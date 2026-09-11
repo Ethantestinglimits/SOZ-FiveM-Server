@@ -10,6 +10,14 @@ if (SOZ_CORE_IS_SERVER) {
     global.__filename = global.__dirname + '/server.js';
 
     if (!process.cwd().match(/soz-core/)) {
-        process.chdir('resources/[soz]/soz-core');
+        try {
+            process.chdir('resources/[soz]/soz-core');
+        } catch (e) {
+            // process.chdir() is unsupported when the script runs in a worker thread
+            // (newer FXServer builds run server scripts this way). Fake it by overriding
+            // process.cwd() instead, since Prisma resolves its schema/engine relative to it.
+            const resourceCwd = process.cwd() + '/resources/[soz]/soz-core';
+            process.cwd = () => resourceCwd;
+        }
     }
 }
