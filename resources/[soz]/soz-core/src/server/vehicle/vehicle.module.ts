@@ -7,6 +7,7 @@ import { VehicleDealershipProvider } from './vehicle.dealership.provider';
 import { VehicleElectricProvider } from './vehicle.electric.provider';
 import { VehicleFuelProvider } from './vehicle.fuel.provider';
 import { VehicleGarageProvider } from './vehicle.garage.provider';
+import { VehicleGloveboxProvider } from './vehicle.glovebox.provider';
 import { VehicleKeysProvider } from './vehicle.keys.provider';
 import { VehicleLockProvider } from './vehicle.lock.provider';
 import { VehicleMigrationProvider } from './vehicle.migration.provider';
@@ -31,6 +32,7 @@ import { VehicleTyreProvider } from './vehicle.tyre.provider';
         VehicleDealershipProvider,
         VehicleFuelProvider,
         VehicleGarageProvider,
+        VehicleGloveboxProvider,
         VehicleKeysProvider,
         VehicleLockProvider,
         VehicleMigrationProvider,

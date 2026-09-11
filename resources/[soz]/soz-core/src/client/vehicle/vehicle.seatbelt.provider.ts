@@ -18,7 +18,11 @@ import { VehicleService } from './vehicle.service';
 
 const THRESHOLD_G_STRENGTH_EJECTION = 6.0;
 const THRESHOLD_G_STRENGTH_DAMAGE = 9.5;
+const THRESHOLD_G_STRENGTH_GLOVEBOX_EXPLOSION = 25.0;
 const EJECTION_TICK_INTERVAL_SECONDES = 0.1;
+// How long to keep tracking a vehicle's speed after the player leaves it, so bailing out
+// right before an impact doesn't dodge the glovebox-explosion check.
+const EXPLOSION_TRACKING_GRACE_MS = 3000;
 
 @Provider()
 export class VehicleSeatbeltProvider {
@@ -43,6 +47,8 @@ export class VehicleSeatbeltProvider {
     private lastVehicleVelocity: Vector3 | null = null;
     private lastVehicleHealth = 0;
     private lastEjectionTimeOrDamage = 0;
+    private trackedVehicleForExplosion: number | null = null;
+    private trackedVehicleExitTime: number | null = null;
 
     private async trySwitchingSeat() {
         if (this.isSwitchingSeat) {
@@ -170,11 +176,30 @@ export class VehicleSeatbeltProvider {
     @Tick(EJECTION_TICK_INTERVAL_SECONDES * 1000)
     async handleVehicleEjectionAndSeatbelt() {
         const ped = PlayerPedId();
-        const vehicle = GetVehiclePedIsIn(ped, false);
+        const currentVehicle = GetVehiclePedIsIn(ped, false);
 
-        if (!vehicle) {
-            this.lastVehiclePosition = null;
+        if (currentVehicle) {
+            this.trackedVehicleForExplosion = currentVehicle;
+            this.trackedVehicleExitTime = null;
+        } else {
             this.isSeatbeltOn = false;
+
+            if (this.trackedVehicleForExplosion !== null) {
+                if (this.trackedVehicleExitTime === null) {
+                    this.trackedVehicleExitTime = Date.now();
+                } else if (Date.now() - this.trackedVehicleExitTime > EXPLOSION_TRACKING_GRACE_MS) {
+                    this.trackedVehicleForExplosion = null;
+                    this.trackedVehicleExitTime = null;
+                }
+            }
+        }
+
+        // Keep tracking the vehicle the player just left for a short grace period, purely to
+        // still catch a glovebox-explosion-worthy impact even if they bailed beforehand.
+        const vehicle = currentVehicle || this.trackedVehicleForExplosion;
+
+        if (!vehicle || !DoesEntityExist(vehicle)) {
+            this.lastVehiclePosition = null;
             this.lastVehicleHealth = 0;
 
             return;
@@ -213,7 +238,10 @@ export class VehicleSeatbeltProvider {
         const gStrength = toVectorNorm(acceleration) / 9.81;
         const vehicleNetworkId = NetworkGetNetworkIdFromEntity(vehicle);
 
-        if (gStrength > THRESHOLD_G_STRENGTH_EJECTION) {
+        // Only the occupants still inside need ejection/damage handling — each of them runs
+        // this same tick themselves. The grace-period tracking below is solely so a driver who
+        // bailed out doesn't dodge the glovebox-explosion check.
+        if (currentVehicle && gStrength > THRESHOLD_G_STRENGTH_EJECTION) {
             TriggerServerEvent(
                 ServerEvent.VEHICLE_ROUTE_EJECTION,
                 vehicleNetworkId,
@@ -222,6 +250,13 @@ export class VehicleSeatbeltProvider {
                 this.vehicleService.getPlayersInVehicle(vehicle),
                 this.lastVehicleHealth != vehicleHealth
             );
+        }
+
+        if (
+            gStrength > THRESHOLD_G_STRENGTH_GLOVEBOX_EXPLOSION &&
+            !this.playerService.getPlayer()?.metadata.godmode
+        ) {
+            TriggerServerEvent(ServerEvent.VEHICLE_CHECK_GLOVEBOX_EXPLOSIVE, vehicleNetworkId);
         }
 
         this.lastVehicleVelocity = vehicleVelocity;
