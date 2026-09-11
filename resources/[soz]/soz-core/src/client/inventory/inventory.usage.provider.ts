@@ -3,15 +3,24 @@ import { OnNuiEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { emitRpc } from '../../core/rpc';
+import { DrivingSchoolConfig } from '../../shared/driving-school';
 import { NuiEvent, ServerEvent } from '../../shared/event';
 import { InventoryItem } from '../../shared/inventory';
+import { AllowedTaxiModel } from '../../shared/job/cjr';
 import { RpcServerEvent } from '../../shared/rpc';
-import { VehicleSeat } from '../../shared/vehicle/vehicle';
+import { VehicleClass, VehicleSeat } from '../../shared/vehicle/vehicle';
 import { Notifier } from '../notifier';
 import { PlayerService } from '../player/player.service';
 import { VehicleSeatbeltProvider } from '../vehicle/vehicle.seatbelt.provider';
 
-const VEHICLE_SEAT_SWITCH_MAX_SPEED_KMH = 88;
+const VEHICLE_SEAT_SWITCH_MAX_SPEED_KMH = 70;
+const VEHICLE_SEAT_SWITCH_FORBIDDEN_CLASSES = [
+    VehicleClass.Utility,
+    VehicleClass.Service,
+    VehicleClass.Emergency,
+    VehicleClass.Vans,
+    VehicleClass.Commercial,
+];
 
 @Provider()
 export class InventoryUsageProvider {
@@ -66,12 +75,36 @@ export class InventoryUsageProvider {
         TriggerServerEvent(ServerEvent.INVENTORY_USE_ITEM, inventoryId, item.slot);
     }
 
+    private getPedVehicleSeat(vehicle: number, ped: number): VehicleSeat | null {
+        const maxPassengers = GetVehicleMaxNumberOfPassengers(vehicle);
+
+        for (let seat = VehicleSeat.Driver; seat < maxPassengers; seat++) {
+            if (GetPedInVehicleSeat(vehicle, seat) === ped) {
+                return seat;
+            }
+        }
+
+        return null;
+    }
+
     private async trySwitchVehicleSeat(targetSeat: VehicleSeat): Promise<boolean> {
         const ped = PlayerPedId();
         const vehicle = GetVehiclePedIsIn(ped, false);
 
         if (!vehicle) {
             return false;
+        }
+
+        if (AllowedTaxiModel.includes(GetEntityModel(vehicle))) {
+            this.notifier.notify('Impossible de changer de place dans un taxi.', 'error');
+
+            return true;
+        }
+
+        if (GetVehicleNumberPlateText(vehicle).trim() === DrivingSchoolConfig.vehiclePlateText) {
+            this.notifier.notify('Impossible de changer de place pendant un examen de conduite.', 'error');
+
+            return true;
         }
 
         if (GetVehiclePedIsEntering(ped) === vehicle) {
@@ -86,6 +119,24 @@ export class InventoryUsageProvider {
 
         if (targetSeat !== VehicleSeat.Driver && targetSeat >= GetVehicleMaxNumberOfPassengers(vehicle)) {
             return false;
+        }
+
+        const pedSeat = this.getPedVehicleSeat(vehicle, ped);
+
+        if (pedSeat !== null && pedSeat > VehicleSeat.BackRight) {
+            this.notifier.notify('Vous ne pouvez pas rejoindre cette place depuis votre siège actuel.', 'error');
+
+            return true;
+        }
+
+        const isMovingFromBackToFront =
+            (pedSeat === VehicleSeat.BackLeft || pedSeat === VehicleSeat.BackRight) &&
+            (targetSeat === VehicleSeat.Driver || targetSeat === VehicleSeat.Copilot);
+
+        if (isMovingFromBackToFront && VEHICLE_SEAT_SWITCH_FORBIDDEN_CLASSES.includes(GetVehicleClass(vehicle))) {
+            this.notifier.notify('Vous ne pouvez pas rejoindre cette place depuis votre siège actuel.', 'error');
+
+            return true;
         }
 
         const isLeavingDriverSeat = GetPedInVehicleSeat(vehicle, VehicleSeat.Driver) === ped;
@@ -108,7 +159,17 @@ export class InventoryUsageProvider {
             return true;
         }
 
-        SetPedIntoVehicle(ped, vehicle, targetSeat);
+        const isAdjacentRowSwap =
+            (pedSeat === VehicleSeat.Driver && targetSeat === VehicleSeat.Copilot) ||
+            (pedSeat === VehicleSeat.Copilot && targetSeat === VehicleSeat.Driver) ||
+            (pedSeat === VehicleSeat.BackLeft && targetSeat === VehicleSeat.BackRight) ||
+            (pedSeat === VehicleSeat.BackRight && targetSeat === VehicleSeat.BackLeft);
+
+        if (isAdjacentRowSwap) {
+            TaskShuffleToNextVehicleSeat(ped, vehicle);
+        } else {
+            SetPedIntoVehicle(ped, vehicle, targetSeat);
+        }
 
         return true;
     }
