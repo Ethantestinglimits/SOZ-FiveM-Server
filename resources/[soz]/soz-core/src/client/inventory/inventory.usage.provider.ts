@@ -6,12 +6,23 @@ import { emitRpc } from '../../core/rpc';
 import { NuiEvent, ServerEvent } from '../../shared/event';
 import { InventoryItem } from '../../shared/inventory';
 import { RpcServerEvent } from '../../shared/rpc';
+import { VehicleSeat } from '../../shared/vehicle/vehicle';
+import { Notifier } from '../notifier';
 import { PlayerService } from '../player/player.service';
+import { VehicleSeatbeltProvider } from '../vehicle/vehicle.seatbelt.provider';
+
+const VEHICLE_SEAT_SWITCH_MAX_SPEED_KMH = 88;
 
 @Provider()
 export class InventoryUsageProvider {
     @Inject(PlayerService)
     private playerService: PlayerService;
+
+    @Inject(Notifier)
+    private notifier: Notifier;
+
+    @Inject(VehicleSeatbeltProvider)
+    private vehicleSeatbeltProvider: VehicleSeatbeltProvider;
 
     @OnNuiEvent(NuiEvent.InventorySetShortcut)
     public async onInventoryActionSetShortcut({ shortcut, slot }: { shortcut: number; slot: number | null }) {
@@ -55,29 +66,86 @@ export class InventoryUsageProvider {
         TriggerServerEvent(ServerEvent.INVENTORY_USE_ITEM, inventoryId, item.slot);
     }
 
+    private async trySwitchVehicleSeat(targetSeat: VehicleSeat): Promise<boolean> {
+        const ped = PlayerPedId();
+        const vehicle = GetVehiclePedIsIn(ped, false);
+
+        if (!vehicle) {
+            return false;
+        }
+
+        if (GetVehiclePedIsEntering(ped) === vehicle) {
+            return false;
+        }
+
+        const currentSeat = GetPedInVehicleSeat(vehicle, targetSeat);
+
+        if (currentSeat === ped) {
+            return false;
+        }
+
+        if (targetSeat !== VehicleSeat.Driver && targetSeat >= GetVehicleMaxNumberOfPassengers(vehicle)) {
+            return false;
+        }
+
+        const isLeavingDriverSeat = GetPedInVehicleSeat(vehicle, VehicleSeat.Driver) === ped;
+
+        if (isLeavingDriverSeat && GetEntitySpeed(vehicle) * 3.6 > VEHICLE_SEAT_SWITCH_MAX_SPEED_KMH) {
+            this.notifier.notify('Vous allez trop vite pour changer de place.', 'error');
+
+            return true;
+        }
+
+        if (this.vehicleSeatbeltProvider.isSeatbeltOnForPlayer()) {
+            this.notifier.notify('Détachez votre ceinture avant de changer de place.', 'error');
+
+            return true;
+        }
+
+        if (!IsVehicleSeatFree(vehicle, targetSeat)) {
+            this.notifier.notify('Cette place est déjà occupée.', 'error');
+
+            return true;
+        }
+
+        SetPedIntoVehicle(ped, vehicle, targetSeat);
+
+        return true;
+    }
+
     @Command('inventory.use.1', {
-        description: "Raccourci d'arme principale",
+        description: "Raccourci d'arme principale / conducteur",
         keys: [{ mapper: 'keyboard', key: '1' }],
     })
     async useItem1() {
+        if (await this.trySwitchVehicleSeat(VehicleSeat.Driver)) return;
         await this.useItem(1);
     }
 
     @Command('inventory.use.2', {
-        description: "Raccourci d'arme secondaire",
+        description: "Raccourci d'arme secondaire / passager avant",
         keys: [{ mapper: 'keyboard', key: '2' }],
     })
     async useItem2() {
+        if (await this.trySwitchVehicleSeat(VehicleSeat.Copilot)) return;
         await this.useItem(2);
     }
 
-    @Command('inventory.use.3', { description: "Raccourci d'inventaire 03", keys: [{ mapper: 'keyboard', key: '3' }] })
+    @Command('inventory.use.3', {
+        description: "Raccourci d'inventaire 03 / passager arrière gauche",
+        keys: [{ mapper: 'keyboard', key: '3' }],
+    })
     async useItem3() {
+        if (await this.trySwitchVehicleSeat(VehicleSeat.BackLeft)) return;
         await this.useItem(3);
     }
 
-    @Command('inventory.use.4', { description: "Raccourci d'inventaire 04", keys: [{ mapper: 'keyboard', key: '4' }] })
+    @Command('inventory.use.4', {
+        description: "Raccourci d'inventaire 04 / passager arrière droit",
+        keys: [{ mapper: 'keyboard', key: '4' }],
+    })
     async useItem4() {
+        if (await this.trySwitchVehicleSeat(VehicleSeat.BackRight)) return;
         await this.useItem(4);
     }
 
