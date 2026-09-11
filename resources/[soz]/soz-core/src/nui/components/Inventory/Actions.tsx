@@ -164,6 +164,7 @@ enum ActionItemType {
     Use = 'use',
     Drop = 'drop',
     ShowItem = 'show',
+    LookItem = 'lookItem',
     Give = 'give',
     Equip = 'equip',
     SetPrimaryWeapon = 'setPrimaryWeapon',
@@ -236,6 +237,23 @@ export const ActionItem: FunctionComponent<ActionItemProps> = ({ action, invento
                 className={classNames}
             >
                 Montrer
+            </div>
+        );
+    }
+
+    if (action === ActionItemType.LookItem) {
+        return (
+            <div
+                onClick={() =>
+                    fetchNui(NuiEvent.InventoryActionLookItem, {
+                        inventoryId: inventoryId,
+                        inventoryItem: inventoryItem,
+                        item: item,
+                    })
+                }
+                className={classNames}
+            >
+                Regarder
             </div>
         );
     }
@@ -521,6 +539,10 @@ export const getActions = (
 
     if (item.canShow) {
         actions.push(ActionItemType.ShowItem);
+    }
+
+    if (item.canLook) {
+        actions.push(ActionItemType.LookItem);
     }
 
     if (item.type !== 'card') {

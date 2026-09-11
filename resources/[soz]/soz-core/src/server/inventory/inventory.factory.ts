@@ -22,6 +22,7 @@ import {
 import { PrismaService } from '../database/prisma.service';
 import { LockService } from '../lock.service';
 import { PlayerService } from '../player/player.service';
+import { VehicleRepository } from '../repository/vehicle.repository';
 import { Inventory } from './inventory';
 
 type AccessChecker = {
@@ -50,6 +51,9 @@ export class InventoryFactory {
 
     @Inject(Logger)
     private logger: Logger;
+
+    @Inject(VehicleRepository)
+    private vehicleRepository: VehicleRepository;
 
     private inventories: Map<string, Inventory> = new Map();
 
@@ -117,7 +121,53 @@ export class InventoryFactory {
         const plate = vehicleState.volatile.plate || GetVehicleNumberPlateText(vehicle);
         const persistent = vehicleState.volatile.isPlayerVehicle;
 
-        return this.getOrCreate('glovebox_' + plate, InventoryType.Glovebox, { persistent });
+        // Only player-owned vehicles get a registration card seeded in on first creation;
+        // a non-persistent glovebox (rental/job/temp spawn) is regenerated every time anyway.
+        const itemsCreator = persistent ? await this.createRegistrationCardCreator(vehicle, plate) : null;
+
+        return this.getOrCreate('glovebox_' + plate, InventoryType.Glovebox, { persistent }, itemsCreator);
+    }
+
+    private async createRegistrationCardCreator(
+        vehicle: number,
+        plate: string
+    ): Promise<() => Record<number, InventoryItem>> {
+        const item = this.itemService.getItem('carte_grise');
+
+        if (!item) {
+            return null;
+        }
+
+        const vehicleModel = await this.vehicleRepository.findByHash(GetEntityModel(vehicle));
+        const vehicleLabel = vehicleModel?.name || 'Véhicule inconnu';
+
+        let vehicleOwnerName = 'Inconnu';
+
+        const playerVehicle = await this.database.playerVehicle.findFirst({
+            where: { plate },
+            select: { citizenid: true, player: { select: { charinfo: true } } },
+        });
+
+        if (playerVehicle?.player?.charinfo) {
+            const charInfo = JSON.parse(playerVehicle.player.charinfo);
+            vehicleOwnerName = `${charInfo.firstname} ${charInfo.lastname}`;
+        }
+
+        return () => ({
+            1: {
+                slot: 1,
+                name: 'carte_grise',
+                amount: 1,
+                type: item.type,
+                metadata: {
+                    vehiclePlate: plate,
+                    vehicleModel: vehicleLabel,
+                    vehicleOwner: playerVehicle?.citizenid,
+                    vehicleOwnerName,
+                    extraLabel: `${vehicleLabel} — ${plate}`,
+                },
+            },
+        });
     }
 
     async getVehicleWeight(plate: string): Promise<number> {

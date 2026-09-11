@@ -13,6 +13,7 @@ import { ItemNewsProvider } from './item.news.provider';
 import { ItemNutritionProvider } from './item.nutrition.provider';
 import { ItemPanelProvider } from './item.panel.provider';
 import { ItemToolsProvider } from './item.tools.provider';
+import { ItemVehicleRegistrationProvider } from './item.vehicle.registration.provider';
 import { ItemVoipProvider } from './item.voip.provider';
 
 @Module({
@@ -32,6 +33,7 @@ import { ItemVoipProvider } from './item.voip.provider';
         ItemJobsProvider,
         ItemLoaderProvider,
         ItemGiftProvider,
+        ItemVehicleRegistrationProvider,
     ],
 })
 export class ItemModule {}

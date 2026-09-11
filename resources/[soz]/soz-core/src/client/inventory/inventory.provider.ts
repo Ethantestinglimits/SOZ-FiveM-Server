@@ -180,6 +180,22 @@ export class InventoryProvider {
         this.notifier.error("Personne n'est à portée de vous.");
     }
 
+    @OnNuiEvent(NuiEvent.InventoryActionLookItem)
+    public async onInventoryActionLookItem({ inventoryItem }: { inventoryItem: InventoryItem }) {
+        if (this.itemService.isExpired(inventoryItem)) {
+            this.notifier.error("Cet objet est périmée, il n'est plus utilisable.");
+            return;
+        }
+
+        if (inventoryItem.name === 'carte_grise' && inventoryItem.metadata?.vehiclePlate) {
+            this.nuiDispatch.dispatch('card', 'addVehicleRegistrationCard', {
+                plate: inventoryItem.metadata.vehiclePlate,
+                vehicleModel: inventoryItem.metadata.vehicleModel,
+                ownerName: inventoryItem.metadata.vehicleOwnerName,
+            });
+        }
+    }
+
     @OnNuiEvent(NuiEvent.InventoryActionGive)
     public async onInventoryActionGive({
         inventoryId,

@@ -704,6 +704,7 @@ export enum NuiEvent {
     InventoryActionUse = 'soz-core:nui:inventory:action-use',
     InventoryActionDrop = 'soz-core:nui:inventory:action-drop',
     InventoryActionShowItem = 'soz-core:nui:inventory:action-show-item',
+    InventoryActionLookItem = 'soz-core:nui:inventory:action-look-item',
     InventoryActionGive = 'soz-core:nui:inventory:action-give',
     InventoryActionItemOnScreen = 'soz-core:nui:inventory:action-item-on-screen',
     InventoryActionGiveKey = 'soz-core:nui:inventory:action-give-key',
