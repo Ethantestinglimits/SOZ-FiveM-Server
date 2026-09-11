@@ -14,7 +14,7 @@ module.exports = (env, argv) => {
     const serverConfig = createConfig(
         { server: './src/server.ts' },
         argv.mode === 'production',
-        { SOZ_CORE_IS_SERVER: 'true', SOZ_CORE_IS_CLIENT: 'false', __dirname: '"' + buildPath + '"' },
+        { SOZ_CORE_IS_SERVER: 'true', SOZ_CORE_IS_CLIENT: 'false', __dirname: JSON.stringify(buildPath) },
         undefined,
         'node'
     );
