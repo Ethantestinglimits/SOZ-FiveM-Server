@@ -633,13 +633,11 @@ export class VehicleModificationService {
             const isPrimaryColorRgb = typeof configuration.color.primary === 'object';
             const isSecondaryColorRgb = typeof configuration.color.secondary === 'object';
 
-            if (!isPrimaryColorRgb || !isSecondaryColorRgb) {
-                SetVehicleColours(
-                    vehicle,
-                    isPrimaryColorRgb ? 0 : (configuration.color.primary as number),
-                    isSecondaryColorRgb ? 0 : (configuration.color.secondary as number)
-                );
-            }
+            SetVehicleColours(
+                vehicle,
+                isPrimaryColorRgb ? 0 : (configuration.color.primary as number),
+                isSecondaryColorRgb ? 0 : (configuration.color.secondary as number)
+            );
 
             if (isPrimaryColorRgb) {
                 SetVehicleCustomPrimaryColour(
@@ -648,6 +646,8 @@ export class VehicleModificationService {
                     configuration.color.primary[1],
                     configuration.color.primary[2]
                 );
+            } else {
+                ClearVehicleCustomPrimaryColour(vehicle);
             }
 
             if (isSecondaryColorRgb) {
@@ -657,6 +657,8 @@ export class VehicleModificationService {
                     configuration.color.secondary[1],
                     configuration.color.secondary[2]
                 );
+            } else {
+                ClearVehicleCustomSecondaryColour(vehicle);
             }
 
             if (configuration.color.pearlescent !== null || configuration.color.rim !== null) {
