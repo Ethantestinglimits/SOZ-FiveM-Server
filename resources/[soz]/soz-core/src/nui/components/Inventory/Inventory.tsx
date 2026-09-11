@@ -68,7 +68,12 @@ export const Inventory: FunctionComponent<InventoryProps> = ({
         itemsAsArray.reduce((acc, item) => {
             return Math.max(acc, item.slot);
         }, 0) + (player ? 3 : targetMoney !== null ? 1 : 0);
-    const nbLines = Math.max(Math.ceil(maxInventorySlot / 5), 4) + (player || targetMoney !== null ? 0 : 1);
+    const nbLines = configuration.maxSlot
+        ? Math.max(Math.ceil(maxInventorySlot / 5), Math.ceil(configuration.maxSlot / 5))
+        : Math.max(Math.ceil(maxInventorySlot / 5), 4) + (player || targetMoney !== null ? 0 : 1);
+    // Non-capped inventories get one extra row of headroom to drop new items into; a maxSlot
+    // inventory is already sized exactly to its limit, so it shouldn't get that extra row.
+    const rowCount = configuration.maxSlot ? nbLines : nbLines + 1;
 
     useEffect(() => {
         if (currentInventoryItem) {
@@ -96,9 +101,9 @@ export const Inventory: FunctionComponent<InventoryProps> = ({
                 columnCount={5}
                 columnWidth={inventorySize.itemSize}
                 width={inventorySize.width + 10}
-                rowCount={nbLines + 1}
+                rowCount={rowCount}
                 rowHeight={inventorySize.itemSize + inventorySize.gapSize}
-                height={Math.min(nbLines + 1, 6) * (inventorySize.itemSize + inventorySize.gapSize)}
+                height={Math.min(rowCount, 6) * (inventorySize.itemSize + inventorySize.gapSize)}
                 overscanRowCount={7}
                 className="scrollbar scrollbar-w-[5px] scrollbar-thumb-white/80 scrollbar-thumb-rounded-full scrollbar-track-rounded-full"
                 style={{

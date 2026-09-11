@@ -104,6 +104,22 @@ export class InventoryFactory {
         return this.getOrCreate('trunk_' + plate, InventoryType.Trunk, configuration);
     }
 
+    async getVehicleGloveboxInventory(
+        entityNetId: number,
+        vehicleState: Readonly<VehicleState>
+    ): Promise<Inventory | null> {
+        const vehicle = NetworkGetEntityFromNetworkId(entityNetId) as number;
+
+        if (!vehicle) {
+            return null;
+        }
+
+        const plate = vehicleState.volatile.plate || GetVehicleNumberPlateText(vehicle);
+        const persistent = vehicleState.volatile.isPlayerVehicle;
+
+        return this.getOrCreate('glovebox_' + plate, InventoryType.Glovebox, { persistent });
+    }
+
     async getVehicleWeight(plate: string): Promise<number> {
         const inventoryId = `trunk_${plate}`;
 
@@ -351,29 +367,31 @@ export class InventoryFactory {
     }
 
     public async updateVehiclePlate(oldPlate: string, newPlate: string) {
-        if (this.inventories.has('trunk_' + oldPlate)) {
-            const inventory = this.inventories.get('trunk_' + oldPlate);
+        for (const prefix of ['trunk_', 'glovebox_']) {
+            if (this.inventories.has(prefix + oldPlate)) {
+                const inventory = this.inventories.get(prefix + oldPlate);
 
-            this.inventories.delete('trunk_' + oldPlate);
-            this.inventories.set('trunk_' + newPlate, inventory);
+                this.inventories.delete(prefix + oldPlate);
+                this.inventories.set(prefix + newPlate, inventory);
 
-            // @ts-expect-error Needed as the id is really changed when updating plate
-            inventory.id = 'trunk_' + newPlate;
+                // @ts-expect-error Needed as the id is really changed when updating plate
+                inventory.id = prefix + newPlate;
 
-            try {
-                await this.database.inventories.update({
-                    where: {
-                        id: 'trunk_' + oldPlate,
-                    },
-                    data: {
-                        id: 'trunk_' + newPlate,
-                    },
-                });
-            } catch (e) {
-                this.logger.error(
-                    `Failed to update inventory trunk : ${'trunk_' + oldPlate} to ${'trunk_' + newPlate}`,
-                    e
-                );
+                try {
+                    await this.database.inventories.update({
+                        where: {
+                            id: prefix + oldPlate,
+                        },
+                        data: {
+                            id: prefix + newPlate,
+                        },
+                    });
+                } catch (e) {
+                    this.logger.error(
+                        `Failed to update inventory ${prefix}: ${prefix + oldPlate} to ${prefix + newPlate}`,
+                        e
+                    );
+                }
             }
         }
     }

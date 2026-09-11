@@ -174,6 +174,22 @@ export class Inventory {
         return this._configuration.maxWeight;
     }
 
+    private hasFreeSlotFor(itemObject: Item, metadata: InventoryItemMetadata): boolean {
+        if (!this._configuration.maxSlot) {
+            return true;
+        }
+
+        if (!itemObject.unique) {
+            const existingItem = this.filterItems(itemObject.name, true, metadata)[0];
+
+            if (existingItem && (!itemObject.maxStack || existingItem.amount < itemObject.maxStack)) {
+                return true;
+            }
+        }
+
+        return Object.keys(this._items).length < this._configuration.maxSlot;
+    }
+
     add(
         id: string,
         amount = 1,
@@ -229,6 +245,10 @@ export class Inventory {
 
         // Check weight
         if (!bypassCheck && !this.canCarryItem(id, amount, metadata)) {
+            return Err('not_enough_space');
+        }
+
+        if (!bypassCheck && !this.hasFreeSlotFor(itemObject, metadata)) {
             return Err('not_enough_space');
         }
 

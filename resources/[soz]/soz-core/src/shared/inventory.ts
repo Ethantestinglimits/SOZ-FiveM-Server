@@ -27,6 +27,7 @@ export enum InventoryType {
     Fridge = 'fridge',
     FurnitureStorage = 'furniture_storage',
     GangStash = 'gang_stash',
+    Glovebox = 'glovebox',
     IceMachine = 'ice_machine',
     Inverter = 'inverter',
     HouseFridge = 'house_fridge',
@@ -108,6 +109,7 @@ export const MERGE_ERROR_MESSAGE: Record<MergeError, string> = {
 export type InventoryConfiguration = {
     maxWeight: number;
     persistent: boolean;
+    maxSlot?: number;
     allowedItemTypes?: ItemType[];
     allowedItems?: string[];
     notAllowedItems?: string[];
@@ -168,6 +170,68 @@ export const HOUSE_CLOAKROOM_TIER_WEIGHTS = {
     9: 400000,
 };
 
+// Weapons weighing 2kg (2000) or less, small enough to fit in a glovebox.
+export const GLOVEBOX_ALLOWED_WEAPONS: string[] = [
+    'weapon_grenade',
+    'weapon_bzgas',
+    'weapon_flashbang',
+    'weapon_smokegrenade',
+    'weapon_stungun',
+    'weapon_stungun_mp',
+    'weapon_ball',
+    'weapon_knuckle',
+    'weapon_machete',
+    'weapon_bottle',
+    'weapon_hammer',
+    'weapon_flashlight',
+    'weapon_nightstick',
+    'weapon_poolcue',
+    'weapon_bat',
+    'weapon_switchblade',
+    'weapon_knife',
+    'weapon_crowbar',
+    'weapon_stone_hatchet',
+    'weapon_battleaxe',
+    'weapon_wrench',
+    'weapon_candycane',
+    'weapon_golfclub',
+    'weapon_dagger',
+    'weapon_hatchet',
+    'weapon_stunrod',
+    'weapon_snspistol',
+    'weapon_snspistol_mk2',
+    'weapon_flare',
+    'weapon_acidpackage',
+    'weapon_molotov',
+    'weapon_stickybomb',
+    'weapon_proxmine',
+    'weapon_pipebomb',
+    'weapon_navyrevolver',
+    'weapon_vintagepistol',
+    'weapon_ceramicpistol',
+    'weapon_microsmg',
+    'weapon_flaregun',
+    'weapon_gadgetpistol',
+    'weapon_pistolxm3',
+    'weapon_smg',
+    'weapon_tecpistol',
+    'weapon_raycarbine',
+    'weapon_combatpistol',
+    'weapon_minismg',
+    'weapon_appistol',
+    'weapon_pistol',
+    'weapon_pistol_mk2',
+    'weapon_pistol50',
+    'weapon_heavypistol',
+    'weapon_revolver',
+    'weapon_revolver_mk2',
+    'weapon_doubleaction',
+    'weapon_raypistol',
+    'weapon_machinepistol',
+    'weapon_musket',
+    'weapon_carbinerifle',
+];
+
 export const INVENTORY_CONFIGURATIONS: Partial<Record<InventoryType, Partial<InventoryConfiguration>>> = {
     [InventoryType.Player]: {
         maxWeight: 25000,
@@ -226,6 +290,24 @@ export const INVENTORY_CONFIGURATIONS: Partial<Record<InventoryType, Partial<Inv
         maxWeight: 10000000,
         allowedItems: ['weapon_uvflashlight'],
         allowedItemTypes: ['item', 'oil_and_item', 'outfit', 'crate', 'drug_pot', 'evidence'],
+    },
+    [InventoryType.Glovebox]: {
+        maxWeight: 10000,
+        maxSlot: 10,
+        allowedItemTypes: [
+            'item',
+            'evidence',
+            'drug',
+            'item_illegal',
+            'tool',
+            'weapon_ammo',
+            'food',
+            'drink',
+            'cocktail',
+            'liquor',
+        ],
+        // Only weapons weighing 2kg or less (all ammo boxes already qualify by weight, hence the type above)
+        allowedItems: GLOVEBOX_ALLOWED_WEAPONS,
     },
     [InventoryType.EvidenceStorage]: {
         maxWeight: 10000000,
@@ -1421,6 +1503,8 @@ export type InventoryPositionDynamic = {
         max: Vector3;
     };
     maxDistance?: number;
+    // When true, the player must be seated inside the `entity` vehicle, not just nearby.
+    requireOccupant?: boolean;
 };
 
 export const getPositionZone = (

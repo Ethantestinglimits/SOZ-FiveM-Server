@@ -399,6 +399,49 @@ export class VehicleLockProvider {
         return vehicleTrunkZone.isPointInside(pedPosition);
     }
 
+    @Command('soz_vehicle_toggle_glovebox', {
+        description: 'Ouvrir la boîte à gants du véhicule',
+        keys: [
+            {
+                mapper: 'keyboard',
+                key: 'G',
+            },
+        ],
+    })
+    public async openGlovebox() {
+        const ped = PlayerPedId();
+
+        const player = this.playerService.getPlayer();
+
+        if (!player) {
+            return;
+        }
+
+        if (player.metadata.isdead || player.metadata.ishandcuffed) {
+            return;
+        }
+
+        const vehicle = GetVehiclePedIsIn(ped, false);
+
+        if (!vehicle || !IsEntityAVehicle(vehicle)) {
+            return;
+        }
+
+        const vehicleState = await this.vehicleStateService.getServerVehicleState(vehicle);
+
+        if (vehicleState.dead) {
+            return;
+        }
+
+        if (this.playerService.getState().isInventoryBusy) {
+            this.notifier.notify("Inventaire en cours d'utilisation.", 'warning');
+
+            return;
+        }
+
+        this.inventoryManager.openVehicleGloveboxInventory(vehicle);
+    }
+
     @OnEvent(ClientEvent.VEHICLE_SET_TRUNK_STATE)
     async setVehicleTrunkState(vehicleNetworkId: number, state: boolean) {
         if (!NetworkDoesNetworkIdExist(vehicleNetworkId)) {

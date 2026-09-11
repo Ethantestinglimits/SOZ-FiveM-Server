@@ -76,6 +76,18 @@ export class InventoryManager {
 
         if (this._subscribedInventoryPosition.type === 'dynamic') {
             const entity = NetworkGetEntityFromNetworkId(this._subscribedInventoryPosition.entity);
+
+            if (
+                this._subscribedInventoryPosition.requireOccupant &&
+                GetVehiclePedIsIn(PlayerPedId(), false) !== entity
+            ) {
+                this.notifier.error('Vous devez être dans le véhicule pour accéder à la boîte à gants.');
+                this.unsubscribeInventory();
+                this.nuiDispatch.dispatch('inventory', 'CloseInventory');
+
+                return;
+            }
+
             const entityPosition = GetEntityCoords(entity, true) as Vector3;
 
             if (this._subscribedInventoryPosition.dimension) {
@@ -347,6 +359,12 @@ export class InventoryManager {
         const [min, max] = GetModelDimensions(model) as [Vector3, Vector3];
 
         TriggerServerEvent(ServerEvent.INVENTORY_OPEN_TRUNK, vehicleNetworkId, vehicleClass, { min, max });
+    }
+
+    public openVehicleGloveboxInventory(vehicle: number) {
+        const vehicleNetworkId = NetworkGetNetworkIdFromEntity(vehicle);
+
+        TriggerServerEvent(ServerEvent.INVENTORY_OPEN_GLOVEBOX, vehicleNetworkId);
     }
 
     @Exportable('openInventory')
