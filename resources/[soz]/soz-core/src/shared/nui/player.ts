@@ -20,6 +20,7 @@ export interface NuiPLayerMethodMap {
     UpdateAnimationShortcuts: Record<string, Shortcut>;
     UpdateAnimationFavorites: Record<string, Shortcut>;
     UpdateCombatMode: boolean;
+    UpdateAnimationRunning: boolean;
     UpdateInvoices: Invoice[];
     UpdateInventory: {
         configuration: InventoryConfiguration;
@@ -54,4 +55,5 @@ export type PlayerPersonalMenuData = {
     arachnophobe: boolean;
     videoVolume: number;
     voipIntent: string;
+    animationRunning: boolean;
 };

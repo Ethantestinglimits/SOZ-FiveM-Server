@@ -123,6 +123,7 @@ export class PlayerMenuProvider {
             glassmorphismFpsLimit: this.hudGlassmorphismProvider.glassmorphismFpsLimit,
             voipIntent: this.voiceProvider.intent,
             videoVolume: this.streamProvider.videoVolume * 100,
+            animationRunning: this.animationService.hasRunningAnimation(),
         });
     }
 

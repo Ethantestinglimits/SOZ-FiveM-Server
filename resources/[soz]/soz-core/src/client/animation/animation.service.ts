@@ -189,6 +189,20 @@ export class AnimationService {
         return runner;
     }
 
+    public hasRunningAnimation(): boolean {
+        return this.runningAnimations.size > 0;
+    }
+
+    public getRunningAnimation(): { dictionary?: string; name: string; runner: AnimationRunner } | null {
+        const [first] = this.runningAnimations.values();
+
+        if (!first) {
+            return null;
+        }
+
+        return { dictionary: first.dictionary, name: first.name, runner: first.runner };
+    }
+
     public async stop(ped = PlayerPedId()): Promise<void> {
         if (this.runningAnimations.size == 0) {
             ClearPedTasks(ped);

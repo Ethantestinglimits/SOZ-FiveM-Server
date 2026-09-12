@@ -96,6 +96,8 @@ export class ObjectEditorProvider {
             permanent: existingObject?.permanent || false,
             useCircularCamera: true,
             initialPosition: position,
+            invisible: false,
+            highlight: true,
             ...options,
         };
 
@@ -106,12 +108,12 @@ export class ObjectEditorProvider {
             placeOnGround: editorOptions.snapToGround,
             noCollision: true,
             matrix: existingObject?.matrix,
-            invisible: false,
+            invisible: editorOptions.invisible,
             effect: editorOptions.effect,
             vfx: editorOptions.vfx,
             permanent: editorOptions.permanent,
             rotation: existingObject?.rotation,
-            highlight: true,
+            highlight: editorOptions.highlight,
         };
 
         const objectEntity = await this.objectService.createObject(initialObject);
@@ -125,13 +127,13 @@ export class ObjectEditorProvider {
         const promise = new Promise<WorldObject>(resolver => {
             this.currentObject = {
                 edited: !!existingObject,
-                position,
+                position: editorOptions.initialPosition,
                 entity: objectEntity,
                 model,
                 matrix: this.objectService.getEntityMatrix(objectEntity),
                 options: editorOptions,
                 startingObject: initialObject,
-                previousPosition: position,
+                previousPosition: editorOptions.initialPosition,
                 resolver,
             };
         });
@@ -158,7 +160,11 @@ export class ObjectEditorProvider {
         this.refreshObjectPositionFromGame();
 
         if (editorOptions.useCircularCamera) {
-            this.circularCamera.createCamera([position[0], position[1], position[2]]);
+            this.circularCamera.createCamera([
+                editorOptions.initialPosition[0],
+                editorOptions.initialPosition[1],
+                editorOptions.initialPosition[2],
+            ]);
         }
 
         this.nuiMenu.openMenu(
