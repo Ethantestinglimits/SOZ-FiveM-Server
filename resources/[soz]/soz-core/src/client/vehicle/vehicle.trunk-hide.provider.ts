@@ -25,6 +25,9 @@ const TRUNK_ANIMATION = {
 
 const TRUNK_HIDE_LABEL_DURATION = 24 * 60 * 60 * 1000;
 
+// Above this speed, the trunk is considered locked shut: nobody can get in or out.
+const TRUNK_MAX_SPEED = 75;
+
 // Regular passenger cars only - no bikes, no work/utility vehicles (offroad, vans, trucks, ...), no boats/planes/trains.
 const TRUNK_HIDE_ALLOWED_CLASSES = [
     VehicleClass.Compacts,
@@ -64,6 +67,7 @@ export class VehicleTrunkHideProvider {
     private isHidden = false;
     private isBlackedOut = false;
     private isExiting = false;
+    private isAttemptingExit = false;
     private hiddenVehicle: number | null = null;
     private animationRunner: AnimationRunner | null = null;
     private occupiedTrunks = new Set<number>();
@@ -84,6 +88,10 @@ export class VehicleTrunkHideProvider {
         return TRUNK_HIDE_ALLOWED_CLASSES.includes(GetVehicleClass(entity));
     }
 
+    private isTooFastForTrunk(entity: number): boolean {
+        return GetEntitySpeed(entity) * 3.6 > TRUNK_MAX_SPEED;
+    }
+
     @Once()
     public onInit() {
         this.targetFactory.createForAllVehicle([
@@ -99,6 +107,7 @@ export class VehicleTrunkHideProvider {
                         !this.vehicleService.checkBackOfVehicle(entity) ||
                         !this.vehicleLockProvider.isVehOpen(entity) ||
                         !this.isNormalCar(entity) ||
+                        this.isTooFastForTrunk(entity) ||
                         this.occupiedTrunks.has(NetworkGetNetworkIdFromEntity(entity))
                     ) {
                         return false;
@@ -122,6 +131,7 @@ export class VehicleTrunkHideProvider {
                         !this.vehicleService.checkBackOfVehicle(entity) ||
                         !this.vehicleLockProvider.isVehOpen(entity) ||
                         !this.isNormalCar(entity) ||
+                        this.isTooFastForTrunk(entity) ||
                         this.occupiedTrunks.has(NetworkGetNetworkIdFromEntity(entity))
                     ) {
                         return false;
@@ -151,6 +161,7 @@ export class VehicleTrunkHideProvider {
                     this.vehicleService.checkBackOfVehicle(entity) &&
                     this.vehicleLockProvider.isVehOpen(entity) &&
                     this.isNormalCar(entity) &&
+                    !this.isTooFastForTrunk(entity) &&
                     this.occupiedTrunks.has(NetworkGetNetworkIdFromEntity(entity)),
                 action: entity => {
                     const vehicleNetworkId = NetworkGetNetworkIdFromEntity(entity);
@@ -248,6 +259,29 @@ export class VehicleTrunkHideProvider {
     }
 
     private async exitTrunk() {
+        if (!this.isHidden || this.isExiting || this.isAttemptingExit) {
+            return;
+        }
+
+        this.isAttemptingExit = true;
+
+        const hiddenVehicle = this.hiddenVehicle;
+
+        if (hiddenVehicle && DoesEntityExist(hiddenVehicle)) {
+            let warned = false;
+
+            while (DoesEntityExist(hiddenVehicle) && this.isTooFastForTrunk(hiddenVehicle)) {
+                if (!warned) {
+                    this.notifier.notify('Le coffre est verrouillé, le véhicule roule trop vite.', 'error');
+                    warned = true;
+                }
+
+                await wait(500);
+            }
+        }
+
+        this.isAttemptingExit = false;
+
         if (!this.isHidden || this.isExiting) {
             return;
         }
