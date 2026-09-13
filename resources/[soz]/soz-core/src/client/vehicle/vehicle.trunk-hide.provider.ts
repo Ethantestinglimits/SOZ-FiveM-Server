@@ -9,6 +9,7 @@ import { TargetFactory } from '@public/client/target/target.factory';
 
 import { ClientEvent, ServerEvent } from '../../shared/event';
 import { Control } from '../../shared/input';
+import { DrawService } from '../draw.service';
 import { PlayerService } from '../player/player.service';
 
 const TRUNK_ANIMATION = {
@@ -27,7 +28,12 @@ export class VehicleTrunkHideProvider {
     @Inject(AnimationService)
     private animationService: AnimationService;
 
+    @Inject(DrawService)
+    private drawService: DrawService;
+
     private isHidden = false;
+    private isBlackedOut = false;
+    private isExiting = false;
     private hiddenVehicle: number | null = null;
     private animationRunner: AnimationRunner | null = null;
 
@@ -35,9 +41,9 @@ export class VehicleTrunkHideProvider {
     public onInit() {
         this.targetFactory.createForBone('boot', [
             {
-                label: 'Se cacher dans le coffre',
+                label: 'Monter dans le coffre',
                 icon: 'vehicle/car',
-                category: 'criminal',
+                category: 'citizen',
                 canInteract: () => {
                     if (this.isHidden || !this.playerService.canDoAction()) {
                         return false;
@@ -115,13 +121,16 @@ export class VehicleTrunkHideProvider {
         SetEntityVisible(ped, false, false);
         SetEntityCollision(ped, false, false);
 
-        DoScreenFadeOut(500);
+        this.isBlackedOut = true;
     }
 
     private async exitTrunk() {
-        if (!this.isHidden) {
+        if (!this.isHidden || this.isExiting) {
             return;
         }
+
+        this.isExiting = true;
+        this.isBlackedOut = false;
 
         const ped = PlayerPedId();
         const vehicle = this.hiddenVehicle;
@@ -139,7 +148,6 @@ export class VehicleTrunkHideProvider {
         SetEntityVisible(ped, true, false);
         SetEntityCollision(ped, true, true);
 
-        DoScreenFadeIn(500);
         await wait(500);
 
         FreezeEntityPosition(ped, false);
@@ -150,6 +158,7 @@ export class VehicleTrunkHideProvider {
         }
 
         this.isHidden = false;
+        this.isExiting = false;
         this.hiddenVehicle = null;
     }
 
@@ -162,7 +171,19 @@ export class VehicleTrunkHideProvider {
         DisableControlAction(0, Control.FrontendPause, true);
         DisableControlAction(0, Control.FrontendPauseAlternate, true);
 
-        if (IsDisabledControlJustPressed(0, Control.FrontendPause)) {
+        if (this.isBlackedOut) {
+            DrawRect(0.5, 0.5, 1.0, 1.0, 0, 0, 0, 204);
+
+            this.drawService.drawText('Appuyez sur ÉCHAP pour sortir du coffre', [0.5, 0.9], {
+                centered: true,
+                size: 0.4,
+            });
+        }
+
+        if (
+            IsDisabledControlJustPressed(0, Control.FrontendPause) ||
+            IsDisabledControlJustPressed(0, Control.FrontendPauseAlternate)
+        ) {
             await this.exitTrunk();
         }
     }
