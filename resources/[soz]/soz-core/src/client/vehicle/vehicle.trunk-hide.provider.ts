@@ -32,10 +32,12 @@ const TRUNK_MAX_SPEED = 50;
 // instead of calmly stepping out.
 const TRUNK_RAGDOLL_EXIT_SPEED = 10;
 
-// A hidden occupant has no collision, so the game never damages them when the vehicle crashes -
-// mirrors the "seatbelt on" crash damage math from vehicle.seatbelt.provider.ts.
+// A hidden occupant has no collision, so the game never damages them when the vehicle crashes.
+// They have no seatbelt and nothing to brace against back there, so this triggers earlier and hits
+// harder than the "seatbelt on" crash damage in vehicle.seatbelt.provider.ts.
 const TRUNK_CRASH_TICK_INTERVAL_SECONDS = 0.1;
-const TRUNK_CRASH_DAMAGE_G_THRESHOLD = 9.5;
+const TRUNK_CRASH_DAMAGE_G_THRESHOLD = 4.0;
+const TRUNK_CRASH_DAMAGE_FACTOR = 12;
 
 // Regular passenger cars only - no bikes, no work/utility vehicles (offroad, vans, trucks, ...), no boats/planes/trains.
 const TRUNK_HIDE_ALLOWED_CLASSES = [
@@ -434,7 +436,7 @@ export class VehicleTrunkHideProvider {
         }
 
         const ped = PlayerPedId();
-        const damage = ((gStrength - TRUNK_CRASH_DAMAGE_G_THRESHOLD) * toVectorNorm(velocity)) / 30;
+        const damage = ((gStrength - TRUNK_CRASH_DAMAGE_G_THRESHOLD) * toVectorNorm(velocity)) / TRUNK_CRASH_DAMAGE_FACTOR;
 
         if (damage > 0) {
             SetEntityHealth(ped, Math.max(0, Math.round(GetEntityHealth(ped) - damage)));
