@@ -308,6 +308,10 @@ export class VehicleTrunkHideProvider {
             DetachEntity(ped, true, false);
         }
 
+        if (GetSelectedPedWeapon(ped) !== GetHashKey('WEAPON_UNARMED')) {
+            SetCurrentPedWeapon(ped, GetHashKey('WEAPON_UNARMED'), true);
+        }
+
         if (vehicle && DoesEntityExist(vehicle)) {
             const [exitX, exitY, exitZ] = GetOffsetFromEntityInWorldCoords(vehicle, 0.0, -3.0, 0.0) as Vector3;
             SetEntityCoords(ped, exitX, exitY, exitZ, false, false, false, true);
