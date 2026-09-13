@@ -215,6 +215,7 @@ export class VehicleTrunkHideProvider {
             {},
             {
                 canCancel: true,
+                forceCancelHint: true,
                 useWhileDead: true,
                 allowExistingAnimation: true,
                 no_inv_busy: true,
