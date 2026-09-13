@@ -208,6 +208,7 @@ export enum RpcServerEvent {
     OBJECT_GET_LIST = 'soz-core:server:object:get-list',
 
     VEHICLE_TRUNK_CLAIM = 'soz-core:server:vehicle:trunk-claim',
+    VEHICLE_TRUNK_GET_OCCUPIED = 'soz-core:server:vehicle:trunk-get-occupied',
 
     PLAYER_IS_ZOMBIE = 'soz-core:server:player:is-zombie',
 
