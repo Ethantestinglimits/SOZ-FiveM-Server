@@ -9,7 +9,6 @@ import { AnimationService } from '@public/client/animation/animation.service';
 import { TargetFactory } from '@public/client/target/target.factory';
 
 import { ClientEvent, ServerEvent } from '../../shared/event';
-import { Control } from '../../shared/input';
 import { Vector3 } from '../../shared/polyzone/vector';
 import { InstructionalService } from '../instructional.service';
 import { PlayerService } from '../player/player.service';
@@ -158,7 +157,7 @@ export class VehicleTrunkHideProvider {
         );
 
         this.isBlackedOut = true;
-        this.instructionalService.display(['Appuyez sur', Control.FrontendDelete, 'pour sortir du coffre'], true);
+        this.instructionalService.display(['Appuyez sur RETOUR ARRIÈRE', 'pour sortir du coffre'], true);
         this.progressService.progress(
             'vehicleTrunkHide',
             'Vous êtes dans un coffre...',
