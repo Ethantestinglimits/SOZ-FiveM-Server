@@ -1,4 +1,4 @@
-import { Once, OnEvent } from '@core/decorators/event';
+import { Once, OnceStep, OnEvent } from '@core/decorators/event';
 import { Inject } from '@core/decorators/injectable';
 import { Provider } from '@core/decorators/provider';
 import { Tick } from '@core/decorators/tick';
@@ -14,6 +14,7 @@ import { RpcServerEvent } from '../../shared/rpc';
 import { Notifier } from '../notifier';
 import { PlayerService } from '../player/player.service';
 import { ProgressService } from '../progress.service';
+import { VehicleLockProvider } from './vehicle.lock.provider';
 import { VehicleService } from './vehicle.service';
 
 const TRUNK_ANIMATION = {
@@ -43,11 +44,27 @@ export class VehicleTrunkHideProvider {
     @Inject(VehicleService)
     private vehicleService: VehicleService;
 
+    @Inject(VehicleLockProvider)
+    private vehicleLockProvider: VehicleLockProvider;
+
     private isHidden = false;
     private isBlackedOut = false;
     private isExiting = false;
     private hiddenVehicle: number | null = null;
     private animationRunner: AnimationRunner | null = null;
+    private occupiedTrunks = new Set<number>();
+
+    @Once(OnceStep.Start)
+    public async initOccupiedTrunks() {
+        const occupied = await emitRpc<number[]>(RpcServerEvent.VEHICLE_TRUNK_GET_OCCUPIED);
+
+        this.occupiedTrunks = new Set(occupied);
+    }
+
+    @OnEvent(ClientEvent.VEHICLE_TRUNK_OCCUPIED_LIST)
+    public onOccupiedList(vehicles: number[]) {
+        this.occupiedTrunks = new Set(vehicles);
+    }
 
     @Once()
     public onInit() {
@@ -61,7 +78,9 @@ export class VehicleTrunkHideProvider {
                         this.isHidden ||
                         !this.playerService.canDoAction() ||
                         this.progressService.isDoingAction() ||
-                        !this.vehicleService.checkBackOfVehicle(entity)
+                        !this.vehicleService.checkBackOfVehicle(entity) ||
+                        !this.vehicleLockProvider.isVehOpen(entity) ||
+                        this.occupiedTrunks.has(NetworkGetNetworkIdFromEntity(entity))
                     ) {
                         return false;
                     }
@@ -79,7 +98,12 @@ export class VehicleTrunkHideProvider {
                 icon: 'vehicle/car',
                 category: 'criminal',
                 canInteract: entity => {
-                    if (this.isHidden || !this.vehicleService.checkBackOfVehicle(entity)) {
+                    if (
+                        this.isHidden ||
+                        !this.vehicleService.checkBackOfVehicle(entity) ||
+                        !this.vehicleLockProvider.isVehOpen(entity) ||
+                        this.occupiedTrunks.has(NetworkGetNetworkIdFromEntity(entity))
+                    ) {
                         return false;
                     }
 
@@ -102,7 +126,11 @@ export class VehicleTrunkHideProvider {
                 label: "Sortir quelqu'un du coffre",
                 icon: 'vehicle/car',
                 category: 'citizen',
-                canInteract: entity => !this.isHidden && this.vehicleService.checkBackOfVehicle(entity),
+                canInteract: entity =>
+                    !this.isHidden &&
+                    this.vehicleService.checkBackOfVehicle(entity) &&
+                    this.vehicleLockProvider.isVehOpen(entity) &&
+                    this.occupiedTrunks.has(NetworkGetNetworkIdFromEntity(entity)),
                 action: entity => {
                     const vehicleNetworkId = NetworkGetNetworkIdFromEntity(entity);
                     TriggerServerEvent(ServerEvent.VEHICLE_TRUNK_EXTRACT_PLAYER, vehicleNetworkId);

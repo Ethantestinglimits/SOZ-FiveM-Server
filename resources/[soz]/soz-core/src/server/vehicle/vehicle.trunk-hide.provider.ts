@@ -17,6 +17,15 @@ export class VehicleTrunkHideProvider {
 
     private occupiedTrunks = new Map<number, number>();
 
+    private broadcastOccupiedTrunks() {
+        TriggerClientEvent(ClientEvent.VEHICLE_TRUNK_OCCUPIED_LIST, -1, [...this.occupiedTrunks.keys()]);
+    }
+
+    @Rpc(RpcServerEvent.VEHICLE_TRUNK_GET_OCCUPIED)
+    public getOccupiedTrunks(): number[] {
+        return [...this.occupiedTrunks.keys()];
+    }
+
     @Rpc(RpcServerEvent.VEHICLE_TRUNK_CLAIM)
     public async claimTrunk(source: number, vehicleNetworkId: number): Promise<boolean> {
         if (this.occupiedTrunks.has(vehicleNetworkId)) {
@@ -24,6 +33,7 @@ export class VehicleTrunkHideProvider {
         }
 
         this.occupiedTrunks.set(vehicleNetworkId, source);
+        this.broadcastOccupiedTrunks();
 
         return true;
     }
@@ -32,15 +42,23 @@ export class VehicleTrunkHideProvider {
     public async onTrunkRelease(source: number, vehicleNetworkId: number) {
         if (this.occupiedTrunks.get(vehicleNetworkId) === source) {
             this.occupiedTrunks.delete(vehicleNetworkId);
+            this.broadcastOccupiedTrunks();
         }
     }
 
     @On('playerDropped')
     public onPlayerDropped(source: number) {
+        let changed = false;
+
         for (const [vehicleNetworkId, occupant] of this.occupiedTrunks) {
             if (occupant === source) {
                 this.occupiedTrunks.delete(vehicleNetworkId);
+                changed = true;
             }
+        }
+
+        if (changed) {
+            this.broadcastOccupiedTrunks();
         }
     }
 
