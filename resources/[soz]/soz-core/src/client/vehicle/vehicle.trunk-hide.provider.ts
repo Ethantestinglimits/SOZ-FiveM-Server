@@ -9,7 +9,7 @@ import { AnimationService } from '@public/client/animation/animation.service';
 import { TargetFactory } from '@public/client/target/target.factory';
 
 import { ClientEvent, ServerEvent } from '../../shared/event';
-import { Vector3 } from '../../shared/polyzone/vector';
+import { toVectorNorm, Vector3 } from '../../shared/polyzone/vector';
 import { RpcServerEvent } from '../../shared/rpc';
 import { VehicleClass } from '../../shared/vehicle/vehicle';
 import { Notifier } from '../notifier';
@@ -31,6 +31,11 @@ const TRUNK_MAX_SPEED = 50;
 // Above this speed, someone leaving the trunk is thrown out ragdolled, keeping the vehicle's momentum,
 // instead of calmly stepping out.
 const TRUNK_RAGDOLL_EXIT_SPEED = 10;
+
+// A hidden occupant has no collision, so the game never damages them when the vehicle crashes -
+// mirrors the "seatbelt on" crash damage math from vehicle.seatbelt.provider.ts.
+const TRUNK_CRASH_TICK_INTERVAL_SECONDS = 0.1;
+const TRUNK_CRASH_DAMAGE_G_THRESHOLD = 9.5;
 
 // Regular passenger cars only - no bikes, no work/utility vehicles (offroad, vans, trucks, ...), no boats/planes/trains.
 const TRUNK_HIDE_ALLOWED_CLASSES = [
@@ -75,6 +80,7 @@ export class VehicleTrunkHideProvider {
     private hiddenVehicle: number | null = null;
     private hiddenVehicleNetworkId: number | null = null;
     private lastKnownVehiclePosition: Vector3 | null = null;
+    private lastCrashCheckVelocity: Vector3 | null = null;
     private animationRunner: AnimationRunner | null = null;
     private occupiedTrunks = new Set<number>();
 
@@ -396,6 +402,43 @@ export class VehicleTrunkHideProvider {
         this.notifier.notify('Le véhicule a disparu, vous êtes éjecté du coffre.', 'error');
 
         await this.exitTrunk(true);
+    }
+
+    @Tick(TRUNK_CRASH_TICK_INTERVAL_SECONDS * 1000)
+    private async trunkCrashDamageLoop() {
+        if (!this.isHidden || !this.hiddenVehicle || !DoesEntityExist(this.hiddenVehicle)) {
+            this.lastCrashCheckVelocity = null;
+
+            return;
+        }
+
+        const velocity = GetEntityVelocity(this.hiddenVehicle) as Vector3;
+
+        if (!this.lastCrashCheckVelocity) {
+            this.lastCrashCheckVelocity = velocity;
+
+            return;
+        }
+
+        const acceleration: Vector3 = [
+            (this.lastCrashCheckVelocity[0] - velocity[0]) / TRUNK_CRASH_TICK_INTERVAL_SECONDS,
+            (this.lastCrashCheckVelocity[1] - velocity[1]) / TRUNK_CRASH_TICK_INTERVAL_SECONDS,
+            (this.lastCrashCheckVelocity[2] - velocity[2]) / TRUNK_CRASH_TICK_INTERVAL_SECONDS,
+        ];
+        const gStrength = toVectorNorm(acceleration) / 9.81;
+
+        this.lastCrashCheckVelocity = velocity;
+
+        if (gStrength <= TRUNK_CRASH_DAMAGE_G_THRESHOLD) {
+            return;
+        }
+
+        const ped = PlayerPedId();
+        const damage = ((gStrength - TRUNK_CRASH_DAMAGE_G_THRESHOLD) * toVectorNorm(velocity)) / 30;
+
+        if (damage > 0) {
+            SetEntityHealth(ped, Math.max(0, Math.round(GetEntityHealth(ped) - damage)));
+        }
     }
 
     @Tick()
