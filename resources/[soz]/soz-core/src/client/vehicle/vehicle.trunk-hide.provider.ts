@@ -269,7 +269,9 @@ export class VehicleTrunkHideProvider {
             );
 
             await this.exitTrunk();
-        } while (this.isHidden);
+            // Someone else (death, forced extraction, the vehicle disappearing) may already be mid-exit
+            // by the time this resolves - don't restart the hide progress/UI on top of that.
+        } while (this.isHidden && !this.isExiting);
     }
 
     // waitForSafeSpeed: keep retrying silently until the vehicle slows down instead of giving up.
