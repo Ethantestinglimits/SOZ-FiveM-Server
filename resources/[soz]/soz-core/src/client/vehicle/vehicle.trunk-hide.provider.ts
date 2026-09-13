@@ -9,6 +9,7 @@ import { TargetFactory } from '@public/client/target/target.factory';
 
 import { ClientEvent, ServerEvent } from '../../shared/event';
 import { Control } from '../../shared/input';
+import { Vector3 } from '../../shared/polyzone/vector';
 import { DrawService } from '../draw.service';
 import { PlayerService } from '../player/player.service';
 
@@ -171,6 +172,12 @@ export class VehicleTrunkHideProvider {
 
         if (IsEntityAttached(ped)) {
             DetachEntity(ped, true, false);
+        }
+
+        if (vehicle && DoesEntityExist(vehicle)) {
+            const [exitX, exitY, exitZ] = GetOffsetFromEntityInWorldCoords(vehicle, 0.0, -3.0, 0.0) as Vector3;
+            SetEntityCoords(ped, exitX, exitY, exitZ, false, false, false, true);
+            SetEntityHeading(ped, GetEntityHeading(vehicle));
         }
 
         SetEntityVisible(ped, true, false);
