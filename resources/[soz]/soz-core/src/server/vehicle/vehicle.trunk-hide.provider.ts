@@ -117,4 +117,15 @@ export class VehicleTrunkHideProvider {
 
         TriggerClientEvent(ClientEvent.VEHICLE_TRUNK_FORCE_EXIT, occupant);
     }
+
+    @OnEvent(ServerEvent.LSMC_ON_DEATH)
+    public onPlayerDeath(source: number) {
+        for (const occupant of this.occupiedTrunks.values()) {
+            if (occupant === source) {
+                TriggerClientEvent(ClientEvent.VEHICLE_TRUNK_FORCE_EXIT, source);
+
+                return;
+            }
+        }
+    }
 }
