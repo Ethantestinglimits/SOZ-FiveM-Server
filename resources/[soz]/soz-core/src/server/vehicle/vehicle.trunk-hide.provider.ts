@@ -86,4 +86,17 @@ export class VehicleTrunkHideProvider {
 
         TriggerClientEvent(ClientEvent.VEHICLE_TRUNK_FORCE_ENTER, target.source, vehicleNetworkId);
     }
+
+    @OnEvent(ServerEvent.VEHICLE_TRUNK_EXTRACT_PLAYER)
+    public async onTrunkExtractPlayer(source: number, vehicleNetworkId: number) {
+        const occupant = this.occupiedTrunks.get(vehicleNetworkId);
+
+        if (!occupant) {
+            TriggerClientEvent(ClientEvent.NOTIFICATION_DRAW, source, 'Ce coffre est vide.', 'error');
+
+            return;
+        }
+
+        TriggerClientEvent(ClientEvent.VEHICLE_TRUNK_FORCE_EXIT, occupant);
+    }
 }

@@ -372,6 +372,7 @@ export enum ServerEvent {
     VEHICLE_TRUNK_ENTER = 'soz-core:server:vehicle:trunk-enter',
     VEHICLE_TRUNK_RELEASE = 'soz-core:server:vehicle:trunk-release',
     VEHICLE_TRUNK_PUT_PLAYER = 'soz-core:server:vehicle:trunk-put-player',
+    VEHICLE_TRUNK_EXTRACT_PLAYER = 'soz-core:server:vehicle:trunk-extract-player',
     VEHICLE_UPDATE_STATE = 'soz-core:server:vehicle:update-state',
     VEHICLE_UPDATE_CONDITION = 'soz-core:server:vehicle:update-condition',
     VEHICLE_UPDATE_CONDITION_FROM_OWNER = 'soz-core:server:vehicle:update-condition-from-owner',
