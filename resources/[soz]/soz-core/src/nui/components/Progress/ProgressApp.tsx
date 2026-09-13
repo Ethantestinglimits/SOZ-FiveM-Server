@@ -91,19 +91,21 @@ export const ProgressApp: FunctionComponent = () => {
                 }
             )}
         >
-            <div className="flex justify-center items-center">
-                <GameCanvasBox borderClassName="flex items-center gap-2" blur={false}>
-                    {Array.from({ length: PROGRESS_BAR_SEGMENTS }, (_, index) => (
-                        <ProgressSegment
-                            key={index}
-                            currentSegment={index}
-                            maxSegment={PROGRESS_BAR_SEGMENTS}
-                            progress={progress}
-                            currentProgress={currentProgress}
-                        />
-                    ))}
-                </GameCanvasBox>
-            </div>
+            {!progress?.hideBar && (
+                <div className="flex justify-center items-center">
+                    <GameCanvasBox borderClassName="flex items-center gap-2" blur={false}>
+                        {Array.from({ length: PROGRESS_BAR_SEGMENTS }, (_, index) => (
+                            <ProgressSegment
+                                key={index}
+                                currentSegment={index}
+                                maxSegment={PROGRESS_BAR_SEGMENTS}
+                                progress={progress}
+                                currentProgress={currentProgress}
+                            />
+                        ))}
+                    </GameCanvasBox>
+                </div>
+            )}
 
             {vehicle.seat === null && (progress?.label || progress?.units?.length > 0) && (
                 <div className="flex justify-center items-center gap-2">
