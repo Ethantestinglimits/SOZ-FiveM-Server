@@ -318,6 +318,19 @@ const MenuAnimation: FunctionComponent<MenuAnimationProps> = ({
     );
 };
 
+// Mounted only while the "Liste des animations" submenu is on screen (SubMenu unmounts its
+// content on navigation), so leaving the list, closing the menu, or dying all stop the preview
+// the same way: through this cleanup, without needing to hook into every possible exit path.
+const AnimationPreviewGuard: FunctionComponent = () => {
+    useEffect(() => {
+        return () => {
+            fetchNui(NuiEvent.PlayerMenuAnimationPreviewStop);
+        };
+    }, []);
+
+    return null;
+};
+
 const MenuAnimationList: FunctionComponent = () => {
     const [menuConstructor, setMenuConstructor] = useState<{
         elements: ReactElement<any, string | JSXElementConstructor<any>>[];
@@ -398,6 +411,7 @@ const MenuAnimationList: FunctionComponent = () => {
             <SubMenu id="animation_list">
                 <MenuTitle title="Personnel" />
                 <MenuContent subtitle="Liste des animations">
+                    <AnimationPreviewGuard />
                     <MenuItemStringInput onChange={handleFilter} value={textFilter}>
                         Filtre:
                     </MenuItemStringInput>
@@ -510,6 +524,9 @@ const createAnimationLeafItem = (item: AnimationConfigItem): ReactElement => {
                         animationItem: item,
                     });
                 }
+            }}
+            onSelected={() => {
+                fetchNui(NuiEvent.PlayerMenuAnimationPreviewStart, { animationItem: item });
             }}
             title={
                 <div className="flex items-center">
