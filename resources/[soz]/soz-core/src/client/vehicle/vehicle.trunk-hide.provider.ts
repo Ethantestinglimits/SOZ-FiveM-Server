@@ -1,4 +1,3 @@
-import { Command } from '@core/decorators/command';
 import { Once, OnEvent } from '@core/decorators/event';
 import { Inject } from '@core/decorators/injectable';
 import { Provider } from '@core/decorators/provider';
@@ -10,7 +9,6 @@ import { TargetFactory } from '@public/client/target/target.factory';
 
 import { ClientEvent, ServerEvent } from '../../shared/event';
 import { Vector3 } from '../../shared/polyzone/vector';
-import { InstructionalService } from '../instructional.service';
 import { PlayerService } from '../player/player.service';
 import { ProgressService } from '../progress.service';
 
@@ -31,9 +29,6 @@ export class VehicleTrunkHideProvider {
 
     @Inject(AnimationService)
     private animationService: AnimationService;
-
-    @Inject(InstructionalService)
-    private instructionalService: InstructionalService;
 
     @Inject(ProgressService)
     private progressService: ProgressService;
@@ -157,20 +152,22 @@ export class VehicleTrunkHideProvider {
         );
 
         this.isBlackedOut = true;
-        this.instructionalService.display(['Appuyez sur RETOUR ARRIÈRE', 'pour sortir du coffre'], true);
-        this.progressService.progress(
+
+        await this.progressService.progress(
             'vehicleTrunkHide',
             'Vous êtes dans un coffre...',
             TRUNK_HIDE_LABEL_DURATION,
             {},
             {
-                canCancel: false,
+                canCancel: true,
                 useWhileDead: true,
                 allowExistingAnimation: true,
                 no_inv_busy: true,
                 hideBar: true,
             }
         );
+
+        await this.exitTrunk();
     }
 
     private async exitTrunk() {
@@ -180,7 +177,6 @@ export class VehicleTrunkHideProvider {
 
         this.isExiting = true;
         this.isBlackedOut = false;
-        this.instructionalService.clear();
         this.progressService.cancel();
 
         const ped = PlayerPedId();
@@ -231,24 +227,6 @@ export class VehicleTrunkHideProvider {
         }
 
         DrawRect(0.5, 0.5, 1.0, 1.0, 0, 0, 0, 204);
-    }
-
-    @Command('soz_vehicle_exit_trunk', {
-        description: 'Sortir du coffre',
-        keys: [
-            {
-                mapper: 'keyboard',
-                key: 'BACK',
-            },
-        ],
-        passthroughPauseMenu: true,
-    })
-    public async onExitTrunkPressed() {
-        if (!this.isHidden) {
-            return;
-        }
-
-        await this.exitTrunk();
     }
 
     @OnEvent(ClientEvent.VEHICLE_TRUNK_FORCE_ENTER)
