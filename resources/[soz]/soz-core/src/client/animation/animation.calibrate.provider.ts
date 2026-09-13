@@ -14,6 +14,7 @@ import { AnimationService } from './animation.service';
 
 const MARKER_MODEL = joaat('p_bloodsplat_s');
 const SPINE_BONE_NAME = 'SKEL_Spine1';
+const MAX_MOVE_DISTANCE = 2.0;
 
 @Provider()
 export class AnimationCalibrateProvider {
@@ -108,10 +109,10 @@ export class AnimationCalibrateProvider {
                 useCircularCamera: true,
                 invisible: true,
                 highlight: false,
-                maxDistance: 3.0,
                 initialPosition: markerStartPosition,
                 onDrawCallback: object => {
-                    const [x, y, z] = this.applyDelta(pedStartCoords, spineStart, object.position);
+                    const clampedPosition = this.clampToMaxDistance(spineStart, object.position, MAX_MOVE_DISTANCE);
+                    const [x, y, z] = this.applyDelta(pedStartCoords, spineStart, clampedPosition);
 
                     SetEntityCoordsNoOffset(ghost, x, y, z, true, true, true);
                     SetEntityHeading(ghost, object.position[3]);
@@ -134,7 +135,8 @@ export class AnimationCalibrateProvider {
                 return;
             }
 
-            const [x, y, z] = this.applyDelta(pedStartCoords, spineStart, result.position);
+            const clampedResultPosition = this.clampToMaxDistance(spineStart, result.position, MAX_MOVE_DISTANCE);
+            const [x, y, z] = this.applyDelta(pedStartCoords, spineStart, clampedResultPosition);
 
             // Only reposition the real ped, never touch its task: it's still the same tracked
             // AnimationService runner playing on it, and clearing/restarting that task ourselves
@@ -225,6 +227,23 @@ export class AnimationCalibrateProvider {
         } else {
             TaskStartScenarioInPlace(entity, runningAnimation.name, 0, true);
         }
+    }
+
+    // Keeps the gizmo within maxDistance of its starting spot, so the ped can only be nudged into
+    // its final pose rather than dragged arbitrarily far away from where the animation was launched.
+    private clampToMaxDistance(origin: Vector3, target: Vector4 | Vector3, maxDistance: number): Vector3 {
+        const dx = target[0] - origin[0];
+        const dy = target[1] - origin[1];
+        const dz = target[2] - origin[2];
+        const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        if (distance <= maxDistance) {
+            return [target[0], target[1], target[2]];
+        }
+
+        const scale = maxDistance / distance;
+
+        return [origin[0] + dx * scale, origin[1] + dy * scale, origin[2] + dz * scale];
     }
 
     // Translates a gizmo-space position (anchored on the spine bone) back into a world position
