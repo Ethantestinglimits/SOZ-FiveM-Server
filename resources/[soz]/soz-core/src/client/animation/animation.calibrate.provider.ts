@@ -152,6 +152,13 @@ export class AnimationCalibrateProvider {
             frozen = false;
             runningAnimation.runner.finally(() => {
                 FreezeEntityPosition(ped, false);
+
+                // The calibrated spot only makes sense while the animation is actually playing (e.g.
+                // sitting exactly on a chair). Once it ends for any reason, send the player back to
+                // where they were standing before they launched it, instead of leaving them stranded
+                // at the calibrated spot.
+                SetEntityCoordsNoOffset(ped, pedStartCoords[0], pedStartCoords[1], pedStartCoords[2], true, true, true);
+                SetEntityHeading(ped, heading);
                 this.guardAgainstFall(ped, pedStartCoords, heading);
             });
         } finally {
