@@ -11,6 +11,7 @@ import { TargetFactory } from '@public/client/target/target.factory';
 import { ClientEvent, ServerEvent } from '../../shared/event';
 import { Vector3 } from '../../shared/polyzone/vector';
 import { RpcServerEvent } from '../../shared/rpc';
+import { VehicleClass } from '../../shared/vehicle/vehicle';
 import { Notifier } from '../notifier';
 import { PlayerService } from '../player/player.service';
 import { ProgressService } from '../progress.service';
@@ -23,6 +24,19 @@ const TRUNK_ANIMATION = {
 };
 
 const TRUNK_HIDE_LABEL_DURATION = 24 * 60 * 60 * 1000;
+
+// Regular passenger cars only - no bikes, no work/utility vehicles (offroad, vans, trucks, ...), no boats/planes/trains.
+const TRUNK_HIDE_ALLOWED_CLASSES = [
+    VehicleClass.Compacts,
+    VehicleClass.Sedans,
+    VehicleClass.SUVs,
+    VehicleClass.Coupes,
+    VehicleClass.Muscle,
+    VehicleClass.Sportsclassics,
+    VehicleClass.Sports,
+    VehicleClass.Super,
+    VehicleClass.Emergency,
+];
 
 @Provider()
 export class VehicleTrunkHideProvider {
@@ -66,6 +80,10 @@ export class VehicleTrunkHideProvider {
         this.occupiedTrunks = new Set(vehicles);
     }
 
+    private isNormalCar(entity: number): boolean {
+        return TRUNK_HIDE_ALLOWED_CLASSES.includes(GetVehicleClass(entity));
+    }
+
     @Once()
     public onInit() {
         this.targetFactory.createForAllVehicle([
@@ -80,6 +98,7 @@ export class VehicleTrunkHideProvider {
                         this.progressService.isDoingAction() ||
                         !this.vehicleService.checkBackOfVehicle(entity) ||
                         !this.vehicleLockProvider.isVehOpen(entity) ||
+                        !this.isNormalCar(entity) ||
                         this.occupiedTrunks.has(NetworkGetNetworkIdFromEntity(entity))
                     ) {
                         return false;
@@ -102,6 +121,7 @@ export class VehicleTrunkHideProvider {
                         this.isHidden ||
                         !this.vehicleService.checkBackOfVehicle(entity) ||
                         !this.vehicleLockProvider.isVehOpen(entity) ||
+                        !this.isNormalCar(entity) ||
                         this.occupiedTrunks.has(NetworkGetNetworkIdFromEntity(entity))
                     ) {
                         return false;
@@ -130,6 +150,7 @@ export class VehicleTrunkHideProvider {
                     !this.isHidden &&
                     this.vehicleService.checkBackOfVehicle(entity) &&
                     this.vehicleLockProvider.isVehOpen(entity) &&
+                    this.isNormalCar(entity) &&
                     this.occupiedTrunks.has(NetworkGetNetworkIdFromEntity(entity)),
                 action: entity => {
                     const vehicleNetworkId = NetworkGetNetworkIdFromEntity(entity);
