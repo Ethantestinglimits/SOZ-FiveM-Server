@@ -124,6 +124,26 @@ export class VehicleTrunkHideProvider {
 
         SetEntityVisible(ped, false, false);
         SetEntityCollision(ped, false, false);
+        FreezeEntityPosition(ped, false);
+
+        const boneIndex = GetEntityBoneIndexByName(vehicle, 'boot');
+        AttachEntityToEntity(
+            ped,
+            vehicle,
+            boneIndex,
+            0.0,
+            -0.3,
+            -0.1,
+            0.0,
+            0.0,
+            0.0,
+            false,
+            false,
+            false,
+            false,
+            2,
+            true
+        );
 
         this.isBlackedOut = true;
     }
@@ -149,8 +169,13 @@ export class VehicleTrunkHideProvider {
             this.animationRunner = null;
         }
 
+        if (IsEntityAttached(ped)) {
+            DetachEntity(ped, true, false);
+        }
+
         SetEntityVisible(ped, true, false);
         SetEntityCollision(ped, true, true);
+        FreezeEntityPosition(ped, true);
 
         await wait(500);
 
