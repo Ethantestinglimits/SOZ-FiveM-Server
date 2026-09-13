@@ -4,7 +4,9 @@ import { Provider } from '../../core/decorators/provider';
 import { Tick, TickInterval } from '../../core/decorators/tick';
 import { AnimationConfigItem, AnimationProps } from '../../shared/animation';
 import { NuiEvent } from '../../shared/event';
+import { MenuType } from '../../shared/nui/menu';
 import { Vector3 } from '../../shared/polyzone/vector';
+import { NuiMenu } from '../nui/nui.menu';
 import { ResourceLoader } from '../repository/resource.loader';
 
 // The menu panel is styled `w-[36vh]`, so its width in screen-width units depends on the aspect
@@ -53,6 +55,9 @@ export class AnimationPreviewProvider {
     @Inject(ResourceLoader)
     private resourceLoader: ResourceLoader;
 
+    @Inject(NuiMenu)
+    private nuiMenu: NuiMenu;
+
     private ghost: number | null = null;
 
     // Invisible entity the ghost rides on. The ghost cannot be positioned directly because its
@@ -67,12 +72,27 @@ export class AnimationPreviewProvider {
     // hover can detect it's stale and bail out instead of animating a ghost that's already gone.
     private requestId = 0;
 
+    // True while startPreview is between its awaits. The menu guard must not stop the preview
+    // then: stopPreview bumps requestId, which would make the in-flight start abort for good.
+    private starting = false;
+
     // The ghost lives in the world, but is re-pinned to the gameplay camera every frame so it
     // stays at a fixed spot on screen. That keeps the player's own camera and movement entirely
     // free while the preview plays, which a scripted camera takeover would not.
     @Tick(TickInterval.EVERY_FRAME)
     public pinGhostToCamera(): void {
         if (this.ghost === null || this.anchor === null || !DoesEntityExist(this.ghost)) {
+            return;
+        }
+
+        // The NUI-side guard only covers leaving the animation submenu; it never unmounts when a
+        // menu from another NUI app opens over this one, so the client's own view of the open
+        // menu is checked as well.
+        const openedMenu = this.nuiMenu.getOpened();
+
+        if (!this.starting && openedMenu !== MenuType.PlayerPersonal) {
+            this.stopPreview();
+
             return;
         }
 
@@ -135,6 +155,16 @@ export class AnimationPreviewProvider {
 
     @OnNuiEvent(NuiEvent.PlayerMenuAnimationPreviewStart)
     public async startPreview({ animationItem }: { animationItem: AnimationConfigItem }): Promise<void> {
+        this.starting = true;
+
+        try {
+            await this.applyPreview(animationItem);
+        } finally {
+            this.starting = false;
+        }
+    }
+
+    private async applyPreview(animationItem: AnimationConfigItem): Promise<void> {
         const requestId = ++this.requestId;
 
         let dictionary: string | null = null;
