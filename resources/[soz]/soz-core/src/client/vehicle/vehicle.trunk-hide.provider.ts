@@ -2,6 +2,7 @@ import { Once, OnEvent } from '@core/decorators/event';
 import { Inject } from '@core/decorators/injectable';
 import { Provider } from '@core/decorators/provider';
 import { Tick } from '@core/decorators/tick';
+import { emitRpc } from '@core/rpc';
 import { wait } from '@core/utils';
 import { AnimationRunner } from '@public/client/animation/animation.factory';
 import { AnimationService } from '@public/client/animation/animation.service';
@@ -9,6 +10,8 @@ import { TargetFactory } from '@public/client/target/target.factory';
 
 import { ClientEvent, ServerEvent } from '../../shared/event';
 import { Vector3 } from '../../shared/polyzone/vector';
+import { RpcServerEvent } from '../../shared/rpc';
+import { Notifier } from '../notifier';
 import { PlayerService } from '../player/player.service';
 import { ProgressService } from '../progress.service';
 
@@ -32,6 +35,9 @@ export class VehicleTrunkHideProvider {
 
     @Inject(ProgressService)
     private progressService: ProgressService;
+
+    @Inject(Notifier)
+    private notifier: Notifier;
 
     private isHidden = false;
     private isBlackedOut = false;
@@ -100,10 +106,20 @@ export class VehicleTrunkHideProvider {
         }
 
         this.isHidden = true;
+
+        const vehicleNetworkId = NetworkGetNetworkIdFromEntity(vehicle);
+        const claimed = await emitRpc<boolean>(RpcServerEvent.VEHICLE_TRUNK_CLAIM, vehicleNetworkId);
+
+        if (!claimed) {
+            this.isHidden = false;
+            this.notifier.notify('Ce coffre est déjà occupé.', 'error');
+
+            return;
+        }
+
         this.hiddenVehicle = vehicle;
 
         const ped = PlayerPedId();
-        const vehicleNetworkId = NetworkGetNetworkIdFromEntity(vehicle);
 
         FreezeEntityPosition(ped, true);
         TriggerServerEvent(ServerEvent.VEHICLE_TRUNK_ENTER, vehicleNetworkId, true);
@@ -185,6 +201,7 @@ export class VehicleTrunkHideProvider {
 
         if (vehicleNetworkId) {
             TriggerServerEvent(ServerEvent.VEHICLE_TRUNK_ENTER, vehicleNetworkId, true);
+            TriggerServerEvent(ServerEvent.VEHICLE_TRUNK_RELEASE, vehicleNetworkId);
         }
 
         if (this.animationRunner) {
