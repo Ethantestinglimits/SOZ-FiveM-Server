@@ -26,7 +26,11 @@ const TRUNK_ANIMATION = {
 const TRUNK_HIDE_LABEL_DURATION = 24 * 60 * 60 * 1000;
 
 // Above this speed, the trunk is considered locked shut: nobody can get in or out.
-const TRUNK_MAX_SPEED = 75;
+const TRUNK_MAX_SPEED = 50;
+
+// Above this speed, someone leaving the trunk is thrown out ragdolled, keeping the vehicle's momentum,
+// instead of calmly stepping out.
+const TRUNK_RAGDOLL_EXIT_SPEED = 10;
 
 // Regular passenger cars only - no bikes, no work/utility vehicles (offroad, vans, trucks, ...), no boats/planes/trains.
 const TRUNK_HIDE_ALLOWED_CLASSES = [
@@ -90,6 +94,10 @@ export class VehicleTrunkHideProvider {
 
     private isTooFastForTrunk(entity: number): boolean {
         return GetEntitySpeed(entity) * 3.6 > TRUNK_MAX_SPEED;
+    }
+
+    private isAboveRagdollExitSpeed(entity: number): boolean {
+        return GetEntitySpeed(entity) * 3.6 > TRUNK_RAGDOLL_EXIT_SPEED;
     }
 
     @Once()
@@ -318,6 +326,9 @@ export class VehicleTrunkHideProvider {
             SetCurrentPedWeapon(ped, GetHashKey('WEAPON_UNARMED'), true);
         }
 
+        const vehicleVelocity = vehicle && DoesEntityExist(vehicle) ? (GetEntityVelocity(vehicle) as Vector3) : null;
+        const shouldRagdoll = vehicle && DoesEntityExist(vehicle) && this.isAboveRagdollExitSpeed(vehicle);
+
         if (vehicle && DoesEntityExist(vehicle)) {
             const [exitX, exitY, exitZ] = GetOffsetFromEntityInWorldCoords(vehicle, 0.0, -3.0, 0.0) as Vector3;
             SetEntityCoords(ped, exitX, exitY, exitZ, false, false, false, true);
@@ -326,11 +337,19 @@ export class VehicleTrunkHideProvider {
 
         SetEntityVisible(ped, true, false);
         SetEntityCollision(ped, true, true);
-        FreezeEntityPosition(ped, true);
 
-        await wait(500);
+        if (shouldRagdoll && vehicleVelocity) {
+            await wait(0);
 
-        FreezeEntityPosition(ped, false);
+            SetPedToRagdoll(ped, 5511, 5511, 0, false, false, false);
+            SetEntityVelocity(ped, vehicleVelocity[0], vehicleVelocity[1], vehicleVelocity[2]);
+        } else {
+            FreezeEntityPosition(ped, true);
+
+            await wait(500);
+
+            FreezeEntityPosition(ped, false);
+        }
 
         if (vehicleNetworkId) {
             await wait(1000);
