@@ -1,3 +1,4 @@
+import { Command } from '@core/decorators/command';
 import { Once, OnEvent } from '@core/decorators/event';
 import { Inject } from '@core/decorators/injectable';
 import { Provider } from '@core/decorators/provider';
@@ -8,9 +9,8 @@ import { AnimationService } from '@public/client/animation/animation.service';
 import { TargetFactory } from '@public/client/target/target.factory';
 
 import { ClientEvent, ServerEvent } from '../../shared/event';
-import { Control } from '../../shared/input';
 import { Vector3 } from '../../shared/polyzone/vector';
-import { DrawService } from '../draw.service';
+import { InstructionalService } from '../instructional.service';
 import { PlayerService } from '../player/player.service';
 
 const TRUNK_ANIMATION = {
@@ -29,8 +29,8 @@ export class VehicleTrunkHideProvider {
     @Inject(AnimationService)
     private animationService: AnimationService;
 
-    @Inject(DrawService)
-    private drawService: DrawService;
+    @Inject(InstructionalService)
+    private instructionalService: InstructionalService;
 
     private isHidden = false;
     private isBlackedOut = false;
@@ -147,6 +147,7 @@ export class VehicleTrunkHideProvider {
         );
 
         this.isBlackedOut = true;
+        this.instructionalService.display(['Appuyez sur SUPPR', 'pour sortir du coffre'], true);
     }
 
     private async exitTrunk() {
@@ -156,6 +157,7 @@ export class VehicleTrunkHideProvider {
 
         this.isExiting = true;
         this.isBlackedOut = false;
+        this.instructionalService.clear();
 
         const ped = PlayerPedId();
         const vehicle = this.hiddenVehicle;
@@ -199,29 +201,30 @@ export class VehicleTrunkHideProvider {
     }
 
     @Tick()
-    private async escapeTrunkLoop() {
+    private async trunkOverlayLoop() {
+        if (!this.isBlackedOut) {
+            return;
+        }
+
+        DrawRect(0.5, 0.5, 1.0, 1.0, 0, 0, 0, 204);
+    }
+
+    @Command('soz_vehicle_exit_trunk', {
+        description: 'Sortir du coffre',
+        keys: [
+            {
+                mapper: 'keyboard',
+                key: 'DELETE',
+            },
+        ],
+        passthroughPauseMenu: true,
+    })
+    public async onExitTrunkPressed() {
         if (!this.isHidden) {
             return;
         }
 
-        DisableControlAction(0, Control.FrontendPause, true);
-        DisableControlAction(0, Control.FrontendPauseAlternate, true);
-
-        if (this.isBlackedOut) {
-            DrawRect(0.5, 0.5, 1.0, 1.0, 0, 0, 0, 204);
-
-            this.drawService.drawText('Appuyez sur ÉCHAP pour sortir du coffre', [0.5, 0.9], {
-                centered: true,
-                size: 0.4,
-            });
-        }
-
-        if (
-            IsDisabledControlJustPressed(0, Control.FrontendPause) ||
-            IsDisabledControlJustPressed(0, Control.FrontendPauseAlternate)
-        ) {
-            await this.exitTrunk();
-        }
+        await this.exitTrunk();
     }
 
     @OnEvent(ClientEvent.VEHICLE_TRUNK_FORCE_ENTER)
