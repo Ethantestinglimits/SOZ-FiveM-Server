@@ -467,9 +467,7 @@ export class VehicleTrunkHideProvider {
             this.lastKnownVehiclePosition = GetEntityCoords(vehicle, false) as Vector3;
         }
 
-        if (!NetworkGetEntityIsNetworked(vehicle) || !NetworkHasControlOfEntity(vehicle)) {
-            // Ownership migration can produce a large interpolation jump that reads as a crash -
-            // mirrors vehicle.seatbelt.provider.ts's own ownership guard.
+        if (!NetworkGetEntityIsNetworked(vehicle)) {
             this.lastMonitoredVehicleVelocity = null;
             this.lastMonitoredVehicleHealth = null;
 
