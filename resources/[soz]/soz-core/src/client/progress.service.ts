@@ -198,6 +198,7 @@ export class ProgressService {
                 label,
                 duration,
                 units: options.units,
+                hideBar: options.hideBar,
             });
         };
 

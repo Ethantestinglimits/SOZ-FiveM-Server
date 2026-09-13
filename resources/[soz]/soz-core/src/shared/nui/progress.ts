@@ -14,4 +14,5 @@ export type Progress = {
     duration: number;
     units: ProgressUnit[];
     color?: string;
+    hideBar?: boolean;
 };

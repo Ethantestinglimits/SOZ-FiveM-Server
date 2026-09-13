@@ -168,6 +168,7 @@ export class VehicleTrunkHideProvider {
                 useWhileDead: true,
                 allowExistingAnimation: true,
                 no_inv_busy: true,
+                hideBar: true,
             }
         );
     }

@@ -25,6 +25,7 @@ export type ProgressOptions = {
     allowExistingAnimation?: boolean;
     no_inv_busy?: boolean;
     units?: ProgressUnit[];
+    hideBar?: boolean;
 };
 
 export type ProgressAnimation = {
