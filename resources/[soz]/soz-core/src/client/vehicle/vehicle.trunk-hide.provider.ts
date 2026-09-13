@@ -312,6 +312,13 @@ export class VehicleTrunkHideProvider {
         await this.exitTrunk();
     }
 
+    @OnEvent(ClientEvent.PLAYER_ON_DEATH)
+    public async onPlayerDeath() {
+        if (this.isHidden) {
+            await this.exitTrunk();
+        }
+    }
+
     @OnEvent(ClientEvent.VEHICLE_TRUNK_FORCE_ENTER)
     public async onForceEnter(vehicleNetworkId: number) {
         if (!NetworkDoesNetworkIdExist(vehicleNetworkId)) {
