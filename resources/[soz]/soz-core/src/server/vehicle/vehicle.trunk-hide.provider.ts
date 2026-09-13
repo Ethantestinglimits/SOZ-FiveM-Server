@@ -1,9 +1,11 @@
-import { OnEvent } from '@public/core/decorators/event';
+import { On, OnEvent } from '@public/core/decorators/event';
 import { Inject } from '@public/core/decorators/injectable';
 import { Provider } from '@public/core/decorators/provider';
+import { Rpc } from '@public/core/decorators/rpc';
 import { PlayerService } from '@public/server/player/player.service';
 import { PlayerStateService } from '@public/server/player/player.state.service';
 import { ClientEvent, ServerEvent } from '@public/shared/event';
+import { RpcServerEvent } from '@public/shared/rpc';
 
 @Provider()
 export class VehicleTrunkHideProvider {
@@ -12,6 +14,35 @@ export class VehicleTrunkHideProvider {
 
     @Inject(PlayerStateService)
     private playerStateService: PlayerStateService;
+
+    private occupiedTrunks = new Map<number, number>();
+
+    @Rpc(RpcServerEvent.VEHICLE_TRUNK_CLAIM)
+    public async claimTrunk(source: number, vehicleNetworkId: number): Promise<boolean> {
+        if (this.occupiedTrunks.has(vehicleNetworkId)) {
+            return false;
+        }
+
+        this.occupiedTrunks.set(vehicleNetworkId, source);
+
+        return true;
+    }
+
+    @OnEvent(ServerEvent.VEHICLE_TRUNK_RELEASE)
+    public async onTrunkRelease(source: number, vehicleNetworkId: number) {
+        if (this.occupiedTrunks.get(vehicleNetworkId) === source) {
+            this.occupiedTrunks.delete(vehicleNetworkId);
+        }
+    }
+
+    @On('playerDropped')
+    public onPlayerDropped(source: number) {
+        for (const [vehicleNetworkId, occupant] of this.occupiedTrunks) {
+            if (occupant === source) {
+                this.occupiedTrunks.delete(vehicleNetworkId);
+            }
+        }
+    }
 
     private relayTrunkState(vehicleNetworkId: number, state: boolean) {
         const entityId = NetworkGetEntityFromNetworkId(vehicleNetworkId);
