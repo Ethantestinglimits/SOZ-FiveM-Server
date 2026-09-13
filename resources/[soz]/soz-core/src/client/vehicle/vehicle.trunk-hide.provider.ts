@@ -106,7 +106,7 @@ export class VehicleTrunkHideProvider {
                     },
                 },
             ],
-            3.0
+            1.7
         );
     }
 
