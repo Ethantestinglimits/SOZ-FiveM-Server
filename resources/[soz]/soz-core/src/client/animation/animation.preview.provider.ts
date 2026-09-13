@@ -68,6 +68,11 @@ export class AnimationPreviewProvider {
     private loadedDictionary: string | null = null;
     private props: number[] = [];
 
+    // The model the ghost was cloned from. "Se rhabiller"/"Enlever le déguisement" change the
+    // player's model without leaving MenuType.PlayerPersonal, so the menu-close guard never fires
+    // to force a fresh clone — this is checked on every hover instead.
+    private ghostModel: number | null = null;
+
     // Bumped on every start/stop so an in-flight dictionary load from a previous, superseded
     // hover can detect it's stale and bail out instead of animating a ghost that's already gone.
     private requestId = 0;
@@ -130,6 +135,31 @@ export class AnimationPreviewProvider {
         const y = camCoords[1] + forward[1] * distance + right[1] * offsetRight + up[1] * offsetUp;
         const z = camCoords[2] + forward[2] * distance + right[2] * offsetRight + up[2] * offsetUp;
 
+        // Occlusion handling: the ghost's size must stay constant, which rules out pulling it
+        // closer when something blocks the view (that would make it bigger, same optics as a real
+        // camera). So it is hidden instead of resized whenever world geometry sits between the
+        // camera and its spot, and shown again once the line of sight clears.
+        const rayHandle = StartShapeTestRay(
+            camCoords[0],
+            camCoords[1],
+            camCoords[2],
+            x,
+            y,
+            z,
+            1, // world/map geometry only, so passing peds/vehicles do not make the ghost flicker
+            PlayerPedId(),
+            0
+        );
+        const [, occluded] = GetShapeTestResult(rayHandle) as [number, boolean, Vector3, Vector3, number];
+
+        SetEntityVisible(this.ghost, !occluded, false);
+
+        // SetEntityVisible does not cascade to attachments, so props (a held bottle, a phone, ...)
+        // would otherwise stay visible, floating in front of the wall, while the ghost itself hides.
+        for (const prop of this.props) {
+            SetEntityVisible(prop, !occluded, false);
+        }
+
         // The anchor carries no animation task, so unlike the ghost it accepts being repositioned.
         // Mirroring the camera's yaw *and* pitch makes the ghost's forward vector the exact
         // opposite of the camera's, so it shows its front even seen from straight above.
@@ -137,9 +167,8 @@ export class AnimationPreviewProvider {
         SetEntityRotation(this.anchor, -camRot[0], 0.0, camRot[2] + 180, 2, false);
 
         // Re-attached every frame rather than once, so the binding survives anything that detaches
-        // the ghost, such as clearing its tasks when switching animations. isPed must be true here,
-        // as pitch is ignored otherwise.
-        AttachEntityToEntity(this.ghost, this.anchor, 0, 0, 0, 0, 0, 0, 0, false, false, false, true, 2, true);
+        // the ghost, such as clearing its tasks when switching animations.
+        this.reattachGhost();
 
         DrawLightWithRange(
             x - forward[0] * PREVIEW_LIGHT_TOWARDS_CAMERA,
@@ -182,7 +211,10 @@ export class AnimationPreviewProvider {
             return;
         }
 
-        if (!this.ghost || !DoesEntityExist(this.ghost)) {
+        const playerModel = GetEntityModel(PlayerPedId());
+        const staleModel = this.ghost !== null && this.ghostModel !== playerModel;
+
+        if (!this.ghost || !DoesEntityExist(this.ghost) || staleModel) {
             await this.createGhost();
         }
 
@@ -222,12 +254,28 @@ export class AnimationPreviewProvider {
                 false
             );
         } else if (scenarioName) {
-            TaskStartScenarioInPlace(this.ghost, scenarioName, 0, true);
+            // playIntroClip=false skips the scenario's enter animation. Some enter clips (e.g.
+            // WORLD_HUMAN_MOBILE_FILM_SHOCKING's) walk the ped several steps before settling into
+            // the loop, and that locomotion visibly fought the per-frame attachment pinning the
+            // ghost to the camera for as long as it played.
+            TaskStartScenarioInPlace(this.ghost, scenarioName, 0, false);
         }
+
+        this.reattachGhost();
 
         if (animationItem.type === 'animation' && animationItem.animation.props) {
             await this.attachProps(animationItem.animation.props, requestId);
         }
+    }
+
+    // isPed must be true, as pitch is otherwise ignored by the attachment (needed for the
+    // camera-facing billboard rotation applied to the anchor).
+    private reattachGhost(): void {
+        if (this.ghost === null || this.anchor === null) {
+            return;
+        }
+
+        AttachEntityToEntity(this.ghost, this.anchor, 0, 0, 0, 0, 0, 0, 0, false, false, false, true, 2, true);
     }
 
     // Mirrors how AttachedObjectService attaches animation props, but creates them locally instead
@@ -305,6 +353,7 @@ export class AnimationPreviewProvider {
             }
 
             this.ghost = null;
+            this.ghostModel = null;
         }
 
         if (this.anchor !== null) {
@@ -317,17 +366,40 @@ export class AnimationPreviewProvider {
     }
 
     private async createGhost(): Promise<void> {
+        // Covers two cases: a leaked anchor (the ghost was cleaned up some other way than
+        // stopPreview, e.g. the game reclaiming a non-mission entity, while the anchor survived),
+        // and a still-valid ghost being replaced because the player's model changed. Either way,
+        // the old ghost's props are attached to an entity that is about to be deleted or discarded.
+        this.deleteProps();
+
+        if (this.ghost !== null && DoesEntityExist(this.ghost)) {
+            DetachEntity(this.ghost, true, true);
+            ClearPedTasksImmediately(this.ghost);
+            DeleteEntity(this.ghost);
+        }
+
+        if (this.anchor !== null && DoesEntityExist(this.anchor)) {
+            DeleteEntity(this.anchor);
+        }
+
         await this.resourceLoader.loadModel(ANCHOR_MODEL);
 
         const anchor = CreateObjectNoOffset(ANCHOR_MODEL, 0, 0, 0, false, false, false);
 
+        // Completely disabled rather than just muted: this object teleports to the camera every
+        // frame, and a weaker SetEntityCollision still let the player stand on it, which flung
+        // them across the map the next frame when it jumped.
         SetEntityVisible(anchor, false, false);
-        SetEntityCollision(anchor, false, false);
+        SetEntityCompletelyDisableCollision(anchor, false, false);
         FreezeEntityPosition(anchor, true);
 
         this.anchor = anchor;
+        this.resourceLoader.unloadModel(ANCHOR_MODEL);
 
-        const ghost = ClonePed(PlayerPedId(), false, false, false);
+        const player = PlayerPedId();
+        const ghost = ClonePed(player, false, false, false);
+
+        this.ghostModel = GetEntityModel(player);
 
         // Pull the ghost out of the physics world entirely rather than just muting its collision
         // responses: while it was still a physical body, teleporting it into a vehicle every frame
