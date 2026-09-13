@@ -39,49 +39,53 @@ export class VehicleTrunkHideProvider {
 
     @Once()
     public onInit() {
-        this.targetFactory.createForBone('boot', [
-            {
-                label: 'Monter dans le coffre',
-                icon: 'vehicle/car',
-                category: 'citizen',
-                canInteract: () => {
-                    if (this.isHidden || !this.playerService.canDoAction()) {
-                        return false;
-                    }
+        this.targetFactory.createForBone(
+            'boot',
+            [
+                {
+                    label: 'Monter dans le coffre',
+                    icon: 'vehicle/car',
+                    category: 'citizen',
+                    canInteract: () => {
+                        if (this.isHidden || !this.playerService.canDoAction()) {
+                            return false;
+                        }
 
-                    const ped = PlayerPedId();
+                        const ped = PlayerPedId();
 
-                    return IsPedOnFoot(ped) && !IsPedInAnyVehicle(ped, false);
+                        return IsPedOnFoot(ped) && !IsPedInAnyVehicle(ped, false);
+                    },
+                    action: entity => {
+                        this.enterTrunk(entity);
+                    },
                 },
-                action: entity => {
-                    this.enterTrunk(entity);
+                {
+                    label: 'Mettre dans le coffre',
+                    icon: 'vehicle/car',
+                    category: 'criminal',
+                    canInteract: () => {
+                        if (this.isHidden) {
+                            return false;
+                        }
+
+                        const state = this.playerService.getState();
+
+                        return state.isEscorting && state.escorting !== null;
+                    },
+                    action: entity => {
+                        const state = this.playerService.getState();
+
+                        if (!state.escorting) {
+                            return;
+                        }
+
+                        const vehicleNetworkId = NetworkGetNetworkIdFromEntity(entity);
+                        TriggerServerEvent(ServerEvent.VEHICLE_TRUNK_PUT_PLAYER, state.escorting, vehicleNetworkId);
+                    },
                 },
-            },
-            {
-                label: 'Mettre dans le coffre',
-                icon: 'vehicle/car',
-                category: 'criminal',
-                canInteract: () => {
-                    if (this.isHidden) {
-                        return false;
-                    }
-
-                    const state = this.playerService.getState();
-
-                    return state.isEscorting && state.escorting !== null;
-                },
-                action: entity => {
-                    const state = this.playerService.getState();
-
-                    if (!state.escorting) {
-                        return;
-                    }
-
-                    const vehicleNetworkId = NetworkGetNetworkIdFromEntity(entity);
-                    TriggerServerEvent(ServerEvent.VEHICLE_TRUNK_PUT_PLAYER, state.escorting, vehicleNetworkId);
-                },
-            },
-        ]);
+            ],
+            3.0
+        );
     }
 
     private async enterTrunk(vehicle: number) {
