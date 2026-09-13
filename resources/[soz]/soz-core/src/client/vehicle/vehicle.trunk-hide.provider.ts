@@ -73,6 +73,8 @@ export class VehicleTrunkHideProvider {
     private isExiting = false;
     private isAttemptingExit = false;
     private hiddenVehicle: number | null = null;
+    private hiddenVehicleNetworkId: number | null = null;
+    private lastKnownVehiclePosition: Vector3 | null = null;
     private animationRunner: AnimationRunner | null = null;
     private occupiedTrunks = new Set<number>();
 
@@ -197,6 +199,8 @@ export class VehicleTrunkHideProvider {
         }
 
         this.hiddenVehicle = vehicle;
+        this.hiddenVehicleNetworkId = vehicleNetworkId;
+        this.lastKnownVehiclePosition = GetEntityCoords(vehicle, false) as Vector3;
 
         const ped = PlayerPedId();
 
@@ -306,10 +310,15 @@ export class VehicleTrunkHideProvider {
 
         const ped = PlayerPedId();
         const vehicle = this.hiddenVehicle;
-        const vehicleNetworkId = vehicle && DoesEntityExist(vehicle) ? NetworkGetNetworkIdFromEntity(vehicle) : null;
+        // Always use the network id captured on entry: once the vehicle is gone (stored in a garage,
+        // despawned, ...) the entity handle no longer resolves to one, but the server still needs it
+        // to release its claim on the trunk.
+        const vehicleNetworkId = this.hiddenVehicleNetworkId;
 
         if (vehicleNetworkId) {
-            TriggerServerEvent(ServerEvent.VEHICLE_TRUNK_ENTER, vehicleNetworkId, true);
+            if (vehicle && DoesEntityExist(vehicle)) {
+                TriggerServerEvent(ServerEvent.VEHICLE_TRUNK_ENTER, vehicleNetworkId, true);
+            }
             TriggerServerEvent(ServerEvent.VEHICLE_TRUNK_RELEASE, vehicleNetworkId);
         }
 
@@ -333,6 +342,11 @@ export class VehicleTrunkHideProvider {
             const [exitX, exitY, exitZ] = GetOffsetFromEntityInWorldCoords(vehicle, 0.0, -3.0, 0.0) as Vector3;
             SetEntityCoords(ped, exitX, exitY, exitZ, false, false, false, true);
             SetEntityHeading(ped, GetEntityHeading(vehicle));
+        } else if (this.lastKnownVehiclePosition) {
+            // The vehicle disappeared (stored in a garage, despawned, ...) while someone was hidden inside -
+            // fall back to where it was last seen instead of leaving them stuck wherever the attachment broke.
+            const [x, y, z] = this.lastKnownVehiclePosition;
+            SetEntityCoords(ped, x, y, z + 1.0, false, false, false, true);
         }
 
         SetEntityVisible(ped, true, false);
@@ -359,8 +373,27 @@ export class VehicleTrunkHideProvider {
         this.isHidden = false;
         this.isExiting = false;
         this.hiddenVehicle = null;
+        this.hiddenVehicleNetworkId = null;
+        this.lastKnownVehiclePosition = null;
 
         return true;
+    }
+
+    @Tick(1000)
+    private async trunkVehicleWatcher() {
+        if (!this.isHidden || !this.hiddenVehicle) {
+            return;
+        }
+
+        if (DoesEntityExist(this.hiddenVehicle)) {
+            this.lastKnownVehiclePosition = GetEntityCoords(this.hiddenVehicle, false) as Vector3;
+
+            return;
+        }
+
+        this.notifier.notify('Le véhicule a disparu, vous êtes éjecté du coffre.', 'error');
+
+        await this.exitTrunk(true);
     }
 
     @Tick()
