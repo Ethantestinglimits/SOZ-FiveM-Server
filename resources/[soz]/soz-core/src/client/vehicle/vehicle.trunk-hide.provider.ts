@@ -12,11 +12,14 @@ import { ClientEvent, ServerEvent } from '../../shared/event';
 import { Vector3 } from '../../shared/polyzone/vector';
 import { InstructionalService } from '../instructional.service';
 import { PlayerService } from '../player/player.service';
+import { ProgressService } from '../progress.service';
 
 const TRUNK_ANIMATION = {
     dictionary: 'mp_sleep',
     name: 'sleep_loop',
 };
+
+const TRUNK_HIDE_LABEL_DURATION = 24 * 60 * 60 * 1000;
 
 @Provider()
 export class VehicleTrunkHideProvider {
@@ -31,6 +34,9 @@ export class VehicleTrunkHideProvider {
 
     @Inject(InstructionalService)
     private instructionalService: InstructionalService;
+
+    @Inject(ProgressService)
+    private progressService: ProgressService;
 
     private isHidden = false;
     private isBlackedOut = false;
@@ -48,7 +54,11 @@ export class VehicleTrunkHideProvider {
                     icon: 'vehicle/car',
                     category: 'citizen',
                     canInteract: () => {
-                        if (this.isHidden || !this.playerService.canDoAction()) {
+                        if (
+                            this.isHidden ||
+                            !this.playerService.canDoAction() ||
+                            this.progressService.isDoingAction()
+                        ) {
                             return false;
                         }
 
@@ -148,6 +158,18 @@ export class VehicleTrunkHideProvider {
 
         this.isBlackedOut = true;
         this.instructionalService.display(['Appuyez sur SUPPR', 'pour sortir du coffre'], true);
+        this.progressService.progress(
+            'vehicleTrunkHide',
+            'Vous êtes dans un coffre...',
+            TRUNK_HIDE_LABEL_DURATION,
+            {},
+            {
+                canCancel: false,
+                useWhileDead: true,
+                allowExistingAnimation: true,
+                no_inv_busy: true,
+            }
+        );
     }
 
     private async exitTrunk() {
@@ -158,6 +180,7 @@ export class VehicleTrunkHideProvider {
         this.isExiting = true;
         this.isBlackedOut = false;
         this.instructionalService.clear();
+        this.progressService.cancel();
 
         const ped = PlayerPedId();
         const vehicle = this.hiddenVehicle;
