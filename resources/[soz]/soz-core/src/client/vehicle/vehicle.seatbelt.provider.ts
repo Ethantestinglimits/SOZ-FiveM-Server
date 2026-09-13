@@ -9,11 +9,13 @@ import { PhoneService } from '@public/client/phone/phone.service';
 import { Control } from '@public/shared/input';
 
 import { ClientEvent, ServerEvent } from '../../shared/event';
-import { toVectorNorm, Vector3 } from '../../shared/polyzone/vector';
+import { Vector3 } from '../../shared/polyzone/vector';
+import { computeCrashDamage, computeGStrength } from '../../shared/vehicle/crash';
 import { VehicleClass, VehicleSeat } from '../../shared/vehicle/vehicle';
 import { Notifier } from '../notifier';
 import { PlayerService } from '../player/player.service';
 import { SoundService } from '../sound.service';
+import { getVehicleSpeedKmh, ragdollWithVelocity } from './vehicle.physics';
 import { VehicleService } from './vehicle.service';
 
 const THRESHOLD_G_STRENGTH_EJECTION = 6.0;
@@ -120,7 +122,7 @@ export class VehicleSeatbeltProvider {
             return;
         }
 
-        if (GetEntitySpeed(vehicle) * 3.6 > 75 && !this.isSeatbeltOn) {
+        if (getVehicleSpeedKmh(vehicle) > 75 && !this.isSeatbeltOn) {
             this.notifier.notify('Vous allez trop vite pour faire ça.', 'error');
 
             return;
@@ -205,12 +207,7 @@ export class VehicleSeatbeltProvider {
             return;
         }
 
-        const acceleration = [
-            (this.lastVehicleVelocity[0] - vehicleVelocity[0]) / EJECTION_TICK_INTERVAL_SECONDES,
-            (this.lastVehicleVelocity[1] - vehicleVelocity[1]) / EJECTION_TICK_INTERVAL_SECONDES,
-            (this.lastVehicleVelocity[2] - vehicleVelocity[2]) / EJECTION_TICK_INTERVAL_SECONDES,
-        ] as Vector3;
-        const gStrength = toVectorNorm(acceleration) / 9.81;
+        const gStrength = computeGStrength(this.lastVehicleVelocity, vehicleVelocity, EJECTION_TICK_INTERVAL_SECONDES);
         const vehicleNetworkId = NetworkGetNetworkIdFromEntity(vehicle);
 
         if (gStrength > THRESHOLD_G_STRENGTH_EJECTION) {
@@ -252,7 +249,7 @@ export class VehicleSeatbeltProvider {
             if (!this.isSeatbeltOn) {
                 await this.ejectPlayer(ped, vehicleEjection, velocity);
             } else if (damaged && gStrength > THRESHOLD_G_STRENGTH_DAMAGE) {
-                const damage = ((gStrength - THRESHOLD_G_STRENGTH_DAMAGE) * toVectorNorm(velocity)) / 30;
+                const damage = computeCrashDamage(gStrength, THRESHOLD_G_STRENGTH_DAMAGE, velocity, 30);
                 SetEntityHealth(ped, Math.round(GetEntityHealth(ped) - damage));
 
                 const duration = Math.min((1000 * damage) / 4, 6000);
@@ -299,8 +296,7 @@ export class VehicleSeatbeltProvider {
 
         await wait(0);
 
-        SetPedToRagdoll(ped, 5511, 5511, 0, false, false, false);
-        SetEntityVelocity(ped, velocity[0], velocity[1], velocity[2]);
+        ragdollWithVelocity(ped, velocity);
 
         this.isSeatbeltOn = false;
     }

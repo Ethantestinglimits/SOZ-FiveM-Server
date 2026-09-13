@@ -9,14 +9,18 @@ import { AnimationService } from '@public/client/animation/animation.service';
 import { TargetFactory } from '@public/client/target/target.factory';
 
 import { ClientEvent, ServerEvent } from '../../shared/event';
-import { toVectorNorm, Vector3 } from '../../shared/polyzone/vector';
+import { Vector3 } from '../../shared/polyzone/vector';
 import { RpcServerEvent } from '../../shared/rpc';
+import { computeCrashDamage, computeGStrength } from '../../shared/vehicle/crash';
 import { VehicleClass } from '../../shared/vehicle/vehicle';
 import { Notifier } from '../notifier';
 import { PlayerService } from '../player/player.service';
 import { ProgressService } from '../progress.service';
 import { VehicleLockProvider } from './vehicle.lock.provider';
+import { getVehicleSpeedKmh, ragdollWithVelocity } from './vehicle.physics';
 import { VehicleService } from './vehicle.service';
+
+const unarmed = GetHashKey('WEAPON_UNARMED');
 
 const TRUNK_ANIMATION = {
     dictionary: 'mp_sleep',
@@ -35,9 +39,12 @@ const TRUNK_RAGDOLL_EXIT_SPEED = 10;
 // A hidden occupant has no collision, so the game never damages them when the vehicle crashes.
 // They have no seatbelt and nothing to brace against back there, so this triggers earlier and hits
 // harder than the "seatbelt on" crash damage in vehicle.seatbelt.provider.ts.
-const TRUNK_CRASH_TICK_INTERVAL_SECONDS = 0.1;
+const TRUNK_MONITOR_TICK_INTERVAL_SECONDS = 0.1;
 const TRUNK_CRASH_DAMAGE_G_THRESHOLD = 4.0;
 const TRUNK_CRASH_DAMAGE_FACTOR = 12;
+
+// How often (in monitor ticks) to check whether the vehicle disappeared and refresh its last known position.
+const TRUNK_VEHICLE_EXISTENCE_CHECK_EVERY_TICKS = Math.round(1 / TRUNK_MONITOR_TICK_INTERVAL_SECONDS);
 
 // Regular passenger cars only - no bikes, no work/utility vehicles (offroad, vans, trucks, ...), no boats/planes/trains.
 const TRUNK_HIDE_ALLOWED_CLASSES = [
@@ -82,7 +89,9 @@ export class VehicleTrunkHideProvider {
     private hiddenVehicle: number | null = null;
     private hiddenVehicleNetworkId: number | null = null;
     private lastKnownVehiclePosition: Vector3 | null = null;
-    private lastCrashCheckVelocity: Vector3 | null = null;
+    private lastMonitoredVehicleVelocity: Vector3 | null = null;
+    private lastMonitoredVehicleHealth: number | null = null;
+    private monitorTickCount = 0;
     private animationRunner: AnimationRunner | null = null;
     private occupiedTrunks = new Set<number>();
 
@@ -103,11 +112,22 @@ export class VehicleTrunkHideProvider {
     }
 
     private isTooFastForTrunk(entity: number): boolean {
-        return GetEntitySpeed(entity) * 3.6 > TRUNK_MAX_SPEED;
+        return getVehicleSpeedKmh(entity) > TRUNK_MAX_SPEED;
     }
 
     private isAboveRagdollExitSpeed(entity: number): boolean {
-        return GetEntitySpeed(entity) * 3.6 > TRUNK_RAGDOLL_EXIT_SPEED;
+        return getVehicleSpeedKmh(entity) > TRUNK_RAGDOLL_EXIT_SPEED;
+    }
+
+    // Shared eligibility rules for every trunk interaction target; each target adds its own
+    // occupancy/state-specific clause on top of this.
+    private canAccessTrunk(entity: number): boolean {
+        return (
+            this.vehicleService.checkBackOfVehicle(entity) &&
+            this.vehicleLockProvider.isVehOpen(entity) &&
+            this.isNormalCar(entity) &&
+            !this.isTooFastForTrunk(entity)
+        );
     }
 
     @Once()
@@ -122,10 +142,7 @@ export class VehicleTrunkHideProvider {
                         this.isHidden ||
                         !this.playerService.canDoAction() ||
                         this.progressService.isDoingAction() ||
-                        !this.vehicleService.checkBackOfVehicle(entity) ||
-                        !this.vehicleLockProvider.isVehOpen(entity) ||
-                        !this.isNormalCar(entity) ||
-                        this.isTooFastForTrunk(entity) ||
+                        !this.canAccessTrunk(entity) ||
                         this.occupiedTrunks.has(NetworkGetNetworkIdFromEntity(entity))
                     ) {
                         return false;
@@ -146,10 +163,7 @@ export class VehicleTrunkHideProvider {
                 canInteract: entity => {
                     if (
                         this.isHidden ||
-                        !this.vehicleService.checkBackOfVehicle(entity) ||
-                        !this.vehicleLockProvider.isVehOpen(entity) ||
-                        !this.isNormalCar(entity) ||
-                        this.isTooFastForTrunk(entity) ||
+                        !this.canAccessTrunk(entity) ||
                         this.occupiedTrunks.has(NetworkGetNetworkIdFromEntity(entity))
                     ) {
                         return false;
@@ -176,10 +190,7 @@ export class VehicleTrunkHideProvider {
                 category: 'citizen',
                 canInteract: entity =>
                     !this.isHidden &&
-                    this.vehicleService.checkBackOfVehicle(entity) &&
-                    this.vehicleLockProvider.isVehOpen(entity) &&
-                    this.isNormalCar(entity) &&
-                    !this.isTooFastForTrunk(entity) &&
+                    this.canAccessTrunk(entity) &&
                     this.occupiedTrunks.has(NetworkGetNetworkIdFromEntity(entity)),
                 action: entity => {
                     const vehicleNetworkId = NetworkGetNetworkIdFromEntity(entity);
@@ -320,13 +331,14 @@ export class VehicleTrunkHideProvider {
 
         const ped = PlayerPedId();
         const vehicle = this.hiddenVehicle;
+        const vehicleExists = Boolean(vehicle && DoesEntityExist(vehicle));
         // Always use the network id captured on entry: once the vehicle is gone (stored in a garage,
         // despawned, ...) the entity handle no longer resolves to one, but the server still needs it
         // to release its claim on the trunk.
         const vehicleNetworkId = this.hiddenVehicleNetworkId;
 
         if (vehicleNetworkId) {
-            if (vehicle && DoesEntityExist(vehicle)) {
+            if (vehicleExists) {
                 TriggerServerEvent(ServerEvent.VEHICLE_TRUNK_ENTER, vehicleNetworkId, true);
             }
             TriggerServerEvent(ServerEvent.VEHICLE_TRUNK_RELEASE, vehicleNetworkId);
@@ -341,17 +353,22 @@ export class VehicleTrunkHideProvider {
             DetachEntity(ped, true, false);
         }
 
-        if (GetSelectedPedWeapon(ped) !== GetHashKey('WEAPON_UNARMED')) {
-            SetCurrentPedWeapon(ped, GetHashKey('WEAPON_UNARMED'), true);
+        if (GetSelectedPedWeapon(ped) !== unarmed) {
+            SetCurrentPedWeapon(ped, unarmed, true);
         }
 
-        const vehicleVelocity = vehicle && DoesEntityExist(vehicle) ? (GetEntityVelocity(vehicle) as Vector3) : null;
-        const shouldRagdoll = vehicle && DoesEntityExist(vehicle) && this.isAboveRagdollExitSpeed(vehicle);
+        let shouldRagdoll = false;
+        let vehicleVelocity: Vector3 | null = null;
 
-        if (vehicle && DoesEntityExist(vehicle)) {
+        if (vehicleExists) {
             const [exitX, exitY, exitZ] = GetOffsetFromEntityInWorldCoords(vehicle, 0.0, -3.0, 0.0) as Vector3;
             SetEntityCoords(ped, exitX, exitY, exitZ, false, false, false, true);
             SetEntityHeading(ped, GetEntityHeading(vehicle));
+
+            if (this.isAboveRagdollExitSpeed(vehicle)) {
+                shouldRagdoll = true;
+                vehicleVelocity = GetEntityVelocity(vehicle) as Vector3;
+            }
         } else if (this.lastKnownVehiclePosition) {
             // The vehicle disappeared (stored in a garage, despawned, ...) while someone was hidden inside -
             // fall back to where it was last seen instead of leaving them stuck wherever the attachment broke.
@@ -365,8 +382,7 @@ export class VehicleTrunkHideProvider {
         if (shouldRagdoll && vehicleVelocity) {
             await wait(0);
 
-            SetPedToRagdoll(ped, 5511, 5511, 0, false, false, false);
-            SetEntityVelocity(ped, vehicleVelocity[0], vehicleVelocity[1], vehicleVelocity[2]);
+            ragdollWithVelocity(ped, vehicleVelocity);
         } else {
             FreezeEntityPosition(ped, true);
 
@@ -389,58 +405,77 @@ export class VehicleTrunkHideProvider {
         return true;
     }
 
-    @Tick(1000)
-    private async trunkVehicleWatcher() {
+    @Tick(TRUNK_MONITOR_TICK_INTERVAL_SECONDS * 1000)
+    private async trunkMonitorLoop() {
         if (!this.isHidden || !this.hiddenVehicle) {
-            return;
-        }
-
-        if (DoesEntityExist(this.hiddenVehicle)) {
-            this.lastKnownVehiclePosition = GetEntityCoords(this.hiddenVehicle, false) as Vector3;
+            this.lastMonitoredVehicleVelocity = null;
+            this.lastMonitoredVehicleHealth = null;
+            this.monitorTickCount = 0;
 
             return;
         }
 
-        this.notifier.notify('Le véhicule a disparu, vous êtes éjecté du coffre.', 'error');
+        const vehicle = this.hiddenVehicle;
 
-        await this.exitTrunk(true);
+        if (!DoesEntityExist(vehicle)) {
+            this.notifier.notify('Le véhicule a disparu, vous êtes éjecté du coffre.', 'error');
+
+            await this.exitTrunk(true);
+
+            return;
+        }
+
+        this.monitorTickCount++;
+
+        if (this.monitorTickCount >= TRUNK_VEHICLE_EXISTENCE_CHECK_EVERY_TICKS) {
+            this.monitorTickCount = 0;
+            this.lastKnownVehiclePosition = GetEntityCoords(vehicle, false) as Vector3;
+        }
+
+        this.checkCrashDamage(vehicle);
     }
 
-    @Tick(TRUNK_CRASH_TICK_INTERVAL_SECONDS * 1000)
-    private async trunkCrashDamageLoop() {
-        if (!this.isHidden || !this.hiddenVehicle || !DoesEntityExist(this.hiddenVehicle)) {
-            this.lastCrashCheckVelocity = null;
+    // A hidden occupant has no collision, so the game never damages them when the vehicle crashes -
+    // mirrors vehicle.seatbelt.provider.ts's crash detection, gated the same way on an actual drop in
+    // vehicle health so hard braking/bumps/jumps alone don't hurt them.
+    private checkCrashDamage(vehicle: number) {
+        const velocity = GetEntityVelocity(vehicle) as Vector3;
+        const health = GetEntityHealth(vehicle);
+
+        if (!this.lastMonitoredVehicleVelocity || this.lastMonitoredVehicleHealth === null) {
+            this.lastMonitoredVehicleVelocity = velocity;
+            this.lastMonitoredVehicleHealth = health;
 
             return;
         }
 
-        const velocity = GetEntityVelocity(this.hiddenVehicle) as Vector3;
+        const gStrength = computeGStrength(
+            this.lastMonitoredVehicleVelocity,
+            velocity,
+            TRUNK_MONITOR_TICK_INTERVAL_SECONDS
+        );
+        const vehicleDamaged = this.lastMonitoredVehicleHealth !== health;
 
-        if (!this.lastCrashCheckVelocity) {
-            this.lastCrashCheckVelocity = velocity;
+        this.lastMonitoredVehicleVelocity = velocity;
+        this.lastMonitoredVehicleHealth = health;
 
+        if (!vehicleDamaged || gStrength <= TRUNK_CRASH_DAMAGE_G_THRESHOLD) {
             return;
         }
 
-        const acceleration: Vector3 = [
-            (this.lastCrashCheckVelocity[0] - velocity[0]) / TRUNK_CRASH_TICK_INTERVAL_SECONDS,
-            (this.lastCrashCheckVelocity[1] - velocity[1]) / TRUNK_CRASH_TICK_INTERVAL_SECONDS,
-            (this.lastCrashCheckVelocity[2] - velocity[2]) / TRUNK_CRASH_TICK_INTERVAL_SECONDS,
-        ];
-        const gStrength = toVectorNorm(acceleration) / 9.81;
+        const damage = computeCrashDamage(
+            gStrength,
+            TRUNK_CRASH_DAMAGE_G_THRESHOLD,
+            velocity,
+            TRUNK_CRASH_DAMAGE_FACTOR
+        );
 
-        this.lastCrashCheckVelocity = velocity;
-
-        if (gStrength <= TRUNK_CRASH_DAMAGE_G_THRESHOLD) {
+        if (damage <= 0) {
             return;
         }
 
         const ped = PlayerPedId();
-        const damage = ((gStrength - TRUNK_CRASH_DAMAGE_G_THRESHOLD) * toVectorNorm(velocity)) / TRUNK_CRASH_DAMAGE_FACTOR;
-
-        if (damage > 0) {
-            SetEntityHealth(ped, Math.max(0, Math.round(GetEntityHealth(ped) - damage)));
-        }
+        SetEntityHealth(ped, Math.max(0, Math.round(GetEntityHealth(ped) - damage)));
     }
 
     @Tick()
