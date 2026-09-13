@@ -6,21 +6,22 @@ import { Rpc } from '../../core/decorators/rpc';
 import { Contact, ContactDTO } from '../../shared/phone/simcard';
 import { RpcServerEvent } from '../../shared/rpc';
 import { PrismaService } from '../database/prisma.service';
-import { PlayerService } from '../player/player.service';
+import { PhoneDeviceService } from './phone.device.service';
 
 @Provider()
 export class PhoneSimCardContacts {
     @Inject(PrismaService)
     private readonly prismaService: PrismaService;
 
-    @Inject(PlayerService)
-    private readonly playerService: PlayerService;
+    @Inject(PhoneDeviceService)
+    private readonly phoneDeviceService: PhoneDeviceService;
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_CONTACTS_GET)
-    async getContacts(source: number) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
-            return;
+    async getContacts(source: number): Promise<Contact[]> {
+        const device = this.phoneDeviceService.getOpenedDevice(source);
+
+        if (!device) {
+            return [];
         }
 
         return this.prismaService.$queryRaw(
@@ -28,21 +29,22 @@ export class PhoneSimCardContacts {
                 SELECT phone_contacts.*, phone_profile.avatar as avatar
                 FROM phone_contacts
                          LEFT JOIN phone_profile ON phone_contacts.number = phone_profile.number
-                WHERE identifier = ${player.citizenid}
+                WHERE phone_contacts.device_id = ${device.id}
             `
         );
     }
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_CONTACTS_ADD)
     async addContact(source: number, contact: ContactDTO): Promise<Contact> {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
+        const device = this.phoneDeviceService.getOpenedDevice(source);
+
+        if (!device) {
             return;
         }
 
         return this.prismaService.phone_contacts.create({
             data: {
-                identifier: player.citizenid,
+                device_id: device.id,
                 display: contact.display,
                 number: contact.number,
             },
@@ -51,15 +53,16 @@ export class PhoneSimCardContacts {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_CONTACTS_UPDATE)
     async updateContact(source: number, id: number, contact: ContactDTO): Promise<Contact> {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
+        const device = this.phoneDeviceService.getOpenedDevice(source);
+
+        if (!device) {
             return;
         }
 
         return this.prismaService.phone_contacts.update({
             where: {
                 id,
-                identifier: player.citizenid,
+                device_id: device.id,
             },
             data: contact,
         });
@@ -67,15 +70,16 @@ export class PhoneSimCardContacts {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_CONTACTS_REMOVE)
     async deleteContact(source: number, id: number): Promise<Contact> {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
+        const device = this.phoneDeviceService.getOpenedDevice(source);
+
+        if (!device) {
             return;
         }
 
         return this.prismaService.phone_contacts.delete({
             where: {
                 id,
-                identifier: player.citizenid,
+                device_id: device.id,
             },
         });
     }

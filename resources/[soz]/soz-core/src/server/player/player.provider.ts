@@ -112,7 +112,7 @@ export class PlayerProvider {
             weight += 10000;
         }
 
-        if (this.playerSyringeProvider.hasTemporaryCrimiWeight(player.source)) {
+        if (this.hasTemporaryCrimiWeight(player.source)) {
             weight += 40000;
         }
 
@@ -190,6 +190,11 @@ export class PlayerProvider {
     @Exportable('GetPlayerState')
     public getState(source: number): PlayerClientState {
         return this.playerStateService.getClientState(source);
+    }
+
+     @Exportable('HasTemporaryCrimiWeight')
+    public hasTemporaryCrimiWeight(source: number): boolean {
+        return this.playerSyringeProvider.hasTemporaryCrimiWeight(source);
     }
 
     @Exportable('SetPlayerState')

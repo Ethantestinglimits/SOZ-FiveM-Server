@@ -18,6 +18,7 @@ import {
     isInventoryItemExpired,
     MERGE_ERROR_MESSAGE,
 } from '../../shared/inventory';
+import { PHONE_ITEM, ZIM_CARD_ITEM } from '../../shared/phone/device';
 import { getDistance, Vector3 } from '../../shared/polyzone/vector';
 import { getRandomInt } from '../../shared/random';
 import { isErr, isOk } from '../../shared/result';
@@ -28,6 +29,7 @@ import { LockBinService } from '../job/bluebird/lock.bin.service';
 import { Monitor } from '../monitor/monitor';
 import { Notifier } from '../notifier';
 import { PermissionService } from '../permission.service';
+import { PhoneDeviceProvider } from '../phone/phone.device.provider';
 import { PlayerMoneyService } from '../player/player.money.service';
 import { PlayerService } from '../player/player.service';
 import { Inventory } from './inventory';
@@ -71,6 +73,9 @@ export class InventoryProvider {
 
     @Inject(FeatureProvider)
     private featureProvider: FeatureProvider;
+
+    @Inject(PhoneDeviceProvider)
+    private phoneDeviceProvider: PhoneDeviceProvider;
 
     @Tick()
     public async populateInventories() {
@@ -390,6 +395,20 @@ export class InventoryProvider {
         // 1. Case : no target item, simply move item if possible
         if (!targetSlot) {
             await this.moveItem(source, sourceInventory, targetInventory, sourceItem, amount, targetSlot);
+
+            return;
+        }
+
+        const targetItem = targetInventory.getItemAtSlot(targetSlot);
+
+        if (targetItem && targetItem.name === PHONE_ITEM && sourceItem.name === ZIM_CARD_ITEM) {
+            await this.phoneDeviceProvider.insertSimCard(
+                source,
+                sourceInventory,
+                sourceItem,
+                targetInventory,
+                targetItem
+            );
 
             return;
         }

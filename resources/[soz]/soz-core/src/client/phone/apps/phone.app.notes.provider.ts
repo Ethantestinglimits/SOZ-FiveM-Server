@@ -16,6 +16,7 @@ export class PhoneAppNotesProvider {
 
     @Once(OnceStep.NuiLoaded)
     @OnEvent(ClientEvent.ADMIN_SWITCH_CHARACTER)
+    @OnEvent(ClientEvent.PHONE_DEVICE_RELOAD)
     async onNuiLoaded() {
         await this.getNotes();
     }
@@ -40,6 +41,6 @@ export class PhoneAppNotesProvider {
 
     protected async getNotes() {
         const notes = await emitRpc<NoteItem[]>(RpcServerEvent.PHONE_APP_NOTES_GET);
-        this.nuiDispatch.dispatch('phone', 'AppNotesSetData', notes);
+        this.nuiDispatch.dispatch('phone', 'AppNotesSetData', notes || []);
     }
 }

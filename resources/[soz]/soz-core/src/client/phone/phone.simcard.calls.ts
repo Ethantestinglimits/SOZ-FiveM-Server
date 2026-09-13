@@ -26,9 +26,10 @@ export class PhoneSimCardCalls {
     @Once(OnceStep.NuiLoaded)
     @OnEvent(ClientEvent.ADMIN_SWITCH_CHARACTER)
     @OnEvent(ClientEvent.PHONE_SIMCARD_CALLS_HISTORY)
+    @OnEvent(ClientEvent.PHONE_DEVICE_RELOAD)
     async sendCallsHistory() {
         const callsHistory = await emitRpc<CallHistory[]>(RpcServerEvent.PHONE_SIMCARD_CALLS_HISTORY_GET);
-        this.nuiDispatch.dispatch('phone', 'SetCallsHistory', callsHistory);
+        this.nuiDispatch.dispatch('phone', 'SetCallsHistory', callsHistory || []);
     }
 
     @OnNuiEvent(NuiEvent.PhoneSimCardCallsInit)

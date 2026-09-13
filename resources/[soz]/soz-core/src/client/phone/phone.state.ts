@@ -9,6 +9,8 @@ import { PlayerService } from '@public/client/player/player.service';
 import { ResourceLoader } from '@public/client/repository/resource.loader';
 import { StateSelector } from '@public/client/store/store';
 import { PlayerUpdate } from '@public/core/decorators/player';
+import { ClientEvent } from '@public/shared/event/client';
+import { PhoneDevice } from '@public/shared/phone/device';
 import { ActiveCall } from '@public/shared/phone/simcard';
 import { PlayerData } from '@public/shared/player';
 import { RpcServerEvent } from '@public/shared/rpc';
@@ -45,6 +47,8 @@ export class PhoneState {
     private phoneFrontCameraEnabled = false;
 
     private currentCall: ActiveCall | null = null;
+
+    private openedDevice: PhoneDevice | null = null;
 
     @PlayerUpdate()
     public onPlayerUpdate(player: PlayerData) {
@@ -123,6 +127,22 @@ export class PhoneState {
 
         if (this.phoneProp) {
             emitRpc(RpcServerEvent.PHONE_LIGHT_SET_FLASHLIGHT, ObjToNet(this.phoneProp), value);
+        }
+    }
+
+    public getOpenedDevice(): PhoneDevice | null {
+        return this.openedDevice;
+    }
+
+    public setOpenedDevice(device: PhoneDevice | null) {
+        const previous = this.openedDevice;
+
+        this.openedDevice = device;
+        this.nuiDispatch.dispatch('phone', 'SetPhoneDevice', device);
+        this.nuiDispatch.dispatch('phone', 'SetSimCard', device?.simNumber || '');
+
+        if (previous?.id !== device?.id || previous?.simNumber !== device?.simNumber) {
+            TriggerEvent(ClientEvent.PHONE_DEVICE_RELOAD);
         }
     }
 

@@ -20,6 +20,7 @@ export class PhoneSimCardContacts {
 
     @Once(OnceStep.NuiLoaded)
     @OnEvent(ClientEvent.ADMIN_SWITCH_CHARACTER)
+    @OnEvent(ClientEvent.PHONE_DEVICE_RELOAD)
     async onNuiLoaded() {
         const player = this.playerService.getPlayer();
         if (!player) {
@@ -27,7 +28,7 @@ export class PhoneSimCardContacts {
         }
 
         const contacts = await emitRpc<Contact[]>(RpcServerEvent.PHONE_SIMCARD_CONTACTS_GET);
-        this.nuiDispatch.dispatch('phone', 'SetContacts', contacts);
+        this.nuiDispatch.dispatch('phone', 'SetContacts', contacts || []);
     }
 
     @OnNuiEvent(NuiEvent.PhoneSimCardAddContact)

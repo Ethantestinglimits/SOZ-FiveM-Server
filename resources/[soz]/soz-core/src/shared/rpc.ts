@@ -313,6 +313,7 @@ export enum RpcServerEvent {
     PHONE_LIGHT_ADD_PHONE = 'soz-core:server:phone:light:add-phone',
     PHONE_LIGHT_REMOVE_PHONE = 'soz-core:server:phone:light:remove-phone',
     PHONE_LIGHT_SET_FLASHLIGHT = 'soz-core:server:phone:light:set-flashlight',
+    PHONE_DEVICE_GET_MAIN = 'soz-core:server:phone:device:get-main',
     PHONE_SIMCARD_RESET = 'soz-core:server:phone:simcard:reset',
     PHONE_SIMCARD_GET_AVATAR = 'soz-core:server:phone:simcard:get-avatar',
     PHONE_SIMCARD_UPDATE_AVATAR = 'soz-core:server:phone:simcard:update-avatar',

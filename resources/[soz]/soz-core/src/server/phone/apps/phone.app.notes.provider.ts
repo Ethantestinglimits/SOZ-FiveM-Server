@@ -1,24 +1,25 @@
 import { Provider } from '@public/core/decorators/provider';
+import { RpcServerEvent } from '@public/shared/rpc';
 
 import { Inject } from '../../../core/decorators/injectable';
 import { Rpc } from '../../../core/decorators/rpc';
-import { RpcServerEvent } from '../../../shared/rpc';
 import { PrismaService } from '../../database/prisma.service';
-import { PlayerService } from '../../player/player.service';
+import { PhoneDeviceService } from '../phone.device.service';
 
 @Provider()
 export class PhoneAppNotesProvider {
     @Inject(PrismaService)
     private readonly prismaService: PrismaService;
 
-    @Inject(PlayerService)
-    private readonly playerService: PlayerService;
+    @Inject(PhoneDeviceService)
+    private readonly phoneDeviceService: PhoneDeviceService;
 
     @Rpc(RpcServerEvent.PHONE_APP_NOTES_GET)
     async getNotes(source: number) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
-            return;
+        const device = this.phoneDeviceService.getOpenedDevice(source);
+
+        if (!device) {
+            return [];
         }
 
         return this.prismaService.phone_notes.findMany({
@@ -28,15 +29,16 @@ export class PhoneAppNotesProvider {
                 content: true,
             },
             where: {
-                identifier: player.citizenid,
+                device_id: device.id,
             },
         });
     }
 
     @Rpc(RpcServerEvent.PHONE_APP_NOTES_ADD)
     async addNote(source: number, title: string, content: string) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
+        const device = this.phoneDeviceService.getOpenedDevice(source);
+
+        if (!device) {
             return;
         }
 
@@ -44,20 +46,22 @@ export class PhoneAppNotesProvider {
             data: {
                 title,
                 content,
-                identifier: player.citizenid,
+                identifier: '',
+                device_id: device.id,
             },
         });
     }
 
     @Rpc(RpcServerEvent.PHONE_APP_NOTES_UPDATE)
     async updateNote(source: number, id: number, title: string, content: string) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
+        const device = this.phoneDeviceService.getOpenedDevice(source);
+
+        if (!device) {
             return;
         }
 
         return this.prismaService.phone_notes.update({
-            where: { id, identifier: player.citizenid },
+            where: { id, device_id: device.id },
             data: {
                 title,
                 content,
@@ -67,13 +71,14 @@ export class PhoneAppNotesProvider {
 
     @Rpc(RpcServerEvent.PHONE_APP_NOTES_DELETE)
     async deleteNote(source: number, id: number) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
+        const device = this.phoneDeviceService.getOpenedDevice(source);
+
+        if (!device) {
             return;
         }
 
         return this.prismaService.phone_notes.delete({
-            where: { id, identifier: player.citizenid },
+            where: { id, device_id: device.id },
         });
     }
 }

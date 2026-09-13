@@ -4235,6 +4235,18 @@ QBShared.Items = {
         ["description"] = "Une jolie maison !",
         ["illustrator"] = ".Sniteur",
     },
+    ["zim_card"] = {
+        ["name"] = "zim_card",
+        ["label"] = "Carte ZIM",
+        ["weight"] = 10,
+        ["type"] = "item",
+        ["unique"] = true,
+        ["useable"] = true,
+        ["shouldClose"] = true,
+        ["combinable"] = nil,
+        ["description"] = "SMS et Appel illimités, Merci Zree !",
+        ["illustrator"] = ".Runorre",
+    },
 
     -- Communication
     ["phone"] = {
@@ -4243,7 +4255,7 @@ QBShared.Items = {
         ["weight"] = 300,
         ["type"] = "item",
         ["unique"] = true,
-        ["useable"] = false,
+        ["useable"] = true,
         ["shouldClose"] = false,
         ["combinable"] = nil,
         ["description"] = "Outil qui zert à communiquer.",

@@ -3,6 +3,7 @@ import { Inject } from '@core/decorators/injectable';
 import { PlayerInventoryUpdate } from '@core/decorators/player';
 import { Provider } from '@core/decorators/provider';
 import { Tick, TickInterval } from '@core/decorators/tick';
+import { emitRpc } from '@core/rpc';
 import { PlayerTalentService } from '@private/client/player/player.talent.service';
 import { PoliceSwatProvider } from '@private/client/police/police.swat.provider';
 import { MineSweeperRobotProvider } from '@private/client/vehicle/minesweeper.provider';
@@ -11,6 +12,8 @@ import { SceneProvider } from '@public/client/scene/scene.provider';
 import { OnEvent, OnNuiEvent } from '@public/core/decorators/event';
 import { ClientEvent } from '@public/shared/event/client';
 import { NuiEvent } from '@public/shared/event/nui';
+import { PhoneDevice } from '@public/shared/phone/device';
+import { RpcServerEvent } from '@public/shared/rpc';
 
 import { Control } from '../../shared/input';
 import { HousingFournitureProvider } from '../housing/housing.fourniture.provider';
@@ -213,7 +216,41 @@ export class PhoneManager {
             this.nuiDispatch.dispatch('phone', 'SetAvailability', true);
         }
 
+        const device = await emitRpc<PhoneDevice | null>(RpcServerEvent.PHONE_DEVICE_GET_MAIN);
+
+        if (device) {
+            this.phoneState.setOpenedDevice(device);
+        } else if (!playerState.isDead) {
+            this.notifier.error("Vous n'avez pas votre téléphone principal sur vous.");
+
+            return;
+        }
+
         return this.showPhone();
+    }
+
+    @OnEvent(ClientEvent.PHONE_DEVICE_OPEN)
+    public async onPhoneDeviceOpen(device: PhoneDevice) {
+        if (this.phoneState.isPhoneDrowned()) return;
+        if (this.phoneState.isPhoneDisabled()) return;
+
+        const playerState = this.playerService.getState();
+        if (playerState.isInventoryBusy) return;
+
+        this.phoneState.setOpenedDevice(device);
+
+        return this.showPhone();
+    }
+
+    @OnEvent(ClientEvent.PHONE_DEVICE_UPDATE)
+    public async onPhoneDeviceUpdate(device: PhoneDevice) {
+        const opened = this.phoneState.getOpenedDevice();
+
+        if (!opened || opened.id !== device.id) {
+            return;
+        }
+
+        this.phoneState.setOpenedDevice(device);
     }
 
     private async showPhone() {

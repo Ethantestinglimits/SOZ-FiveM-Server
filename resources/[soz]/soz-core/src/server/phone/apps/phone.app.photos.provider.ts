@@ -4,21 +4,22 @@ import { Inject } from '../../../core/decorators/injectable';
 import { Rpc } from '../../../core/decorators/rpc';
 import { RpcServerEvent } from '../../../shared/rpc';
 import { PrismaService } from '../../database/prisma.service';
-import { PlayerService } from '../../player/player.service';
+import { PhoneDeviceService } from '../phone.device.service';
 
 @Provider()
 export class PhoneAppPhotosProvider {
     @Inject(PrismaService)
     private readonly prismaService: PrismaService;
 
-    @Inject(PlayerService)
-    private readonly playerService: PlayerService;
+    @Inject(PhoneDeviceService)
+    private readonly phoneDeviceService: PhoneDeviceService;
 
     @Rpc(RpcServerEvent.PHONE_APP_PHOTOS_GET)
     async getPhotos(source: number) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
-            return;
+        const device = this.phoneDeviceService.getOpenedDevice(source);
+
+        if (!device) {
+            return [];
         }
 
         return this.prismaService.phone_gallery.findMany({
@@ -27,7 +28,7 @@ export class PhoneAppPhotosProvider {
                 image: true,
             },
             where: {
-                identifier: player.citizenid,
+                device_id: device.id,
             },
             orderBy: {
                 id: 'desc',
@@ -37,14 +38,15 @@ export class PhoneAppPhotosProvider {
 
     @Rpc(RpcServerEvent.PHONE_APP_PHOTOS_UPLOAD)
     async takePhoto(source: number, image: string) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
+        const device = this.phoneDeviceService.getOpenedDevice(source);
+
+        if (!device) {
             return;
         }
 
         return this.prismaService.phone_gallery.create({
             data: {
-                identifier: player.citizenid,
+                device_id: device.id,
                 image,
             },
         });
@@ -52,15 +54,16 @@ export class PhoneAppPhotosProvider {
 
     @Rpc(RpcServerEvent.PHONE_APP_PHOTOS_DELETE)
     async deletePhoto(source: number, id: number) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
+        const device = this.phoneDeviceService.getOpenedDevice(source);
+
+        if (!device) {
             return;
         }
 
         await this.prismaService.phone_gallery.delete({
             where: {
                 id,
-                identifier: player.citizenid,
+                device_id: device.id,
             },
         });
     }

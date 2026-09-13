@@ -716,6 +716,8 @@ export enum NuiEvent {
     InventoryActionLookCard = 'soz-core:nui:inventory:action-look-card',
     InventoryActionOpen = 'soz-core:nui:inventory:action-open',
     InventoryActionForceConsume = 'soz-core:nui:inventory:action-force-consume',
+    InventoryActionSetMainPhone = 'soz-core:nui:inventory:action-set-main-phone',
+    InventoryActionRemoveSimCard = 'soz-core:nui:inventory:action-remove-sim-card',
     InventoryShopValidate = 'soz-core:nui:inventory:shop-validate',
     InventoryGoBackPlayerInventory = 'soz-core:nui:inventory:go-back-player-inventory',
 

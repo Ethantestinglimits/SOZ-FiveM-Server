@@ -4,6 +4,7 @@ import { Provider } from '../../core/decorators/provider';
 import { uuidv4 } from '../../core/utils';
 import { ClientEvent } from '../../shared/event/client';
 import { ServerEvent } from '../../shared/event/server';
+import { PhoneDeviceService } from '../phone/phone.device.service';
 import { PlayerService } from '../player/player.service';
 import { StateSelector, Store } from '../store/store';
 
@@ -25,6 +26,9 @@ export class VoipVoicePhoneProvider {
     @Inject(PlayerService)
     private playerService: PlayerService;
 
+    @Inject(PhoneDeviceService)
+    private phoneDeviceService: PhoneDeviceService;
+
     private calls = new Map<string, Call>();
 
     @StateSelector(state => state.global.blackoutLevel)
@@ -37,7 +41,7 @@ export class VoipVoicePhoneProvider {
     }
 
     @OnEvent(ServerEvent.VOIP_PHONE_CALL_START)
-    public startCall(_source: number, callerPhone: string, receiverPhone: string) {
+    public async startCall(_source: number, callerPhone: string, receiverPhone: string) {
         const blackout = this.store.getState().global.blackout;
         const blackoutLevel = this.store.getState().global.blackoutLevel;
 
@@ -45,10 +49,10 @@ export class VoipVoicePhoneProvider {
             return;
         }
 
-        const caller = this.playerService.getPlayerByPhone(callerPhone);
-        const receiver = this.playerService.getPlayerByPhone(receiverPhone);
+        const caller = await this.phoneDeviceService.findDeviceByNumber(callerPhone);
+        const receiver = await this.phoneDeviceService.findDeviceByNumber(receiverPhone);
 
-        if (!caller || !receiver) {
+        if (!caller?.source || !receiver?.source) {
             return;
         }
 
