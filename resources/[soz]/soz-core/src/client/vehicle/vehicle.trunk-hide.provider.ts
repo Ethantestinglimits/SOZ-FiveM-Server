@@ -95,6 +95,16 @@ export class VehicleTrunkHideProvider {
                         TriggerServerEvent(ServerEvent.VEHICLE_TRUNK_PUT_PLAYER, state.escorting, vehicleNetworkId);
                     },
                 },
+                {
+                    label: "Sortir quelqu'un du coffre",
+                    icon: 'vehicle/car',
+                    category: 'citizen',
+                    canInteract: () => !this.isHidden,
+                    action: entity => {
+                        const vehicleNetworkId = NetworkGetNetworkIdFromEntity(entity);
+                        TriggerServerEvent(ServerEvent.VEHICLE_TRUNK_EXTRACT_PLAYER, vehicleNetworkId);
+                    },
+                },
             ],
             3.0
         );
@@ -244,6 +254,11 @@ export class VehicleTrunkHideProvider {
         }
 
         DrawRect(0.5, 0.5, 1.0, 1.0, 0, 0, 0, 204);
+    }
+
+    @OnEvent(ClientEvent.VEHICLE_TRUNK_FORCE_EXIT)
+    public async onForceExit() {
+        await this.exitTrunk();
     }
 
     @OnEvent(ClientEvent.VEHICLE_TRUNK_FORCE_ENTER)
