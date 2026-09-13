@@ -119,6 +119,17 @@ export class VehicleTrunkHideProvider {
         return getVehicleSpeedKmh(entity) > TRUNK_RAGDOLL_EXIT_SPEED;
     }
 
+    // FiveM can recycle an entity handle after the original entity is gone, so DoesEntityExist alone
+    // isn't enough once we've been holding onto `vehicle` across awaits - cross-check the network id
+    // captured at entry to make sure it's still the same vehicle before trusting its position/velocity.
+    private isHiddenVehicleStillValid(vehicle: number): boolean {
+        return (
+            DoesEntityExist(vehicle) &&
+            this.hiddenVehicleNetworkId !== null &&
+            NetworkGetNetworkIdFromEntity(vehicle) === this.hiddenVehicleNetworkId
+        );
+    }
+
     // Shared eligibility rules for every trunk interaction target; each target adds its own
     // occupancy/state-specific clause on top of this.
     private canAccessTrunk(entity: number): boolean {
@@ -205,6 +216,14 @@ export class VehicleTrunkHideProvider {
             return;
         }
 
+        // Applies to every entry path, including being forced in by an escort - the UI-level
+        // canInteract check only ever covers the person voluntarily clicking the target themselves.
+        if (this.isTooFastForTrunk(vehicle)) {
+            this.notifier.notify('Le coffre est verrouillé, le véhicule roule trop vite.', 'error');
+
+            return;
+        }
+
         this.isHidden = true;
 
         const vehicleNetworkId = NetworkGetNetworkIdFromEntity(vehicle);
@@ -213,6 +232,14 @@ export class VehicleTrunkHideProvider {
         if (!claimed) {
             this.isHidden = false;
             this.notifier.notify('Ce coffre est déjà occupé.', 'error');
+
+            return;
+        }
+
+        if (!this.isHidden) {
+            // Something else (death, forced exit, ...) already resolved a hide attempt while we were
+            // waiting on the claim RPC - release what we just got granted instead of entering anyway.
+            TriggerServerEvent(ServerEvent.VEHICLE_TRUNK_RELEASE, vehicleNetworkId);
 
             return;
         }
@@ -305,7 +332,7 @@ export class VehicleTrunkHideProvider {
 
         const hiddenVehicle = this.hiddenVehicle;
 
-        if (hiddenVehicle && DoesEntityExist(hiddenVehicle) && this.isTooFastForTrunk(hiddenVehicle)) {
+        if (hiddenVehicle && this.isHiddenVehicleStillValid(hiddenVehicle) && this.isTooFastForTrunk(hiddenVehicle)) {
             this.notifier.notify('Le coffre est verrouillé, le véhicule roule trop vite.', 'error');
 
             if (!waitForSafeSpeed) {
@@ -314,7 +341,11 @@ export class VehicleTrunkHideProvider {
                 return false;
             }
 
-            while (this.isHidden && DoesEntityExist(hiddenVehicle) && this.isTooFastForTrunk(hiddenVehicle)) {
+            while (
+                this.isHidden &&
+                this.isHiddenVehicleStillValid(hiddenVehicle) &&
+                this.isTooFastForTrunk(hiddenVehicle)
+            ) {
                 await wait(500);
             }
         }
@@ -331,7 +362,7 @@ export class VehicleTrunkHideProvider {
 
         const ped = PlayerPedId();
         const vehicle = this.hiddenVehicle;
-        const vehicleExists = Boolean(vehicle && DoesEntityExist(vehicle));
+        const vehicleExists = Boolean(vehicle && this.isHiddenVehicleStillValid(vehicle));
         // Always use the network id captured on entry: once the vehicle is gone (stored in a garage,
         // despawned, ...) the entity handle no longer resolves to one, but the server still needs it
         // to release its claim on the trunk.
@@ -417,8 +448,12 @@ export class VehicleTrunkHideProvider {
 
         const vehicle = this.hiddenVehicle;
 
-        if (!DoesEntityExist(vehicle)) {
-            this.notifier.notify('Le véhicule a disparu, vous êtes éjecté du coffre.', 'error');
+        if (!this.isHiddenVehicleStillValid(vehicle)) {
+            // Only warn/act once per disappearance - exitTrunk() is already running for a few hundred
+            // ms to a couple seconds, and this tick fires every 100ms in the meantime.
+            if (!this.isExiting && !this.isAttemptingExit) {
+                this.notifier.notify('Le véhicule a disparu, vous êtes éjecté du coffre.', 'error');
+            }
 
             await this.exitTrunk(true);
 
@@ -430,6 +465,15 @@ export class VehicleTrunkHideProvider {
         if (this.monitorTickCount >= TRUNK_VEHICLE_EXISTENCE_CHECK_EVERY_TICKS) {
             this.monitorTickCount = 0;
             this.lastKnownVehiclePosition = GetEntityCoords(vehicle, false) as Vector3;
+        }
+
+        if (!NetworkGetEntityIsNetworked(vehicle) || !NetworkHasControlOfEntity(vehicle)) {
+            // Ownership migration can produce a large interpolation jump that reads as a crash -
+            // mirrors vehicle.seatbelt.provider.ts's own ownership guard.
+            this.lastMonitoredVehicleVelocity = null;
+            this.lastMonitoredVehicleHealth = null;
+
+            return;
         }
 
         this.checkCrashDamage(vehicle);
@@ -470,7 +514,7 @@ export class VehicleTrunkHideProvider {
             TRUNK_CRASH_DAMAGE_FACTOR
         );
 
-        if (damage <= 0) {
+        if (damage <= 0 || this.playerService.getPlayer().metadata.godmode) {
             return;
         }
 
