@@ -318,14 +318,16 @@ const MenuAnimation: FunctionComponent<MenuAnimationProps> = ({
     );
 };
 
+const stopAnimationPreview = () => {
+    fetchNui(NuiEvent.PlayerMenuAnimationPreviewStop);
+};
+
 // Mounted only while the "Liste des animations" submenu is on screen (SubMenu unmounts its
 // content on navigation), so leaving the list, closing the menu, or dying all stop the preview
 // the same way: through this cleanup, without needing to hook into every possible exit path.
 const AnimationPreviewGuard: FunctionComponent = () => {
     useEffect(() => {
-        return () => {
-            fetchNui(NuiEvent.PlayerMenuAnimationPreviewStop);
-        };
+        return stopAnimationPreview;
     }, []);
 
     return null;
@@ -412,10 +414,11 @@ const MenuAnimationList: FunctionComponent = () => {
                 <MenuTitle title="Personnel" />
                 <MenuContent subtitle="Liste des animations">
                     <AnimationPreviewGuard />
-                    <MenuItemStringInput onChange={handleFilter} value={textFilter}>
+                    <MenuItemStringInput onChange={handleFilter} value={textFilter} onSelected={stopAnimationPreview}>
                         Filtre:
                     </MenuItemStringInput>
                     <MenuItemButton
+                        onSelected={stopAnimationPreview}
                         onConfirm={() => {
                             fetchNui(NuiEvent.PlayerMenuAnimationStop);
                         }}
@@ -471,7 +474,8 @@ type ItemCategory<T> = {
 const createRecursiveSubMenu = <T extends ItemCategory<T>>(
     item: T,
     prefix: string,
-    createLeafItem: (item: T) => ReactElement
+    createLeafItem: (item: T) => ReactElement,
+    onCategorySelected?: () => void
 ): [ReactElement, ReactElement[]] => {
     if (item.type !== 'category') {
         return [createLeafItem(item), []];
@@ -482,7 +486,12 @@ const createRecursiveSubMenu = <T extends ItemCategory<T>>(
         const subMenus = [];
 
         for (const subItem of item.items) {
-            const [element, newSubMenus] = createRecursiveSubMenu(subItem, `${prefix}_${item.name}`, createLeafItem);
+            const [element, newSubMenus] = createRecursiveSubMenu(
+                subItem,
+                `${prefix}_${item.name}`,
+                createLeafItem,
+                onCategorySelected
+            );
 
             elements.push(element);
             subMenus.push(...newSubMenus);
@@ -499,7 +508,12 @@ const createRecursiveSubMenu = <T extends ItemCategory<T>>(
             </SubMenu>
         );
 
-        return [<MenuItemSubMenuLink id={`${prefix}${item.name}`}>{item.name}</MenuItemSubMenuLink>, subMenus];
+        return [
+            <MenuItemSubMenuLink id={`${prefix}${item.name}`} onSelected={onCategorySelected}>
+                {item.name}
+            </MenuItemSubMenuLink>,
+            subMenus,
+        ];
     }
 
     return [null, []];
@@ -544,7 +558,9 @@ const createAnimationLeafItem = (item: AnimationConfigItem): ReactElement => {
 };
 
 const createAnimationItemMenu = (item: AnimationConfigItem, prefix: string): [ReactElement, ReactElement[]] => {
-    return createRecursiveSubMenu(item, prefix, createAnimationLeafItem);
+    // Hovering a category rather than an animation stops the preview, which also covers going back
+    // up a level: the category link we came from is reselected on the way back.
+    return createRecursiveSubMenu(item, prefix, createAnimationLeafItem, stopAnimationPreview);
 };
 
 const createWalkLeafItem = (item: WalkConfigItem): ReactElement => {

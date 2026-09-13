@@ -17,7 +17,7 @@ const PREVIEW_GAP_FROM_MENU = 0.12;
 
 // Vertical position of the ped's *feet*, in normalized screen coordinates (0 = top, 1 = bottom).
 // Keeping this high also lifts the ghost off the ground in world space, well above road traffic.
-const PREVIEW_SCREEN_FEET_Y = 0.30;
+const PREVIEW_SCREEN_FEET_Y = 0.3;
 
 // How much of the screen height the ped should cover. The camera distance is derived from this
 // rather than hardcoded, because apparent size depends on the player's FOV: pinning the distance
