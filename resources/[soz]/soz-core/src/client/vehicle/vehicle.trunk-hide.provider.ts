@@ -240,42 +240,48 @@ export class VehicleTrunkHideProvider {
 
         this.isBlackedOut = true;
 
-        await this.progressService.progress(
-            'vehicleTrunkHide',
-            'Vous êtes dans un coffre...',
-            TRUNK_HIDE_LABEL_DURATION,
-            {},
-            {
-                canCancel: true,
-                forceCancelHint: true,
-                useWhileDead: true,
-                allowExistingAnimation: true,
-                no_inv_busy: true,
-                hideBar: true,
-            }
-        );
+        do {
+            await this.progressService.progress(
+                'vehicleTrunkHide',
+                'Vous êtes dans un coffre...',
+                TRUNK_HIDE_LABEL_DURATION,
+                {},
+                {
+                    canCancel: true,
+                    forceCancelHint: true,
+                    useWhileDead: true,
+                    allowExistingAnimation: true,
+                    no_inv_busy: true,
+                    hideBar: true,
+                }
+            );
 
-        await this.exitTrunk();
+            await this.exitTrunk();
+        } while (this.isHidden);
     }
 
-    private async exitTrunk() {
+    // waitForSafeSpeed: keep retrying silently until the vehicle slows down instead of giving up.
+    // Used for exits the player did not choose to attempt right now (forced extraction, death) -
+    // a voluntary cancel should not be honoured automatically later on, once the car happens to slow down.
+    private async exitTrunk(waitForSafeSpeed = false): Promise<boolean> {
         if (!this.isHidden || this.isExiting || this.isAttemptingExit) {
-            return;
+            return false;
         }
 
         this.isAttemptingExit = true;
 
         const hiddenVehicle = this.hiddenVehicle;
 
-        if (hiddenVehicle && DoesEntityExist(hiddenVehicle)) {
-            let warned = false;
+        if (hiddenVehicle && DoesEntityExist(hiddenVehicle) && this.isTooFastForTrunk(hiddenVehicle)) {
+            this.notifier.notify('Le coffre est verrouillé, le véhicule roule trop vite.', 'error');
 
-            while (DoesEntityExist(hiddenVehicle) && this.isTooFastForTrunk(hiddenVehicle)) {
-                if (!warned) {
-                    this.notifier.notify('Le coffre est verrouillé, le véhicule roule trop vite.', 'error');
-                    warned = true;
-                }
+            if (!waitForSafeSpeed) {
+                this.isAttemptingExit = false;
 
+                return false;
+            }
+
+            while (this.isHidden && DoesEntityExist(hiddenVehicle) && this.isTooFastForTrunk(hiddenVehicle)) {
                 await wait(500);
             }
         }
@@ -283,7 +289,7 @@ export class VehicleTrunkHideProvider {
         this.isAttemptingExit = false;
 
         if (!this.isHidden || this.isExiting) {
-            return;
+            return false;
         }
 
         this.isExiting = true;
@@ -334,6 +340,8 @@ export class VehicleTrunkHideProvider {
         this.isHidden = false;
         this.isExiting = false;
         this.hiddenVehicle = null;
+
+        return true;
     }
 
     @Tick()
@@ -347,13 +355,13 @@ export class VehicleTrunkHideProvider {
 
     @OnEvent(ClientEvent.VEHICLE_TRUNK_FORCE_EXIT)
     public async onForceExit() {
-        await this.exitTrunk();
+        await this.exitTrunk(true);
     }
 
     @OnEvent(ClientEvent.PLAYER_ON_DEATH)
     public async onPlayerDeath() {
         if (this.isHidden) {
-            await this.exitTrunk();
+            await this.exitTrunk(true);
         }
     }
 
