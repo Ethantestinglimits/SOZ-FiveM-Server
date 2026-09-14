@@ -288,7 +288,7 @@ export class WeaponProvider {
 
                 const vehModel = GetEntityModel(vehicle);
                 const vehDef = this.vehicleRepository.getByModelHash(vehModel);
-                if (vehDef.dealershipId === DealershipType.Armored) {
+                if (vehDef?.dealershipId === DealershipType.Armored) {
                     DisablePlayerFiring(PlayerId(), true);
                     DisableControlAction(0, Control.Attack, true);
                     DisableControlAction(0, Control.Attack2, true);
