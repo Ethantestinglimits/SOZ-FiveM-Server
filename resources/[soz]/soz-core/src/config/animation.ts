@@ -176,18 +176,8 @@ const AIM_VARIATIONS_HILLBILLY_DICTIONARY = 'combat@aim_variations@1h@hillbilly'
 
 export const AimStyles: AimStyleConfigList = [
     { name: 'Défaut', dictionary: null },
-    { name: 'Gang - Variation A', dictionary: AIM_VARIATIONS_GANG_DICTIONARY, clip: 'aim_variation_a' },
-    { name: 'Gang - Variation B', dictionary: AIM_VARIATIONS_GANG_DICTIONARY, clip: 'aim_variation_b' },
-    { name: 'Gang - Variation C', dictionary: AIM_VARIATIONS_GANG_DICTIONARY, clip: 'aim_variation_c' },
-    { name: 'Gang - Variation D', dictionary: AIM_VARIATIONS_GANG_DICTIONARY, clip: 'aim_variation_d' },
-    { name: 'Gang - Variation E', dictionary: AIM_VARIATIONS_GANG_DICTIONARY, clip: 'aim_variation_e' },
-    { name: 'Gang - Variation F', dictionary: AIM_VARIATIONS_GANG_DICTIONARY, clip: 'aim_variation_f' },
-    { name: 'Hillbilly - Variation A', dictionary: AIM_VARIATIONS_HILLBILLY_DICTIONARY, clip: 'aim_variation_a' },
-    { name: 'Hillbilly - Variation B', dictionary: AIM_VARIATIONS_HILLBILLY_DICTIONARY, clip: 'aim_variation_b' },
-    { name: 'Hillbilly - Variation C', dictionary: AIM_VARIATIONS_HILLBILLY_DICTIONARY, clip: 'aim_variation_c' },
-    { name: 'Hillbilly - Variation D', dictionary: AIM_VARIATIONS_HILLBILLY_DICTIONARY, clip: 'aim_variation_d' },
-    { name: 'Hillbilly - Variation E', dictionary: AIM_VARIATIONS_HILLBILLY_DICTIONARY, clip: 'aim_variation_e' },
-    { name: 'Hillbilly - Variation F', dictionary: AIM_VARIATIONS_HILLBILLY_DICTIONARY, clip: 'aim_variation_f' },
+    { name: 'Gang', dictionary: AIM_VARIATIONS_GANG_DICTIONARY, clip: 'aim_variation_a' },
+    { name: 'Hillbilly', dictionary: AIM_VARIATIONS_HILLBILLY_DICTIONARY, clip: 'aim_variation_a' },
 ];
 
 export const getAimStyle = (name: string | null | undefined): AimStyleConfigItem =>
