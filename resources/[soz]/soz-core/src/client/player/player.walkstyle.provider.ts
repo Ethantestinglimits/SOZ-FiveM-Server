@@ -3,7 +3,6 @@ import { Inject } from '@core/decorators/injectable';
 import { Provider } from '@core/decorators/provider';
 import { PlayerUpdate } from '@public/core/decorators/player';
 
-import { getAimStyle } from '../../config/animation';
 import { PlayerData } from '../../shared/player';
 import { ResourceLoader } from '../repository/resource.loader';
 import { PlayerService } from './player.service';
@@ -34,9 +33,6 @@ export class PlayerWalkstyleProvider {
         item: null,
     };
 
-    private currentWalkStyle: string | null = null;
-    private currentWeaponClipset: string | null = null;
-
     private async applyWalkStyle(base: string, transitionSpeed = 1.0): Promise<void> {
         const ped = PlayerPedId();
 
@@ -56,8 +52,6 @@ export class PlayerWalkstyleProvider {
             walkStyle = this.conf.item;
         }
 
-        this.currentWalkStyle = walkStyle;
-
         if (GetPedMovementClipset(ped) == GetHashKey(walkStyle)) {
             return;
         }
@@ -70,33 +64,14 @@ export class PlayerWalkstyleProvider {
 
         await this.resourceLoader.loadAnimationSet(walkStyle);
         SetPedMovementClipset(ped, walkStyle, transitionSpeed);
-    }
 
-    private async applyWeaponClipset(aimStyleName: string | null): Promise<void> {
-        const ped = PlayerPedId();
-        const isCrouched = this.currentWalkStyle === 'move_ped_crouched';
-        const aimStyle = getAimStyle(aimStyleName);
-
-        const clipset = isCrouched ? 'move_ped_crouched' : aimStyle.clipset;
-        const strafeClipset = isCrouched
-            ? 'move_ped_crouched_strafing'
-            : aimStyle.strafeClipset ?? aimStyle.clipset;
-
-        if (this.currentWeaponClipset === clipset) {
-            return;
-        }
-        this.currentWeaponClipset = clipset;
-
-        if (!clipset) {
+        if (walkStyle == 'move_ped_crouched') {
+            SetPedWeaponMovementClipset(ped, 'move_ped_crouched');
+            SetPedStrafeClipset(ped, 'move_ped_crouched_strafing');
+        } else {
             ResetPedWeaponMovementClipset(ped);
             ResetPedStrafeClipset(ped);
-
-            return;
         }
-
-        await this.resourceLoader.loadClipSet(clipset);
-        SetPedWeaponMovementClipset(ped, clipset);
-        SetPedStrafeClipset(ped, strafeClipset);
     }
 
     async updateWalkStyle(kind: keyof WalkStyleConf, walkStyle: string | null, transitionSpeed = 1.0): Promise<void> {
@@ -123,8 +98,6 @@ export class PlayerWalkstyleProvider {
             await this.applyWalkStyle(player.metadata.walk);
         }
 
-        await this.applyWeaponClipset(player.metadata.aimStyle);
-
         if (player.metadata.mood) {
             await this.applyMood(player.metadata.mood);
         }
@@ -135,8 +108,6 @@ export class PlayerWalkstyleProvider {
         if (player.metadata.walk) {
             await this.applyWalkStyle(player.metadata.walk);
         }
-
-        await this.applyWeaponClipset(player.metadata.aimStyle);
 
         if (player.metadata.mood) {
             await this.applyMood(player.metadata.mood);

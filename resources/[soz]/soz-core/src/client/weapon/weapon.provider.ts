@@ -4,6 +4,7 @@ import { Provider } from '@core/decorators/provider';
 import { Tick, TickInterval } from '@core/decorators/tick';
 import { emitRpc } from '@core/rpc';
 import { PhoneAppSocietyProvider } from '@public/client/phone/apps/phone.app.society.provider';
+import { getAimStyle } from '@public/config/animation';
 import { DealershipType } from '@public/config/dealership';
 import { wait } from '@public/core/utils';
 import { Feature } from '@public/shared/features';
@@ -34,6 +35,7 @@ import { PhoneService } from '../phone/phone.service';
 import { PlayerService } from '../player/player.service';
 import { ProgressService } from '../progress.service';
 import { FuelStationRepository } from '../repository/fuel.station.repository';
+import { ResourceLoader } from '../repository/resource.loader';
 import { VehicleRepository } from '../repository/vehicle.repository';
 import { ZoneRepository } from '../repository/zone.repository';
 import { VoipRadioProvider } from '../voip/voip.radio.provider';
@@ -112,6 +114,9 @@ export class WeaponProvider {
 
     @Inject(VehicleRepository)
     private vehicleRepository: VehicleRepository;
+
+    @Inject(ResourceLoader)
+    private resourceLoader: ResourceLoader;
 
     private lastPoliceCall = 0;
 
@@ -612,6 +617,32 @@ export class WeaponProvider {
         const player = PlayerPedId();
         if (IsControlPressed(0, 25) && IsEntityPlayingAnim(player, 'move_m@intimidation@cop@unarmed', 'idle', 3)) {
             ClearPedSecondaryTask(player);
+        }
+    }
+
+    // Pose personnalisée jouée pendant la visée active (clic droit maintenu). Expérimental : peut
+    // entrer en conflit avec l'IK natif du jeu qui oriente les bras vers le réticule.
+    @Tick(0)
+    public async onAimStyleTick() {
+        const ped = PlayerPedId();
+        const aimStyle = getAimStyle(this.playerService.getPlayer()?.metadata.aimStyle);
+
+        if (!aimStyle.dictionary || !aimStyle.clip) {
+            return;
+        }
+
+        const isAiming =
+            IsPlayerFreeAiming(PlayerId()) &&
+            !IsPedInAnyVehicle(ped, false) &&
+            GetSelectedPedWeapon(ped) !== weaponUnarmed;
+
+        if (isAiming) {
+            if (!IsEntityPlayingAnim(ped, aimStyle.dictionary, aimStyle.clip, 3)) {
+                await this.resourceLoader.loadAnimationDictionary(aimStyle.dictionary);
+                TaskPlayAnim(ped, aimStyle.dictionary, aimStyle.clip, 4.0, 4.0, -1, 49, 0, false, false, false);
+            }
+        } else if (IsEntityPlayingAnim(ped, aimStyle.dictionary, aimStyle.clip, 3)) {
+            StopAnimTask(ped, aimStyle.dictionary, aimStyle.clip, 4.0);
         }
     }
 
