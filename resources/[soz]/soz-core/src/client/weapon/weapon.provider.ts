@@ -35,7 +35,6 @@ import { PhoneService } from '../phone/phone.service';
 import { PlayerService } from '../player/player.service';
 import { ProgressService } from '../progress.service';
 import { FuelStationRepository } from '../repository/fuel.station.repository';
-import { ResourceLoader } from '../repository/resource.loader';
 import { VehicleRepository } from '../repository/vehicle.repository';
 import { ZoneRepository } from '../repository/zone.repository';
 import { VoipRadioProvider } from '../voip/voip.radio.provider';
@@ -114,9 +113,6 @@ export class WeaponProvider {
 
     @Inject(VehicleRepository)
     private vehicleRepository: VehicleRepository;
-
-    @Inject(ResourceLoader)
-    private resourceLoader: ResourceLoader;
 
     private lastPoliceCall = 0;
 
@@ -622,12 +618,18 @@ export class WeaponProvider {
 
     // Pose personnalisée jouée pendant la visée active (clic droit maintenu). Expérimental : peut
     // entrer en conflit avec l'IK natif du jeu qui oriente les bras vers le réticule.
+    private aimStyleDictionaryFailed: string | null = null;
+
     @Tick(0)
     public async onAimStyleTick() {
         const ped = PlayerPedId();
         const aimStyle = getAimStyle(this.playerService.getPlayer()?.metadata.aimStyle);
 
         if (!aimStyle.dictionary || !aimStyle.clip) {
+            return;
+        }
+
+        if (this.aimStyleDictionaryFailed === aimStyle.dictionary) {
             return;
         }
 
@@ -638,12 +640,43 @@ export class WeaponProvider {
 
         if (isAiming) {
             if (!IsEntityPlayingAnim(ped, aimStyle.dictionary, aimStyle.clip, 3)) {
-                await this.resourceLoader.loadAnimationDictionary(aimStyle.dictionary);
+                const loaded = await this.loadAnimDictWithTimeout(aimStyle.dictionary, 5000);
+
+                if (!loaded) {
+                    this.aimStyleDictionaryFailed = aimStyle.dictionary;
+                    console.error(
+                        `[weapon] Style de visée "${aimStyle.name}" : le dictionnaire "${aimStyle.dictionary}" n'a pas pu être chargé (nom invalide ?)`
+                    );
+
+                    return;
+                }
+
+                console.log(
+                    `[weapon] Style de visée "${aimStyle.name}" appliqué (${aimStyle.dictionary}/${aimStyle.clip})`
+                );
                 TaskPlayAnim(ped, aimStyle.dictionary, aimStyle.clip, 4.0, 4.0, -1, 49, 0, false, false, false);
             }
         } else if (IsEntityPlayingAnim(ped, aimStyle.dictionary, aimStyle.clip, 3)) {
             StopAnimTask(ped, aimStyle.dictionary, aimStyle.clip, 4.0);
         }
+    }
+
+    private async loadAnimDictWithTimeout(dictionary: string, timeoutMs: number): Promise<boolean> {
+        if (HasAnimDictLoaded(dictionary)) {
+            return true;
+        }
+
+        RequestAnimDict(dictionary);
+
+        const start = Date.now();
+        while (!HasAnimDictLoaded(dictionary)) {
+            if (Date.now() - start > timeoutMs) {
+                return false;
+            }
+            await wait(0);
+        }
+
+        return true;
     }
 
     @OnEvent(ClientEvent.WEAPON_FLASH)
