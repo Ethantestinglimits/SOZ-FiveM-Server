@@ -257,7 +257,7 @@ export class PlayerAnimationProvider {
 
     @OnNuiEvent(NuiEvent.PlayerMenuAnimationSetAimStyle)
     public async setAimStyleAnimation({ aimStyleItem }: { aimStyleItem: AimStyleConfigItem }) {
-        TriggerServerEvent('QBCore:Server:SetMetaData', 'aimStyle', aimStyleItem.name);
+        TriggerServerEvent('QBCore:Server:SetMetaData', 'aimstyle', aimStyleItem.name);
     }
 
     @OnNuiEvent(NuiEvent.PlayerMenuAnimationFavorite)

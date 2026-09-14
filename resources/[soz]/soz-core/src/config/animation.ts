@@ -169,18 +169,25 @@ export const Moods: MoodConfigList = [
     { name: 'Viser', mood: 'mood_aiming_1' },
 ];
 
-// Complétez cette liste avec les clipsets testés (SetPedWeaponMovementClipset / SetPedStrafeClipset).
-// clip/dictionary non testés en jeu, à vérifier avant mise en prod (risque de blocage si le nom est invalide).
-const AIM_VARIATION_DICTIONARY = 'combat@aim_variations@1h@gang';
+// Clip/dictionary non confirmés en jeu, à vérifier via les logs [weapon][aimstyle] (risque de
+// blocage de 5s si le nom est invalide, cf. WeaponProvider.loadAnimDictWithTimeout).
+const AIM_VARIATIONS_GANG_DICTIONARY = 'combat@aim_variations@1h@gang';
+const AIM_VARIATIONS_HILLBILLY_DICTIONARY = 'combat@aim_variations@1h@hillbilly';
 
 export const AimStyles: AimStyleConfigList = [
     { name: 'Défaut', dictionary: null },
-    { name: 'Variation A', dictionary: AIM_VARIATION_DICTIONARY, clip: 'aim_variation_a' },
-    { name: 'Variation B', dictionary: AIM_VARIATION_DICTIONARY, clip: 'aim_variation_b' },
-    { name: 'Variation C', dictionary: AIM_VARIATION_DICTIONARY, clip: 'aim_variation_c' },
-    { name: 'Variation D', dictionary: AIM_VARIATION_DICTIONARY, clip: 'aim_variation_d' },
-    { name: 'Variation E', dictionary: AIM_VARIATION_DICTIONARY, clip: 'aim_variation_e' },
-    { name: 'Variation F', dictionary: AIM_VARIATION_DICTIONARY, clip: 'aim_variation_f' },
+    { name: 'Gang - Variation A', dictionary: AIM_VARIATIONS_GANG_DICTIONARY, clip: 'aim_variation_a' },
+    { name: 'Gang - Variation B', dictionary: AIM_VARIATIONS_GANG_DICTIONARY, clip: 'aim_variation_b' },
+    { name: 'Gang - Variation C', dictionary: AIM_VARIATIONS_GANG_DICTIONARY, clip: 'aim_variation_c' },
+    { name: 'Gang - Variation D', dictionary: AIM_VARIATIONS_GANG_DICTIONARY, clip: 'aim_variation_d' },
+    { name: 'Gang - Variation E', dictionary: AIM_VARIATIONS_GANG_DICTIONARY, clip: 'aim_variation_e' },
+    { name: 'Gang - Variation F', dictionary: AIM_VARIATIONS_GANG_DICTIONARY, clip: 'aim_variation_f' },
+    { name: 'Hillbilly - Variation A', dictionary: AIM_VARIATIONS_HILLBILLY_DICTIONARY, clip: 'aim_variation_a' },
+    { name: 'Hillbilly - Variation B', dictionary: AIM_VARIATIONS_HILLBILLY_DICTIONARY, clip: 'aim_variation_b' },
+    { name: 'Hillbilly - Variation C', dictionary: AIM_VARIATIONS_HILLBILLY_DICTIONARY, clip: 'aim_variation_c' },
+    { name: 'Hillbilly - Variation D', dictionary: AIM_VARIATIONS_HILLBILLY_DICTIONARY, clip: 'aim_variation_d' },
+    { name: 'Hillbilly - Variation E', dictionary: AIM_VARIATIONS_HILLBILLY_DICTIONARY, clip: 'aim_variation_e' },
+    { name: 'Hillbilly - Variation F', dictionary: AIM_VARIATIONS_HILLBILLY_DICTIONARY, clip: 'aim_variation_f' },
 ];
 
 export const getAimStyle = (name: string | null | undefined): AimStyleConfigItem =>
