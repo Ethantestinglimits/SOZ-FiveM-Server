@@ -170,7 +170,18 @@ export const Moods: MoodConfigList = [
 ];
 
 // Complétez cette liste avec les clipsets testés (SetPedWeaponMovementClipset / SetPedStrafeClipset).
-export const AimStyles: AimStyleConfigList = [{ name: 'Défaut', clipset: null }];
+// clip/dictionary non testés en jeu, à vérifier avant mise en prod (risque de blocage si le nom est invalide).
+const AIM_VARIATION_DICTIONARY = 'combat@aim_variations@1h@gang';
+
+export const AimStyles: AimStyleConfigList = [
+    { name: 'Défaut', dictionary: null },
+    { name: 'Variation A', dictionary: AIM_VARIATION_DICTIONARY, clip: 'aim_variation_a' },
+    { name: 'Variation B', dictionary: AIM_VARIATION_DICTIONARY, clip: 'aim_variation_b' },
+    { name: 'Variation C', dictionary: AIM_VARIATION_DICTIONARY, clip: 'aim_variation_c' },
+    { name: 'Variation D', dictionary: AIM_VARIATION_DICTIONARY, clip: 'aim_variation_d' },
+    { name: 'Variation E', dictionary: AIM_VARIATION_DICTIONARY, clip: 'aim_variation_e' },
+    { name: 'Variation F', dictionary: AIM_VARIATION_DICTIONARY, clip: 'aim_variation_f' },
+];
 
 export const getAimStyle = (name: string | null | undefined): AimStyleConfigItem =>
     AimStyles.find(aimStyle => aimStyle.name === name) || AimStyles[0];

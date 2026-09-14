@@ -71,9 +71,8 @@ export type MoodConfigList = MoodConfigItem[];
 export type AimStyleConfigItem = {
     name: string;
     // null = comportement natif (pas d'override)
-    clipset: string | null;
-    // si absent, utilise `clipset` pour le strafe également
-    strafeClipset?: string | null;
+    dictionary: string | null;
+    clip?: string;
 };
 
 export type AimStyleConfigList = AimStyleConfigItem[];
