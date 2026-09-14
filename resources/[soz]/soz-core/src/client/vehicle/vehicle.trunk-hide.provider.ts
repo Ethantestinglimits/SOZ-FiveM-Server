@@ -41,7 +41,9 @@ const TRUNK_RAGDOLL_EXIT_SPEED = 10;
 // harder than the "seatbelt on" crash damage in vehicle.seatbelt.provider.ts.
 const TRUNK_MONITOR_TICK_INTERVAL_SECONDS = 0.1;
 const TRUNK_CRASH_DAMAGE_G_THRESHOLD = 4.0;
-const TRUNK_CRASH_DAMAGE_FACTOR = 12;
+// Calibrated from a real test: a crash costing the driver 90% HP only cost the trunk occupant 25% (ratio 0.28),
+// target is trunk-occupant loss ~0.8x the driver's loss (e.g. driver -50% -> trunk -40%) - scaled 12 by 0.28/0.8.
+const TRUNK_CRASH_DAMAGE_FACTOR = 4.17;
 // How many monitor ticks (500ms) a health drop still counts as "just happened" for correlating with a g-spike.
 const TRUNK_CRASH_DAMAGE_WINDOW_TICKS = 5;
 
