@@ -491,7 +491,9 @@ export class VehicleTrunkHideProvider {
     // to the previous tick, "damaged" means it dropped at any point within a short rolling window.
     private checkCrashDamage(vehicle: number) {
         const velocity = GetEntityVelocity(vehicle) as Vector3;
-        const health = GetEntityHealth(vehicle);
+        // Not GetEntityHealth: this codebase tracks vehicle damage through body/engine health
+        // (vehicle.service.ts, vehicle.damage.provider.ts, ...) - GetEntityHealth doesn't move on impact.
+        const health = GetVehicleBodyHealth(vehicle);
 
         if (this.vehicleHealthBaseline === null) {
             this.vehicleHealthBaseline = health;
