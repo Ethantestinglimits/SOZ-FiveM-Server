@@ -625,7 +625,7 @@ export class WeaponProvider {
     @Tick(0)
     public async onAimStyleTick() {
         const ped = PlayerPedId();
-        const aimStyle = getAimStyle(this.playerService.getPlayer()?.metadata.aimStyle);
+        const aimStyle = getAimStyle(this.playerService.getPlayer()?.metadata.aimstyle);
         const isAiming =
             IsPlayerFreeAiming(PlayerId()) &&
             !IsPedInAnyVehicle(ped, false) &&
