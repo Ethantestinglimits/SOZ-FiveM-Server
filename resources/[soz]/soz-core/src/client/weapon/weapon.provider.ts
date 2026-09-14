@@ -50,6 +50,10 @@ const messageExcludeGroups = [
 const weaponUnarmed = GetHashKey('WEAPON_UNARMED');
 const weaponPetrolCan = GetHashKey('WEAPON_PETROLCAN');
 
+// Armes tenues à une main (cohérent avec weapon.holster.provider.ts) : les seules sur lesquelles le
+// style de visée personnalisé s'applique, les armes à 2 mains gardent l'animation native.
+const oneHandedWeaponGroups = [GetHashKey('GROUP_PISTOL'), GetHashKey('GROUP_STUNGUN')];
+
 const messageExclude = [
     GetHashKey('weapon_musket'),
     GetHashKey('weapon_raypistol'),
@@ -626,10 +630,15 @@ export class WeaponProvider {
     public async onAimStyleTick() {
         const ped = PlayerPedId();
         const aimStyle = getAimStyle(this.playerService.getPlayer()?.metadata.aimstyle);
+        const weapon = GetSelectedPedWeapon(ped);
+        const isOneHandedWeapon = oneHandedWeaponGroups.includes(GetWeapontypeGroup(weapon));
+
         const isAiming =
             IsPlayerFreeAiming(PlayerId()) &&
             !IsPedInAnyVehicle(ped, false) &&
-            GetSelectedPedWeapon(ped) !== weaponUnarmed;
+            weapon !== weaponUnarmed &&
+            isOneHandedWeapon &&
+            !IsPedReloading(ped);
 
         const debugState = `style="${aimStyle.name}" dictionary=${aimStyle.dictionary ?? 'aucun'} isAiming=${isAiming}`;
         if (debugState !== this.aimStyleDebugState) {
