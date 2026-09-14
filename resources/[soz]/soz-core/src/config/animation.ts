@@ -1,6 +1,12 @@
 import { ClientEvent } from '@public/shared/event';
 
-import { AnimationConfigList, MoodConfigList, WalkConfigList } from '../shared/animation';
+import {
+    AimStyleConfigItem,
+    AimStyleConfigList,
+    AnimationConfigList,
+    MoodConfigList,
+    WalkConfigList,
+} from '../shared/animation';
 
 export const Walks: WalkConfigList = [
     { type: 'walk', name: 'Démarche par défaut Homme', walk: 'move_m@multiplayer' },
@@ -162,6 +168,12 @@ export const Moods: MoodConfigList = [
     { name: 'Un œil', mood: 'pose_aiming_1' },
     { name: 'Viser', mood: 'mood_aiming_1' },
 ];
+
+// Complétez cette liste avec les clipsets testés (SetPedWeaponMovementClipset / SetPedStrafeClipset).
+export const AimStyles: AimStyleConfigList = [{ name: 'Défaut', clipset: null }];
+
+export const getAimStyle = (name: string | null | undefined): AimStyleConfigItem =>
+    AimStyles.find(aimStyle => aimStyle.name === name) || AimStyles[0];
 
 export const Animations: AnimationConfigList = [
     {

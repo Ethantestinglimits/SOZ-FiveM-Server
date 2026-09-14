@@ -68,6 +68,16 @@ export type MoodConfigItem = {
 
 export type MoodConfigList = MoodConfigItem[];
 
+export type AimStyleConfigItem = {
+    name: string;
+    // null = comportement natif (pas d'override)
+    clipset: string | null;
+    // si absent, utilise `clipset` pour le strafe également
+    strafeClipset?: string | null;
+};
+
+export type AimStyleConfigList = AimStyleConfigItem[];
+
 export type Animation = {
     props?: AnimationProps[];
     enter?: AnimationInfo;

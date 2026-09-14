@@ -248,6 +248,7 @@ export enum NuiEvent {
     PlayerMenuAnimationPlay = 'soz-core:nui:player:menu:animation-play',
     PlayerMenuAnimationSetWalk = 'soz-core:nui:player:menu:animation-set-walk',
     PlayerMenuAnimationSetMood = 'soz-core:nui:player:menu:animation-set-mood',
+    PlayerMenuAnimationSetAimStyle = 'soz-core:nui:player:menu:animation-set-aim-style',
     PlayerMenuAnimationStop = 'soz-core:nui:player:menu:animation-stop',
     PlayerMenuAnimationShortcut = 'soz-core:nui:player:menu:animation-shortcut',
     PlayerMenuAnimationShortcutDelete = 'soz-core:nui:player:menu:animation-shortcut-delete',
