@@ -30,6 +30,7 @@ export interface NuiPhoneMap {
     SetCallSound: boolean;
     SetDialSound: boolean;
     SetEndSound: never;
+    PlayNotificationSound: never;
     SetCurrentCall: ActiveCall;
     SetCallsHistory: CallHistory[];
 

@@ -3,8 +3,10 @@ import { Provider } from '@public/core/decorators/provider';
 import { Inject } from '../../core/decorators/injectable';
 import { Rpc } from '../../core/decorators/rpc';
 import { ClientEvent } from '../../shared/event/client';
+import { PhoneDevice } from '../../shared/phone/device';
 import { RpcServerEvent } from '../../shared/rpc';
 import { PrismaService } from '../database/prisma.service';
+import { PhoneDeviceRepository } from './phone.device.repository';
 import { PhoneDeviceService } from './phone.device.service';
 
 @Provider()
@@ -15,9 +17,12 @@ export class PhoneSimCard {
     @Inject(PhoneDeviceService)
     private readonly phoneDeviceService: PhoneDeviceService;
 
+    @Inject(PhoneDeviceRepository)
+    private readonly phoneDeviceRepository: PhoneDeviceRepository;
+
     @Rpc(RpcServerEvent.PHONE_SIMCARD_RESET)
     async reset(source: number) {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device) {
             return;
@@ -49,12 +54,36 @@ export class PhoneSimCard {
             },
         });
 
-        TriggerClientEvent(ClientEvent.ADMIN_SWITCH_CHARACTER, source);
+        await this.prismaService.phone_messages.deleteMany({
+            where: {
+                device_id: device.id,
+            },
+        });
+
+        await this.prismaService.phone_messages_conversations.deleteMany({
+            where: {
+                device_id: device.id,
+            },
+        });
+
+        await this.phoneDeviceRepository.resetDevice(device.id);
+
+        const resetDevice: PhoneDevice = {
+            ...device,
+            initialized: false,
+            hasPinCode: false,
+            isOwner: false,
+            isLocked: false,
+            settings: {},
+        };
+
+        this.phoneDeviceService.setOpenedDevice(source, resetDevice);
+        TriggerClientEvent(ClientEvent.PHONE_DEVICE_UPDATE, source, resetDevice);
     }
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_GET_AVATAR)
     async getAvatar(source: number): Promise<string> {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device?.simNumber) {
             return null;
@@ -74,7 +103,7 @@ export class PhoneSimCard {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_UPDATE_AVATAR)
     async updateAvatar(source: number, avatar: string) {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device?.simNumber) {
             return;
@@ -96,7 +125,7 @@ export class PhoneSimCard {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_CALLS_HISTORY_GET)
     async getCallHistory(source: number) {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device?.simNumber) {
             return [];

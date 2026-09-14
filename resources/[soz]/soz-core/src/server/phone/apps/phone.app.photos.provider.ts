@@ -16,7 +16,7 @@ export class PhoneAppPhotosProvider {
 
     @Rpc(RpcServerEvent.PHONE_APP_PHOTOS_GET)
     async getPhotos(source: number) {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device) {
             return [];
@@ -38,7 +38,7 @@ export class PhoneAppPhotosProvider {
 
     @Rpc(RpcServerEvent.PHONE_APP_PHOTOS_UPLOAD)
     async takePhoto(source: number, image: string) {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device) {
             return;
@@ -54,7 +54,7 @@ export class PhoneAppPhotosProvider {
 
     @Rpc(RpcServerEvent.PHONE_APP_PHOTOS_DELETE)
     async deletePhoto(source: number, id: number) {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device) {
             return;

@@ -81,12 +81,15 @@ export class PhoneSimCardMessages {
     @OnEvent(ClientEvent.PHONE_SIMCARD_MESSAGES_MESSAGE_NEW)
     async newMessage(message: Message & { device_id?: string }) {
         const openedDevice = this.phoneState.getOpenedDevice();
+        const player = this.playerService.getState();
 
         if (message.device_id && openedDevice?.id !== message.device_id) {
+            if (!player.isInHub) {
+                this.nuiDispatch.dispatch('phone', 'PlayNotificationSound');
+            }
+
             return;
         }
-
-        const player = this.playerService.getState();
 
         message.isMuted = player.isInHub;
 

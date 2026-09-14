@@ -16,7 +16,7 @@ export class PhoneAppNotesProvider {
 
     @Rpc(RpcServerEvent.PHONE_APP_NOTES_GET)
     async getNotes(source: number) {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device) {
             return [];
@@ -36,7 +36,7 @@ export class PhoneAppNotesProvider {
 
     @Rpc(RpcServerEvent.PHONE_APP_NOTES_ADD)
     async addNote(source: number, title: string, content: string) {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device) {
             return;
@@ -54,7 +54,7 @@ export class PhoneAppNotesProvider {
 
     @Rpc(RpcServerEvent.PHONE_APP_NOTES_UPDATE)
     async updateNote(source: number, id: number, title: string, content: string) {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device) {
             return;
@@ -71,7 +71,7 @@ export class PhoneAppNotesProvider {
 
     @Rpc(RpcServerEvent.PHONE_APP_NOTES_DELETE)
     async deleteNote(source: number, id: number) {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device) {
             return;

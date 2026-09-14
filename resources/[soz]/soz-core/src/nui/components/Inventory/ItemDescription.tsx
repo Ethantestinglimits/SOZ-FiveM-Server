@@ -149,6 +149,7 @@ export const ItemDescription: FunctionComponent<ItemDescriptionProps> = ({
                             {inventoryItem.metadata?.notSearchable && <span>[Caché]</span>}
                             {inventoryItem.metadata?.crafted && <span>[Illégal]</span>}
                             {inventoryItem.metadata?.printed && <span>[Réplique]</span>}
+                            {inventoryItem.metadata?.simNumber && <span>[{inventoryItem.metadata.simNumber}]</span>}
                         </div>
                     </div>
                     <div className="flex mt-1 justify-between align-items-center w-full">

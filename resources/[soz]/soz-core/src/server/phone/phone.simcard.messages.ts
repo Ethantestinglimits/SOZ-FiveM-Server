@@ -19,7 +19,7 @@ export class PhoneSimCardMessages {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_MESSAGES_CONVERSATION_GET)
     async getConversations(source: number): Promise<MessageConversation[]> {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device) {
             return [];
@@ -69,7 +69,7 @@ export class PhoneSimCardMessages {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_MESSAGES_CONVERSATION_ADD)
     async createConversation(source: number, phoneNumber: string) {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device?.simNumber || phoneNumber === device.simNumber) {
             return;
@@ -85,7 +85,7 @@ export class PhoneSimCardMessages {
         if (target) {
             await this.upsertConversation(target.deviceId, phoneNumber, device.simNumber, conversationId);
 
-            if (target.source) {
+            if (target.source && target.isMain) {
                 await this.notifyConversationReload(target.source, target.deviceId);
             }
         }
@@ -95,7 +95,7 @@ export class PhoneSimCardMessages {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_MESSAGES_CONVERSATION_SET_READ)
     async setConversationRead(source: number, conversationId: string) {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device) {
             return;
@@ -126,7 +126,7 @@ export class PhoneSimCardMessages {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_MESSAGES_CONVERSATION_ARCHIVE)
     async archiveConversation(source: number, conversationId: string) {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device) {
             return;
@@ -145,7 +145,7 @@ export class PhoneSimCardMessages {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_MESSAGES_GET)
     async getMessages(source: number) {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device) {
             return [];
@@ -175,7 +175,7 @@ export class PhoneSimCardMessages {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_MESSAGES_SEND)
     async sendMessage(source: number, conversationId: string, message: string) {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device?.simNumber) {
             return;
@@ -252,7 +252,7 @@ export class PhoneSimCardMessages {
             },
         });
 
-        if (target.source) {
+        if (target.source && target.isMain) {
             this.notifyNewMessage(target.source, target.deviceId, targetMessage);
         }
     }

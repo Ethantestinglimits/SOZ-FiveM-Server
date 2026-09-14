@@ -27,13 +27,13 @@ export class PhoneSimCardCalls {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_CALLS_INIT)
     async initCalls(source: number, phoneNumber: string) {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
         if (!device?.simNumber) {
             return Err('unavailable');
         }
 
         const target = await this.phoneDeviceService.findDeviceByNumber(phoneNumber);
-        if (!target?.source || this.playerAlreadyInCall(target.source)) {
+        if (!target?.source || !target.isMain || this.playerAlreadyInCall(target.source)) {
             const identifier = uuidv4();
 
             await this.prismaService.phone_calls.create({

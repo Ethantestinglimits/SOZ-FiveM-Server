@@ -66,7 +66,7 @@ export class PhoneSimCardCalls {
         await emitRpc(RpcServerEvent.PHONE_SIMCARD_CALLS_MUTE, phoneNumber, muted);
 
         this.phoneState.setCurrentCall({ ...this.phoneState.getCurrentCall(), muted });
-        this.nuiDispatch.dispatch('phone', 'SetCurrentCall', this.phoneState.getCurrentCall());
+        this.phoneState.dispatchCurrentCall();
     }
 
     @OnNuiEvent(NuiEvent.PhoneSimCardCallsSpeaker)
@@ -75,7 +75,7 @@ export class PhoneSimCardCalls {
         TriggerEvent(ClientEvent.VOIP_VOICE_SPEAKER_CALL, speaker);
 
         this.phoneState.setCurrentCall({ ...this.phoneState.getCurrentCall(), speaker });
-        this.nuiDispatch.dispatch('phone', 'SetCurrentCall', this.phoneState.getCurrentCall());
+        this.phoneState.dispatchCurrentCall();
     }
 
     @OnEvent(ClientEvent.VOIP_VOICE_START_CALL)
@@ -97,15 +97,20 @@ export class PhoneSimCardCalls {
 
     @OnEvent(ClientEvent.PHONE_SIMCARD_CALLS_UPDATE)
     async onCallUpdate(call: ActiveCall) {
-        const muted = this.phoneState.getCurrentCall()?.muted ?? false;
+        const previousCall = this.phoneState.getCurrentCall();
+        const muted = previousCall?.muted ?? false;
+
         if (call !== null) {
             this.phoneState.setCurrentCall({ ...call, muted });
         } else {
             this.phoneState.setCurrentCall(null);
             this.clearCallSounds();
-            this.nuiDispatch.dispatch('phone', 'SetEndSound');
+
+            if (!this.phoneState.isCallHiddenFromDisplay(previousCall)) {
+                this.nuiDispatch.dispatch('phone', 'SetEndSound');
+            }
         }
 
-        this.nuiDispatch.dispatch('phone', 'SetCurrentCall', this.phoneState.getCurrentCall());
+        this.phoneState.dispatchCurrentCall();
     }
 }

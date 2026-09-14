@@ -18,7 +18,7 @@ export class PhoneSimCardContacts {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_CONTACTS_GET)
     async getContacts(source: number): Promise<Contact[]> {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device) {
             return [];
@@ -36,7 +36,7 @@ export class PhoneSimCardContacts {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_CONTACTS_ADD)
     async addContact(source: number, contact: ContactDTO): Promise<Contact> {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device) {
             return;
@@ -53,7 +53,7 @@ export class PhoneSimCardContacts {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_CONTACTS_UPDATE)
     async updateContact(source: number, id: number, contact: ContactDTO): Promise<Contact> {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device) {
             return;
@@ -70,7 +70,7 @@ export class PhoneSimCardContacts {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_CONTACTS_REMOVE)
     async deleteContact(source: number, id: number): Promise<Contact> {
-        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
 
         if (!device) {
             return;

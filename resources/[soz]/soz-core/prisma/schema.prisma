@@ -418,8 +418,6 @@ model phone_notes {
     @@index([device_id], map: "device_id")
 }
 
-/// Carte ZIM : porte le numero de telephone. Elle vit soit dans un phone_device,
-/// soit en item libre dans un inventaire (item `zim_card`, metadata.number).
 model phone_sim {
     number     String   @id @db.VarChar(10)
     owner      String?  @db.VarChar(50)
@@ -431,7 +429,6 @@ model phone_sim {
     @@index([owner], map: "owner")
 }
 
-/// Appareil physique. `id` est recopie dans la metadata `id` de l'item `phone`.
 model phone_device {
     id          String   @id @db.VarChar(36)
     frame       String   @default("black.webp") @db.VarChar(64)

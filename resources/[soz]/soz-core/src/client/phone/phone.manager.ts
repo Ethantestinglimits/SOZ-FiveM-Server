@@ -9,10 +9,15 @@ import { PoliceSwatProvider } from '@private/client/police/police.swat.provider'
 import { MineSweeperRobotProvider } from '@private/client/vehicle/minesweeper.provider';
 import { PhoneState } from '@public/client/phone/phone.state';
 import { SceneProvider } from '@public/client/scene/scene.provider';
-import { OnEvent, OnNuiEvent } from '@public/core/decorators/event';
+import { Once, OnceStep, OnEvent, OnNuiEvent } from '@public/core/decorators/event';
 import { ClientEvent } from '@public/shared/event/client';
 import { NuiEvent } from '@public/shared/event/nui';
-import { PhoneDevice } from '@public/shared/phone/device';
+import {
+    PhoneDevice,
+    PhoneDeviceSettings,
+    PhoneDeviceSetup,
+    PhoneDeviceUnlockResult,
+} from '@public/shared/phone/device';
 import { RpcServerEvent } from '@public/shared/rpc';
 
 import { Control } from '../../shared/input';
@@ -64,6 +69,8 @@ export class PhoneManager {
     private readonly policeSwatProvider: PoliceSwatProvider;
 
     private isInsideInput = false;
+
+    private emergencyActive = false;
 
     @StateSelector(state => state.global.blackout, state => state.global.blackoutLevel)
     async onBlackout(blackout: boolean, blackoutLevel: number) {
@@ -122,25 +129,50 @@ export class PhoneManager {
         this.isInsideInput = insideInput;
     }
 
+    @Once(OnceStep.NuiLoaded)
+    @OnEvent(ClientEvent.ADMIN_SWITCH_CHARACTER)
+    async loadMainDevice() {
+        if (!this.playerService.getPlayer()) {
+            return;
+        }
+
+        const device = await emitRpc<PhoneDevice | null>(RpcServerEvent.PHONE_DEVICE_GET_MAIN);
+
+        this.phoneState.setOpenedDevice(device || null);
+    }
+
+    @OnNuiEvent(NuiEvent.PhoneDeviceSaveSettings)
+    async onSaveSettings(settings: PhoneDeviceSettings) {
+        this.phoneState.updateOpenedDeviceSettings(settings);
+
+        await emitRpc(RpcServerEvent.PHONE_DEVICE_SAVE_SETTINGS, settings);
+    }
+
+    @OnNuiEvent(NuiEvent.PhoneDeviceSetup)
+    async onDeviceSetup(setup: PhoneDeviceSetup) {
+        const device = await emitRpc<PhoneDevice | null>(RpcServerEvent.PHONE_DEVICE_SETUP, setup);
+
+        if (device) {
+            this.phoneState.setOpenedDevice(device);
+        }
+
+        return Boolean(device);
+    }
+
+    @OnNuiEvent(NuiEvent.PhoneDeviceUnlock)
+    async onDeviceUnlock({ pinCode }: { pinCode: string }) {
+        const result = await emitRpc<PhoneDeviceUnlockResult>(RpcServerEvent.PHONE_DEVICE_UNLOCK, pinCode);
+
+        if (result?.device) {
+            this.phoneState.setOpenedDevice(result.device);
+        }
+
+        return result;
+    }
+
     @OnNuiEvent(NuiEvent.PhoneSetPropModel)
     async onPhoneSetPropModel({ frame }: { frame: string }) {
-        switch (frame) {
-            case 'gold.webp':
-                this.phoneState.setPhonePropModel('soz_phone_gold');
-                break;
-            case 'natural.webp':
-                this.phoneState.setPhonePropModel('soz_phone_natural');
-                break;
-            case 'white.webp':
-                this.phoneState.setPhonePropModel('soz_phone_white');
-                break;
-            case 'casino_diamond.webp':
-                this.phoneState.setPhonePropModel('soz_phone_diamond');
-                break;
-            case 'black.webp':
-            default:
-                this.phoneState.setPhonePropModel('soz_phone_black');
-        }
+        this.phoneState.setPhonePropModelFromFrame(frame);
     }
 
     @OnNuiEvent(NuiEvent.PhoneFlashLight)
@@ -158,6 +190,7 @@ export class PhoneManager {
             await this.stopPhoneCall();
         }
 
+        this.emergencyActive = true;
         this.nuiDispatch.dispatch('phone', 'SetEmergency', true);
 
         const player = this.playerService.getPlayer();
@@ -178,6 +211,7 @@ export class PhoneManager {
     async onRevive(_skipanim: boolean, _uniteHU: boolean, _uniteHUBed: number, rpDeath: boolean) {
         if (rpDeath) return;
 
+        this.emergencyActive = false;
         this.nuiDispatch.dispatch('phone', 'SetEmergency', false);
         this.nuiDispatch.dispatch('phone', 'SetEmergencyDeath', null);
     }
@@ -207,20 +241,27 @@ export class PhoneManager {
         }
 
         const playerState = this.playerService.getState();
-        if (!playerState.isDead) {
+        const isDead = playerState.isDead || Boolean(this.playerService.getPlayer()?.metadata?.isdead);
+
+        if (!isDead) {
             if (this.phoneState.isPhoneDrowned()) return;
             if (this.phoneState.isPhoneDisabled()) return;
 
             if (!this.hasPlayerPhone()) return;
         } else {
             this.nuiDispatch.dispatch('phone', 'SetAvailability', true);
+
+            if (!this.emergencyActive) {
+                this.emergencyActive = true;
+                this.nuiDispatch.dispatch('phone', 'SetEmergency', true);
+            }
         }
 
         const device = await emitRpc<PhoneDevice | null>(RpcServerEvent.PHONE_DEVICE_GET_MAIN);
 
         if (device) {
             this.phoneState.setOpenedDevice(device);
-        } else if (!playerState.isDead) {
+        } else if (!isDead) {
             this.notifier.error("Vous n'avez pas votre téléphone principal sur vous.");
 
             return;
@@ -237,7 +278,7 @@ export class PhoneManager {
         const playerState = this.playerService.getState();
         if (playerState.isInventoryBusy) return;
 
-        this.phoneState.setOpenedDevice(device);
+        await this.phoneState.switchOpenedDevice(device);
 
         return this.showPhone();
     }

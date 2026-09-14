@@ -7,7 +7,15 @@ import { Rpc } from '../../core/decorators/rpc';
 import { ClientEvent } from '../../shared/event/client';
 import { ServerEvent } from '../../shared/event/server';
 import { ADD_ERROR_MESSAGE, InventoryItem } from '../../shared/inventory';
-import { PHONE_ITEM, PhoneDevice, PhoneDeviceSettings, ZIM_CARD_ITEM } from '../../shared/phone/device';
+import {
+    isValidPinCode,
+    PHONE_ITEM,
+    PhoneDevice,
+    PhoneDeviceSettings,
+    PhoneDeviceSetup,
+    PhoneDeviceUnlockResult,
+    ZIM_CARD_ITEM,
+} from '../../shared/phone/device';
 import { isOk } from '../../shared/result';
 import { RpcServerEvent } from '../../shared/rpc';
 import { Inventory } from '../inventory/inventory';
@@ -24,13 +32,18 @@ const INSERT_SIM_ERROR_MESSAGE: Record<InsertSimError, string> = {
     sim_in_use: 'Cette Carte ZIM est déjà insérée dans un autre téléphone.',
 };
 
+const isValidSettings = (settings: unknown): settings is PhoneDeviceSettings =>
+    Boolean(settings) && typeof settings === 'object' && JSON.stringify(settings).length <= 20000;
+
 const toPhoneDevice = (device: phone_device, citizenid: string): PhoneDevice => ({
     id: device.id,
     frame: device.frame,
     simNumber: device.sim_number,
-    initialized: device.initialized,
+    initialized: device.initialized && !(device.pin_code === null && device.owner === citizenid),
     isMain: device.main_for === citizenid,
     hasPinCode: device.pin_code !== null,
+    isOwner: device.owner === citizenid,
+    isLocked: device.initialized && device.pin_code !== null && device.owner !== citizenid,
     settings: (device.settings as unknown as PhoneDeviceSettings) || {},
 });
 
@@ -93,6 +106,95 @@ export class PhoneDeviceProvider {
         return main.device;
     }
 
+    @Rpc(RpcServerEvent.PHONE_DEVICE_SAVE_SETTINGS)
+    public async saveSettings(source: number, settings: PhoneDeviceSettings): Promise<void> {
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
+
+        if (!device || !isValidSettings(settings)) {
+            return;
+        }
+
+        await this.phoneDeviceRepository.updateSettings(device.id, settings);
+        this.phoneDeviceService.updateOpenedDevice(source, { ...device, settings });
+    }
+
+    @Rpc(RpcServerEvent.PHONE_DEVICE_SETUP)
+    public async setupDevice(source: number, setup: PhoneDeviceSetup): Promise<PhoneDevice | null> {
+        const player = this.playerService.getPlayer(source);
+        const device = this.phoneDeviceService.getOpenedDevice(source);
+
+        if (!player || !device || device.initialized || !isValidPinCode(setup?.pinCode)) {
+            return null;
+        }
+
+        if (!isValidSettings(setup.settings)) {
+            return null;
+        }
+
+        const done = await this.phoneDeviceRepository.setupDevice(
+            device.id,
+            player.citizenid,
+            setup.pinCode,
+            setup.settings
+        );
+
+        if (!done) {
+            return null;
+        }
+
+        const updated: PhoneDevice = {
+            ...device,
+            initialized: true,
+            hasPinCode: true,
+            isOwner: true,
+            isLocked: false,
+            settings: setup.settings,
+        };
+
+        this.phoneDeviceService.setOpenedDevice(source, updated);
+
+        return updated;
+    }
+
+    @Rpc(RpcServerEvent.PHONE_DEVICE_UNLOCK)
+    public async unlockDevice(source: number, pinCode: string): Promise<PhoneDeviceUnlockResult> {
+        const opened = this.phoneDeviceService.getOpenedDevice(source);
+
+        if (!opened) {
+            return { device: null, error: 'invalid_code', retryIn: 0 };
+        }
+
+        if (!opened.isLocked) {
+            return { device: opened, error: null, retryIn: 0 };
+        }
+
+        const retryIn = this.phoneDeviceService.getUnlockRetryDelay(opened.id);
+
+        if (retryIn > 0) {
+            return { device: null, error: 'too_many_attempts', retryIn };
+        }
+
+        const device = await this.phoneDeviceRepository.getDevice(opened.id);
+
+        if (!device || !isValidPinCode(pinCode) || device.pin_code !== pinCode) {
+            const nextRetryIn = this.phoneDeviceService.registerUnlockFailure(opened.id);
+
+            return {
+                device: null,
+                error: nextRetryIn > 0 ? 'too_many_attempts' : 'invalid_code',
+                retryIn: nextRetryIn,
+            };
+        }
+
+        this.phoneDeviceService.clearUnlockFailures(opened.id);
+
+        const unlocked = { ...opened, isLocked: false };
+
+        this.phoneDeviceService.setOpenedDevice(source, unlocked);
+
+        return { device: unlocked, error: null, retryIn: 0 };
+    }
+
     @On('QBCore:Server:PlayerUnload', false)
     public onPlayerUnload(source: number): void {
         this.phoneDeviceService.clearOpenedDevice(source);
@@ -114,6 +216,18 @@ export class PhoneDeviceProvider {
         }
 
         await this.phoneDeviceRepository.setMainDevice(player.citizenid, phone.device.id);
+
+        const opened = this.phoneDeviceService.getOpenedDevice(source);
+
+        if (opened) {
+            const updated = { ...opened, isMain: opened.id === phone.device.id };
+
+            TriggerClientEvent(
+                ClientEvent.PHONE_DEVICE_UPDATE,
+                source,
+                this.phoneDeviceService.updateOpenedDevice(source, updated)
+            );
+        }
 
         this.notifier.notify(source, 'Ce téléphone est désormais votre ~b~téléphone principal~s~.', 'success');
     }
@@ -148,7 +262,7 @@ export class PhoneDeviceProvider {
             return;
         }
 
-        const added = inventory.add(ZIM_CARD_ITEM, 1, { simNumber: number, label: number });
+        const added = inventory.add(ZIM_CARD_ITEM, 1, { simNumber: number });
 
         if (!isOk(added)) {
             await this.phoneDeviceRepository.insertSim(device.id, number);
@@ -160,9 +274,8 @@ export class PhoneDeviceProvider {
         inventory.updateMetadataAtSlot(inventoryItem.slot, { simNumber: undefined });
         await inventory.observe();
 
-        const updated = { ...device, simNumber: null };
+        const updated = this.phoneDeviceService.updateOpenedDevice(source, { ...device, simNumber: null });
 
-        this.phoneDeviceService.updateOpenedDevice(source, updated);
         this.notifier.notify(source, 'Vous avez retiré la ~b~Carte ZIM ' + number + '~s~.', 'success');
         TriggerClientEvent(ClientEvent.PHONE_DEVICE_UPDATE, source, updated);
     }
@@ -210,9 +323,8 @@ export class PhoneDeviceProvider {
         await sourceInventory.observe();
         await targetInventory.observe();
 
-        const updated = { ...device, simNumber: number };
+        const updated = this.phoneDeviceService.updateOpenedDevice(source, { ...device, simNumber: number });
 
-        this.phoneDeviceService.updateOpenedDevice(source, updated);
         this.notifier.notify(source, 'Vous avez inséré la ~b~Carte ZIM ' + number + '~s~.', 'success');
         TriggerClientEvent(ClientEvent.PHONE_DEVICE_UPDATE, source, updated);
     }

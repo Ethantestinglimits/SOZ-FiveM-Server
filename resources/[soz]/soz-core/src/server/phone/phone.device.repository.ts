@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 
 import { Inject, Injectable } from '../../core/decorators/injectable';
 import { uuidv4 } from '../../core/utils';
+import { PhoneDeviceSettings } from '../../shared/phone/device';
 import { Err, Ok, Result } from '../../shared/result';
 import { PrismaService } from '../database/prisma.service';
 
@@ -107,6 +108,47 @@ export class PhoneDeviceRepository {
         });
 
         return device.sim_number;
+    }
+
+    public async updateSettings(deviceId: string, settings: PhoneDeviceSettings): Promise<void> {
+        await this.prismaService.phone_device.update({
+            where: { id: deviceId },
+            data: { settings: settings as Prisma.InputJsonValue },
+        });
+    }
+
+    public async setupDevice(
+        deviceId: string,
+        owner: string,
+        pinCode: string,
+        settings: PhoneDeviceSettings
+    ): Promise<boolean> {
+        const { count } = await this.prismaService.phone_device.updateMany({
+            where: {
+                id: deviceId,
+                OR: [{ initialized: false }, { pin_code: null, owner }],
+            },
+            data: {
+                initialized: true,
+                owner,
+                pin_code: pinCode,
+                settings: settings as Prisma.InputJsonValue,
+            },
+        });
+
+        return count > 0;
+    }
+
+    public async resetDevice(deviceId: string): Promise<void> {
+        await this.prismaService.phone_device.update({
+            where: { id: deviceId },
+            data: {
+                initialized: false,
+                owner: null,
+                pin_code: null,
+                settings: Prisma.DbNull,
+            },
+        });
     }
 
     public async setMainDevice(citizenid: string, deviceId: string): Promise<void> {
