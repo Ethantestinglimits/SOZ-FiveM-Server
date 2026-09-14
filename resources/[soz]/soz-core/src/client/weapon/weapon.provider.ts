@@ -620,10 +620,22 @@ export class WeaponProvider {
     // entrer en conflit avec l'IK natif du jeu qui oriente les bras vers le réticule.
     private aimStyleDictionaryFailed: string | null = null;
 
+    private aimStyleDebugState: string | null = null;
+
     @Tick(0)
     public async onAimStyleTick() {
         const ped = PlayerPedId();
         const aimStyle = getAimStyle(this.playerService.getPlayer()?.metadata.aimStyle);
+        const isAiming =
+            IsPlayerFreeAiming(PlayerId()) &&
+            !IsPedInAnyVehicle(ped, false) &&
+            GetSelectedPedWeapon(ped) !== weaponUnarmed;
+
+        const debugState = `style="${aimStyle.name}" dictionary=${aimStyle.dictionary ?? 'aucun'} isAiming=${isAiming}`;
+        if (debugState !== this.aimStyleDebugState) {
+            this.aimStyleDebugState = debugState;
+            console.log(`[weapon][aimstyle] ${debugState}`);
+        }
 
         if (!aimStyle.dictionary || !aimStyle.clip) {
             return;
@@ -632,11 +644,6 @@ export class WeaponProvider {
         if (this.aimStyleDictionaryFailed === aimStyle.dictionary) {
             return;
         }
-
-        const isAiming =
-            IsPlayerFreeAiming(PlayerId()) &&
-            !IsPedInAnyVehicle(ped, false) &&
-            GetSelectedPedWeapon(ped) !== weaponUnarmed;
 
         if (isAiming) {
             if (!IsEntityPlayingAnim(ped, aimStyle.dictionary, aimStyle.clip, 3)) {
