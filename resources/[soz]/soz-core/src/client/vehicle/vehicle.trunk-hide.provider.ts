@@ -42,6 +42,8 @@ const TRUNK_RAGDOLL_EXIT_SPEED = 10;
 const TRUNK_MONITOR_TICK_INTERVAL_SECONDS = 0.1;
 const TRUNK_CRASH_DAMAGE_G_THRESHOLD = 4.0;
 const TRUNK_CRASH_DAMAGE_FACTOR = 12;
+// How many monitor ticks (500ms) a health drop still counts as "just happened" for correlating with a g-spike.
+const TRUNK_CRASH_DAMAGE_WINDOW_TICKS = 5;
 
 // How often (in monitor ticks) to check whether the vehicle disappeared and refresh its last known position.
 const TRUNK_VEHICLE_EXISTENCE_CHECK_EVERY_TICKS = Math.round(1 / TRUNK_MONITOR_TICK_INTERVAL_SECONDS);
@@ -90,7 +92,8 @@ export class VehicleTrunkHideProvider {
     private hiddenVehicleNetworkId: number | null = null;
     private lastKnownVehiclePosition: Vector3 | null = null;
     private lastMonitoredVehicleVelocity: Vector3 | null = null;
-    private lastMonitoredVehicleHealth: number | null = null;
+    private vehicleHealthBaseline: number | null = null;
+    private vehicleHealthBaselineTickCount = 0;
     private monitorTickCount = 0;
     private animationRunner: AnimationRunner | null = null;
     private occupiedTrunks = new Set<number>();
@@ -440,7 +443,8 @@ export class VehicleTrunkHideProvider {
     private async trunkMonitorLoop() {
         if (!this.isHidden || !this.hiddenVehicle) {
             this.lastMonitoredVehicleVelocity = null;
-            this.lastMonitoredVehicleHealth = null;
+            this.vehicleHealthBaseline = null;
+            this.vehicleHealthBaselineTickCount = 0;
             this.monitorTickCount = 0;
 
             return;
@@ -469,7 +473,8 @@ export class VehicleTrunkHideProvider {
 
         if (!NetworkGetEntityIsNetworked(vehicle)) {
             this.lastMonitoredVehicleVelocity = null;
-            this.lastMonitoredVehicleHealth = null;
+            this.vehicleHealthBaseline = null;
+            this.vehicleHealthBaselineTickCount = 0;
 
             return;
         }
@@ -480,13 +485,29 @@ export class VehicleTrunkHideProvider {
     // A hidden occupant has no collision, so the game never damages them when the vehicle crashes -
     // mirrors vehicle.seatbelt.provider.ts's crash detection, gated the same way on an actual drop in
     // vehicle health so hard braking/bumps/jumps alone don't hurt them.
+    //
+    // The health drop and the g-force spike from the same impact don't always land in the exact same
+    // 100ms tick (the health sync can lag a tick or two behind), so instead of comparing health only
+    // to the previous tick, "damaged" means it dropped at any point within a short rolling window.
     private checkCrashDamage(vehicle: number) {
         const velocity = GetEntityVelocity(vehicle) as Vector3;
         const health = GetEntityHealth(vehicle);
 
-        if (!this.lastMonitoredVehicleVelocity || this.lastMonitoredVehicleHealth === null) {
+        if (this.vehicleHealthBaseline === null) {
+            this.vehicleHealthBaseline = health;
+        }
+
+        const vehicleDamaged = health < this.vehicleHealthBaseline;
+
+        this.vehicleHealthBaselineTickCount++;
+
+        if (this.vehicleHealthBaselineTickCount >= TRUNK_CRASH_DAMAGE_WINDOW_TICKS) {
+            this.vehicleHealthBaselineTickCount = 0;
+            this.vehicleHealthBaseline = health;
+        }
+
+        if (!this.lastMonitoredVehicleVelocity) {
             this.lastMonitoredVehicleVelocity = velocity;
-            this.lastMonitoredVehicleHealth = health;
 
             return;
         }
@@ -496,10 +517,8 @@ export class VehicleTrunkHideProvider {
             velocity,
             TRUNK_MONITOR_TICK_INTERVAL_SECONDS
         );
-        const vehicleDamaged = this.lastMonitoredVehicleHealth !== health;
 
         this.lastMonitoredVehicleVelocity = velocity;
-        this.lastMonitoredVehicleHealth = health;
 
         if (!vehicleDamaged || gStrength <= TRUNK_CRASH_DAMAGE_G_THRESHOLD) {
             return;
