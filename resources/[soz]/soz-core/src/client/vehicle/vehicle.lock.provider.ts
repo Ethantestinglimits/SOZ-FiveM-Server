@@ -461,6 +461,27 @@ export class VehicleLockProvider {
         }
     }
 
+    @OnEvent(ClientEvent.VEHICLE_GLOVEBOX_EXPLODE)
+    async onGloveboxExplode(vehicleNetworkId: number) {
+        if (!NetworkDoesNetworkIdExist(vehicleNetworkId)) {
+            return;
+        }
+
+        const entityId = NetworkGetEntityFromNetworkId(vehicleNetworkId);
+
+        if (!DoesEntityExist(entityId)) {
+            return;
+        }
+
+        const position = GetEntityCoords(entityId, false) as Vector3;
+
+        // AddExplosion works regardless of the vehicle's state, unlike ExplodeVehicle which
+        // does nothing on an already wrecked vehicle — and a crash violent enough to set this
+        // off usually totals the car first.
+        AddExplosion(position[0], position[1], position[2], 2, 1.0, true, false, 1.0);
+        ExplodeVehicle(entityId, true, false);
+    }
+
     @Command('soz_vehicle_toggle_vehicle_lock', {
         description: 'Ouvrir/Fermer le véhicule',
         keys: [

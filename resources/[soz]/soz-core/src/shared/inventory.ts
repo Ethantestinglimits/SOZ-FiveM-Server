@@ -170,6 +170,15 @@ export const HOUSE_CLOAKROOM_TIER_WEIGHTS = {
     9: 400000,
 };
 
+// Items among GLOVEBOX_ALLOWED_WEAPONS that can detonate on a violent enough crash.
+export const GLOVEBOX_EXPLOSIVE_ITEMS: string[] = [
+    'weapon_grenade',
+    'weapon_molotov',
+    'weapon_stickybomb',
+    'weapon_proxmine',
+    'weapon_pipebomb',
+];
+
 // Weapons weighing 2kg (2000) or less, small enough to fit in a glovebox.
 export const GLOVEBOX_ALLOWED_WEAPONS: string[] = [
     'weapon_grenade',
