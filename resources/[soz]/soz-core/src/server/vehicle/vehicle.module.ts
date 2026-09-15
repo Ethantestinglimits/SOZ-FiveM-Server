@@ -21,6 +21,7 @@ import { VehicleService } from './vehicle.service';
 import { VehicleSpawner } from './vehicle.spawner';
 import { VehicleStateProvider } from './vehicle.state.provider';
 import { VehicleTowProvider } from './vehicle.tow.provider';
+import { VehicleTrunkHideProvider } from './vehicle.trunk-hide.provider';
 import { VehicleTyreProvider } from './vehicle.tyre.provider';
 
 @Module({
@@ -47,6 +48,7 @@ import { VehicleTyreProvider } from './vehicle.tyre.provider';
         VehicleOffroadProvider,
         VehicleOrderProvider,
         VehiclePushProvider,
+        VehicleTrunkHideProvider,
         VehicleTyreProvider,
     ],
 })

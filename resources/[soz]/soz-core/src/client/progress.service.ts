@@ -186,18 +186,16 @@ export class ProgressService {
             options.start?.();
 
             if (options.canCancel) {
-                this.instructionalService.display([
-                    'Appuyez sur',
-                    Control.FrontendRRight,
-                    'ou',
-                    Control.CursorCancel,
-                    'pour annuler',
-                ]);
+                this.instructionalService.display(
+                    ['Appuyez sur', Control.FrontendRRight, 'ou', Control.CursorCancel, 'pour annuler'],
+                    !!options.forceCancelHint
+                );
             }
             this.nuiDispatch.dispatch('progress', 'Start', {
                 label,
                 duration,
                 units: options.units,
+                hideBar: options.hideBar,
             });
         };
 
