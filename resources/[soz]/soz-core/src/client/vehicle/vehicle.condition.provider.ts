@@ -46,6 +46,12 @@ export class VehicleConditionProvider {
 
     private currentVehiclePositionForTemporaryTire: CurrentVehiclePosition | null = null;
 
+    // Window indexes seen broken on a single check but not confirmed yet, per vehicle.
+    // A vehicle re-streaming after being out of network scope can momentarily report
+    // broken windows that are just a rendering artifact of the resync, not real damage
+    // (see the window desync issue). Only trust a break once seen on two consecutive checks.
+    private pendingWindowBreaks: Map<number, Set<number>> = new Map();
+
     @OnEvent(ClientEvent.VEHICLE_CONDITION_REGISTER)
     private async registerVehicleCondition(
         vehicleNetworkId: number,
@@ -109,6 +115,44 @@ export class VehicleConditionProvider {
     @OnEvent(ClientEvent.VEHICLE_CONDITION_UNREGISTER)
     private unregisterVehicleCondition(vehicleNetworkId: number): void {
         this.currentVehicleCondition.delete(vehicleNetworkId);
+        this.pendingWindowBreaks.delete(vehicleNetworkId);
+    }
+
+    // Filters newly-reported broken windows out of a windowStatus diff until they have
+    // been observed on two consecutive checks, to avoid a one-tick resync artifact being
+    // pushed to the server and persisted as real damage.
+    private confirmWindowBreaks(
+        vehicleNetworkId: number,
+        reportedWindowStatus: { [key: number]: boolean },
+        knownWindowStatus: { [key: number]: boolean }
+    ): { [key: number]: boolean } {
+        const pending = this.pendingWindowBreaks.get(vehicleNetworkId) ?? new Set<number>();
+        const confirmed: { [key: number]: boolean } = {};
+
+        for (const [indexStr, isBroken] of Object.entries(reportedWindowStatus)) {
+            const index = parseInt(indexStr, 10);
+
+            if (!isBroken || knownWindowStatus[index]) {
+                confirmed[index] = isBroken;
+                pending.delete(index);
+                continue;
+            }
+
+            if (pending.has(index)) {
+                confirmed[index] = true;
+                pending.delete(index);
+            } else {
+                pending.add(index);
+            }
+        }
+
+        if (pending.size > 0) {
+            this.pendingWindowBreaks.set(vehicleNetworkId, pending);
+        } else {
+            this.pendingWindowBreaks.delete(vehicleNetworkId);
+        }
+
+        return confirmed;
     }
 
     public getVehicleCondition(vehicleNetworkId: number): VehicleCondition | null {
@@ -134,6 +178,7 @@ export class VehicleConditionProvider {
         for (const [vehicleNetworkId, currentCondition] of this.currentVehicleCondition) {
             if (!NetworkDoesNetworkIdExist(vehicleNetworkId)) {
                 this.currentVehicleCondition.delete(vehicleNetworkId);
+                this.pendingWindowBreaks.delete(vehicleNetworkId);
 
                 continue;
             }
@@ -143,6 +188,7 @@ export class VehicleConditionProvider {
             // cannot check a vehicle that does not exist
             if (!entityId) {
                 this.currentVehicleCondition.delete(vehicleNetworkId);
+                this.pendingWindowBreaks.delete(vehicleNetworkId);
 
                 continue;
             }
@@ -150,6 +196,7 @@ export class VehicleConditionProvider {
             // cannot check a vehicle where we are not the owner
             if (!NetworkHasControlOfEntity(entityId)) {
                 this.currentVehicleCondition.delete(vehicleNetworkId);
+                this.pendingWindowBreaks.delete(vehicleNetworkId);
 
                 continue;
             }
@@ -162,6 +209,18 @@ export class VehicleConditionProvider {
                 ...fuelCondition,
                 ...this.vehicleService.getVehicleConditionDiff(entityId, currentCondition, state),
             };
+
+            if (condition.windowStatus) {
+                condition.windowStatus = this.confirmWindowBreaks(
+                    vehicleNetworkId,
+                    condition.windowStatus,
+                    currentCondition.windowStatus
+                );
+
+                if (Object.keys(condition.windowStatus).length === 0) {
+                    delete condition.windowStatus;
+                }
+            }
 
             if (Object.keys(condition).length > 0) {
                 // if not empty
