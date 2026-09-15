@@ -2,6 +2,8 @@ import { Command } from '../../core/decorators/command';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Logger } from '../../core/logger';
+import { ClientEvent } from '../../shared/event';
+import { Notifier } from '../notifier';
 import { VehicleSpawner } from './vehicle.spawner';
 import { VehicleStateService } from './vehicle.state.service';
 
@@ -12,6 +14,9 @@ export class VehicleCommandProvider {
 
     @Inject(VehicleStateService)
     private vehicleStateService: VehicleStateService;
+
+    @Inject(Notifier)
+    private notifier: Notifier;
 
     @Inject(Logger)
     private logger: Logger;
@@ -58,5 +63,31 @@ export class VehicleCommandProvider {
         this.vehicleStateService.updateVehicleCondition(closestVehicle.vehicleNetworkId, {
             oilLevel: newlevel,
         });
+    }
+
+    @Command('perf', { role: ['admin'], description: 'Max out closest vehicle performance (Admin Only)' })
+    async perfCommand(source: number) {
+        const closestVehicle = await this.vehicleSpawner.getClosestVehicle(source);
+
+        if (!closestVehicle) {
+            this.notifier.notify(source, 'Aucun véhicule à proximité.', 'error');
+            return;
+        }
+
+        const entityId = NetworkGetEntityFromNetworkId(closestVehicle.vehicleNetworkId);
+
+        if (!entityId) {
+            this.notifier.notify(source, 'Ce véhicule est introuvable.', 'error');
+            return;
+        }
+
+        const owner = NetworkGetEntityOwner(entityId);
+
+        if (!owner) {
+            this.notifier.notify(source, "Ce véhicule n'a pas de propriétaire réseau.", 'error');
+            return;
+        }
+
+        TriggerClientEvent(ClientEvent.VEHICLE_ADMIN_MAX_PERFORMANCE, owner, closestVehicle.vehicleNetworkId);
     }
 }
