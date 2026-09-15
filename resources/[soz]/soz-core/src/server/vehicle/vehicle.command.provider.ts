@@ -90,4 +90,22 @@ export class VehicleCommandProvider {
 
         TriggerClientEvent(ClientEvent.VEHICLE_ADMIN_MAX_PERFORMANCE, owner, closestVehicle.vehicleNetworkId);
     }
+
+    @Command('repair', { role: ['admin'], description: 'Repair closest vehicle (Admin Only)' })
+    async repairCommand(source: number) {
+        const closestVehicle = await this.vehicleSpawner.getClosestVehicle(source);
+
+        this.vehicleStateService.updateVehicleCondition(closestVehicle.vehicleNetworkId, {
+            engineHealth: 1000,
+            bodyHealth: 1000,
+            tankHealth: 1000,
+            dirtLevel: 0,
+            tireHealth: {},
+            tireBurstState: {},
+            tireBurstCompletely: {},
+            tireTemporaryRepairDistance: {},
+            doorStatus: {},
+            windowStatus: {},
+        });
+    }
 }
