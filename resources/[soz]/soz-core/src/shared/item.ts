@@ -57,6 +57,7 @@ type BaseItem = {
     onlyone?: boolean;
     illustrator?: Record<string, string> | string;
     canShow?: boolean;
+    canLook?: boolean;
     throwable?: boolean;
     openStorageLabel?: string;
     resellPrice?: number | number[];

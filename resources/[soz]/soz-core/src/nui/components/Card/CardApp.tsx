@@ -2,7 +2,7 @@ import { Transition } from '@headlessui/react';
 import { FunctionComponent, useEffect, useState } from 'react';
 
 import { uuidv4 } from '../../../core/utils';
-import { CardType } from '../../../shared/nui/card';
+import { CardType, VehicleRegistrationCardData } from '../../../shared/nui/card';
 import { PlayerData } from '../../../shared/player';
 import { useNuiEvent } from '../../hook/nui';
 import { BankCard } from './BankCard';
@@ -10,6 +10,7 @@ import { CasinoCard } from './CasinoCard';
 import { HealthCard } from './HealthCard';
 import { IdentityCard } from './IdentityCard';
 import { LicenseCard } from './LicenseCard';
+import { VehicleRegistrationCard } from './VehicleRegistrationCard';
 
 type CardData = {
     type: CardType;
@@ -23,6 +24,11 @@ type CardItemProps = {
 
 type CardQueueItem = {
     card: CardData;
+    id: string;
+};
+
+type VehicleRegistrationCardQueueItem = {
+    card: VehicleRegistrationCardData;
     id: string;
 };
 
@@ -80,8 +86,37 @@ export const CardItem: FunctionComponent<CardItemProps> = ({ card }) => {
     );
 };
 
+const VehicleRegistrationCardItem: FunctionComponent<{ card: VehicleRegistrationCardData }> = ({ card }) => {
+    const [show, setShow] = useState(false);
+
+    useEffect(() => {
+        setShow(true);
+
+        setTimeout(() => {
+            setShow(false);
+        }, 20000);
+    }, []);
+
+    return (
+        <Transition
+            show={show}
+            enter="transform ease-out duration-300 transition"
+            enterFrom="-translate-y-full"
+            enterTo="translate-y-0"
+            leave="transform ease-in duration-300 transition"
+            leaveFrom="translate-x-0"
+            leaveTo="translate-x-full"
+        >
+            <VehicleRegistrationCard {...card} />
+        </Transition>
+    );
+};
+
 export const CardApp: FunctionComponent = () => {
     const [cardQueue, setCardQueue] = useState<CardQueueItem[]>([]);
+    const [vehicleRegistrationCardQueue, setVehicleRegistrationCardQueue] = useState<
+        VehicleRegistrationCardQueueItem[]
+    >([]);
 
     useNuiEvent('card', 'addCard', card => {
         setCardQueue(prev => [
@@ -101,7 +136,25 @@ export const CardApp: FunctionComponent = () => {
         }, 15000);
     });
 
-    if (cardQueue.length === 0) {
+    useNuiEvent('card', 'addVehicleRegistrationCard', card => {
+        setVehicleRegistrationCardQueue(prev => [
+            {
+                card,
+                id: uuidv4(),
+            },
+            ...prev,
+        ]);
+
+        setTimeout(() => {
+            setVehicleRegistrationCardQueue(prev => {
+                const newQueue = [...prev];
+                newQueue.pop();
+                return newQueue;
+            });
+        }, 15000);
+    });
+
+    if (cardQueue.length === 0 && vehicleRegistrationCardQueue.length === 0) {
         return null;
     }
 
@@ -111,6 +164,9 @@ export const CardApp: FunctionComponent = () => {
                 <div className="h-full overflow-hidden p-6">
                     {cardQueue.map(item => {
                         return <CardItem key={item.id} card={item.card} />;
+                    })}
+                    {vehicleRegistrationCardQueue.map(item => {
+                        return <VehicleRegistrationCardItem key={item.id} card={item.card} />;
                     })}
                 </div>
             </div>

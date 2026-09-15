@@ -3948,6 +3948,19 @@ QBShared.Items = {
         ["description"] = "Tout le necéssaire pour retaper un véhicule dans un coin sombre",
         ["illustrator"] = ".DBlade",
     },
+    ["carte_grise"] = {
+        ["name"] = "carte_grise",
+        ["label"] = "Carte grise",
+        ["weight"] = 50,
+        ["type"] = "item",
+        ["unique"] = true,
+        ["useable"] = false,
+        ["canShow"] = true,
+        ["canLook"] = true,
+        ["shouldClose"] = true,
+        ["combinable"] = nil,
+        ["description"] = "Certificat d'immatriculation du véhicule.",
+    },
     -- Medication
     ["firstaid"] = {
         ["name"] = "firstaid",

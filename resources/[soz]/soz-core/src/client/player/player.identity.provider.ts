@@ -55,4 +55,13 @@ export class PlayerIdentityProvider {
             iban,
         });
     }
+
+    @OnEvent(ClientEvent.VEHICLE_REGISTRATION_SHOW_CARD)
+    public showVehicleRegistrationCard(plate: string, vehicleModel: string, ownerName: string) {
+        this.dispatcher.dispatch('card', 'addVehicleRegistrationCard', {
+            plate,
+            vehicleModel,
+            ownerName,
+        });
+    }
 }

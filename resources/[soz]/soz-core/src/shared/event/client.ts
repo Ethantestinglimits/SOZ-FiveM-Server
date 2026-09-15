@@ -181,6 +181,7 @@ export enum ClientEvent {
     PLAYER_HEALTH_DO_FREE_WEIGHT = 'soz-core:client:player:health:free-weight',
     PLAYER_SET_UNLIMITED_SPRINT = 'soz-core:client:player:set-unlimited-sprint',
     PLAYER_SHOW_IDENTITY = 'soz-core:client:player:show-identity',
+    VEHICLE_REGISTRATION_SHOW_CARD = 'soz-core:client:vehicle:show-registration-card',
     PLAYER_UPDATE_CROSSHAIR = 'soz-core:client:player:update-crosshair',
     PLAYER_UPDATE_STATE = 'soz-core:client:player:update-state',
     PLAYER_UPDATE_LIST_STATE = 'soz-core:client:player:update-list-state',

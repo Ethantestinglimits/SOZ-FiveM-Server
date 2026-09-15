@@ -1004,6 +1004,11 @@ export type InventoryItemMetadata = {
     cyberDBSearch?: DBSearch;
     url?: string;
     extraLabel?: string;
+    // carte_grise
+    vehiclePlate?: string;
+    vehicleModel?: string;
+    vehicleOwner?: string;
+    vehicleOwnerName?: string;
     // apparel
     components?: Partial<Record<Component, OutfitItem>>;
     props?: Partial<Record<Prop, OutfitItem>>;
