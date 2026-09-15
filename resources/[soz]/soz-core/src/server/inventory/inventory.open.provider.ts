@@ -257,6 +257,38 @@ export class InventoryOpenProvider {
         );
     }
 
+    @OnEvent(ServerEvent.INVENTORY_OPEN_GLOVEBOX)
+    public async onOpenGlovebox(source: number, vehicleNetworkId: number) {
+        const vehicleState = this.vehicleStateService.getVehicleState(vehicleNetworkId);
+        const inventory = await this.inventoryFactory.getVehicleGloveboxInventory(vehicleNetworkId, vehicleState);
+
+        if (!inventory) {
+            return;
+        }
+
+        this.doSubscribe(source, inventory);
+
+        const inventoryPosition: InventoryPosition = {
+            type: 'dynamic',
+            entity: vehicleNetworkId,
+            requireOccupant: true,
+        };
+
+        this.inventoryPositionChecker.openInventory(source, inventory.id, inventoryPosition);
+
+        TriggerClientEvent(
+            ClientEvent.INVENTORY_OPEN,
+            source,
+            inventory.id,
+            inventory.type(),
+            inventory.configuration(),
+            inventory.items(),
+            inventoryPosition,
+            false,
+            await inventory.state(source)
+        );
+    }
+
     @OnEvent(ServerEvent.INVENTORY_OPEN_SUB_INVENTORY)
     public async onOpenSubInventory(source: number, inventoryId: string, slot: number) {
         const inventory = await this.inventoryFactory.get(inventoryId);

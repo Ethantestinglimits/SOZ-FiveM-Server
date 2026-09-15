@@ -419,6 +419,7 @@ export enum ServerEvent {
     INVENTORY_UNSUBSCRIBE = 'soz-core:server:inventory:unsubscribe',
     INVENTORY_OPEN = 'soz-core:server:inventory:open',
     INVENTORY_OPEN_TRUNK = 'soz-core:server:inventory:open_trunk',
+    INVENTORY_OPEN_GLOVEBOX = 'soz-core:server:inventory:open_glovebox',
     INVENTORY_OPEN_TARGET = 'soz-core:server:inventory:open-target',
     INVENTORY_OPEN_SUB_INVENTORY = 'soz-core:server:inventory:open-sub-inventory',
     INVENTORY_MOVE_ITEM = 'soz-core:server:inventory:move-item',

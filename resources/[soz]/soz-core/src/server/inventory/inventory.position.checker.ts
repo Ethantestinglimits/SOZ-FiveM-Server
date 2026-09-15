@@ -198,6 +198,11 @@ export class InventoryPositionChecker {
 
         if (inventoryPosition.type === 'dynamic') {
             const entity = NetworkGetEntityFromNetworkId(inventoryPosition.entity);
+
+            if (inventoryPosition.requireOccupant && GetVehiclePedIsIn(GetPlayerPed(source), false) !== entity) {
+                return false;
+            }
+
             const entityPosition = GetEntityCoords(entity, true) as Vector3;
 
             if (inventoryPosition.dimension) {

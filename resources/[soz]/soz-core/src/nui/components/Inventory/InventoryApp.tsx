@@ -251,6 +251,9 @@ const getInventoryTitle = (type: InventoryType): string => {
         case InventoryType.Trunk:
             return 'Véhicule';
 
+        case InventoryType.Glovebox:
+            return 'Boîte à gants';
+
         case InventoryType.HouseStash:
             return 'Réserve';
 
