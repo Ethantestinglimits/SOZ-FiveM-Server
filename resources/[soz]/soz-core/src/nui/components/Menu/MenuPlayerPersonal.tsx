@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { Fragment, FunctionComponent, JSXElementConstructor, ReactElement, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { Animations, Moods, Walks } from '../../../config/animation';
+import { AimStyles, Animations, Moods, Walks } from '../../../config/animation';
 import { AnimationConfigItem, AnimationConfigList, WalkConfigItem } from '../../../shared/animation';
 import { NuiEvent } from '../../../shared/event';
 import { JobPermission } from '../../../shared/job';
@@ -240,6 +240,7 @@ const MenuAnimation: FunctionComponent<MenuAnimationProps> = ({
                     <MenuSubTitle>Postures</MenuSubTitle>
                     <MenuItemSubMenuLink id="walk_list">Démarches</MenuItemSubMenuLink>
                     <MenuItemSubMenuLink id="mood_list">Humeurs</MenuItemSubMenuLink>
+                    <MenuItemSubMenuLink id="aim_style_list">Viser</MenuItemSubMenuLink>
                     <MenuItemCheckbox
                         onChange={value => {
                             fetchNui(NuiEvent.PlayerAnimationUpdateCombatMode, value);
@@ -262,6 +263,21 @@ const MenuAnimation: FunctionComponent<MenuAnimationProps> = ({
                             key={i}
                         >
                             {mood.name}
+                        </MenuItemButton>
+                    ))}
+                </MenuContent>
+            </SubMenu>
+            <SubMenu id="aim_style_list">
+                <MenuTitle title="Personnel" />
+                <MenuContent subtitle="Gestion du style de visée">
+                    {AimStyles.map((aimStyle, i) => (
+                        <MenuItemButton
+                            onConfirm={() => {
+                                fetchNui(NuiEvent.PlayerMenuAnimationSetAimStyle, { aimStyleItem: aimStyle });
+                            }}
+                            key={i}
+                        >
+                            {aimStyle.name}
                         </MenuItemButton>
                     ))}
                 </MenuContent>

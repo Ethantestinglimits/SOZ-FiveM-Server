@@ -68,6 +68,15 @@ export type MoodConfigItem = {
 
 export type MoodConfigList = MoodConfigItem[];
 
+export type AimStyleConfigItem = {
+    name: string;
+    // null = comportement natif (pas d'override)
+    dictionary: string | null;
+    clip?: string;
+};
+
+export type AimStyleConfigList = AimStyleConfigItem[];
+
 export type Animation = {
     props?: AnimationProps[];
     enter?: AnimationInfo;

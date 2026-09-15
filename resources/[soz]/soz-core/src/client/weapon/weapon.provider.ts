@@ -4,6 +4,7 @@ import { Provider } from '@core/decorators/provider';
 import { Tick, TickInterval } from '@core/decorators/tick';
 import { emitRpc } from '@core/rpc';
 import { PhoneAppSocietyProvider } from '@public/client/phone/apps/phone.app.society.provider';
+import { getAimStyle } from '@public/config/animation';
 import { DealershipType } from '@public/config/dealership';
 import { wait } from '@public/core/utils';
 import { Feature } from '@public/shared/features';
@@ -48,6 +49,10 @@ const messageExcludeGroups = [
 
 const weaponUnarmed = GetHashKey('WEAPON_UNARMED');
 const weaponPetrolCan = GetHashKey('WEAPON_PETROLCAN');
+
+// Armes tenues à une main (cohérent avec weapon.holster.provider.ts) : les seules sur lesquelles le
+// style de visée personnalisé s'applique, les armes à 2 mains gardent l'animation native.
+const oneHandedWeaponGroups = [GetHashKey('GROUP_PISTOL'), GetHashKey('GROUP_STUNGUN')];
 
 const messageExclude = [
     GetHashKey('weapon_musket'),
@@ -283,7 +288,7 @@ export class WeaponProvider {
 
                 const vehModel = GetEntityModel(vehicle);
                 const vehDef = this.vehicleRepository.getByModelHash(vehModel);
-                if (vehDef.dealershipId === DealershipType.Armored) {
+                if (vehDef?.dealershipId === DealershipType.Armored) {
                     DisablePlayerFiring(PlayerId(), true);
                     DisableControlAction(0, Control.Attack, true);
                     DisableControlAction(0, Control.Attack2, true);
@@ -613,6 +618,81 @@ export class WeaponProvider {
         if (IsControlPressed(0, 25) && IsEntityPlayingAnim(player, 'move_m@intimidation@cop@unarmed', 'idle', 3)) {
             ClearPedSecondaryTask(player);
         }
+    }
+
+    // Pose personnalisée jouée pendant la visée active (clic droit maintenu). Expérimental : peut
+    // entrer en conflit avec l'IK natif du jeu qui oriente les bras vers le réticule.
+    private aimStyleDictionaryFailed: string | null = null;
+
+    private aimStyleDebugState: string | null = null;
+
+    @Tick(0)
+    public async onAimStyleTick() {
+        const ped = PlayerPedId();
+        const aimStyle = getAimStyle(this.playerService.getPlayer()?.metadata.aimstyle);
+        const weapon = GetSelectedPedWeapon(ped);
+        const isOneHandedWeapon = oneHandedWeaponGroups.includes(GetWeapontypeGroup(weapon));
+
+        const isAiming =
+            IsPlayerFreeAiming(PlayerId()) &&
+            !IsPedInAnyVehicle(ped, false) &&
+            weapon !== weaponUnarmed &&
+            isOneHandedWeapon &&
+            !IsPedReloading(ped);
+
+        const debugState = `style="${aimStyle.name}" dictionary=${aimStyle.dictionary ?? 'aucun'} isAiming=${isAiming}`;
+        if (debugState !== this.aimStyleDebugState) {
+            this.aimStyleDebugState = debugState;
+            console.log(`[weapon][aimstyle] ${debugState}`);
+        }
+
+        if (!aimStyle.dictionary || !aimStyle.clip) {
+            return;
+        }
+
+        if (this.aimStyleDictionaryFailed === aimStyle.dictionary) {
+            return;
+        }
+
+        if (isAiming) {
+            if (!IsEntityPlayingAnim(ped, aimStyle.dictionary, aimStyle.clip, 3)) {
+                const loaded = await this.loadAnimDictWithTimeout(aimStyle.dictionary, 5000);
+
+                if (!loaded) {
+                    this.aimStyleDictionaryFailed = aimStyle.dictionary;
+                    console.error(
+                        `[weapon] Style de visée "${aimStyle.name}" : le dictionnaire "${aimStyle.dictionary}" n'a pas pu être chargé (nom invalide ?)`
+                    );
+
+                    return;
+                }
+
+                console.log(
+                    `[weapon] Style de visée "${aimStyle.name}" appliqué (${aimStyle.dictionary}/${aimStyle.clip})`
+                );
+                TaskPlayAnim(ped, aimStyle.dictionary, aimStyle.clip, 4.0, 4.0, -1, 49, 0, false, false, false);
+            }
+        } else if (IsEntityPlayingAnim(ped, aimStyle.dictionary, aimStyle.clip, 3)) {
+            StopAnimTask(ped, aimStyle.dictionary, aimStyle.clip, 4.0);
+        }
+    }
+
+    private async loadAnimDictWithTimeout(dictionary: string, timeoutMs: number): Promise<boolean> {
+        if (HasAnimDictLoaded(dictionary)) {
+            return true;
+        }
+
+        RequestAnimDict(dictionary);
+
+        const start = Date.now();
+        while (!HasAnimDictLoaded(dictionary)) {
+            if (Date.now() - start > timeoutMs) {
+                return false;
+            }
+            await wait(0);
+        }
+
+        return true;
     }
 
     @OnEvent(ClientEvent.WEAPON_FLASH)

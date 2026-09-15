@@ -6,7 +6,14 @@ import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Logger } from '../../core/logger';
 import { uuidv4 } from '../../core/utils';
-import { AnimationConfigItem, MoodConfigItem, WalkConfigBase, WalkConfigItem, Walking } from '../../shared/animation';
+import {
+    AimStyleConfigItem,
+    AnimationConfigItem,
+    MoodConfigItem,
+    WalkConfigBase,
+    WalkConfigItem,
+    Walking,
+} from '../../shared/animation';
 import { ClientEvent, NuiEvent } from '../../shared/event';
 import { Shortcut } from '../../shared/nui/player';
 import { getRandomItem } from '../../shared/random';
@@ -246,6 +253,11 @@ export class PlayerAnimationProvider {
     @OnNuiEvent(NuiEvent.PlayerMenuAnimationSetMood)
     public async setMoodAnimation({ moodItem }: { moodItem: MoodConfigItem }) {
         TriggerServerEvent('QBCore:Server:SetMetaData', 'mood', moodItem.mood);
+    }
+
+    @OnNuiEvent(NuiEvent.PlayerMenuAnimationSetAimStyle)
+    public async setAimStyleAnimation({ aimStyleItem }: { aimStyleItem: AimStyleConfigItem }) {
+        TriggerServerEvent('QBCore:Server:SetMetaData', 'aimstyle', aimStyleItem.name);
     }
 
     @OnNuiEvent(NuiEvent.PlayerMenuAnimationFavorite)

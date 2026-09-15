@@ -405,6 +405,8 @@ export type PlayerMetadata = PlayerHealthBook & {
     itt_end: number;
     hazmat: boolean;
     mood?: string | null;
+    // qb-core lowercases metadata keys on write (Player.Functions.SetMetaData), so this must stay all-lowercase.
+    aimstyle?: string | null;
     rp_death: boolean;
     is_senator: boolean;
     injail: boolean;

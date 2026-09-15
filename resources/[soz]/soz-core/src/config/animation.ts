@@ -1,6 +1,12 @@
 import { ClientEvent } from '@public/shared/event';
 
-import { AnimationConfigList, MoodConfigList, WalkConfigList } from '../shared/animation';
+import {
+    AimStyleConfigItem,
+    AimStyleConfigList,
+    AnimationConfigList,
+    MoodConfigList,
+    WalkConfigList,
+} from '../shared/animation';
 
 export const Walks: WalkConfigList = [
     { type: 'walk', name: 'Démarche par défaut Homme', walk: 'move_m@multiplayer' },
@@ -162,6 +168,20 @@ export const Moods: MoodConfigList = [
     { name: 'Un œil', mood: 'pose_aiming_1' },
     { name: 'Viser', mood: 'mood_aiming_1' },
 ];
+
+// Clip/dictionary non confirmés en jeu, à vérifier via les logs [weapon][aimstyle] (risque de
+// blocage de 5s si le nom est invalide, cf. WeaponProvider.loadAnimDictWithTimeout).
+const AIM_VARIATIONS_GANG_DICTIONARY = 'combat@aim_variations@1h@gang';
+const AIM_VARIATIONS_HILLBILLY_DICTIONARY = 'combat@aim_variations@1h@hillbilly';
+
+export const AimStyles: AimStyleConfigList = [
+    { name: 'Défaut', dictionary: null },
+    { name: 'Gang', dictionary: AIM_VARIATIONS_GANG_DICTIONARY, clip: 'aim_variation_a' },
+    { name: 'Hillbilly', dictionary: AIM_VARIATIONS_HILLBILLY_DICTIONARY, clip: 'aim_variation_a' },
+];
+
+export const getAimStyle = (name: string | null | undefined): AimStyleConfigItem =>
+    AimStyles.find(aimStyle => aimStyle.name === name) || AimStyles[0];
 
 export const Animations: AnimationConfigList = [
     {
