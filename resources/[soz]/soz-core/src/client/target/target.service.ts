@@ -91,9 +91,12 @@ export class TargetService {
 
     protected attachedCheckInteraction(model: string | null): boolean {
         const ped = PlayerPedId();
+        const entity = GetEntityAttachedTo(ped);
+
+        if (entity && entity === GetVehiclePedIsIn(ped, false)) return true;
+
         if (!model && IsEntityAttached(ped)) return false;
 
-        const entity = GetEntityAttachedTo(ped);
         if (entity && GetEntityModel(entity) !== GetHashKey(model)) return false;
 
         return true;
