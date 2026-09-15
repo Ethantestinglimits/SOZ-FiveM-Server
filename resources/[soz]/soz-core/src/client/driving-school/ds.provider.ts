@@ -2,6 +2,7 @@ import { emitRpc } from '@public/core/rpc';
 import { Feature } from '@public/shared/features';
 import { RpcServerEvent } from '@public/shared/rpc';
 import { TaxType } from '@public/shared/tax';
+import { CustomPlateMenuData } from '@public/shared/vehicle/plate';
 
 import { Once, OnceStep, OnNuiEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
@@ -11,8 +12,10 @@ import { ClientEvent, NuiEvent, ServerEvent } from '../../shared/event';
 import { MenuType } from '../../shared/nui/menu';
 import { Vector3, Vector4 } from '../../shared/polyzone/vector';
 import { TargetOption } from '../../shared/target';
+import { validateCustomPlate } from '../../shared/vehicle/plate';
 import { BlipFactory } from '../blip';
 import { FeatureProvider } from '../feature/feature.provider';
+import { InputService } from '../nui/input.service';
 import { Notifier } from '../notifier';
 import { NuiMenu } from '../nui/nui.menu';
 import { PlayerService } from '../player/player.service';
@@ -41,6 +44,9 @@ export class DrivingSchoolProvider {
 
     @Inject(FeatureProvider)
     private featureProvider: FeatureProvider;
+
+    @Inject(InputService)
+    private inputService: InputService;
 
     @Once(OnceStep.RepositoriesLoaded)
     public setupDrivingSchool() {
@@ -78,6 +84,21 @@ export class DrivingSchoolProvider {
         this.nuiMenu.closeMenu();
     }
 
+    @OnNuiEvent<{ id: number; price: number }>(NuiEvent.CustomPlateChooseVehicle)
+    public async chooseCustomPlateVehicle({ id }) {
+        const plate = await this.inputService.askInput(
+            { title: 'Nouvelle plaque (2 à 8 caractères)', maxCharacters: 8 },
+            validateCustomPlate
+        );
+
+        if (!plate) {
+            return;
+        }
+
+        TriggerServerEvent(ServerEvent.CUSTOM_PLATE_BUY, id, plate);
+        this.nuiMenu.closeMenu();
+    }
+
     private getTargetOptions(position: Vector3): TargetOption[] {
         const targetOptions: TargetOption[] = [
             {
@@ -93,6 +114,27 @@ export class DrivingSchoolProvider {
                             currentVehicleLimit: this.playerService.getPlayer().metadata.vehiclelimit,
                             remainingSlots,
                         },
+                        {
+                            position: {
+                                position,
+                                distance: 2.5,
+                            },
+                        }
+                    );
+                },
+            },
+            {
+                label: `Plaques personnalisées`,
+                icon: 'driving-school/voiture',
+                category: 'citizen',
+                blackoutGlobal: true,
+                action: async () => {
+                    const vehicles = await emitRpc<CustomPlateMenuData['vehicles']>(
+                        RpcServerEvent.CUSTOM_PLATE_GET_VEHICLES
+                    );
+                    this.nuiMenu.openMenu(
+                        MenuType.CustomPlate,
+                        { vehicles },
                         {
                             position: {
                                 position,

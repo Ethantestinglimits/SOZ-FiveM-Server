@@ -32,6 +32,7 @@ import { MenuUpwData } from '../job/upw';
 import { BossShopMenu, ShopProduct } from '../shop';
 import { GarageMenuData } from '../vehicle/garage';
 import { VehicleCustomMenuData } from '../vehicle/modification';
+import { CustomPlateMenuData } from '../vehicle/plate';
 import {
     VehicleAuctionMenuData,
     VehicleDealershipMenuData,
@@ -71,6 +72,7 @@ export enum MenuType {
     BennysUpgradeVehicle = 'bennys_upgrade_vehicle',
     Demo = 'demo',
     DrivingSchool = 'driving_school',
+    CustomPlate = 'custom_plate',
     BossShop = 'boss_shop',
     SuperetteShop = 'superette_shop',
     TattooShop = 'tattoo_shop',
@@ -183,6 +185,7 @@ export interface MenuTypeMap extends Record<MenuType, any> {
     [MenuType.BossShop]: BossShopMenu;
     [MenuType.Demo]: never;
     [MenuType.DrivingSchool]: DrivingSchoolMenuData;
+    [MenuType.CustomPlate]: CustomPlateMenuData;
     [MenuType.FightForStyleJobMenu]: any;
     [MenuType.HousingUpgrades]: HousingUpgradesMenuData;
     [MenuType.Garage]: GarageMenuData;
