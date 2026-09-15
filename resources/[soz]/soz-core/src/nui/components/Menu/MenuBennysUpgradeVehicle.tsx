@@ -3,7 +3,7 @@ import { useItem } from '@public/nui/hook/data';
 import { RootState } from '@public/nui/store';
 import { TaxType } from '@public/shared/tax';
 import { LSCustomMode } from '@public/shared/vehicle/vehicle';
-import { FunctionComponent, useEffect, useMemo, useState } from 'react';
+import { FunctionComponent, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { RGBColor } from '../../../shared/color';
@@ -29,6 +29,7 @@ import {
 } from '../../../shared/vehicle/modification';
 import { fetchNui } from '../../fetch';
 import { useGetPrice } from '../../hook/price';
+import { ColorPicker } from '../Styleguide/ColorPicker';
 import {
     MainMenu,
     Menu,
@@ -147,15 +148,27 @@ type MenuBennysUpgradeVehicleProps = {
 };
 
 type MenuItemSelectVehicleColorProps<T extends number> = {
-    value?: T;
+    value?: T | RGBColor;
     title: string;
-    onChange?: (color: T) => void;
-    onConfirm?: (color: T) => void;
+    onChange?: (color: T | RGBColor) => void;
+    onConfirm?: (color: T | RGBColor) => void;
     useCategory?: boolean;
     choices?: Partial<Record<T, VehicleColorChoiceItem>>;
     firstIsNone?: boolean;
-    initialValue?: T;
+    initialValue?: T | RGBColor;
 };
+
+const isRgbColorValue = (value: unknown): value is RGBColor => Array.isArray(value);
+
+const RgbSentinelChoice: VehicleColorChoiceItem = { label: 'RGB', color: [-1, -1, -1] };
+
+const isRgbSentinelChoice = (color: RGBColor | undefined | null): boolean =>
+    !!color &&
+    color[0] === RgbSentinelChoice.color[0] &&
+    color[1] === RgbSentinelChoice.color[1] &&
+    color[2] === RgbSentinelChoice.color[2];
+
+const RGB_GRADIENT = 'linear-gradient(to right, #ff3b30, #34c759, #0a84ff)';
 
 export const MenuItemSelectVehicleColor: FunctionComponent<
     MenuItemSelectVehicleColorProps<VehicleColor | VehicleXenonColor>
@@ -169,7 +182,17 @@ export const MenuItemSelectVehicleColor: FunctionComponent<
     firstIsNone = false,
     initialValue,
 }) => {
-    const [category, setCategory] = useState<VehicleColorCategory | null>(choices[value]?.category ?? null);
+    const [category, setCategory] = useState<VehicleColorCategory | null>(
+        isRgbColorValue(value) ? VehicleColorCategory.Custom : (choices[value]?.category ?? null)
+    );
+    const lastRgbValueRef = useRef<RGBColor | null>(isRgbColorValue(value) ? value : null);
+
+    useEffect(() => {
+        if (isRgbColorValue(value)) {
+            lastRgbValueRef.current = value;
+        }
+    }, [value]);
+
     const innerOnChange = (index, color) => {
         if (onChange) {
             onChange(color);
@@ -209,7 +232,9 @@ export const MenuItemSelectVehicleColor: FunctionComponent<
         );
     }
 
-    const initialCategory = choices[initialValue]?.category ?? null;
+    const initialCategory = isRgbColorValue(initialValue)
+        ? VehicleColorCategory.Custom
+        : (choices[initialValue]?.category ?? null);
 
     const colorList = Object.keys(choices)
         .filter(color => choices[color].category === category)
@@ -218,8 +243,13 @@ export const MenuItemSelectVehicleColor: FunctionComponent<
     return (
         <>
             <MenuItemSelect
-                onChange={(index, value) => {
-                    setCategory(value);
+                onChange={(index, newCategory) => {
+                    setCategory(newCategory);
+
+                    if (newCategory === VehicleColorCategory.Custom && !isRgbColorValue(value) && onChange) {
+                        const seed = lastRgbValueRef.current ?? choices[value as number]?.color ?? [255, 255, 255];
+                        onChange(seed);
+                    }
                 }}
                 value={category}
                 initialValue={initialCategory}
@@ -231,29 +261,37 @@ export const MenuItemSelectVehicleColor: FunctionComponent<
                 <MenuItemSelectOption value={VehicleColorCategory.Pearly}>Brillante</MenuItemSelectOption>
                 <MenuItemSelectOption value={VehicleColorCategory.Metal}>Métal & Chrome</MenuItemSelectOption>
                 <MenuItemSelectOption value={VehicleColorCategory.Cameleon}>Cameleon</MenuItemSelectOption>
+                <MenuItemSelectOption value={VehicleColorCategory.Custom}>Personnalisé</MenuItemSelectOption>
             </MenuItemSelect>
-            <MenuItemSelect
-                distance={3}
-                title={title}
-                value={value}
-                onChange={innerOnChange}
-                onConfirm={innerOnConfirm}
-                keyDescendant={category}
-                initialValue={initialValue || 0}
-            >
-                {colorList.map((color, index) => {
-                    const option = choices[color.toString()];
+            {category === VehicleColorCategory.Custom ? (
+                <ColorPicker
+                    value={isRgbColorValue(value) ? value : undefined}
+                    onChange={color => onChange && onChange(color)}
+                />
+            ) : (
+                <MenuItemSelect
+                    distance={3}
+                    title={title}
+                    value={value}
+                    onChange={innerOnChange}
+                    onConfirm={innerOnConfirm}
+                    keyDescendant={category}
+                    initialValue={initialValue || 0}
+                >
+                    {colorList.map((color, index) => {
+                        const option = choices[color.toString()];
 
-                    return (
-                        <MenuItemSelectOptionColor
-                            color={option.color}
-                            label={option.label}
-                            value={color}
-                            key={index}
-                        />
-                    );
-                })}
-            </MenuItemSelect>
+                        return (
+                            <MenuItemSelectOptionColor
+                                color={option.color}
+                                label={option.label}
+                                value={color}
+                                key={index}
+                            />
+                        );
+                    })}
+                </MenuItemSelect>
+            )}
         </>
     );
 };
@@ -312,9 +350,7 @@ export const MenuItemSelectVehicleRGBColor: FunctionComponent<MenuItemSelectVehi
             onChange={innerOnChange}
             onConfirm={innerOnConfirm}
             initialValue={initialValue}
-            equalityFn={(a: RGBColor, b: RGBColor) =>
-                a !== null && b !== null && a[0] === b[0] && a[1] === b[1] && a[2] === b[2]
-            }
+            equalityFn={(a: RGBColor, b: RGBColor) => !!a && !!b && a[0] === b[0] && a[1] === b[1] && a[2] === b[2]}
         >
             {choices.map((option, index) => {
                 return (
@@ -322,6 +358,7 @@ export const MenuItemSelectVehicleRGBColor: FunctionComponent<MenuItemSelectVehi
                         color={option.color}
                         label={option.label}
                         value={option.color}
+                        background={isRgbSentinelChoice(option.color) ? RGB_GRADIENT : undefined}
                         key={index}
                     />
                 );
@@ -330,9 +367,20 @@ export const MenuItemSelectVehicleRGBColor: FunctionComponent<MenuItemSelectVehi
     );
 };
 
+const isPresetRGBColor = (color: RGBColor | undefined, choices: VehicleColorChoiceItem[]): boolean => {
+    if (!color) {
+        return true;
+    }
+
+    return choices.some(choice => choice.color[0] === color[0] && choice.color[1] === color[1] && choice.color[2] === color[2]);
+};
+
 export const MenuBennysUpgradeVehicle: FunctionComponent<MenuBennysUpgradeVehicleProps> = ({ data }) => {
     const [config, setConfig] = useState<VehicleConfiguration | null>(null);
     const [options, setOptions] = useState<VehicleUpgradeOptions | null>(null);
+    const [neonRgbMode, setNeonRgbMode] = useState(
+        () => !isPresetRGBColor(data?.currentConfiguration?.neon?.color, Object.values(VehicleXenonColorChoices))
+    );
     const item = useItem('veh_strip_piece_std');
     const crimi = ![LSCustomMode.Admin, LSCustomMode.LsCustom, LSCustomMode.NewGahray].includes(data.mode);
     const menuTitle = crimi ? 'Customisations' : JobLabel.bennys;
@@ -368,7 +416,7 @@ export const MenuBennysUpgradeVehicle: FunctionComponent<MenuBennysUpgradeVehicl
         }
     }, [data]);
 
-    if (!data || !options) {
+    if (!data || !options || !config) {
         return null;
     }
 
@@ -461,26 +509,26 @@ export const MenuBennysUpgradeVehicle: FunctionComponent<MenuBennysUpgradeVehicl
                         </MenuItemSelect>
                     )}
                     <MenuItemSelectVehicleColor
-                        value={config?.color?.primary as VehicleColor}
+                        value={config?.color?.primary}
                         title="Couleur principale"
                         useCategory={true}
-                        initialValue={data.originalConfiguration?.color?.primary as VehicleColor}
+                        initialValue={data.originalConfiguration?.color?.primary}
                         onChange={color => {
                             setConfig({
                                 ...config,
-                                color: { ...config.color, primary: color as VehicleColor },
+                                color: { ...config.color, primary: color as VehicleColor | RGBColor },
                             });
                         }}
                     />
                     <MenuItemSelectVehicleColor
-                        value={config?.color?.secondary as VehicleColor}
+                        value={config?.color?.secondary}
                         title="Couleur secondaire"
                         useCategory={true}
-                        initialValue={data.originalConfiguration?.color?.secondary as VehicleColor}
+                        initialValue={data.originalConfiguration?.color?.secondary}
                         onChange={color => {
                             setConfig({
                                 ...config,
-                                color: { ...config.color, secondary: color as VehicleColor },
+                                color: { ...config.color, secondary: color as VehicleColor | RGBColor },
                             });
                         }}
                     />
@@ -970,13 +1018,23 @@ export const MenuBennysUpgradeVehicle: FunctionComponent<MenuBennysUpgradeVehicl
                     </MenuItemCheckbox>
                     <MenuItemSelectVehicleRGBColor
                         title="Couleur des néons"
-                        value={config?.neon?.color}
-                        initialValue={data.originalConfiguration?.neon?.color}
+                        value={neonRgbMode ? RgbSentinelChoice.color : config?.neon?.color}
+                        initialValue={
+                            isPresetRGBColor(data.originalConfiguration?.neon?.color, Object.values(VehicleXenonColorChoices))
+                                ? data.originalConfiguration?.neon?.color
+                                : RgbSentinelChoice.color
+                        }
                         onChange={color => {
                             if (!color) {
                                 return;
                             }
 
+                            if (isRgbSentinelChoice(color)) {
+                                setNeonRgbMode(true);
+                                return;
+                            }
+
+                            setNeonRgbMode(false);
                             setConfig({
                                 ...config,
                                 neon: {
@@ -986,8 +1044,23 @@ export const MenuBennysUpgradeVehicle: FunctionComponent<MenuBennysUpgradeVehicl
                                 },
                             });
                         }}
-                        choices={Object.values(VehicleXenonColorChoices)}
+                        choices={[...Object.values(VehicleXenonColorChoices), RgbSentinelChoice]}
                     />
+                    {neonRgbMode && (
+                        <ColorPicker
+                            value={config?.neon?.color}
+                            onChange={color => {
+                                setConfig({
+                                    ...config,
+                                    neon: {
+                                        light: {},
+                                        ...config?.neon,
+                                        color,
+                                    },
+                                });
+                            }}
+                        />
+                    )}
                     <MenuItemVehicleModification
                         modKey="xenonHeadlights"
                         options={options}

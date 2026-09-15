@@ -1292,18 +1292,20 @@ export const MenuItemSelectOptionBox: FunctionComponent<MenuItemSelectOptionProp
 type MenuItemSelectOptionColorHelperProps = {
     label: string;
     color: RGBColor;
+    background?: string;
 };
 
 export const MenuItemSelectOptionColorHelper: FunctionComponent<MenuItemSelectOptionColorHelperProps> = ({
     label,
     color,
+    background,
 }) => {
     return (
         <div className="flex justify-between items-center">
             <span>{label}</span>
             <div
                 className="flex-grow h-4 ml-2"
-                style={{ backgroundColor: `rgb(${color[0]}, ${color[1]}, ${color[2]} )` }}
+                style={{ background: background ?? `rgb(${color[0]}, ${color[1]}, ${color[2]} )` }}
             />
         </div>
     );
@@ -1315,6 +1317,7 @@ type MenuItemSelectOptionColorProps = {
     label?: string;
     color: RGBColor;
     description?: string;
+    background?: string;
 };
 
 export const MenuItemSelectOptionColor: FunctionComponent<MenuItemSelectOptionColorProps> = ({
@@ -1323,8 +1326,9 @@ export const MenuItemSelectOptionColor: FunctionComponent<MenuItemSelectOptionCo
     value = null,
     description = null,
     label = null,
+    background,
 }) => {
-    const helper = <MenuItemSelectOptionColorHelper label={label} color={color} />;
+    const helper = <MenuItemSelectOptionColorHelper label={label} color={color} background={background} />;
     const [handleRefSet, show, isSelected, onClick] = useSelectOption(value, onSelected, description, helper);
     const colorClassname = cn('h-5 w-5 rounded-full hover:border-white', {
         'border-2 border-white': isSelected,
@@ -1341,7 +1345,7 @@ export const MenuItemSelectOptionColor: FunctionComponent<MenuItemSelectOptionCo
         >
             <div
                 className={colorClassname}
-                style={{ backgroundColor: `rgb(${color[0]}, ${color[1]}, ${color[2]} )` }}
+                style={{ background: background ?? `rgb(${color[0]}, ${color[1]}, ${color[2]} )` }}
             />
         </li>
     );

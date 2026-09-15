@@ -686,6 +686,7 @@ export enum VehicleColorCategory {
     Matte = 'matte',
     Metal = 'metal',
     Cameleon = 'cameleon',
+    Custom = 'custom',
 }
 
 export type VehicleColorChoiceItem = {
