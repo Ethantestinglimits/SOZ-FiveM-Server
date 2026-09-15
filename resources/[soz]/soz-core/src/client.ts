@@ -16,6 +16,7 @@ import { ClothingModule } from './client/clothing/clothing.module';
 import { CraftModule } from './client/craft/craft.module';
 import { DoorModule } from './client/door/door.module';
 import { DrivingSchoolModule } from './client/driving-school/ds.module';
+import { DuoAnimationModule } from './client/duo-animation/duo-animation.module';
 import { FactoryModule } from './client/factory/factory.module';
 import { FeatureModule } from './client/feature/feature.module';
 import { GamesModule } from './client/games/games.module';
@@ -145,6 +146,7 @@ async function bootstrap() {
         GamesModule,
         LocationModule,
         AnimalModule,
+        DuoAnimationModule,
         ...PrivateModules
     );
 

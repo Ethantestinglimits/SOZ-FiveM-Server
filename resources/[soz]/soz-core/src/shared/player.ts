@@ -329,7 +329,14 @@ export const ShortPlayerLicenceLabels = {
     [PlayerLicenceType.Rescuer]: 'Secouriste',
 };
 
-export type PlayerListStateKey = 'dead' | 'zipped' | 'wearingPatientOutfit' | 'escorted' | 'knockedOut' | 'validated';
+export type PlayerListStateKey =
+    | 'dead'
+    | 'zipped'
+    | 'wearingPatientOutfit'
+    | 'escorted'
+    | 'knockedOut'
+    | 'validated'
+    | 'inLastStand';
 
 export enum PlayerCriminalState {
     None,

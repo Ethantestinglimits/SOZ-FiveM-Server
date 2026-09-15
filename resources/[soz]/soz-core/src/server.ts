@@ -21,6 +21,7 @@ import { CraftModule } from './server/craft/craft.module';
 import { DatabaseModule } from './server/database/database.module';
 import { DoorModule } from './server/door/door.module';
 import { DrivingSchoolModule } from './server/driving-school/ds.module';
+import { DuoAnimationModule } from './server/duo-animation/duo-animation.module';
 import { FeatureModule } from './server/feature/feature.module';
 import { FieldModule } from './server/field/field.module';
 import { GamesModule } from './server/games/games.module';
@@ -138,6 +139,7 @@ async function bootstrap() {
         CameraModule,
         BillboardModule,
         AnimalModule,
+        DuoAnimationModule,
         ...PrivateModules
     );
 

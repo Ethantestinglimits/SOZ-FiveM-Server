@@ -246,6 +246,7 @@ export enum NuiEvent {
     PlayerMenuInvoiceDeny = 'soz-core:nui:player:menu:deny-invoice',
     PlayerMenuClothConfigUpdate = 'soz-core:nui:player:menu:cloth-config-update',
     PlayerMenuAnimationPlay = 'soz-core:nui:player:menu:animation-play',
+    PlayerMenuDuoAnimationRequest = 'soz-core:nui:player:menu:duo-animation-request',
     PlayerMenuAnimationSetWalk = 'soz-core:nui:player:menu:animation-set-walk',
     PlayerMenuAnimationSetMood = 'soz-core:nui:player:menu:animation-set-mood',
     PlayerMenuAnimationStop = 'soz-core:nui:player:menu:animation-stop',

@@ -257,6 +257,25 @@ export const getHeadingFromVector2d = (x: number, y: number): number => {
     return (deg(angle) + 360) % 360;
 };
 
+export const getHeadingTowards = (from: Vector2 | Vector3, to: Vector2 | Vector3): number => {
+    const dx = to[0] - from[0];
+    const dy = to[1] - from[1];
+
+    return (deg(Math.atan2(-dx, dy)) + 360) % 360;
+};
+
+export function arePedsFacingEachOther(
+    posA: Vector3,
+    headingA: number,
+    posB: Vector3,
+    headingB: number,
+    maxAngle: number
+): boolean {
+    const axisHeading = getHeadingTowards(posA, posB);
+
+    return angleDist(headingA, axisHeading) <= maxAngle && angleDist(headingB, (axisHeading + 180) % 360) <= maxAngle;
+}
+
 export function multiplyVector(vec: Vector3, quat: Vector4): Vector3 {
     const num = quat[0] * 2;
     const num2 = quat[1] * 2;
