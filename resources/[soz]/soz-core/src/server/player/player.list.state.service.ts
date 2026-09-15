@@ -12,6 +12,7 @@ export class PlayerListStateService {
         escorted: new Set<number>(),
         knockedOut: new Set<number>(),
         validated: new Set<number>(),
+        inLastStand: new Set<number>(),
     };
 
     public handlePlayer(player: PlayerData, playerState: PlayerClientState) {
@@ -21,6 +22,7 @@ export class PlayerListStateService {
         this.handle('escorted', player.source, playerState.isEscorted);
         this.handle('knockedOut', player.source, playerState.isKnockedOut);
         this.handle('validated', player.source, player.is_validated);
+        this.handle('inLastStand', player.source, player.metadata.inlaststand);
     }
 
     public removePlayer(player: number) {
@@ -30,6 +32,7 @@ export class PlayerListStateService {
         this.handle('escorted', player, false);
         this.handle('knockedOut', player, false);
         this.handle('validated', player, false);
+        this.handle('inLastStand', player, false);
     }
 
     private handle(key: PlayerListStateKey, player: number, status: boolean) {
@@ -64,6 +67,7 @@ export class PlayerListStateService {
             escorted: [],
             knockedOut: [],
             validated: [],
+            inLastStand: [],
         };
 
         for (const key in this.lists) {

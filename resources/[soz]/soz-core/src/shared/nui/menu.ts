@@ -16,6 +16,7 @@ import { EditorMenuData } from '@public/shared/object';
 import { AdminMenuStateProps } from '../../nui/components/Admin/AdminMenu';
 import { PlayerCloakroomItem, WardrobeMenuData } from '../cloth';
 import { DrivingSchoolMenuData } from '../driving-school';
+import { DuoAnimationMenuData } from '../duo-animation';
 import { FuelType } from '../fuel';
 import { AdminMapperMenuData, HousingUpgradesMenuData } from '../housing/menu';
 import { DmcJobMenuData } from '../job/dmc';
@@ -104,6 +105,7 @@ export enum MenuType {
     EasterShop = 'easter_shop',
     TaxiJobMenu = 'taxi_job',
     PlayerPersonal = 'player_personal',
+    DuoAnimation = 'duo_animation',
     PropPlacementMenu = 'prop_placement_menu',
     HousingPropPlacementMenu = 'housing_prop_placement_menu',
     LsmcJobMenu = 'lsmc_job_menu',
@@ -204,6 +206,7 @@ export interface MenuTypeMap extends Record<MenuType, any> {
     [MenuType.EasterShop]: ShopProduct[];
     [MenuType.TaxiJobMenu]: any;
     [MenuType.PlayerPersonal]: PlayerPersonalMenuData;
+    [MenuType.DuoAnimation]: DuoAnimationMenuData;
     [MenuType.LsmcJobMenu]: any;
     [MenuType.JobOnDutyMenu]: NuiJobEmployeeOnDuty;
     [MenuType.Album]: { tracks: Record<string, string>; volume: number };

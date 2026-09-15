@@ -8,6 +8,9 @@ export enum ClientEvent {
     ANIMATION_SURRENDER = 'soz-core:client:animation:surrender',
     ANIMATION_GIVE = 'soz-core:client:animation:give',
 
+    DUO_ANIMATION_REQUEST_RECEIVED = 'soz-core:client:animation:duo-request-received',
+    DUO_ANIMATION_PLAY = 'soz-core:client:animation:duo-play',
+
     BASE_ENTERED_VEHICLE = 'baseevents:enteredVehicle',
     BASE_ENTERING_VEHICLE = 'baseevents:enteringVehicle',
     BASE_LEFT_VEHICLE = 'baseevents:leftVehicle',

@@ -10,6 +10,7 @@ export class PlayerListStateService {
         escorted: new Set<number>(),
         knockedOut: new Set<number>(),
         validated: new Set<number>(),
+        inLastStand: new Set<number>(),
     };
 
     public updateList(key: PlayerListStateKey, players: number[]) {
@@ -38,5 +39,9 @@ export class PlayerListStateService {
 
     public isValidated(player: number) {
         return this.lists.validated.has(player);
+    }
+
+    public isInLastStand(player: number) {
+        return this.lists.inLastStand.has(player);
     }
 }

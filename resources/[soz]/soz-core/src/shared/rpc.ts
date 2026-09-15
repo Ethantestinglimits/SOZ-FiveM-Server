@@ -40,6 +40,10 @@ export enum RpcServerEvent {
 
     DMC_GET_CONVERTER_STATE = 'soz-core:server:job:dmc:get-converter-state',
 
+    DUO_ANIMATION_REQUEST = 'soz-core:server:animation:duo-request',
+    DUO_ANIMATION_ACCEPT = 'soz-core:server:animation:duo-accept',
+    DUO_ANIMATION_DECLINE = 'soz-core:server:animation:duo-decline',
+
     INVENTORY_SELF_FETCH = 'soz-core:inventory:self-fetch',
     INVENTORY_TRANSFER_MONEY = 'soz-core:inventory:transfer-money',
     INVENTORY_GET_ITEM_COUNT = 'soz-core:inventory:search',

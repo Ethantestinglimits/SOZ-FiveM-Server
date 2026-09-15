@@ -68,6 +68,7 @@ import { MenuEditorObject } from '@public/nui/components/Menu/MenuEditorObject';
 import { MenuGarage } from '@public/nui/components/Menu/MenuGarage';
 import { MenuHalloweenVampire } from '@public/nui/components/Menu/MenuHalloweenVampire';
 import { MenuOilSetPrice } from '@public/nui/components/Menu/MenuOilSetPrice';
+import { MenuDuoAnimation } from '@public/nui/components/Menu/MenuDuoAnimation';
 import { MenuPlayerPersonal } from '@public/nui/components/Menu/MenuPlayerPersonal';
 import { MenuPropPlacement } from '@public/nui/components/Menu/MenuPropPlacement';
 import { MenuPropPlacementHousing } from '@public/nui/components/Menu/MenuPropPlacementHousing';
@@ -258,6 +259,7 @@ const MenuRouter: FunctionComponent = () => {
             <Route path={`/${MenuType.EasterShop}/*`} element={<EasterShopMenu data={menuData} />} />
             <Route path={`/${MenuType.TaxiJobMenu}/*`} element={<TaxiJobMenu />} />
             <Route path={`/${MenuType.PlayerPersonal}/*`} element={<MenuPlayerPersonal data={menuData} />} />
+            <Route path={`/${MenuType.DuoAnimation}/*`} element={<MenuDuoAnimation data={menuData} />} />
             <Route path={`/${MenuType.JobOnDutyMenu}/*`} element={<JobOnDutyMenu data={menuData} />} />
             <Route path={`/${MenuType.DrugGarden}/*`} element={<DrugGardenMenu data={menuData} />} />
             <Route path={`/${MenuType.DrugAdmin}/*`} element={<MenuDrugAdminLocation />} />
