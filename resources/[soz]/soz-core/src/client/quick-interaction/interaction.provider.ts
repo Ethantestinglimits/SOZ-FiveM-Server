@@ -8,6 +8,7 @@ import { DUIRenderer } from '@public/client/dui.service';
 import { InteractionDistanceProvider } from '@public/client/quick-interaction/interaction.distance.provider';
 import { InteractionOffsetProvider } from '@public/client/quick-interaction/interaction.offset.provider';
 
+import { Control } from '../../shared/input';
 import { Interaction, InteractionOption } from '../../shared/interaction';
 import { getDistance, Vector3, Vector4 } from '../../shared/polyzone/vector';
 import { ResourceLoader } from '../repository/resource.loader';
@@ -160,6 +161,10 @@ export class InteractionProvider {
     @Tick()
     public async onTick() {
         if (this.nearbyInteractions.size === 0) return;
+
+        if (IsPedInAnyVehicle(PlayerPedId(), false)) {
+            DisableControlAction(0, Control.VehicleDuck, true);
+        }
 
         const playerPosition = this.playerPosition;
         for (const [id, interaction] of this.nearbyInteractions.entries()) {

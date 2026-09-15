@@ -349,13 +349,15 @@ export class DoorProvider {
             const distance = getDistance(coords, door.coords);
 
             if (distance < 80) {
+                const searchRadius = Math.max(door.target?.draw ?? defaultDrawDistance, 2.0);
+
                 for (const subdoor of subdoors) {
                     if (!subdoor.entity || !DoesEntityExist(subdoor.entity)) {
                         const entity = GetClosestObjectOfType(
                             subdoor.coords[0],
                             subdoor.coords[1],
                             subdoor.coords[2],
-                            2.0,
+                            searchRadius,
                             subdoor.model,
                             false,
                             false,
