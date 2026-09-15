@@ -146,6 +146,7 @@ export const useSimCardStateHandlers = () => {
     useNuiEvent('phone', 'SetCallSound', (play: boolean) => (play ? callSound.play() : callSound.stop()));
     useNuiEvent('phone', 'SetDialSound', (play: boolean) => (play ? dialSound.play() : dialSound.stop()));
     useNuiEvent('phone', 'SetEndSound', () => endSound());
+    useNuiEvent('phone', 'PlayNotificationSound', () => notificationSound.play());
 
     useNuiEvent('phone', 'SetCurrentCall', setCurrentCall);
     useNuiEvent('phone', 'SetCallsHistory', setCallHistory);

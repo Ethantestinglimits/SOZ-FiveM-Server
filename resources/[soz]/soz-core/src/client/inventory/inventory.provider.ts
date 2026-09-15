@@ -144,6 +144,30 @@ export class InventoryProvider {
         TriggerServerEvent(ServerEvent.INVENTORY_USE_ITEM, inventoryId, inventoryItem.slot);
     }
 
+    @OnNuiEvent(NuiEvent.InventoryActionSetMainPhone)
+    public async onInventoryActionSetMainPhone({
+        inventoryId,
+        inventoryItem,
+    }: {
+        inventoryItem: InventoryItem;
+        inventoryId: string;
+    }) {
+        this.nuiDispatch.closeEverything();
+
+        TriggerServerEvent(ServerEvent.PHONE_DEVICE_SET_MAIN, inventoryId, inventoryItem.slot);
+    }
+
+    @OnNuiEvent(NuiEvent.InventoryActionRemoveSimCard)
+    public async onInventoryActionRemoveSimCard({
+        inventoryId,
+        inventoryItem,
+    }: {
+        inventoryItem: InventoryItem;
+        inventoryId: string;
+    }) {
+        TriggerServerEvent(ServerEvent.PHONE_DEVICE_REMOVE_SIM, inventoryId, inventoryItem.slot);
+    }
+
     @OnNuiEvent(NuiEvent.InventoryActionDrop)
     public async onInventoryActionDrop({
         inventoryId,

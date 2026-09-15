@@ -7,59 +7,60 @@ import { ClientEvent } from '../../shared/event/client';
 import { MessageConversation } from '../../shared/phone/simcard';
 import { RpcServerEvent } from '../../shared/rpc';
 import { PrismaService } from '../database/prisma.service';
-import { PlayerService } from '../player/player.service';
+import { PhoneDeviceService } from './phone.device.service';
 
 @Provider()
 export class PhoneSimCardMessages {
     @Inject(PrismaService)
     private readonly prismaService: PrismaService;
 
-    @Inject(PlayerService)
-    private readonly playerService: PlayerService;
+    @Inject(PhoneDeviceService)
+    private readonly phoneDeviceService: PhoneDeviceService;
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_MESSAGES_CONVERSATION_GET)
-    async getConversations(source: number) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
-            return;
+    async getConversations(source: number): Promise<MessageConversation[]> {
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
+
+        if (!device) {
+            return [];
         }
 
         const conversations = await this.prismaService.$queryRaw<
             {
+                id: number;
                 unread: number;
                 conversation_id: string;
                 masked: number;
-                user_identifier: string;
                 participant_identifier: string;
                 avatar: string;
                 updatedAt: any;
             }[]
         >(
             Prisma.sql`
-                SELECT DISTINCT phone_messages_conversations.unread,
-                                phone_messages_conversations.conversation_id,
-                                phone_messages_conversations.masked,
-                                phone_messages_conversations.user_identifier,
-                                phone_messages_conversations.participant_identifier,
-                                phone_profile.avatar,
-                                phone_messages_conversations.updatedAt
+                SELECT phone_messages_conversations.id,
+                       phone_messages_conversations.unread,
+                       phone_messages_conversations.conversation_id,
+                       phone_messages_conversations.masked,
+                       phone_messages_conversations.participant_identifier,
+                       phone_profile.avatar,
+                       phone_messages_conversations.updatedAt
                 FROM phone_messages_conversations
                          LEFT OUTER JOIN phone_profile
                                          ON phone_profile.number = phone_messages_conversations.participant_identifier
-                WHERE phone_messages_conversations.user_identifier = ${player.charinfo.phone}
+                WHERE phone_messages_conversations.device_id = ${device.id}
                   AND phone_messages_conversations.updatedAt >= DATE_SUB(NOW(), INTERVAL 14 DAY)
                 ORDER BY phone_messages_conversations.updatedAt DESC
             `
         );
 
         return conversations.map(
-            (conversation: any) =>
+            conversation =>
                 ({
+                    id: conversation.id,
                     unread: conversation.unread,
                     conversation_id: conversation.conversation_id,
                     masked: conversation.masked === 1,
                     phoneNumber: conversation.participant_identifier,
-                    display: conversation.display,
                     avatar: conversation.avatar,
                     updatedAt: Number(conversation.updatedAt),
                 }) as MessageConversation
@@ -68,81 +69,53 @@ export class PhoneSimCardMessages {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_MESSAGES_CONVERSATION_ADD)
     async createConversation(source: number, phoneNumber: string) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
+
+        if (!device?.simNumber || phoneNumber === device.simNumber) {
             return;
         }
 
-        const conversationId = [player.charinfo.phone, phoneNumber].sort().join('+');
+        const conversationId = [device.simNumber, phoneNumber].sort().join('+');
+        const conversation = await this.upsertConversation(device.id, device.simNumber, phoneNumber, conversationId);
 
-        const conversationExists = await this.prismaService.phone_messages_conversations.findFirst({
-            where: {
-                conversation_id: conversationId,
-                user_identifier: player.charinfo.phone,
-            },
-        });
+        await this.notifyConversationReload(source, device.id);
 
-        if (conversationExists) {
-            await this.prismaService.phone_messages_conversations.update({
-                where: {
-                    id: conversationExists.id,
-                    conversation_id: conversationId,
-                    user_identifier: player.charinfo.phone,
-                },
-                data: {
-                    masked: false,
-                    updatedAt: new Date(),
-                },
-            });
+        const target = await this.phoneDeviceService.findDeviceByNumber(phoneNumber);
 
-            TriggerClientEvent(ClientEvent.PHONE_SIMCARD_MESSAGES_CONVERSATION_RELOAD, source);
+        if (target) {
+            await this.upsertConversation(target.deviceId, phoneNumber, device.simNumber, conversationId);
 
-            return conversationExists;
+            if (target.source && target.isMain) {
+                await this.notifyConversationReload(target.source, target.deviceId);
+            }
         }
 
-        await this.prismaService.phone_messages_conversations.create({
-            data: {
-                conversation_id: conversationId,
-                user_identifier: player.charinfo.phone,
-                participant_identifier: phoneNumber,
-            },
-        });
-        await this.prismaService.phone_messages_conversations.create({
-            data: {
-                conversation_id: conversationId,
-                user_identifier: phoneNumber,
-                participant_identifier: player.charinfo.phone,
-            },
-        });
-
-        const targetPlayer = this.playerService.getPlayerByPhone(phoneNumber);
-        if (targetPlayer) {
-            TriggerClientEvent(ClientEvent.PHONE_SIMCARD_MESSAGES_CONVERSATION_RELOAD, targetPlayer.source);
-        }
-
-        return {
-            conversation_id: conversationId,
-        };
+        return conversation;
     }
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_MESSAGES_CONVERSATION_SET_READ)
     async setConversationRead(source: number, conversationId: string) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
+
+        if (!device) {
             return;
         }
 
         const conversation = await this.prismaService.phone_messages_conversations.findFirst({
             where: {
                 conversation_id: conversationId,
-                user_identifier: player.charinfo.phone,
+                device_id: device.id,
             },
         });
+
+        if (!conversation) {
+            return;
+        }
 
         await this.prismaService.phone_messages_conversations.updateMany({
             where: {
                 conversation_id: conversationId,
-                user_identifier: player.charinfo.phone,
+                device_id: device.id,
             },
             data: {
                 unread: 0,
@@ -153,15 +126,16 @@ export class PhoneSimCardMessages {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_MESSAGES_CONVERSATION_ARCHIVE)
     async archiveConversation(source: number, conversationId: string) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
+
+        if (!device) {
             return;
         }
 
         await this.prismaService.phone_messages_conversations.updateMany({
             where: {
                 conversation_id: conversationId,
-                user_identifier: player.charinfo.phone,
+                device_id: device.id,
             },
             data: {
                 masked: true,
@@ -171,33 +145,29 @@ export class PhoneSimCardMessages {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_MESSAGES_GET)
     async getMessages(source: number) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
-            return;
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
+
+        if (!device) {
+            return [];
         }
 
-        const messages = await this.prismaService.$queryRaw<
-            {
-                id: number;
-                conversation_id: string;
-                message: string;
-                author: string;
-                createdAt: any;
-            }[]
-        >(
-            Prisma.sql`SELECT DISTINCT phone_messages.id,
-                                       phone_messages.conversation_id,
-                                       phone_messages.message,
-                                       phone_messages.author,
-                                       phone_messages.createdAt
-                       FROM phone_messages
-                                LEFT JOIN phone_messages_conversations ON phone_messages.conversation_id = phone_messages_conversations.conversation_id
-                       WHERE phone_messages_conversations.participant_identifier = ${player.charinfo.phone}
-                         AND phone_messages.updatedAt >= DATE_SUB(NOW(), INTERVAL 14 DAY)
-                       ORDER BY id DESC`
-        );
+        const messages = await this.prismaService.phone_messages.findMany({
+            select: {
+                id: true,
+                conversation_id: true,
+                message: true,
+                author: true,
+                createdAt: true,
+            },
+            where: {
+                device_id: device.id,
+            },
+            orderBy: {
+                id: 'desc',
+            },
+        });
 
-        return messages.map((message: any) => ({
+        return messages.map(message => ({
             ...message,
             createdAt: Number(message.createdAt),
         }));
@@ -205,15 +175,28 @@ export class PhoneSimCardMessages {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_MESSAGES_SEND)
     async sendMessage(source: number, conversationId: string, message: string) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
+
+        if (!device?.simNumber) {
+            return;
+        }
+
+        const conversation = await this.prismaService.phone_messages_conversations.findFirst({
+            where: {
+                conversation_id: conversationId,
+                device_id: device.id,
+            },
+        });
+
+        if (!conversation) {
             return;
         }
 
         const createdMessage = await this.prismaService.phone_messages.create({
             data: {
-                user_identifier: player.citizenid,
-                author: player.charinfo.phone,
+                device_id: device.id,
+                user_identifier: '',
+                author: device.simNumber,
                 conversation_id: conversationId,
                 message,
             },
@@ -222,20 +205,7 @@ export class PhoneSimCardMessages {
         await this.prismaService.phone_messages_conversations.updateMany({
             where: {
                 conversation_id: conversationId,
-                user_identifier: {
-                    not: player.charinfo.phone,
-                },
-            },
-            data: {
-                unread: {
-                    increment: 1,
-                },
-            },
-        });
-
-        await this.prismaService.phone_messages_conversations.updateMany({
-            where: {
-                conversation_id: conversationId,
+                device_id: device.id,
             },
             data: {
                 masked: false,
@@ -243,17 +213,96 @@ export class PhoneSimCardMessages {
             },
         });
 
-        const createdMessageData = { ...createdMessage, createdAt: Number(createdMessage.createdAt) };
+        this.notifyNewMessage(source, device.id, createdMessage);
 
-        for (const phoneNumber of conversationId.split('+')) {
-            const targetPlayer = this.playerService.getPlayerByPhone(phoneNumber);
-            if (targetPlayer) {
-                TriggerClientEvent(
-                    ClientEvent.PHONE_SIMCARD_MESSAGES_MESSAGE_NEW,
-                    targetPlayer.source,
-                    createdMessageData
-                );
-            }
+        const target = await this.phoneDeviceService.findDeviceByNumber(conversation.participant_identifier);
+
+        if (!target) {
+            return;
         }
+
+        await this.upsertConversation(
+            target.deviceId,
+            conversation.participant_identifier,
+            device.simNumber,
+            conversationId
+        );
+
+        const targetMessage = await this.prismaService.phone_messages.create({
+            data: {
+                device_id: target.deviceId,
+                user_identifier: '',
+                author: device.simNumber,
+                conversation_id: conversationId,
+                message,
+            },
+        });
+
+        await this.prismaService.phone_messages_conversations.updateMany({
+            where: {
+                conversation_id: conversationId,
+                device_id: target.deviceId,
+            },
+            data: {
+                masked: false,
+                updatedAt: new Date(),
+                unread: {
+                    increment: 1,
+                },
+            },
+        });
+
+        if (target.source && target.isMain) {
+            this.notifyNewMessage(target.source, target.deviceId, targetMessage);
+        }
+    }
+
+    private async upsertConversation(
+        deviceId: string,
+        ownNumber: string,
+        participantNumber: string,
+        conversationId: string
+    ) {
+        const existing = await this.prismaService.phone_messages_conversations.findFirst({
+            where: {
+                conversation_id: conversationId,
+                device_id: deviceId,
+            },
+        });
+
+        if (existing) {
+            await this.prismaService.phone_messages_conversations.update({
+                where: {
+                    id: existing.id,
+                },
+                data: {
+                    masked: false,
+                    updatedAt: new Date(),
+                },
+            });
+
+            return existing;
+        }
+
+        return this.prismaService.phone_messages_conversations.create({
+            data: {
+                device_id: deviceId,
+                conversation_id: conversationId,
+                user_identifier: ownNumber,
+                participant_identifier: participantNumber,
+            },
+        });
+    }
+
+    private notifyNewMessage(source: number, deviceId: string, message: { createdAt: Date }) {
+        TriggerClientEvent(ClientEvent.PHONE_SIMCARD_MESSAGES_MESSAGE_NEW, source, {
+            ...message,
+            createdAt: Number(message.createdAt),
+            device_id: deviceId,
+        });
+    }
+
+    private async notifyConversationReload(source: number, deviceId: string) {
+        TriggerClientEvent(ClientEvent.PHONE_SIMCARD_MESSAGES_CONVERSATION_RELOAD, source, deviceId);
     }
 }

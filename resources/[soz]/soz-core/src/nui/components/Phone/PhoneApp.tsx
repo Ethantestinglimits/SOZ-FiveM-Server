@@ -27,8 +27,18 @@ import { FlashLightDynamicIsland } from './system/dynamic-island/components/Flas
 import { NotificationDynamicIsland } from './system/dynamic-island/components/NotificationDynamicIsland';
 import { useEmergency, useEmergencyStateHandlers } from './system/emergency/emergency.atom';
 import { EmergencyApp } from './system/emergency/EmergencyApp';
-import { usePhoneFocus, usePhoneInsideInput, usePhoneStateHandlers } from './system/phone.atom';
+import { LockScreenApp } from './system/lock/LockScreenApp';
+import {
+    usePhoneFocus,
+    usePhoneHasSimCard,
+    usePhoneInsideInput,
+    usePhoneIsLocked,
+    usePhoneNeedsSetup,
+    usePhoneStateHandlers,
+} from './system/phone.atom';
 import { PhoneWrapper } from './system/PhoneWrapper';
+import { SetupApp } from './system/setup/SetupApp';
+import { NoSimCardApp } from './system/sim-card/NoSimCardApp';
 import { useSimCardStateHandlers } from './system/sim-card/sim.card.atom';
 import { SoundProvider } from './system/sound/providers/SoundProvider';
 
@@ -38,6 +48,9 @@ export const PhoneApp: FunctionComponent = () => {
     const insideInput = usePhoneInsideInput();
 
     const emergency = useEmergency();
+    const hasSimCard = usePhoneHasSimCard();
+    const needsSetup = usePhoneNeedsSetup();
+    const isLocked = usePhoneIsLocked();
 
     useNuiFocus(
         focus,
@@ -84,6 +97,12 @@ export const PhoneApp: FunctionComponent = () => {
 
                         {emergency ? (
                             <EmergencyApp />
+                        ) : needsSetup ? (
+                            <SetupApp />
+                        ) : isLocked ? (
+                            <LockScreenApp />
+                        ) : !hasSimCard ? (
+                            <NoSimCardApp />
                         ) : (
                             <Routes>
                                 <Route index element={<HomeApp />} />

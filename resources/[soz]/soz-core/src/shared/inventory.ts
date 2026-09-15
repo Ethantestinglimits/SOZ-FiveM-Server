@@ -1012,6 +1012,8 @@ export type InventoryItemMetadata = {
     // apparel
     components?: Partial<Record<Component, OutfitItem>>;
     props?: Partial<Record<Prop, OutfitItem>>;
+    //phone
+    simNumber?: string;
 };
 
 export const isInventoryItemExpired = (item: InventoryItem): boolean => {

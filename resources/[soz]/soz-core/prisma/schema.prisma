@@ -336,6 +336,7 @@ model placed_prop {
 model phone_calls {
     id          Int      @id @default(autoincrement())
     identifier  String?  @db.VarChar(48)
+    device_id   String?  @db.VarChar(36)
     transmitter String   @db.VarChar(8)
     receiver    String   @db.VarChar(8)
     is_accepted Int?     @default(0) @db.TinyInt
@@ -345,29 +346,35 @@ model phone_calls {
     @@index([identifier], map: "identifier")
     @@index([transmitter], map: "transmitter")
     @@index([receiver], map: "receiver")
+    @@index([device_id], map: "device_id")
 }
 
 model phone_contacts {
     id         Int     @id @default(autoincrement())
     identifier String? @db.VarChar(48)
+    device_id  String? @db.VarChar(36)
     number     String? @db.VarChar(8)
     display    String  @default("") @db.VarChar(255)
     favorite   Boolean @default(false)
 
     @@index([identifier], map: "identifier")
     @@index([number], map: "number")
+    @@index([device_id], map: "device_id")
 }
 
 model phone_gallery {
     id         Int     @id @default(autoincrement())
     identifier String? @db.VarChar(48)
+    device_id  String? @db.VarChar(36)
     image      String  @db.VarChar(255)
 
     @@index([identifier], map: "identifier")
+    @@index([device_id], map: "device_id")
 }
 
 model phone_messages {
     id              Int      @id @default(autoincrement())
+    device_id       String?  @db.VarChar(36)
     message         String   @db.VarChar(512)
     user_identifier String   @db.VarChar(48)
     conversation_id String   @db.VarChar(128)
@@ -379,10 +386,12 @@ model phone_messages {
 
     @@index([user_identifier], map: "user_identifier")
     @@index([conversation_id], map: "conversation_id")
+    @@index([device_id], map: "device_id")
 }
 
 model phone_messages_conversations {
     id                     Int      @id @default(autoincrement())
+    device_id              String?  @db.VarChar(36)
     user_identifier        String   @db.VarChar(8)
     conversation_id        String   @db.VarChar(128)
     participant_identifier String   @db.VarChar(8)
@@ -395,15 +404,46 @@ model phone_messages_conversations {
     @@index([user_identifier], map: "user_identifier")
     @@index([conversation_id], map: "conversation_id")
     @@index([participant_identifier], map: "participant_identifier")
+    @@index([device_id], map: "device_id")
 }
 
 model phone_notes {
-    id         Int    @id @default(autoincrement())
-    identifier String @db.VarChar(48)
-    title      String @db.VarChar(128)
-    content    String @db.LongText
+    id         Int     @id @default(autoincrement())
+    identifier String  @db.VarChar(48)
+    device_id  String? @db.VarChar(36)
+    title      String  @db.VarChar(128)
+    content    String  @db.LongText
 
     @@index([identifier], map: "identifier")
+    @@index([device_id], map: "device_id")
+}
+
+model phone_sim {
+    number     String   @id @db.VarChar(10)
+    owner      String?  @db.VarChar(50)
+    avatar     String?  @db.VarChar(255)
+    created_at DateTime @default(now()) @db.Timestamp(0)
+
+    device phone_device?
+
+    @@index([owner], map: "owner")
+}
+
+model phone_device {
+    id          String   @id @db.VarChar(36)
+    frame       String   @default("black.webp") @db.VarChar(64)
+    owner       String?  @db.VarChar(50)
+    main_for    String?  @unique(map: "main_for") @db.VarChar(50)
+    sim_number  String?  @unique(map: "sim_number") @db.VarChar(10)
+    pin_code    String?  @db.VarChar(8)
+    initialized Boolean  @default(false)
+    settings    Json?
+    created_at  DateTime @default(now()) @db.Timestamp(0)
+    updated_at  DateTime @default(now()) @updatedAt @db.Timestamp(0)
+
+    sim phone_sim? @relation(fields: [sim_number], references: [number], onDelete: SetNull, onUpdate: Cascade, map: "FK_phone_device_sim")
+
+    @@index([owner], map: "owner")
 }
 
 model phone_profile {

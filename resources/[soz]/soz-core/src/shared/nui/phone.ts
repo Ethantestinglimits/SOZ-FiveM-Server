@@ -6,6 +6,7 @@ import { NewsMessage } from '@public/shared/phone/apps/news';
 import { NoteItem } from '@public/shared/phone/apps/notes';
 import { PhotoItem } from '@public/shared/phone/apps/photos';
 import { SocietyMessage } from '@public/shared/phone/apps/society';
+import { PhoneDevice } from '@public/shared/phone/device';
 import { ActiveCall, CallHistory, Contact, Message, MessageConversation } from '@public/shared/phone/simcard';
 import { ForecastWithTemperature } from '@public/shared/weather';
 
@@ -19,6 +20,8 @@ export interface NuiPhoneMap {
     SetEmergency: boolean;
     SetEmergencyDeath: string;
 
+    SetPhoneDevice: PhoneDevice;
+
     SetSimCard: string;
     SetSimCardAvatar: string;
 
@@ -27,6 +30,7 @@ export interface NuiPhoneMap {
     SetCallSound: boolean;
     SetDialSound: boolean;
     SetEndSound: never;
+    PlayNotificationSound: never;
     SetCurrentCall: ActiveCall;
     SetCallsHistory: CallHistory[];
 

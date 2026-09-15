@@ -5,6 +5,7 @@ import { FunctionComponent } from 'react';
 import { NuiEvent } from '../../../shared/event/nui';
 import { InventoryItem } from '../../../shared/inventory';
 import { Item } from '../../../shared/item';
+import { PHONE_ITEM } from '../../../shared/phone/device';
 import { PlayerData } from '../../../shared/player';
 import { fetchNui } from '../../fetch';
 
@@ -178,6 +179,8 @@ enum ActionItemType {
     LookCard = 'lookCard',
     Open = 'open',
     ForceConsume = 'forceConsume',
+    SetMainPhone = 'setMainPhone',
+    RemoveSimCard = 'removeSimCard',
 }
 
 type ActionItemProps = {
@@ -475,6 +478,40 @@ export const ActionItem: FunctionComponent<ActionItemProps> = ({ action, invento
         );
     }
 
+    if (action === ActionItemType.RemoveSimCard) {
+        return (
+            <div
+                onClick={() =>
+                    fetchNui(NuiEvent.InventoryActionRemoveSimCard, {
+                        inventoryId: inventoryId,
+                        inventoryItem: inventoryItem,
+                        item: item,
+                    })
+                }
+                className={classNames}
+            >
+                Retirer la Carte ZIM
+            </div>
+        );
+    }
+
+    if (action === ActionItemType.SetMainPhone) {
+        return (
+            <div
+                onClick={() =>
+                    fetchNui(NuiEvent.InventoryActionSetMainPhone, {
+                        inventoryId: inventoryId,
+                        inventoryItem: inventoryItem,
+                        item: item,
+                    })
+                }
+                className={classNames}
+            >
+                Définir comme téléphone principal
+            </div>
+        );
+    }
+
     return null;
 };
 
@@ -535,6 +572,14 @@ export const getActions = (
         actions.push(ActionItemType.Use);
     } else if (item.type === 'fish' && player.metadata.drugs_skills.includes(DrugSkill.Zoologiste)) {
         actions.push(ActionItemType.Use);
+    }
+
+    if (item.name === PHONE_ITEM) {
+        actions.push(ActionItemType.SetMainPhone);
+
+        if (inventoryItem.metadata?.simNumber) {
+            actions.push(ActionItemType.RemoveSimCard);
+        }
     }
 
     if (item.canShow) {

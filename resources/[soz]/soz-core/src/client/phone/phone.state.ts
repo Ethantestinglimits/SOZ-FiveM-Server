@@ -2,6 +2,7 @@ import { Inject } from '@core/decorators/injectable';
 import { Provider } from '@core/decorators/provider';
 import { Tick } from '@core/decorators/tick';
 import { emitRpc } from '@core/rpc';
+import { wait } from '@core/utils';
 import { AnimationService } from '@public/client/animation/animation.service';
 import { NuiDispatch } from '@public/client/nui/nui.dispatch';
 import { AttachedObjectService } from '@public/client/object/attached.object.service';
@@ -9,11 +10,14 @@ import { PlayerService } from '@public/client/player/player.service';
 import { ResourceLoader } from '@public/client/repository/resource.loader';
 import { StateSelector } from '@public/client/store/store';
 import { PlayerUpdate } from '@public/core/decorators/player';
+import { ClientEvent } from '@public/shared/event/client';
+import { PhoneDevice, PhoneDeviceSettings } from '@public/shared/phone/device';
 import { ActiveCall } from '@public/shared/phone/simcard';
 import { PlayerData } from '@public/shared/player';
 import { RpcServerEvent } from '@public/shared/rpc';
 
 const KVP_PHONE_PROP_MODEL = 'soz_phone_prop_model';
+const PHONE_SWITCH_ANIMATION_DELAY = 750;
 
 @Provider()
 export class PhoneState {
@@ -46,6 +50,8 @@ export class PhoneState {
 
     private currentCall: ActiveCall | null = null;
 
+    private openedDevice: PhoneDevice | null = null;
+
     @PlayerUpdate()
     public onPlayerUpdate(player: PlayerData) {
         this.nuiDispatch.dispatch('phone', 'SetAvailability', !this.phoneDisabled || player.metadata.isdead);
@@ -56,6 +62,26 @@ export class PhoneState {
     ) {
         this.phonePropModel = model;
         SetResourceKvp(KVP_PHONE_PROP_MODEL, model);
+    }
+
+    public setPhonePropModelFromFrame(frame: string) {
+        switch (frame) {
+            case 'gold.webp':
+                this.setPhonePropModel('soz_phone_gold');
+                break;
+            case 'natural.webp':
+                this.setPhonePropModel('soz_phone_natural');
+                break;
+            case 'white.webp':
+                this.setPhonePropModel('soz_phone_white');
+                break;
+            case 'casino_diamond.webp':
+                this.setPhonePropModel('soz_phone_diamond');
+                break;
+            case 'black.webp':
+            default:
+                this.setPhonePropModel('soz_phone_black');
+        }
     }
 
     public isPhoneDisabled() {
@@ -124,6 +150,72 @@ export class PhoneState {
         if (this.phoneProp) {
             emitRpc(RpcServerEvent.PHONE_LIGHT_SET_FLASHLIGHT, ObjToNet(this.phoneProp), value);
         }
+    }
+
+    public getOpenedDevice(): PhoneDevice | null {
+        return this.openedDevice;
+    }
+
+    public setOpenedDevice(device: PhoneDevice | null) {
+        const previous = this.openedDevice;
+
+        this.openedDevice = device;
+
+        if (device?.settings?.frame?.value) {
+            this.setPhonePropModelFromFrame(device.settings.frame.value);
+        }
+
+        this.nuiDispatch.dispatch('phone', 'SetPhoneDevice', device);
+        this.nuiDispatch.dispatch('phone', 'SetSimCard', device?.simNumber || '');
+
+        if (this.currentCall) {
+            this.dispatchCurrentCall();
+        }
+
+        if (
+            previous?.id !== device?.id ||
+            previous?.simNumber !== device?.simNumber ||
+            previous?.isLocked !== device?.isLocked ||
+            previous?.initialized !== device?.initialized
+        ) {
+            TriggerEvent(ClientEvent.PHONE_DEVICE_RELOAD);
+        }
+    }
+
+    public async switchOpenedDevice(device: PhoneDevice | null) {
+        if (!this.phoneOpen || this.openedDevice?.id === device?.id) {
+            this.setOpenedDevice(device);
+
+            return;
+        }
+
+        this.setPhoneFrontCameraEnabled(false);
+        this.setPhoneFlashlightEnabled(false);
+        this.setPhoneOpen(false);
+        TriggerEvent(ClientEvent.PHONE_IS_INSIDE_INPUT, { insideInput: false });
+
+        await wait(PHONE_SWITCH_ANIMATION_DELAY);
+
+        this.setOpenedDevice(device);
+        this.setPhoneOpen(true);
+    }
+
+    public updateOpenedDeviceSettings(settings: PhoneDeviceSettings) {
+        if (!this.openedDevice) {
+            return;
+        }
+
+        this.openedDevice = { ...this.openedDevice, settings };
+    }
+
+    public isCallHiddenFromDisplay(call: ActiveCall | null): boolean {
+        return Boolean(call) && !call.isTransmitter && Boolean(this.openedDevice) && !this.openedDevice.isMain;
+    }
+
+    public dispatchCurrentCall() {
+        const call = this.currentCall;
+
+        this.nuiDispatch.dispatch('phone', 'SetCurrentCall', this.isCallHiddenFromDisplay(call) ? null : call);
     }
 
     public getCurrentCall() {

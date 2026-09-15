@@ -418,6 +418,9 @@ export enum ServerEvent {
     LSMC_HALLOWEEN_LOOT_PLAYER = 'lsmc:halloween:lootPlayer',
     VEHICLE_FREE_JOB_SPAWN = 'soz-core:server:vehicle:free-job-spawn',
 
+    PHONE_DEVICE_SET_MAIN = 'soz-core:server:phone:device:set-main',
+    PHONE_DEVICE_REMOVE_SIM = 'soz-core:server:phone:device:remove-sim',
+
     INVENTORY_USE_ITEM = 'soz-core:server:inventory:use-item',
     INVENTORY_SET_ITEM_SHORTCUT = 'soz-core:server:inventory:set-item-usage',
     INVENTORY_REMOVE_ITEM_SHORTCUT = 'soz-core:server:inventory:remove-item-usage',

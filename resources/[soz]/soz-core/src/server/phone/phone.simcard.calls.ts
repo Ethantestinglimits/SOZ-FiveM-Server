@@ -9,8 +9,8 @@ import { ServerEvent } from '../../shared/event/server';
 import { ActiveCall } from '../../shared/phone/simcard';
 import { Err, Ok } from '../../shared/result';
 import { PrismaService } from '../database/prisma.service';
-import { PlayerService } from '../player/player.service';
 import { Store } from '../store/store';
+import { PhoneDeviceService } from './phone.device.service';
 
 @Provider()
 export class PhoneSimCardCalls {
@@ -20,27 +20,27 @@ export class PhoneSimCardCalls {
     @Inject(PrismaService)
     private readonly prismaService: PrismaService;
 
-    @Inject(PlayerService)
-    private readonly playerService: PlayerService;
+    @Inject(PhoneDeviceService)
+    private readonly phoneDeviceService: PhoneDeviceService;
 
     private calls = new Map<string, ActiveCall>();
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_CALLS_INIT)
     async initCalls(source: number, phoneNumber: string) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
-            console.error('Player not found for', source);
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
+        if (!device?.simNumber) {
             return Err('unavailable');
         }
 
-        const targetPlayer = this.playerService.getPlayerByPhone(phoneNumber);
-        if (!targetPlayer || this.playerAlreadyInCall(targetPlayer.source)) {
+        const target = await this.phoneDeviceService.findDeviceByNumber(phoneNumber);
+        if (!target?.source || !target.isMain || this.playerAlreadyInCall(target.source)) {
             const identifier = uuidv4();
 
             await this.prismaService.phone_calls.create({
                 data: {
                     identifier: identifier,
-                    transmitter: player.charinfo.phone,
+                    device_id: device.id,
+                    transmitter: device.simNumber,
                     receiver: phoneNumber,
                     start: new Date(),
                     end: new Date(),
@@ -48,10 +48,10 @@ export class PhoneSimCardCalls {
                 },
             });
 
-            TriggerClientEvent(ClientEvent.PHONE_SIMCARD_CALLS_UPDATE, player.source, {
+            TriggerClientEvent(ClientEvent.PHONE_SIMCARD_CALLS_UPDATE, source, {
                 identifier: identifier,
-                transmitter: player.charinfo.phone,
-                transmitterSource: player.source,
+                transmitter: device.simNumber,
+                transmitterSource: source,
                 receiver: phoneNumber,
                 receiverSource: -1,
                 start: Date.now(),
@@ -59,30 +59,31 @@ export class PhoneSimCardCalls {
                 is_accepted: false,
                 isTransmitter: true,
             });
-            TriggerClientEvent(ClientEvent.PHONE_SIMCARD_CALLS_INIT, player.source);
-            TriggerClientEvent(ClientEvent.PHONE_SIMCARD_CALLS_HISTORY, player.source);
+            TriggerClientEvent(ClientEvent.PHONE_SIMCARD_CALLS_INIT, source);
+            TriggerClientEvent(ClientEvent.PHONE_SIMCARD_CALLS_HISTORY, source);
 
             return Ok('unavailable');
         }
 
-        this.calls.set(player.charinfo.phone, {
+        this.calls.set(device.simNumber, {
             identifier: uuidv4(),
-            transmitter: player.charinfo.phone,
-            transmitterSource: player.source,
-            receiver: targetPlayer.charinfo.phone,
-            receiverSource: targetPlayer.source,
+            transmitter: device.simNumber,
+            transmitterSource: source,
+            receiver: phoneNumber,
+            receiverSource: target.source,
             start: Date.now(),
             end: Date.now(),
             is_accepted: false,
         });
 
-        const currentCall = this.calls.get(player.charinfo.phone);
+        const currentCall = this.calls.get(device.simNumber);
 
         await this.prismaService.phone_calls.create({
             data: {
                 identifier: currentCall.identifier,
-                transmitter: player.charinfo.phone,
-                receiver: targetPlayer.charinfo.phone,
+                device_id: device.id,
+                transmitter: device.simNumber,
+                receiver: phoneNumber,
                 start: new Date(currentCall.start),
                 end: new Date(currentCall.end),
                 is_accepted: currentCall.is_accepted ? 1 : 0,

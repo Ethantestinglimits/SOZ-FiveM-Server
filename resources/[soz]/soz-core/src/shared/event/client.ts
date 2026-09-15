@@ -490,6 +490,9 @@ export enum ClientEvent {
     XMAS_UPDATE_SCENE_STATE = 'soz-core:client:xmas:update-scene-state',
 
     PHONE_IS_INSIDE_INPUT = 'soz-core:client:phone:is-inside-input',
+    PHONE_DEVICE_OPEN = 'soz-core:client:phone:device:open',
+    PHONE_DEVICE_UPDATE = 'soz-core:client:phone:device:update',
+    PHONE_DEVICE_RELOAD = 'soz-core:client:phone:device:reload',
     PHONE_SIMCARD_CALLS_HISTORY = 'soz-core:client:phone:simcard:calls:history',
     PHONE_SIMCARD_CALLS_INIT = 'phone:app:simcard:calls:init',
     PHONE_SIMCARD_CALLS_RECEIVE = 'phone:app:simcard:calls:receive',

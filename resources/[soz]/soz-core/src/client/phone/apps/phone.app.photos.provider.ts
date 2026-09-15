@@ -20,9 +20,10 @@ export class PhoneAppPhotosProvider {
 
     @Once(OnceStep.NuiLoaded)
     @OnEvent(ClientEvent.ADMIN_SWITCH_CHARACTER)
+    @OnEvent(ClientEvent.PHONE_DEVICE_RELOAD)
     async onNuiLoaded() {
         const photos = await emitRpc<PhotoItem[]>(RpcServerEvent.PHONE_APP_PHOTOS_GET);
-        this.nuiDispatch.dispatch('phone', 'AppPhotosSetData', photos);
+        this.nuiDispatch.dispatch('phone', 'AppPhotosSetData', photos || []);
     }
 
     @OnNuiEvent(NuiEvent.PhoneAppPhotosUpload)

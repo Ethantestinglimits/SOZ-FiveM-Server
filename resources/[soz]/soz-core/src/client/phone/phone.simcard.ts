@@ -20,13 +20,13 @@ export class PhoneSimCard {
 
     @Once(OnceStep.NuiLoaded)
     @OnEvent(ClientEvent.ADMIN_SWITCH_CHARACTER)
+    @OnEvent(ClientEvent.PHONE_DEVICE_RELOAD)
     async onNuiLoaded() {
         const player = this.playerService.getPlayer();
         if (!player) {
             return;
         }
 
-        this.nuiDispatch.dispatch('phone', 'SetSimCard', player.charinfo.phone);
         this.nuiDispatch.dispatch('phone', 'SetSocietySimCard', SocietyNumberList[player.job.id]);
 
         const avatar = await emitRpc<string>(RpcServerEvent.PHONE_SIMCARD_GET_AVATAR);

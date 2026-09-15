@@ -3,57 +3,90 @@ import { Provider } from '@public/core/decorators/provider';
 import { Inject } from '../../core/decorators/injectable';
 import { Rpc } from '../../core/decorators/rpc';
 import { ClientEvent } from '../../shared/event/client';
+import { PhoneDevice } from '../../shared/phone/device';
 import { RpcServerEvent } from '../../shared/rpc';
 import { PrismaService } from '../database/prisma.service';
-import { PlayerService } from '../player/player.service';
+import { PhoneDeviceRepository } from './phone.device.repository';
+import { PhoneDeviceService } from './phone.device.service';
 
 @Provider()
 export class PhoneSimCard {
     @Inject(PrismaService)
     private readonly prismaService: PrismaService;
 
-    @Inject(PlayerService)
-    private readonly playerService: PlayerService;
+    @Inject(PhoneDeviceService)
+    private readonly phoneDeviceService: PhoneDeviceService;
+
+    @Inject(PhoneDeviceRepository)
+    private readonly phoneDeviceRepository: PhoneDeviceRepository;
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_RESET)
     async reset(source: number) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
+
+        if (!device) {
             return;
         }
 
-        await this.prismaService.phone_profile.deleteMany({
-            where: {
-                number: player.charinfo.phone,
-            },
-        });
+        if (device.simNumber) {
+            await this.prismaService.phone_profile.deleteMany({
+                where: {
+                    number: device.simNumber,
+                },
+            });
+        }
 
         await this.prismaService.phone_notes.deleteMany({
             where: {
-                identifier: player.citizenid,
+                device_id: device.id,
             },
         });
 
         await this.prismaService.phone_contacts.deleteMany({
             where: {
-                identifier: player.citizenid,
+                device_id: device.id,
             },
         });
 
         await this.prismaService.phone_gallery.deleteMany({
             where: {
-                identifier: player.citizenid,
+                device_id: device.id,
             },
         });
 
-        TriggerClientEvent(ClientEvent.ADMIN_SWITCH_CHARACTER, source);
+        await this.prismaService.phone_messages.deleteMany({
+            where: {
+                device_id: device.id,
+            },
+        });
+
+        await this.prismaService.phone_messages_conversations.deleteMany({
+            where: {
+                device_id: device.id,
+            },
+        });
+
+        await this.phoneDeviceRepository.resetDevice(device.id);
+
+        const resetDevice: PhoneDevice = {
+            ...device,
+            initialized: false,
+            hasPinCode: false,
+            isOwner: false,
+            isLocked: false,
+            settings: {},
+        };
+
+        this.phoneDeviceService.setOpenedDevice(source, resetDevice);
+        TriggerClientEvent(ClientEvent.PHONE_DEVICE_UPDATE, source, resetDevice);
     }
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_GET_AVATAR)
     async getAvatar(source: number): Promise<string> {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
-            return;
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
+
+        if (!device?.simNumber) {
+            return null;
         }
 
         const profile = await this.prismaService.phone_profile.findFirst({
@@ -61,7 +94,7 @@ export class PhoneSimCard {
                 avatar: true,
             },
             where: {
-                number: player.charinfo.phone,
+                number: device.simNumber,
             },
         });
 
@@ -70,20 +103,21 @@ export class PhoneSimCard {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_UPDATE_AVATAR)
     async updateAvatar(source: number, avatar: string) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
+
+        if (!device?.simNumber) {
             return;
         }
 
         await this.prismaService.phone_profile.upsert({
             where: {
-                number: player.charinfo.phone,
+                number: device.simNumber,
             },
             update: {
                 avatar,
             },
             create: {
-                number: player.charinfo.phone,
+                number: device.simNumber,
                 avatar,
             },
         });
@@ -91,19 +125,20 @@ export class PhoneSimCard {
 
     @Rpc(RpcServerEvent.PHONE_SIMCARD_CALLS_HISTORY_GET)
     async getCallHistory(source: number) {
-        const player = this.playerService.getPlayer(source);
-        if (!player) {
-            return;
+        const device = this.phoneDeviceService.getUnlockedDevice(source);
+
+        if (!device?.simNumber) {
+            return [];
         }
 
         const history = await this.prismaService.phone_calls.findMany({
             where: {
                 OR: [
                     {
-                        receiver: player.charinfo.phone,
+                        receiver: device.simNumber,
                     },
                     {
-                        transmitter: player.charinfo.phone,
+                        transmitter: device.simNumber,
                     },
                 ],
             },

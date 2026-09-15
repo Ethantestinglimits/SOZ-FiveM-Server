@@ -9,6 +9,7 @@ import { NuiEvent } from '../../shared/event/nui';
 import { RpcServerEvent } from '../../shared/rpc';
 import { NuiDispatch } from '../nui/nui.dispatch';
 import { PlayerService } from '../player/player.service';
+import { PhoneState } from './phone.state';
 
 @Provider()
 export class PhoneSimCardMessages {
@@ -18,8 +19,12 @@ export class PhoneSimCardMessages {
     @Inject(PlayerService)
     private readonly playerService: PlayerService;
 
+    @Inject(PhoneState)
+    private readonly phoneState: PhoneState;
+
     @Once(OnceStep.NuiLoaded)
     @OnEvent(ClientEvent.ADMIN_SWITCH_CHARACTER)
+    @OnEvent(ClientEvent.PHONE_DEVICE_RELOAD)
     async onNuiLoaded() {
         const player = this.playerService.getPlayer();
         if (!player) {
@@ -65,7 +70,7 @@ export class PhoneSimCardMessages {
         const conversations = await emitRpc<MessageConversation[]>(
             RpcServerEvent.PHONE_SIMCARD_MESSAGES_CONVERSATION_GET
         );
-        this.nuiDispatch.dispatch('phone', 'SetConversations', conversations);
+        this.nuiDispatch.dispatch('phone', 'SetConversations', conversations || []);
     }
 
     @OnNuiEvent(NuiEvent.PhoneSimCardSendMessage)
@@ -74,8 +79,17 @@ export class PhoneSimCardMessages {
     }
 
     @OnEvent(ClientEvent.PHONE_SIMCARD_MESSAGES_MESSAGE_NEW)
-    async newMessage(message: Message) {
+    async newMessage(message: Message & { device_id?: string }) {
+        const openedDevice = this.phoneState.getOpenedDevice();
         const player = this.playerService.getState();
+
+        if (message.device_id && openedDevice?.id !== message.device_id) {
+            if (!player.isInHub) {
+                this.nuiDispatch.dispatch('phone', 'PlayNotificationSound');
+            }
+
+            return;
+        }
 
         message.isMuted = player.isInHub;
 
@@ -85,6 +99,6 @@ export class PhoneSimCardMessages {
 
     async reloadMessages() {
         const messages = await emitRpc<Message[]>(RpcServerEvent.PHONE_SIMCARD_MESSAGES_GET);
-        this.nuiDispatch.dispatch('phone', 'SetMessages', messages);
+        this.nuiDispatch.dispatch('phone', 'SetMessages', messages || []);
     }
 }
