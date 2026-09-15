@@ -384,6 +384,17 @@ export class VehicleStateService {
         this.vehicleKeys[citizenId].add(vehiclePlate);
     }
 
+    public renameVehicleKey(oldPlate: string, newPlate: string): void {
+        for (const citizenId of Object.keys(this.vehicleKeys)) {
+            const keys = this.vehicleKeys[citizenId];
+
+            if (keys.has(oldPlate)) {
+                keys.delete(oldPlate);
+                keys.add(newPlate);
+            }
+        }
+    }
+
     public getVehicleKeys(citizenId: string): string[] {
         if (!this.vehicleKeys[citizenId]) {
             return [];

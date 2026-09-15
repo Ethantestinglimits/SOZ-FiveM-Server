@@ -367,6 +367,7 @@ export enum NuiEvent {
 
     DrivingSchoolUpdateVehicleLimit = 'soz-core:client:driving-school:update-vehicle-limit',
     DrivingSchoolCheckVehicleSlots = 'soz-core:client:driving-school:check-vehicle-slots',
+    CustomPlateChooseVehicle = 'soz-core:client:vehicle:custom-plate:choose-vehicle',
 
     HousingUpgradeApartment = 'soz-core:client:housing:upgrade-apartment',
     HousingChangePrincipalApartement = 'soz-core:nui:housing:change-principal-apartment',

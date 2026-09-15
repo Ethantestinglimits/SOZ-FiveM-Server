@@ -351,6 +351,8 @@ export enum ServerEvent {
     VEHICLE_USE_BODY_REPAIR_KIT = 'soz-core:server:vehicle:use-body-repair-kit',
     VEHICLE_USE_CLEANING_KIT = 'soz-core:server:vehicle:use-cleaning-kit',
     VEHICLE_USE_WHEEL_KIT = 'soz-core:server:vehicle:use-wheel-kit',
+    CUSTOM_PLATE_BUY = 'soz-core:server:vehicle:custom-plate:buy',
+    CUSTOM_PLATE_APPLY_FAKE = 'soz-core:server:vehicle:custom-plate:apply-fake',
     VEHICLE_FORCE_OPEN = 'soz-core:server:vehicle:force-open',
     VEHICLE_COLLECT_FINGERPRINT = 'soz-core:server:vehicle:collect-fingerprint',
     VEHICLE_COLLECT_DRUG = 'soz-core:server:vehicle:collect-drug',

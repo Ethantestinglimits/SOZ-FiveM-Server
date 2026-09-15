@@ -13,6 +13,7 @@ import { VehicleMigrationProvider } from './vehicle.migration.provider';
 import { VehicleOffroadProvider } from './vehicle.offroad.provider';
 import { VehicleOrderProvider } from './vehicle.order.provider';
 import { VehiclePitStopProvider } from './vehicle.pitstop.provider';
+import { VehiclePlateProvider } from './vehicle.plate.provider';
 import { VehicleProvider } from './vehicle.provider';
 import { VehiclePushProvider } from './vehicle.push.provider';
 import { VehicleRadarProvider } from './vehicle.radar.provider';
@@ -46,6 +47,7 @@ import { VehicleTyreProvider } from './vehicle.tyre.provider';
         VehicleOrderProvider,
         VehiclePushProvider,
         VehicleTyreProvider,
+        VehiclePlateProvider,
     ],
 })
 export class VehicleModule {}

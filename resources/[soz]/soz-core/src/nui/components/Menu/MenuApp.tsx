@@ -24,6 +24,7 @@ import { DoorAdminMenu } from '@public/nui/components/Admin/DoorAdminMenu';
 import { AdminMenuMapper } from '@public/nui/components/Admin/Mapper/AdminMenuMapper';
 import { BahamaUnicornJobMenu } from '@public/nui/components/BahamaUnicorn/BahamaUnicornJobMenu';
 import { PitStopPriceMenu } from '@public/nui/components/Bennys/PitStopPriceMenu';
+import { CustomPlateMenu } from '@public/nui/components/DrivingSchool/CustomPlateMenu';
 import { DrivingSchoolMenu } from '@public/nui/components/DrivingSchool/DrivingSchoolMenu';
 import { FdfJobMenu } from '@public/nui/components/FDF/FdfJobMenu';
 import { FightForStyleJobMenu } from '@public/nui/components/FightForStyle/FightForStyleJobMenu';
@@ -251,6 +252,7 @@ const MenuRouter: FunctionComponent = () => {
             <Route path={`/${MenuType.Garage}/*`} element={<MenuGarage data={menuData} />} />
             <Route path={`/${MenuType.OilSetStationPrice}/*`} element={<MenuOilSetPrice data={menuData} />} />
             <Route path={`/${MenuType.DrivingSchool}/*`} element={<DrivingSchoolMenu data={menuData} />} />
+            <Route path={`/${MenuType.CustomPlate}/*`} element={<CustomPlateMenu data={menuData} />} />
             <Route path={`/${MenuType.HousingUpgrades}/*`} element={<HousingUpgradesMenu data={menuData} />} />
             <Route path={`/${MenuType.LsmcJobMenu}/*`} element={<LsmcJobMenu />} />
             <Route path={`/${MenuType.MandatoryJobMenu}/*`} element={<MandatoryJobMenu data={menuData} />} />

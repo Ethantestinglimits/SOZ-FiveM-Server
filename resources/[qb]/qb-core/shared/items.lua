@@ -3912,6 +3912,18 @@ QBShared.Items = {
         ["description"] = "Pour éviter de se retrouver à pieds.",
         ["illustrator"] = ".LeakFlood",
     },
+    ["plaque_perso_temp"] = {
+        ["name"] = "plaque_perso_temp",
+        ["label"] = "Plaque personnalisée temporaire",
+        ["weight"] = 500,
+        ["type"] = "item",
+        ["unique"] = false,
+        ["useable"] = false,
+        ["shouldClose"] = true,
+        ["combinable"] = nil,
+        ["description"] = "Une fausse plaque à poser sur un véhicule, non reconnue par les services de police.",
+        ["illustrator"] = ".LeakFlood",
+    },
     ["tow_cable"] = {
         ["name"] = "tow_cable",
         ["label"] = "Cable de remorquage",

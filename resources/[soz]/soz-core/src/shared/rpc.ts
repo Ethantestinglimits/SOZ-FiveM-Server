@@ -38,6 +38,8 @@ export enum RpcServerEvent {
     DRIVING_SCHOOL_SPAWN_VEHICLE = 'soz-core:server:driving-school:spawn-vehicle',
     DRIVING_SCHOOL_CHECK_REMAINING_SLOTS = 'soz-core:server:driving-school:check-vehicle-slots',
 
+    CUSTOM_PLATE_GET_VEHICLES = 'soz-core:server:vehicle:custom-plate:get-vehicles',
+
     DMC_GET_CONVERTER_STATE = 'soz-core:server:job:dmc:get-converter-state',
 
     INVENTORY_SELF_FETCH = 'soz-core:inventory:self-fetch',
