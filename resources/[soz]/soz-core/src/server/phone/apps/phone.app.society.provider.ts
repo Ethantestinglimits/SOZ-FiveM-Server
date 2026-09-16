@@ -24,6 +24,7 @@ import { ApiPhoneProvider } from '../../api/api.phone.provider';
 import { PrismaService } from '../../database/prisma.service';
 import { PlayerService } from '../../player/player.service';
 import { ServerStateService } from '../../server.state.service';
+import { PhoneDeviceService } from '../phone.device.service';
 
 @Provider()
 export class PhoneAppSocietyProvider {
@@ -42,6 +43,9 @@ export class PhoneAppSocietyProvider {
     @Inject(Notifier)
     private readonly notifier: Notifier;
 
+    @Inject(PhoneDeviceService)
+    private readonly phoneDeviceService: PhoneDeviceService;
+
     private cityInBlackout = false;
 
     @StateSelector(state => state.global.blackoutLevel)
@@ -55,7 +59,7 @@ export class PhoneAppSocietyProvider {
     async getMessages(source: number) {
         const player = this.playerService.getPlayer(source);
         if (!player) {
-            return;
+            return [];
         }
 
         const messages = await this.prismaService.phone_society_messages.findMany({
@@ -78,7 +82,9 @@ export class PhoneAppSocietyProvider {
         const player = this.playerService.getPlayer(source);
 
         const username = message.overrideIdentifier ?? `${player?.charinfo?.firstname} ${player?.charinfo?.lastname}`;
-        const identifier = (message.anonymous ? '#' : '') + (message.overrideIdentifier ?? player?.charinfo?.phone);
+        const device = this.phoneDeviceService.getOpenedDevice(source);
+        const phoneNumber = device ? device.simNumber || '' : player?.charinfo?.phone;
+        const identifier = (message.anonymous ? '#' : '') + (message.overrideIdentifier ?? phoneNumber);
 
         let position: SocietyMessagePosition | null = message.position
             ? { coords: GetEntityCoords(GetPlayerPed(source)) as Vector3 }
@@ -200,12 +206,12 @@ export class PhoneAppSocietyProvider {
             data,
         });
 
-        const originalPlayer = this.serverStateService.getPlayerByPhoneNumber(
+        const originalDevice = await this.phoneDeviceService.findDeviceByNumber(
             societyMessage.source_phone.replace('#', '')
         );
-        if (originalPlayer && societyMessage.isTaken && !societyMessage.isDone) {
+        if (originalDevice?.source && originalDevice.isMain && societyMessage.isTaken && !societyMessage.isDone) {
             this.notifier.notify(
-                originalPlayer.source,
+                originalDevice.source,
                 `Votre ~b~appel~s~ au ${societyMessage.conversation_id} vient d'être pris !`,
                 'info',
                 10000

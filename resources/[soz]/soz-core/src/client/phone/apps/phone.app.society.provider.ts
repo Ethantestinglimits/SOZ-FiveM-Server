@@ -20,6 +20,11 @@ export class PhoneAppSocietyProvider {
         await this.fetchSocietyMembers();
     }
 
+    @Once(OnceStep.PlayerLoaded)
+    async onPlayerLoaded() {
+        await this.fetchSocietyMembers();
+    }
+
     @On('QBCore:Client:OnJobUpdate')
     async onJobUpdate() {
         await this.fetchSocietyMembers();
@@ -42,6 +47,6 @@ export class PhoneAppSocietyProvider {
 
     private async fetchSocietyMembers() {
         const messages = await emitRpc<SocietyMessage[]>(RpcServerEvent.PHONE_APP_SOCIETY_GET);
-        this.nuiDispatch.dispatch('phone', 'AppSocietySetData', messages);
+        this.nuiDispatch.dispatch('phone', 'AppSocietySetData', messages || []);
     }
 }
