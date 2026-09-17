@@ -14,6 +14,7 @@ export class TextureReplacerProvider {
     private textureDict = CreateRuntimeTxd(`dynamic_prop_textures`);
 
     private loadedTexture: string[] = [];
+    private requestedTextures = new Set<string>();
     private waitingReplcament = new Map<string, TextureReplacement[]>();
     private waitingLoad: string[] = [];
     private loadingTexture: {
@@ -67,6 +68,33 @@ export class TextureReplacerProvider {
                 };
                 this.nuiDispatch.dispatch('texture', 'loadImage', next);
             }
+        }
+    }
+
+    public isTextureLoaded(url: string): boolean {
+        return this.loadedTexture.includes(url);
+    }
+
+    /**
+     * Unlike replaceTexture, this only loads the image into the runtime texture dict without
+     * swapping it onto any model texture slot, so it is safe to call from a per-frame tick.
+     * The load is only ever requested once per url.
+     */
+    public loadTexture(url: string) {
+        if (this.requestedTextures.has(url)) {
+            return;
+        }
+
+        this.requestedTextures.add(url);
+
+        if (!this.loadingTexture) {
+            this.loadingTexture = {
+                length: 0,
+                chunks: [],
+            };
+            this.nuiDispatch.dispatch('texture', 'loadImage', url);
+        } else {
+            this.waitingLoad.push(url);
         }
     }
 

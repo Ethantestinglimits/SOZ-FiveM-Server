@@ -1160,6 +1160,15 @@ model dynamic_prop_billboard {
     updatedAt  DateTime @default(now()) @db.Timestamp(0)
 }
 
+model dynamic_prop_graffiti {
+    id        String   @id @db.VarChar(128)
+    gangId    Int
+    imageUrl  String?  @db.Text
+    position  String   @db.Text
+    createdAt DateTime @default(now()) @db.Timestamp(0)
+    updatedAt DateTime @default(now()) @db.Timestamp(0)
+}
+
 model model_swap {
     id       Int     @id @default(autoincrement())
     source   String  @db.Text

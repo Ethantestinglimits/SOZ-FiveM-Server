@@ -32,6 +32,7 @@ import { MenuLaserGameAdmin } from '@public/nui/components/Games/MenuLaserGameAd
 import { MenuLaserGameCreate } from '@public/nui/components/Games/MenuLaserGameCreate';
 import { MenuLaserGameManage } from '@public/nui/components/Games/MenuLaserGameManage';
 import { GarbageJobMenu } from '@public/nui/components/Garbage/GarbageJobMenu';
+import { GraffitiManageMenu } from '@public/nui/components/Graffiti/GraffitiManageMenu';
 import { MenuGunSmith } from '@public/nui/components/GunSmith/GunSmithMenu';
 import { HousingAddRoommateMenu } from '@public/nui/components/Housing/HousingAddRoommateMenu';
 import { HousingAddTenantMenu } from '@public/nui/components/Housing/HousingAddTenantMenu';
@@ -348,6 +349,7 @@ const MenuRouter: FunctionComponent = () => {
             <Route path={`/${MenuType.GangZoneEditMenu}/*`} element={<MenuGangZoneEdit data={menuData} />} />
             <Route path={`/${MenuType.GangMenu}/*`} element={<MenuGang />} />
             <Route path={`/${MenuType.GangVehiculeMenu}/*`} element={<MenuGangVehicule />} />
+            <Route path={`/${MenuType.GraffitiManageMenu}/*`} element={<GraffitiManageMenu data={menuData} />} />
             <Route path={`/${MenuType.WatchMenu}/*`} element={<MenuWatch data={menuData} />} />
             <Route path={`/${MenuType.HalloweenVampire}/*`} element={<MenuHalloweenVampire />} />
             <Route

@@ -11,4 +11,8 @@ export class GangService {
     public async getMaxSafeSize(gang: Gang) {
         return 0;
     }
+
+    public async isHC(source: number): Promise<boolean> {
+        return false;
+    }
 }

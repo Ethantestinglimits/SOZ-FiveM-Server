@@ -11,6 +11,7 @@ export type WorldObjectMetadata = {
     locked?: boolean;
     closed?: boolean;
     job?: JobType;
+    imageUrl?: string;
 };
 
 export type WorldObjectGrowth = {
