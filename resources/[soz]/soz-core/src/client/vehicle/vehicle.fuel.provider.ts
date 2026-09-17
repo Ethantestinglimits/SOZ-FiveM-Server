@@ -50,6 +50,9 @@ const VehicleClassFuelMultiplier: Partial<Record<VehicleClass, number>> = {
     [VehicleClass.Helicopters]: 6.33,
 };
 
+const LEAKING_TANK_HEALTH_THRESHOLD = 650;
+const LEAKING_FUEL_DRAIN_PER_SECOND = 0.2;
+
 @Provider()
 export class VehicleFuelProvider {
     @Inject(VehicleService)
@@ -628,10 +631,6 @@ export class VehicleFuelProvider {
     }
 
     public checkVehicleFuel(vehicleEntityId: number, vehicleCondition: VehicleCondition): Partial<VehicleCondition> {
-        if (!IsVehicleEngineOn(vehicleEntityId)) {
-            return {};
-        }
-
         const model = GetEntityModel(vehicleEntityId);
 
         if (IsThisModelABicycle(model)) {
@@ -645,7 +644,17 @@ export class VehicleFuelProvider {
             };
         }
 
-        const fuelLevel = vehicleCondition.fuelLevel;
+        const fuelLevelAfterLeak = this.applyFuelTankLeak(vehicleEntityId, model, vehicleCondition.fuelLevel);
+
+        if (!IsVehicleEngineOn(vehicleEntityId)) {
+            if (fuelLevelAfterLeak === vehicleCondition.fuelLevel) {
+                return {};
+            }
+
+            return { fuelLevel: fuelLevelAfterLeak };
+        }
+
+        const fuelLevel = fuelLevelAfterLeak;
         const oilLevel = vehicleCondition.oilLevel;
 
         let multiplier = VehicleClassFuelMultiplier[GetVehicleClass(vehicleEntityId)] || 1.0;
@@ -690,6 +699,30 @@ export class VehicleFuelProvider {
             fuelLevel: newFuel,
             oilLevel: newOil,
         };
+    }
+
+    // Below this tank health, GTA's engine spawns the leaking petrol puddle VFX on its own; the game never drains
+    // fuelLevel for it, so without this the puddle stays forever and the tank never empties. We re-evaluate whether
+    // the VFX should be active every tick, so it turns back on after a refuel and off again once the tank runs dry.
+    private applyFuelTankLeak(vehicleEntityId: number, model: number, fuelLevel: number): number {
+        if (isVehicleModelElectric(model)) {
+            return fuelLevel;
+        }
+
+        const isTankPunctured = GetVehiclePetrolTankHealth(vehicleEntityId) < LEAKING_TANK_HEALTH_THRESHOLD;
+        const isLeaking = isTankPunctured && fuelLevel > 0;
+
+        SetVehicleCanLeakPetrol(vehicleEntityId, isLeaking || !isTankPunctured);
+
+        if (!isLeaking) {
+            return isTankPunctured ? 0 : fuelLevel;
+        }
+
+        const newFuelLevel = Math.max(0, fuelLevel - LEAKING_FUEL_DRAIN_PER_SECOND);
+
+        SetVehicleFuelLevel(vehicleEntityId, newFuelLevel);
+
+        return newFuelLevel;
     }
 
     @Tick(TickInterval.EVERY_5_MINUTE)
