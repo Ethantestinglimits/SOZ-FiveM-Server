@@ -28,6 +28,9 @@ const DEAD_ANIM_NAME = 'dead_a';
 // Local ped clones spawn within this radius of the player and despawn past it (see spawnNearbyBodies).
 const SPAWN_DISTANCE = 30.0;
 
+// Movement speed multiplier while carrying a body (1.0 = normal).
+const CARRY_MOVE_RATE = 1.3;
+
 // Resting bodies are rendered as a non-networked ped local to each client (spawned/despawned by
 // distance below), never a single shared networked entity: dressing/mood/targets are all local-only
 // state anyway, so there is nothing to synchronize, no ownership to acquire, and no risk of ever
@@ -66,6 +69,8 @@ export class PlayerDisconnectedBodyProvider {
     private carriedCitizenIds = new Set<string>();
 
     private carrying: { citizenId: string; entity: number; runner: AnimationRunner } | null = null;
+
+    private lastCarryDebug = 0;
 
     private playerLoaded = false;
 
@@ -299,8 +304,24 @@ export class PlayerDisconnectedBodyProvider {
             return;
         }
 
+        const ped = PlayerPedId();
+
         SetPlayerSprint(PlayerId(), true);
         EnableControlAction(0, Control.Sprint, true);
+        // Fallback in case the game keeps the carry pose at walking gait whatever the sprint control does:
+        // speeds the locomotion up instead. Reset when the carry ends (see carryBody).
+        SetPedMoveRateOverride(ped, CARRY_MOVE_RATE);
+
+        const now = GetGameTimer();
+        if (now - this.lastCarryDebug > 1000) {
+            this.lastCarryDebug = now;
+            console.log(
+                `[disconnected-body] carry sprint: pressed=${IsControlPressed(0, Control.Sprint)} ` +
+                    `disabledPressed=${IsDisabledControlPressed(0, Control.Sprint)} ` +
+                    `enabled=${IsControlEnabled(0, Control.Sprint)} speed=${GetEntitySpeed(ped).toFixed(2)} ` +
+                    `running=${IsPedRunning(ped)} sprinting=${IsPedSprinting(ped)}`
+            );
+        }
     }
 
     private async carryBody(citizenId: string, localEntity: number) {
@@ -373,6 +394,7 @@ export class PlayerDisconnectedBodyProvider {
 
         this.carrying = null;
         this.playerService.setPushing(false);
+        SetPedMoveRateOverride(PlayerPedId(), 1.0);
 
         if (!DoesEntityExist(entity)) {
             return;
