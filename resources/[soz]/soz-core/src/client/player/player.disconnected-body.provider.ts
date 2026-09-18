@@ -15,6 +15,7 @@ import { Provider } from '../../core/decorators/provider';
 import { Tick, TickInterval } from '../../core/decorators/tick';
 import { wait } from '../../core/utils';
 import { ClientEvent, ServerEvent } from '../../shared/event';
+import { Control } from '../../shared/input';
 import { PlayerPositionProvider } from './player.position.provider';
 import { PlayerService } from './player.service';
 
@@ -292,6 +293,16 @@ export class PlayerDisconnectedBodyProvider {
         DeleteEntity(pedHandle);
     }
 
+    @Tick(TickInterval.EVERY_FRAME)
+    public allowSprintWhileCarrying() {
+        if (!this.carrying) {
+            return;
+        }
+
+        SetPlayerSprint(PlayerId(), true);
+        EnableControlAction(0, Control.Sprint, true);
+    }
+
     private async carryBody(citizenId: string, localEntity: number) {
         const snapshot = this.bodies.get(citizenId);
         if (!snapshot || this.carrying) {
@@ -328,7 +339,7 @@ export class PlayerDisconnectedBodyProvider {
         SetEntityCompletelyDisableCollision(entity, true, true);
         // Fireman's carry: the body hangs over the carrier's shoulder (offsets/rotation are the standard
         // ones for the firemans_carry / fin_c2_mcs_1_camman pair).
-        AttachEntityToEntity(entity, playerPed, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 180.0, false, false, false, false, 2, false);
+        AttachEntityToEntity(entity, playerPed, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 0.0, false, false, false, false, 2, false);
 
         this.animationService.playAnimation(
             {
