@@ -191,12 +191,24 @@ export class PlayerDisconnectedBodyProvider {
         // Claim the slot before the model load/CreatePed await so a second tick can't double-spawn.
         this.localPeds.set(citizenId, 0);
 
+        // The stored position is a ped's GetEntityCoords (its center, ~1m above the ground) and the clone
+        // is frozen the instant it is configured, so it would hover at that height instead of settling.
+        // Snap it to the ground; when collision isn't loaded yet at this distance, fall back to the
+        // standing-height offset.
+        const [foundGround, groundZ] = GetGroundZFor_3dCoord(
+            snapshot.position[0],
+            snapshot.position[1],
+            snapshot.position[2] + 0.5,
+            false
+        );
+        const spawnZ = foundGround ? groundZ : snapshot.position[2] - 1.0;
+
         const pedHandle = await this.pedFactory.createPed({
             model: snapshot.model,
             coords: {
                 x: snapshot.position[0],
                 y: snapshot.position[1],
-                z: snapshot.position[2],
+                z: spawnZ,
                 w: snapshot.position[3],
             },
             skin: snapshot.skin,
