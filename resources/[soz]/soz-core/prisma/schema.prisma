@@ -259,6 +259,17 @@ model persistent_prop {
     position String  @db.LongText
 }
 
+model disconnected_body {
+    citizenid  String   @id @db.VarChar(50)
+    position   String   @db.LongText
+    model      String   @db.VarChar(191)
+    skin       String   @db.LongText
+    outfit     String   @db.LongText
+    animation  String?  @db.LongText
+    is_dead    Boolean  @default(false)
+    created_at DateTime @default(now()) @db.Timestamp(0)
+}
+
 model event {
     id          String  @id @default(uuid())
     name        String  @db.VarChar(255)
