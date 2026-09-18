@@ -51,7 +51,7 @@ const VehicleClassFuelMultiplier: Partial<Record<VehicleClass, number>> = {
 };
 
 const LEAKING_TANK_HEALTH_THRESHOLD = 650;
-const LEAKING_FUEL_DRAIN_PER_SECOND = 0.2;
+const LEAKING_FUEL_DRAIN_PER_SECOND = 1;
 
 @Provider()
 export class VehicleFuelProvider {
