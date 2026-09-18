@@ -8,7 +8,7 @@ import { InventoryType } from '@public/shared/inventory';
 import { DisconnectedBodySnapshot } from '@public/shared/player-disconnected-body';
 import { Vector3, Vector4 } from '@public/shared/polyzone/vector';
 
-import { OnEvent } from '../../core/decorators/event';
+import { Once, OnEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Tick, TickInterval } from '../../core/decorators/tick';
@@ -64,6 +64,49 @@ export class PlayerDisconnectedBodyProvider {
     private carriedCitizenIds = new Set<string>();
 
     private carrying: { citizenId: string; entity: number } | null = null;
+
+    private citizenIdByPed = new Map<number, string>();
+
+    // Registered once, globally: createForEntity does NOT work on peds (the target resolver's
+    // checkTargetEntityActions explicitly skips entityType 1/2, only checkTargetPedActions — driven by
+    // this global registration — handles them), so per-clone entity targets silently never match.
+    @Once()
+    public registerBodyTargets() {
+        this.targetFactory.createForAllPed([
+            {
+                label: 'Fouiller le corps',
+                icon: 'global/search',
+                category: 'citizen',
+                canInteract: entity => this.citizenIdByPed.has(entity),
+                action: (entity, entityCoords) => {
+                    const citizenId = this.citizenIdByPed.get(entity);
+                    if (!citizenId) {
+                        return;
+                    }
+
+                    this.inventoryManager.openInventory(
+                        InventoryType.Player,
+                        `player_${citizenId}`,
+                        entityCoords || (GetEntityCoords(entity) as Vector3),
+                    );
+                },
+            },
+            {
+                label: 'Déplacer le corps',
+                icon: 'ems/push',
+                category: 'citizen',
+                canInteract: entity => this.citizenIdByPed.has(entity) && !this.carrying,
+                action: entity => {
+                    const citizenId = this.citizenIdByPed.get(entity);
+                    if (!citizenId) {
+                        return;
+                    }
+
+                    this.carryBody(citizenId, entity);
+                },
+            },
+        ]);
+    }
 
     @Tick(TickInterval.EVERY_SECOND)
     public pushBodyStateSnapshot() {
@@ -179,6 +222,7 @@ export class PlayerDisconnectedBodyProvider {
         }
 
         this.localPeds.set(citizenId, pedHandle);
+        this.citizenIdByPed.set(pedHandle, citizenId);
 
         if (!snapshot.isDead) {
             SetFacialIdleAnimOverride(pedHandle, SLEEP_MOOD, null);
@@ -194,30 +238,29 @@ export class PlayerDisconnectedBodyProvider {
             if (NetworkDoesEntityExistWithNetworkId(snapshot.vehicleNetId)) {
                 const vehicle = NetToVeh(snapshot.vehicleNetId);
                 SetPedIntoVehicle(pedHandle, vehicle, snapshot.vehicleSeatIndex ?? -1);
+            } else if (DoesEntityExist(pedHandle)) {
+                // The vehicle never streamed in for this client (e.g. nobody kept it loaded/it got
+                // cleaned up) — drop the ped to the ground instead of leaving it floating at the old
+                // seat height, and let it act like a normal grounded body from here on.
+                const [found, groundZ] = GetGroundZFor_3dCoord(
+                    snapshot.position[0],
+                    snapshot.position[1],
+                    snapshot.position[2],
+                    false
+                );
+                SetEntityCoords(
+                    pedHandle,
+                    snapshot.position[0],
+                    snapshot.position[1],
+                    found ? groundZ : snapshot.position[2],
+                    false,
+                    false,
+                    false,
+                    false
+                );
+                FreezeEntityPosition(pedHandle, true);
             }
         }
-
-        this.targetFactory.createForEntity(pedHandle, [
-            {
-                label: 'Fouiller le corps',
-                icon: 'global/search',
-                category: 'citizen',
-                action: (entity, entityCoords) => {
-                    this.inventoryManager.openInventory(
-                        InventoryType.Player,
-                        `player_${citizenId}`,
-                        entityCoords || (GetEntityCoords(entity) as Vector3),
-                    );
-                },
-            },
-            {
-                label: 'Déplacer le corps',
-                icon: 'ems/push',
-                category: 'citizen',
-                canInteract: () => !this.carrying,
-                action: entity => this.carryBody(citizenId, entity),
-            },
-        ]);
     }
 
     private despawnLocalPed(citizenId: string) {
@@ -228,7 +271,7 @@ export class PlayerDisconnectedBodyProvider {
             return;
         }
 
-        this.targetFactory.removeForEntity([pedHandle]);
+        this.citizenIdByPed.delete(pedHandle);
         DeleteEntity(pedHandle);
     }
 
