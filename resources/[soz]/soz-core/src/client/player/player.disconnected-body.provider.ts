@@ -313,11 +313,6 @@ export class PlayerDisconnectedBodyProvider {
             invincible: true,
             network: true,
             isScriptHostPed: true,
-            ...(snapshot.isDead
-                ? { animDict: DEAD_ANIM_DICTIONARY, anim: DEAD_ANIM_NAME }
-                : snapshot.animation
-                  ? { animDict: snapshot.animation.dictionary, anim: snapshot.animation.name }
-                  : { animDict: SLEEP_ANIM_DICTIONARY, anim: SLEEP_ANIM_NAME }),
         });
 
         if (!entity) {
@@ -331,14 +326,27 @@ export class PlayerDisconnectedBodyProvider {
 
         SetEntityCollision(entity, false, true);
         SetEntityCompletelyDisableCollision(entity, true, true);
-        // Same attach point/bone as the police hostage drag (police.player.provider.ts), which is built
-        // for a person-shaped entity slung against the dragger's side, unlike a box-carry anim.
-        AttachEntityToEntity(entity, playerPed, 11816, 0.45, 0.45, 0.0, 0.0, 0.0, 0.0, false, false, true, true, 2, true);
+        // Fireman's carry: the body hangs over the carrier's shoulder (offsets/rotation are the standard
+        // ones for the firemans_carry / fin_c2_mcs_1_camman pair).
+        AttachEntityToEntity(entity, playerPed, 0, 0.27, 0.15, 0.63, 0.5, 0.5, 180.0, false, false, false, false, 2, false);
+
+        this.animationService.playAnimation(
+            {
+                base: {
+                    dictionary: 'nm',
+                    name: 'firemans_carry',
+                    options: {
+                        repeat: true,
+                    },
+                },
+            },
+            { ped: entity }
+        );
 
         const runner = this.animationService.playAnimation({
             base: {
-                dictionary: 'anim@gangops@hostage@',
-                name: 'perp_idle',
+                dictionary: 'missfinale_c2mcs_1',
+                name: 'fin_c2_mcs_1_camman',
                 options: {
                     repeat: true,
                     onlyUpperBody: true,
