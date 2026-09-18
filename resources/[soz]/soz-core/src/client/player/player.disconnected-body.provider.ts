@@ -1,3 +1,4 @@
+import { AnimationRunner } from '@public/client/animation/animation.factory';
 import { AnimationService } from '@public/client/animation/animation.service';
 import { ClothingService } from '@public/client/clothing/clothing.service';
 import { PedFactory } from '@public/client/factory/ped.factory';
@@ -8,7 +9,7 @@ import { InventoryType } from '@public/shared/inventory';
 import { DisconnectedBodySnapshot } from '@public/shared/player-disconnected-body';
 import { Vector3, Vector4 } from '@public/shared/polyzone/vector';
 
-import { Once, OnEvent } from '../../core/decorators/event';
+import { Once, OnceStep, OnEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Tick, TickInterval } from '../../core/decorators/tick';
@@ -63,7 +64,11 @@ export class PlayerDisconnectedBodyProvider {
 
     private carriedCitizenIds = new Set<string>();
 
-    private carrying: { citizenId: string; entity: number } | null = null;
+    private carrying: { citizenId: string; entity: number; runner: AnimationRunner } | null = null;
+
+    private playerLoaded = false;
+
+    private pendingTeleport: Vector4 | null = null;
 
     private citizenIdByPed = new Map<number, string>();
 
@@ -330,10 +335,7 @@ export class PlayerDisconnectedBodyProvider {
         // for a person-shaped entity slung against the dragger's side, unlike a box-carry anim.
         AttachEntityToEntity(entity, playerPed, 11816, 0.45, 0.45, 0.0, 0.0, 0.0, 0.0, false, false, true, true, 2, true);
 
-        this.carrying = { citizenId, entity };
-        this.playerService.setPushing(true);
-
-        await this.animationService.playAnimation({
+        const runner = this.animationService.playAnimation({
             base: {
                 dictionary: 'anim@gangops@hostage@',
                 name: 'perp_idle',
@@ -344,6 +346,11 @@ export class PlayerDisconnectedBodyProvider {
                 },
             },
         });
+
+        this.carrying = { citizenId, entity, runner };
+        this.playerService.setPushing(true);
+
+        await runner;
 
         this.carrying = null;
         this.playerService.setPushing(false);
@@ -406,8 +413,37 @@ export class PlayerDisconnectedBodyProvider {
         }
     }
 
+    // The server fires this while the login RPC is still running, before soz-character places the player
+    // from player.position (loading/logging.lua) — teleporting right away just gets overwritten by that
+    // placement, so hold it until the character has finished loading.
     @OnEvent(ClientEvent.PLAYER_BODY_TELEPORT)
     public async onTeleport(position: Vector4) {
-        await this.playerPositionProvider.teleportAdminToPosition(position);
+        this.pendingTeleport = position;
+
+        if (this.playerLoaded) {
+            await this.applyPendingTeleport();
+        }
+    }
+
+    @Once(OnceStep.PlayerLoaded, true)
+    public async onPlayerLoaded() {
+        this.playerLoaded = true;
+        await this.applyPendingTeleport();
+    }
+
+    private async applyPendingTeleport() {
+        const position = this.pendingTeleport;
+        this.pendingTeleport = null;
+
+        if (position) {
+            await this.playerPositionProvider.teleportAdminToPosition(position);
+        }
+    }
+
+    // The reconnecting player owns this body: free the carrier's hands (the animation ending runs the
+    // normal drop path, which deletes the carried ped; the server ignores its stop report).
+    @OnEvent(ClientEvent.PLAYER_BODY_CANCEL_CARRY)
+    public onCancelCarry() {
+        this.carrying?.runner.cancel();
     }
 }

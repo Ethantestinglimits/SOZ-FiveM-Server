@@ -195,6 +195,7 @@ export enum ClientEvent {
     PLAYER_BODY_SYNC_ALL = 'soz-core:client:player:body:sync-all',
     PLAYER_BODY_REMOVE = 'soz-core:client:player:body:remove',
     PLAYER_BODY_CARRY_STATE = 'soz-core:client:player:body:carry-state',
+    PLAYER_BODY_CANCEL_CARRY = 'soz-core:client:player:body:cancel-carry',
     PLAYER_BODY_TELEPORT = 'soz-core:client:player:body:teleport',
 
     PROGRESS_START = 'soz-core:client:progress:start',

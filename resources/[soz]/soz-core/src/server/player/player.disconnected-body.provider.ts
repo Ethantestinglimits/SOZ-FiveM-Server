@@ -20,7 +20,7 @@ export class PlayerDisconnectedBodyProvider {
 
     private bodies: Record<string, DisconnectedBodySnapshot> = {};
 
-    private carriedNetIds: Record<string, number> = {};
+    private carriers: Record<string, { source: number; netId: number }> = {};
 
     @Once(OnceStep.DatabaseConnected)
     public async restoreBodies() {
@@ -53,6 +53,13 @@ export class PlayerDisconnectedBodyProvider {
         const snapshot = this.lastKnownState[source];
         delete this.lastKnownState[source];
 
+        // A carrier leaving takes the networked ped they were holding with them (it is their entity), so
+        // the carried body would stay hidden forever on every client: drop it where the carrier stood.
+        const carriedCitizenId = Object.keys(this.carriers).find(id => this.carriers[id].source === source);
+        if (carriedCitizenId && snapshot) {
+            await this.setBodyPosition(carriedCitizenId, snapshot.position);
+        }
+
         if (!snapshot || this.bodies[snapshot.citizenId]) {
             return;
         }
@@ -76,22 +83,39 @@ export class PlayerDisconnectedBodyProvider {
 
         delete this.bodies[player.citizenid];
 
+        let spawnPosition: Vector4 = body.position;
+
+        // Reconnecting while someone is carrying the body: the player comes back where the carrier is
+        // right now, and the carrier's hands are freed (their carry flow tears the ped down itself).
+        const carrier = this.carriers[player.citizenid];
+        if (carrier) {
+            delete this.carriers[player.citizenid];
+
+            const carrierPed = GetPlayerPed(String(carrier.source));
+            if (carrierPed && DoesEntityExist(carrierPed)) {
+                const coords = GetEntityCoords(carrierPed);
+                spawnPosition = [coords[0], coords[1], coords[2], GetEntityHeading(carrierPed)];
+            }
+
+            TriggerClientEvent(ClientEvent.PLAYER_BODY_CANCEL_CARRY, carrier.source);
+        }
+
         TriggerClientEvent(ClientEvent.PLAYER_BODY_REMOVE, -1, player.citizenid);
 
         await this.prismaService.disconnected_body
             .delete({ where: { citizenid: player.citizenid } })
             .catch(() => undefined);
 
-        TriggerClientEvent(ClientEvent.PLAYER_BODY_TELEPORT, source, body.position);
+        TriggerClientEvent(ClientEvent.PLAYER_BODY_TELEPORT, source, spawnPosition);
     }
 
     @OnEvent(ServerEvent.PLAYER_BODY_START_CARRY)
     public onStartCarry(source: number, citizenId: string, netId: number) {
-        if (!this.bodies[citizenId] || this.carriedNetIds[citizenId]) {
+        if (!this.bodies[citizenId] || this.carriers[citizenId]) {
             return;
         }
 
-        this.carriedNetIds[citizenId] = netId;
+        this.carriers[citizenId] = { source, netId };
 
         // Everyone still tracking a local clone for this body needs to drop it now that a real
         // networked ped (the one being carried) represents it instead.
@@ -100,19 +124,22 @@ export class PlayerDisconnectedBodyProvider {
 
     @OnEvent(ServerEvent.PLAYER_BODY_STOP_CARRY)
     public async onStopCarry(source: number, citizenId: string, position: Vector4) {
-        if (!this.bodies[citizenId]) {
+        if (!this.bodies[citizenId] || this.carriers[citizenId]?.source !== source) {
             return;
         }
 
-        delete this.carriedNetIds[citizenId];
+        await this.setBodyPosition(citizenId, position);
+    }
+
+    private async setBodyPosition(citizenId: string, position: Vector4) {
+        delete this.carriers[citizenId];
 
         const snapshot: DisconnectedBodySnapshot = { ...this.bodies[citizenId], position };
         this.bodies[citizenId] = snapshot;
         await this.persistBody(snapshot);
 
-        // The login flow places the player from player.position (soz-character loading/logging.lua), which
-        // qb-core wrote at disconnect — a teleport fired on PLAYER_LOADED gets overridden by that
-        // placement, so the moved spot has to be written where the game actually reads it from.
+        // Written to player.position too, which is what the login flow places the player from
+        // (soz-character loading/logging.lua) — the client-side teleport alone is not enough.
         await this.prismaService.player
             .update({
                 where: { citizenid: citizenId },
