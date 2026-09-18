@@ -191,6 +191,8 @@ export enum ClientEvent {
     PLAYER_ZOMBIE_SET_POSITIONS = 'soz-core:client:player:zombie:set-positions',
     PLAYER_CARD_SHOW = 'soz-core:client:player:card:show',
     PLAYER_CARD_SEE = 'soz-core:client:player:card:see',
+    PLAYER_BODY_APPLY_APPEARANCE = 'soz-core:client:player:body:apply-appearance',
+    PLAYER_BODY_TELEPORT = 'soz-core:client:player:body:teleport',
 
     PROGRESS_START = 'soz-core:client:progress:start',
     PROGRESS_STOP = 'soz-core:client:progress:stop',
