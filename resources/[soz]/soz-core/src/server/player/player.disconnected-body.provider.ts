@@ -110,6 +110,16 @@ export class PlayerDisconnectedBodyProvider {
         this.bodies[citizenId] = snapshot;
         await this.persistBody(snapshot);
 
+        // The login flow places the player from player.position (soz-character loading/logging.lua), which
+        // qb-core wrote at disconnect — a teleport fired on PLAYER_LOADED gets overridden by that
+        // placement, so the moved spot has to be written where the game actually reads it from.
+        await this.prismaService.player
+            .update({
+                where: { citizenid: citizenId },
+                data: { position: JSON.stringify({ x: position[0], y: position[1], z: position[2] }) },
+            })
+            .catch(() => undefined);
+
         // Resume normal local-clone rendering for everyone at the new position.
         TriggerClientEvent(ClientEvent.PLAYER_BODY_SYNC, -1, snapshot);
     }
