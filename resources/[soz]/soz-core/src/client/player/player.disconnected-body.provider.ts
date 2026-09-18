@@ -8,7 +8,7 @@ import { InventoryType } from '@public/shared/inventory';
 import { DisconnectedBodySnapshot } from '@public/shared/player-disconnected-body';
 import { Vector3, Vector4 } from '@public/shared/polyzone/vector';
 
-import { Once, OnEvent } from '../../core/decorators/event';
+import { OnEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Tick, TickInterval } from '../../core/decorators/tick';
@@ -23,6 +23,14 @@ const SLEEP_MOOD = 'mood_sleeping_1';
 const DEAD_ANIM_DICTIONARY = 'dead';
 const DEAD_ANIM_NAME = 'dead_a';
 
+// Local ped clones spawn within this radius of the player and despawn past it (see spawnNearbyBodies).
+const SPAWN_DISTANCE = 30.0;
+
+// Resting bodies are rendered as a non-networked ped local to each client (spawned/despawned by
+// distance below), never a single shared networked entity: dressing/mood/targets are all local-only
+// state anyway, so there is nothing to synchronize, no ownership to acquire, and no risk of ever
+// showing the model's default look while waiting on that. A real networked ped only exists for the
+// few seconds someone is actively carrying one (see carryBody).
 @Provider()
 export class PlayerDisconnectedBodyProvider {
     @Inject(PlayerService)
@@ -49,53 +57,13 @@ export class PlayerDisconnectedBodyProvider {
     @Inject(Notifier)
     private notifier: Notifier;
 
-    private appliedNetIds = new Set<number>();
+    private bodies = new Map<string, DisconnectedBodySnapshot>();
 
-    private pendingBodies = new Map<number, DisconnectedBodySnapshot>();
+    private localPeds = new Map<string, number>();
 
-    private bodyCitizenIds = new Map<number, string>();
+    private carriedCitizenIds = new Set<string>();
 
-    private carriedBody = 0;
-
-    @Once()
-    public registerBodyTargets() {
-        this.targetFactory.createForAllPed([
-            {
-                label: 'Fouiller le corps',
-                icon: 'global/search',
-                category: 'citizen',
-                canInteract: entity => this.getBodyCitizenId(entity) !== null,
-                action: (entity, entityCoords) => {
-                    const citizenId = this.getBodyCitizenId(entity);
-                    if (!citizenId) {
-                        return;
-                    }
-
-                    this.inventoryManager.openInventory(
-                        InventoryType.Player,
-                        `player_${citizenId}`,
-                        entityCoords || (GetEntityCoords(entity) as Vector3),
-                    );
-                },
-            },
-            {
-                label: 'Déplacer le corps',
-                icon: 'ems/push',
-                category: 'citizen',
-                canInteract: entity =>
-                    this.getBodyCitizenId(entity) !== null && !this.carriedBody && !this.playerService.isPushing(),
-                action: entity => this.carryBody(entity),
-            },
-        ]);
-    }
-
-    private getBodyCitizenId(entity: number): string | null {
-        if (!entity || !DoesEntityExist(entity) || !NetworkGetEntityIsNetworked(entity)) {
-            return null;
-        }
-
-        return this.bodyCitizenIds.get(NetworkGetNetworkIdFromEntity(entity)) ?? null;
-    }
+    private carrying: { citizenId: string; entity: number } | null = null;
 
     @Tick(TickInterval.EVERY_SECOND)
     public pushBodyStateSnapshot() {
@@ -146,62 +114,41 @@ export class PlayerDisconnectedBodyProvider {
         return -1;
     }
 
-    @OnEvent(ClientEvent.PLAYER_BODY_APPLY_APPEARANCE)
-    public async onApplyAppearance(netId: number, snapshot: DisconnectedBodySnapshot) {
-        if (this.appliedNetIds.has(netId) || this.pendingBodies.has(netId)) {
-            return;
-        }
-
-        // Makes the body interactable as soon as it is known: the targets registered in
-        // registerBodyTargets resolve it by net id, so they work before it is dressed and survive it
-        // streaming in and out.
-        this.bodyCitizenIds.set(netId, snapshot.citizenId);
-        this.pendingBodies.set(netId, snapshot);
-
-        let attempts = 0;
-        while (!NetworkDoesEntityExistWithNetworkId(netId) && attempts < 100) {
-            await wait(100);
-            attempts++;
-        }
-
-        if (!NetworkDoesEntityExistWithNetworkId(netId)) {
-            this.pendingBodies.delete(netId);
-            return;
-        }
-
-        await this.applyBodyAppearance(netId, snapshot);
-    }
-
-    // Retries bodies this client could not dress yet: the appearance natives are ignored unless the
-    // caller owns the networked ped, and ownership only comes once it is streamed in close enough.
     @Tick(TickInterval.EVERY_SECOND)
-    public async retryPendingBodies() {
-        if (this.pendingBodies.size === 0) {
-            return;
-        }
+    public async spawnNearbyBodies() {
+        const playerCoords = GetEntityCoords(PlayerPedId()) as Vector3;
 
-        for (const [netId, snapshot] of [...this.pendingBodies]) {
-            await this.applyBodyAppearance(netId, snapshot);
+        for (const [citizenId, snapshot] of this.bodies) {
+            const hasLocalPed = this.localPeds.has(citizenId);
+            if (this.carriedCitizenIds.has(citizenId)) {
+                if (hasLocalPed) {
+                    this.despawnLocalPed(citizenId);
+                }
+                continue;
+            }
+
+            const distance = Vdist(
+                playerCoords[0],
+                playerCoords[1],
+                playerCoords[2],
+                snapshot.position[0],
+                snapshot.position[1],
+                snapshot.position[2]
+            );
+
+            if (distance <= SPAWN_DISTANCE && !hasLocalPed) {
+                await this.spawnLocalPed(citizenId, snapshot);
+            } else if (distance > SPAWN_DISTANCE && hasLocalPed) {
+                this.despawnLocalPed(citizenId);
+            }
         }
     }
 
-    private async applyBodyAppearance(netId: number, snapshot: DisconnectedBodySnapshot) {
-        if (!NetworkDoesEntityExistWithNetworkId(netId)) {
-            return;
-        }
+    private async spawnLocalPed(citizenId: string, snapshot: DisconnectedBodySnapshot) {
+        // Claim the slot before the model load/CreatePed await so a second tick can't double-spawn.
+        this.localPeds.set(citizenId, 0);
 
-        const pedHandle = NetToPed(netId);
-
-        if (!NetworkHasControlOfEntity(pedHandle)) {
-            NetworkRequestControlOfEntity(pedHandle);
-
-            return;
-        }
-
-        this.pendingBodies.delete(netId);
-        this.appliedNetIds.add(netId);
-
-        await this.pedFactory.configurePed(pedHandle, {
+        const pedHandle = await this.pedFactory.createPed({
             model: snapshot.model,
             coords: {
                 x: snapshot.position[0],
@@ -214,12 +161,24 @@ export class PlayerDisconnectedBodyProvider {
             freeze: !snapshot.vehicleNetId,
             invincible: true,
             blockevents: true,
+            network: false,
             ...(snapshot.isDead
                 ? { animDict: DEAD_ANIM_DICTIONARY, anim: DEAD_ANIM_NAME }
                 : snapshot.animation
                   ? { animDict: snapshot.animation.dictionary, anim: snapshot.animation.name }
                   : { animDict: SLEEP_ANIM_DICTIONARY, anim: SLEEP_ANIM_NAME }),
         });
+
+        if (!pedHandle || !this.localPeds.has(citizenId)) {
+            // Removed/out of range again while the model was loading.
+            if (pedHandle) {
+                DeleteEntity(pedHandle);
+            }
+            this.localPeds.delete(citizenId);
+            return;
+        }
+
+        this.localPeds.set(citizenId, pedHandle);
 
         if (!snapshot.isDead) {
             SetFacialIdleAnimOverride(pedHandle, SLEEP_MOOD, null);
@@ -238,36 +197,85 @@ export class PlayerDisconnectedBodyProvider {
             }
         }
 
-        SetEntityCollision(pedHandle, true, true);
-        SetEntityVisible(pedHandle, true, false);
+        this.targetFactory.createForEntity(pedHandle, [
+            {
+                label: 'Fouiller le corps',
+                icon: 'global/search',
+                category: 'citizen',
+                action: (entity, entityCoords) => {
+                    this.inventoryManager.openInventory(
+                        InventoryType.Player,
+                        `player_${citizenId}`,
+                        entityCoords || (GetEntityCoords(entity) as Vector3),
+                    );
+                },
+            },
+            {
+                label: 'Déplacer le corps',
+                icon: 'ems/push',
+                category: 'citizen',
+                canInteract: () => !this.carrying,
+                action: entity => this.carryBody(citizenId, entity),
+            },
+        ]);
     }
 
-    private async carryBody(entity: number) {
-        for (let i = 0; i < 10; i++) {
-            if (NetworkHasControlOfEntity(entity)) {
-                break;
-            }
+    private despawnLocalPed(citizenId: string) {
+        const pedHandle = this.localPeds.get(citizenId);
+        this.localPeds.delete(citizenId);
 
-            NetworkRequestControlOfEntity(entity);
-            await wait(i * 100);
-        }
-
-        if (!NetworkHasControlOfEntity(entity)) {
-            this.notifier.notify('Impossible de déplacer ce corps.', 'error');
-
+        if (!pedHandle || !DoesEntityExist(pedHandle)) {
             return;
         }
 
+        this.targetFactory.removeForEntity([pedHandle]);
+        DeleteEntity(pedHandle);
+    }
+
+    private async carryBody(citizenId: string, localEntity: number) {
+        const snapshot = this.bodies.get(citizenId);
+        if (!snapshot || this.carrying) {
+            return;
+        }
+
+        const coords = GetEntityCoords(localEntity) as Vector3;
+        const heading = GetEntityHeading(localEntity);
+
+        this.despawnLocalPed(citizenId);
+
+        // Created networked+script-host by this client, so it has network control immediately — no
+        // ownership acquisition needed, unlike a server-created shared entity.
+        const entity = await this.pedFactory.createPed({
+            model: snapshot.model,
+            coords: { x: coords[0], y: coords[1], z: coords[2], w: heading },
+            skin: snapshot.skin,
+            outfit: snapshot.outfit,
+            invincible: true,
+            network: true,
+            isScriptHostPed: true,
+            ...(snapshot.isDead
+                ? { animDict: DEAD_ANIM_DICTIONARY, anim: DEAD_ANIM_NAME }
+                : snapshot.animation
+                  ? { animDict: snapshot.animation.dictionary, anim: snapshot.animation.name }
+                  : { animDict: SLEEP_ANIM_DICTIONARY, anim: SLEEP_ANIM_NAME }),
+        });
+
+        if (!entity) {
+            return;
+        }
+
+        const netId = NetworkGetNetworkIdFromEntity(entity);
+        TriggerServerEvent(ServerEvent.PLAYER_BODY_START_CARRY, citizenId, netId);
+
         const playerPed = PlayerPedId();
 
-        FreezeEntityPosition(entity, false);
         SetEntityCollision(entity, false, true);
         SetEntityCompletelyDisableCollision(entity, true, true);
         // Same attach point/bone as the police hostage drag (police.player.provider.ts), which is built
-        // for a person-shaped entity slung against the dragger's side, unlike the box-carry anim.
+        // for a person-shaped entity slung against the dragger's side, unlike a box-carry anim.
         AttachEntityToEntity(entity, playerPed, 11816, 0.45, 0.45, 0.0, 0.0, 0.0, 0.0, false, false, true, true, 2, true);
 
-        this.carriedBody = entity;
+        this.carrying = { citizenId, entity };
         this.playerService.setPushing(true);
 
         await this.animationService.playAnimation({
@@ -282,62 +290,64 @@ export class PlayerDisconnectedBodyProvider {
             },
         });
 
-        this.carriedBody = 0;
+        this.carrying = null;
         this.playerService.setPushing(false);
 
-        for (let i = 0; i < 10; i++) {
-            if (NetworkHasControlOfEntity(entity)) {
-                break;
-            }
-
-            NetworkRequestControlOfEntity(entity);
-            await wait(i * 100);
+        if (!DoesEntityExist(entity)) {
+            return;
         }
 
         DetachEntity(entity, false, false);
         SetEntityCompletelyDisableCollision(entity, false, true);
         SetEntityCollision(entity, true, true);
         PlaceObjectOnGroundProperly(entity);
-        FreezeEntityPosition(entity, true);
 
-        // Report the final position explicitly instead of relying on the server reading GetEntityCoords
-        // off entity sync at reconnect time: sync is throttled/lags for a just-frozen entity, so that
-        // read could still see the pre-move spot depending on timing.
-        const netId = NetworkGetNetworkIdFromEntity(entity);
-        const coords = GetEntityCoords(entity) as Vector3;
-        const heading = GetEntityHeading(entity);
-        TriggerServerEvent(ServerEvent.PLAYER_BODY_MOVED, netId, [coords[0], coords[1], coords[2], heading]);
+        const finalCoords = GetEntityCoords(entity) as Vector3;
+        const finalHeading = GetEntityHeading(entity);
+
+        DeleteEntity(entity);
+
+        TriggerServerEvent(ServerEvent.PLAYER_BODY_STOP_CARRY, citizenId, [
+            finalCoords[0],
+            finalCoords[1],
+            finalCoords[2],
+            finalHeading,
+        ]);
+    }
+
+    @OnEvent(ClientEvent.PLAYER_BODY_SYNC)
+    public onSync(snapshot: DisconnectedBodySnapshot) {
+        this.bodies.set(snapshot.citizenId, snapshot);
+        this.carriedCitizenIds.delete(snapshot.citizenId);
+
+        // A stale local clone can only exist here if this body moved without going through the carry
+        // flow (it shouldn't); despawn it so spawnNearbyBodies rebuilds it at the right spot.
+        if (this.localPeds.has(snapshot.citizenId)) {
+            this.despawnLocalPed(snapshot.citizenId);
+        }
+    }
+
+    @OnEvent(ClientEvent.PLAYER_BODY_SYNC_ALL)
+    public onSyncAll(snapshots: DisconnectedBodySnapshot[]) {
+        for (const snapshot of snapshots) {
+            this.bodies.set(snapshot.citizenId, snapshot);
+        }
     }
 
     @OnEvent(ClientEvent.PLAYER_BODY_REMOVE)
-    public async onRemove(netId: number) {
-        this.appliedNetIds.delete(netId);
-        this.pendingBodies.delete(netId);
-        this.bodyCitizenIds.delete(netId);
+    public onRemove(citizenId: string) {
+        this.bodies.delete(citizenId);
+        this.carriedCitizenIds.delete(citizenId);
+        this.despawnLocalPed(citizenId);
+    }
 
-        if (!NetworkDoesEntityExistWithNetworkId(netId)) {
-            return;
-        }
-
-        const pedHandle = NetToPed(netId);
-
-        if (this.carriedBody === pedHandle) {
-            DetachEntity(pedHandle, false, false);
-            this.carriedBody = 0;
-            this.playerService.setPushing(false);
-        }
-
-        // Backstop for the server's own DeleteEntity: it does not always take on a ped a client
-        // currently owns, and only the owning client can delete it in that case.
-        for (let i = 0; i < 10 && DoesEntityExist(pedHandle); i++) {
-            if (NetworkHasControlOfEntity(pedHandle)) {
-                DeleteEntity(pedHandle);
-
-                return;
-            }
-
-            NetworkRequestControlOfEntity(pedHandle);
-            await wait(100);
+    @OnEvent(ClientEvent.PLAYER_BODY_CARRY_STATE)
+    public onCarryState(citizenId: string, carrying: boolean) {
+        if (carrying) {
+            this.carriedCitizenIds.add(citizenId);
+            this.despawnLocalPed(citizenId);
+        } else {
+            this.carriedCitizenIds.delete(citizenId);
         }
     }
 
