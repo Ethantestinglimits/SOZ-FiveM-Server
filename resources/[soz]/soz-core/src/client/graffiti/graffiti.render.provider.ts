@@ -40,7 +40,7 @@ export class GraffitiRenderProvider {
         }
     }
 
-    private drawGraffiti(position: Vector4, textureName: string) {
+    public drawGraffiti(position: Vector4, textureName: string) {
         const topRight = applyOffset(position, [GRAFFITI_WIDTH / 2, 0, GRAFFITI_HEIGHT]);
         const bottomRight = applyOffset(position, [GRAFFITI_WIDTH / 2, 0, 0]);
         const topLeft = applyOffset(position, [-GRAFFITI_WIDTH / 2, 0, GRAFFITI_HEIGHT]);

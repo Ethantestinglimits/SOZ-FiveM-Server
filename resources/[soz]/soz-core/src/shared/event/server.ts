@@ -839,6 +839,7 @@ export enum ServerEvent {
     GRAFFITI_PLACE = 'soz-core:server:graffiti:place',
     GRAFFITI_SET_IMAGE = 'soz-core:server:graffiti:set-image',
     GRAFFITI_REMOVE = 'soz-core:server:graffiti:remove',
+    GRAFFITI_MOVE = 'soz-core:server:graffiti:move',
 
     ADMIN_FIRE_PROPAGATION = 'soz-core:admin:fire-propagation',
     ADMIN_STAR_NEW_FIRE_PIT = 'soz-core:admin:star:new-fire-pit',

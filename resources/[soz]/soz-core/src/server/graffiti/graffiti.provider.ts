@@ -80,8 +80,6 @@ export class GraffitiProvider {
 
     private usedSlotByGang = new Map<number, string[]>();
 
-    // Populated by /graffiti_list, consumed by /graffiti_remove <index> so players don't have to
-    // type a full graffiti id in chat.
     private lastListedByPlayer = new Map<number, string[]>();
 
     @Once()
@@ -99,8 +97,10 @@ export class GraffitiProvider {
                 model: GetHashKey(GRAFFITI_ANCHOR_MODEL),
                 position: fromVector4Object(JSON.parse(graffiti.position)),
                 permanent: false,
+                invisible: !!graffiti.imageUrl,
                 metadata: {
                     gangId: graffiti.gangId,
+                    ownerId: graffiti.ownerId,
                     imageUrl: graffiti.imageUrl,
                 },
             };
@@ -109,6 +109,14 @@ export class GraffitiProvider {
 
             this.getSlotsForGang(graffiti.gangId).push(graffiti.id);
         }
+    }
+
+    private isOwner(player: { citizenid: string; gang?: { id: number } }, object: WorldObject): boolean {
+        if (player.gang?.id && player.gang.id === object.metadata?.gangId) {
+            return true;
+        }
+
+        return !!object.metadata?.ownerId && player.citizenid === object.metadata.ownerId;
     }
 
     private getSlotsForGang(gangId: number): string[] {
@@ -139,31 +147,26 @@ export class GraffitiProvider {
 
     private async useGraffiti(source: number, item: Item, inventoryItem: InventoryItem) {
         const player = this.playerService.getPlayer(source);
-        if (!player || !player.gang?.id) {
-            this.notifier.error(source, "Vous devez appartenir à un gang pour utiliser cet objet.");
+        if (!player) {
             return;
         }
 
-        if (this.getSlotsForGang(player.gang.id).length >= GRAFFITI_MAX_PER_GANG) {
-            this.notifier.error(source, 'Votre gang a atteint le nombre maximum de tags posés.');
+        if (this.getSlotsForGang(player.gang?.id ?? 0).length >= GRAFFITI_MAX_PER_GANG) {
+            this.notifier.error(source, 'Le nombre maximum de tags posés a été atteint.');
             return;
         }
 
-        TriggerClientEvent(
-            ClientEvent.OBJECT_PLACE_ITEM,
-            source,
-            ServerEvent.GRAFFITI_PLACE,
-            GRAFFITI_ANCHOR_MODEL,
-            inventoryItem,
-            false,
-            true
-        );
+        TriggerClientEvent(ClientEvent.GRAFFITI_PLACE_ITEM, source, inventoryItem);
     }
 
     @OnEvent(ServerEvent.GRAFFITI_PLACE)
-    public async placeGraffiti(source: number, position: Vector4, inventoryItem: InventoryItem) {
+    public async placeGraffiti(source: number, position: Vector4, inventoryItem: InventoryItem, imageUrl?: string) {
         const playerStartingTag = this.playerService.getPlayer(source);
-        if (!playerStartingTag || !playerStartingTag.gang?.id) {
+        if (!playerStartingTag) {
+            return;
+        }
+
+        if (imageUrl && !(await this.isValidImageUrl(source, imageUrl))) {
             return;
         }
 
@@ -183,13 +186,15 @@ export class GraffitiProvider {
         }
 
         const player = this.playerService.getPlayer(source);
-        if (!player || !player.gang?.id) {
+        if (!player) {
             return;
         }
 
-        const slots = this.getSlotsForGang(player.gang.id);
+        const gangId = player.gang?.id ?? 0;
+
+        const slots = this.getSlotsForGang(gangId);
         if (slots.length >= GRAFFITI_MAX_PER_GANG) {
-            this.notifier.error(source, 'Votre gang a atteint le nombre maximum de tags posés.');
+            this.notifier.error(source, 'Le nombre maximum de tags posés a été atteint.');
             return;
         }
 
@@ -204,7 +209,9 @@ export class GraffitiProvider {
         await this.prismaService.dynamic_prop_graffiti.create({
             data: {
                 id: objectId,
-                gangId: player.gang.id,
+                gangId,
+                ownerId: player.citizenid,
+                imageUrl: imageUrl || null,
                 position: JSON.stringify(toVector4Object(position)),
                 createdAt: new Date(),
             },
@@ -217,8 +224,11 @@ export class GraffitiProvider {
             model: GetHashKey(GRAFFITI_ANCHOR_MODEL),
             position,
             permanent: false,
+            invisible: !!imageUrl,
             metadata: {
-                gangId: player.gang.id,
+                gangId,
+                ownerId: player.citizenid,
+                imageUrl: imageUrl || undefined,
             },
         };
 
@@ -227,8 +237,32 @@ export class GraffitiProvider {
         this.monitor.traceEvent('graffiti_placement', {
             id: object.id,
             player_source: source,
-            gang_id: player.gang.id,
+            gang_id: gangId,
         });
+    }
+
+    private async isValidImageUrl(source: number, imageUrl: string): Promise<boolean> {
+        if (this.permissionService.isStaff(source)) {
+            return true;
+        }
+
+        try {
+            const resp = await axios.get(imageUrl);
+            if (resp.status != 200 && resp.status != 304) {
+                this.notifier.error(source, 'URL non valide');
+                return false;
+            }
+            const contentType = resp.headers['content-type'] ?? resp.headers['Content-Type'];
+            if (!contentType || !contentType.toString().startsWith('image')) {
+                this.notifier.error(source, `L'URL n'est pas une image`);
+                return false;
+            }
+        } catch (e) {
+            this.notifier.error(source, 'URL non valide');
+            return false;
+        }
+
+        return true;
     }
 
     @OnEvent(ServerEvent.GRAFFITI_SET_IMAGE)
@@ -239,27 +273,13 @@ export class GraffitiProvider {
         }
 
         const player = this.playerService.getPlayer(source);
-        if (!player || player.gang?.id !== object.metadata?.gangId) {
+        if (!player || !this.isOwner(player, object)) {
             this.notifier.error(source, "Vous n'avez pas la permission de modifier ce tag.");
             return;
         }
 
-        if (!this.permissionService.isStaff(source)) {
-            try {
-                const resp = await axios.get(imageUrl);
-                if (resp.status != 200 && resp.status != 304) {
-                    this.notifier.error(source, 'URL non valide');
-                    return;
-                }
-                const contentType = resp.headers['content-type'] ?? resp.headers['Content-Type'];
-                if (!contentType || !contentType.toString().startsWith('image')) {
-                    this.notifier.error(source, `L'URL n'est pas une image`);
-                    return;
-                }
-            } catch (e) {
-                this.notifier.error(source, 'URL non valide');
-                return;
-            }
+        if (!(await this.isValidImageUrl(source, imageUrl))) {
+            return;
         }
 
         await this.prismaService.dynamic_prop_graffiti.update({
@@ -268,12 +288,40 @@ export class GraffitiProvider {
         });
 
         object.metadata = { ...object.metadata, imageUrl };
+        object.invisible = true;
         this.objectProvider.updateObject(object);
 
         this.monitor.traceEvent('graffiti_image_update', {
             id: objectId,
             player_source: source,
             message: imageUrl,
+        });
+    }
+
+    @OnEvent(ServerEvent.GRAFFITI_MOVE)
+    public async moveGraffiti(source: number, objectId: string, position: Vector4): Promise<void> {
+        const object = this.objectProvider.getObject(objectId);
+        if (!object) {
+            return;
+        }
+
+        const player = this.playerService.getPlayer(source);
+        if (!player || !this.isOwner(player, object)) {
+            this.notifier.error(source, "Vous n'avez pas la permission de déplacer ce tag.");
+            return;
+        }
+
+        await this.prismaService.dynamic_prop_graffiti.update({
+            where: { id: objectId },
+            data: { position: JSON.stringify(toVector4Object(position)), updatedAt: new Date() },
+        });
+
+        object.position = position;
+        this.objectProvider.updateObject(object);
+
+        this.monitor.traceEvent('graffiti_moved', {
+            id: objectId,
+            player_source: source,
         });
     }
 
@@ -292,14 +340,6 @@ export class GraffitiProvider {
         await this.deleteGraffiti(source, object);
     }
 
-    /**
-     * A gang's own tag can end up out of reach (placed inside a wall, or in an otherwise
-     * unreachable spot), in which case the in-world target menu can't be used at all. These
-     * commands are a fallback that don't require targeting the physical prop: /graffiti_list
-     * shows what a player is allowed to manage (their own gang's tags, or every tag for on-duty
-     * police/staff), and /graffiti_remove <numéro> removes one by the number it was just listed
-     * under, reusing the exact same permission check as the target-menu removal.
-     */
     @Command('graffiti_list', {
         description: 'Lister les tags que vous pouvez gérer (votre gang, ou tous si police/staff)',
     })
@@ -313,16 +353,11 @@ export class GraffitiProvider {
         const isStaff = this.permissionService.isStaff(source);
         const canSeeEveryGang = isPolice || isStaff;
 
-        if (!canSeeEveryGang && !player.gang?.id) {
-            this.notifier.error(source, "Vous devez appartenir à un gang pour utiliser cette commande.");
-            return;
-        }
-
         const graffitiAnchorModel = GetHashKey(GRAFFITI_ANCHOR_MODEL);
         const graffitis = this.objectProvider
             .getObjects()
             .filter(object => object.model === graffitiAnchorModel)
-            .filter(object => canSeeEveryGang || object.metadata?.gangId === player.gang.id);
+            .filter(object => canSeeEveryGang || this.isOwner(player, object));
 
         if (graffitis.length === 0) {
             this.notifier.notify(source, 'Aucun tag trouvé.', 'info');
@@ -356,11 +391,6 @@ export class GraffitiProvider {
         );
     }
 
-    /**
-     * Backs the dedicated graffiti-management NPC menu (client-side src/client/graffiti/graffiti.provider.ts):
-     * unlike /graffiti_list, this is gang-members-only and never shows other gangs' tags, since it's
-     * meant purely for self-service cleanup of your own gang's graffitis.
-     */
     @Rpc(RpcServerEvent.GRAFFITI_GET_GANG_LIST)
     public async getGangGraffitiList(source: number): Promise<GraffitiMenuEntry[]> {
         const player = this.playerService.getPlayer(source);
@@ -426,10 +456,9 @@ export class GraffitiProvider {
             return false;
         }
 
-        const isOwnGang = !!player.gang?.id && player.gang.id === object.metadata?.gangId;
         const isPolice = FDO_NO_FBI.includes(player.job.id) && player.job.onduty;
 
-        if (isOwnGang || isPolice || this.permissionService.isStaff(source)) {
+        if (this.isOwner(player, object) || isPolice || this.permissionService.isStaff(source)) {
             return true;
         }
 

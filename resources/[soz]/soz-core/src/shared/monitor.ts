@@ -182,6 +182,7 @@ export type MonitorEvent = {
     type?: string;
     category?: string;
     house_id?: string;
+    gang_id?: number;
     tier?: number;
     repair_type?: string;
     field?: string;
