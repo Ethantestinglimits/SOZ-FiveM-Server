@@ -12,6 +12,8 @@ import {
     VehicleUpgradeChoice,
     VehicleUpgradeOptions,
     VehicleWheelType,
+    VehicleXenonColor,
+    xenonCustomColorStateKey,
 } from '../../shared/vehicle/modification';
 import { isVehicleModelElectric, VehicleClass } from '../../shared/vehicle/vehicle';
 
@@ -728,8 +730,26 @@ export class VehicleModificationService {
 
         SetVehicleWindowTint(vehicle, configuration.windowTint || 0);
 
-        if (configuration.xenonColor !== null) {
-            SetVehicleXenonLightsColour(vehicle, configuration.xenonColor);
+        if (configuration.xenonColor !== null && configuration.xenonColor !== undefined) {
+            const isXenonColorRgb = typeof configuration.xenonColor === 'object';
+
+            SetVehicleXenonLightsColour(
+                vehicle,
+                isXenonColorRgb ? VehicleXenonColor.Default : (configuration.xenonColor as VehicleXenonColor)
+            );
+
+            if (isXenonColorRgb) {
+                SetVehicleXenonLightsCustomColor(
+                    vehicle,
+                    configuration.xenonColor[0],
+                    configuration.xenonColor[1],
+                    configuration.xenonColor[2]
+                );
+            } else {
+                ClearVehicleXenonLightsCustomColor(vehicle);
+            }
+
+            Entity(vehicle).state.set(xenonCustomColorStateKey, isXenonColorRgb ? configuration.xenonColor : null, true);
         }
 
         if (configuration.livery !== null && configuration.livery !== undefined) {

@@ -4,8 +4,10 @@ import { Feature } from '@public/shared/features';
 import { OnEvent, OnNuiEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
+import { Tick } from '../../core/decorators/tick';
 import { emitRpc } from '../../core/rpc';
 import { wait } from '../../core/utils';
+import { RGBColor } from '../../shared/color';
 import { ClientEvent, NuiEvent } from '../../shared/event';
 import { MenuType } from '../../shared/nui/menu';
 import { Vector3 } from '../../shared/polyzone/vector';
@@ -18,6 +20,7 @@ import {
     VehicleCustomInput,
     VehicleCustomMenuData,
     VehicleUpgradeOptions,
+    xenonCustomColorStateKey,
 } from '../../shared/vehicle/modification';
 import { isVehicleModelElectric, LSCustomMode, VehicleClass, VehicleSeat } from '../../shared/vehicle/vehicle';
 import { FeatureProvider } from '../feature/feature.provider';
@@ -50,6 +53,28 @@ export class VehicleCustomProvider {
 
     @Inject(FeatureProvider)
     private featureProvider: FeatureProvider;
+
+    private xenonCustomColorApplied: Map<number, string | null> = new Map();
+
+    @Tick(2000)
+    public async syncXenonCustomColorTick(): Promise<void> {
+        for (const vehicle of GetGamePool('CVehicle')) {
+            const color = Entity(vehicle).state[xenonCustomColorStateKey] as RGBColor | null | undefined;
+            const key = color ? color.join(',') : null;
+
+            if (this.xenonCustomColorApplied.get(vehicle) === key) {
+                continue;
+            }
+
+            this.xenonCustomColorApplied.set(vehicle, key);
+
+            if (color) {
+                SetVehicleXenonLightsCustomColor(vehicle, color[0], color[1], color[2]);
+            } else {
+                ClearVehicleXenonLightsCustomColor(vehicle);
+            }
+        }
+    }
 
     public isPedInsideCustomZone(): boolean {
         const position = GetEntityCoords(PlayerPedId(), true) as Vector3;

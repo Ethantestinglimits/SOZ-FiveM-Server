@@ -340,6 +340,8 @@ export type VehicleNeon = {
     light: Record<VehicleNeonLight, boolean>;
 };
 
+export const xenonCustomColorStateKey = 'xenonCustomColor';
+
 export type VehicleModification = {
     spoiler?: number;
     bumperFront?: number;
@@ -588,7 +590,7 @@ export type VehicleConfiguration = {
     tyreSmokeColor?: RGBColor;
     wheelType?: VehicleWheelType;
     windowTint?: VehicleWindowTint;
-    xenonColor?: VehicleXenonColor;
+    xenonColor?: VehicleXenonColor | RGBColor;
     livery?: number;
     customWheelFront?: boolean;
     customWheelRear?: boolean;
