@@ -5,9 +5,11 @@ import { Provider } from '@core/decorators/provider';
 import { Tick } from '@core/decorators/tick';
 import { uuidv4, wait } from '@core/utils';
 import { Notifier } from '@public/client/notifier';
+import { ContextMenuGrouping } from '@public/config/context-menu';
 
 import { NuiEvent } from '../../shared/event/nui';
 import { Control } from '../../shared/input';
+import { JobLabel, JobType } from '../../shared/job';
 import { TargetCursorMenuPosition } from '../../shared/nui/target';
 import { getDistance, Vector3 } from '../../shared/polyzone/vector';
 import { TargetMode, TargetOption } from '../../shared/target';
@@ -24,6 +26,51 @@ const MAX_DISTANCE = 50;
 // Après l'ouverture du curseur, le NUI prend le focus et le jeu reçoit un faux relâchement de la touche: on l'ignore
 // pendant ce délai (ms)
 const CURSOR_FOCUS_GRACE = 800;
+
+// Tolérance au clic: rayons supplémentaires tirés autour du point cliqué quand le rayon exact ne trouve rien. Deux
+// anneaux de CLICK_TOLERANCE_POINTS rayons, à ces rayons (fraction de la hauteur de l'écran: 0.01 ≈ 11 px à 1080p)
+const CLICK_TOLERANCE_RADII = [0.006, 0.014];
+const CLICK_TOLERANCE_POINTS = 8;
+
+// Squelette du joueur pour savoir si un clic est sur son corps: segments entre deux os, avec l'épaisseur du corps à cet
+// endroit (m). La capsule de collision du ped est bien plus large que son skin, on ne s'y fie donc pas seule.
+const BONE = {
+    head: 31086,
+    neck: 39317,
+    spine3: 24818,
+    spine0: 23553,
+    pelvis: 11816,
+    lThigh: 58271,
+    lCalf: 63931,
+    lFoot: 14201,
+    rThigh: 51826,
+    rCalf: 36864,
+    rFoot: 52301,
+    lUpperArm: 45509,
+    lForearm: 61163,
+    lHand: 18905,
+    rUpperArm: 40269,
+    rForearm: 28252,
+    rHand: 57005,
+};
+const PLAYER_BODY_SEGMENTS: [number, number, number][] = [
+    [BONE.head, BONE.neck, 0.15],
+    [BONE.neck, BONE.spine3, 0.2],
+    [BONE.spine3, BONE.spine0, 0.2],
+    [BONE.spine0, BONE.pelvis, 0.2],
+    [BONE.pelvis, BONE.lThigh, 0.14],
+    [BONE.lThigh, BONE.lCalf, 0.12],
+    [BONE.lCalf, BONE.lFoot, 0.1],
+    [BONE.pelvis, BONE.rThigh, 0.14],
+    [BONE.rThigh, BONE.rCalf, 0.12],
+    [BONE.rCalf, BONE.rFoot, 0.1],
+    [BONE.spine3, BONE.lUpperArm, 0.12],
+    [BONE.lUpperArm, BONE.lForearm, 0.1],
+    [BONE.lForearm, BONE.lHand, 0.09],
+    [BONE.spine3, BONE.rUpperArm, 0.12],
+    [BONE.rUpperArm, BONE.rForearm, 0.1],
+    [BONE.rForearm, BONE.rHand, 0.09],
+];
 
 @Provider()
 export class TargetProvider {
@@ -79,6 +126,53 @@ export class TargetProvider {
     // modules)
     private _worldOptions: ((coords: Vector3) => Promise<TargetOption[]>) | null = null;
 
+    // Options affichées en cliquant sur son propre personnage (fournies par les modules)
+    private _selfPedOptions: (() => Promise<TargetOption[]>) | null = null;
+
+    // Regroupe les options d'entreprise d'une cible en sous-menus, d'après leur job (règles dans
+    // config/context-menu.ts, ContextMenuGrouping). Les options qui ont déjà un sous-menu ne sont pas touchées.
+    private groupOptions(options: TargetOption[]): TargetOption[] {
+        const jobIds = (option: TargetOption): string[] => {
+            if (typeof option.job === 'string') return [option.job];
+
+            return option.job ? Object.keys(option.job) : [];
+        };
+
+        const jobGroup = (option: TargetOption): string | null => {
+            const ids = jobIds(option);
+
+            if (option.group || ids.length === 0) return null;
+
+            const configured = ContextMenuGrouping.jobs.find(entry =>
+                ids.every(id => entry.jobs.includes(id as JobType))
+            );
+
+            if (configured) return configured.label;
+
+            // Un job seul, sans entrée dans la config, prend son nom complet
+            return ids.length === 1 ? JobLabel[ids[0] as JobType] ?? ids[0] : null;
+        };
+
+        const counts = new Map<string, number>();
+
+        for (const option of options) {
+            const group = jobGroup(option);
+
+            if (group) counts.set(group, (counts.get(group) ?? 0) + 1);
+        }
+
+        return options.map(option => {
+            const group = jobGroup(option);
+
+            // Pas assez d'options de ce job sur cette cible: elles restent à plat
+            if (!group || counts.get(group) <= ContextMenuGrouping.minOptions) return option;
+
+            const subGroup = ContextMenuGrouping.subGroups.find(entry => entry.labels.includes(option.label));
+
+            return { ...option, group: subGroup ? `${group}/${subGroup.group}` : group };
+        });
+    }
+
     @Command('+target', {
         description: 'Activer le mode ciblage',
         keys: [{ mapper: 'keyboard', key: 'LMENU' }],
@@ -109,6 +203,89 @@ export class TargetProvider {
         this._worldOptions = factory;
     }
 
+    public registerSelfPedOptions(factory: () => Promise<TargetOption[]>): void {
+        this._selfPedOptions = factory;
+    }
+
+    private async getSelfPedOptions(): Promise<TargetOption[]> {
+        if (!this._selfPedOptions) return [];
+
+        const ped = PlayerPedId();
+
+        try {
+            const options = await this._selfPedOptions();
+
+            return options.map(option => ({
+                category: 'citizen',
+                ...option,
+                id: uuidv4(),
+                entity: ped,
+                entityCoords: GetEntityCoords(ped, true) as Vector3,
+            }));
+        } catch (error) {
+            console.error('[context-menu] options du joueur: erreur à la construction', error);
+
+            return [];
+        }
+    }
+
+    // Le rayon du curseur ignore le ped du joueur (sinon il le toucherait toujours). Pour savoir si on clique sur son
+    // personnage:
+    // 1. un rayon qui ne l'ignore pas doit le toucher en premier (une voiture ou un objet devant passe avant lui);
+    // 2. ce rayon doit passer près de son squelette: la capsule de collision du ped est plus large que son skin, on
+    //    ne se fie donc pas à elle seule.
+    private async isCursorOverPlayer(cursor: [number, number]): Promise<boolean> {
+        const ped = PlayerPedId();
+        const [entity, , hit] = await this.screenService.getEntityOnPosition(
+            cursor,
+            this._playerCoordsOverride,
+            undefined,
+            true
+        );
+
+        if (!hit || entity !== ped) return false;
+
+        const [origin, direction] = this.screenService.getCursorRay(cursor, this._playerCoordsOverride);
+        const directionLength = getDistance([0, 0, 0], direction);
+
+        if (directionLength === 0) return false;
+
+        // Distance d'un point au rayon (le rayon ne va que vers l'avant)
+        const distanceToRay = (point: Vector3): number => {
+            const offset: Vector3 = [point[0] - origin[0], point[1] - origin[1], point[2] - origin[2]];
+            const along = Math.max(
+                0,
+                (offset[0] * direction[0] + offset[1] * direction[1] + offset[2] * direction[2]) / directionLength ** 2
+            );
+            const closest: Vector3 = [
+                origin[0] + direction[0] * along,
+                origin[1] + direction[1] * along,
+                origin[2] + direction[2] * along,
+            ];
+
+            return getDistance(point, closest);
+        };
+
+        return PLAYER_BODY_SEGMENTS.some(([boneA, boneB, radius]) => {
+            const from = GetPedBoneCoords(ped, boneA, 0, 0, 0) as Vector3;
+            const to = GetPedBoneCoords(ped, boneB, 0, 0, 0) as Vector3;
+
+            // Le segment est échantillonné: on cherche son point le plus proche du rayon
+            for (let i = 0; i <= 4; i++) {
+                const t = i / 4;
+                const point: Vector3 = [
+                    from[0] + (to[0] - from[0]) * t,
+                    from[1] + (to[1] - from[1]) * t,
+                    from[2] + (to[2] - from[2]) * t,
+                ];
+
+                if (distanceToRay(point) <= radius) return true;
+            }
+
+            return false;
+        });
+    }
+
     private async getWorldOptions(coords: Vector3): Promise<TargetOption[]> {
         if (!this._worldOptions) return [];
 
@@ -123,7 +300,7 @@ export class TargetProvider {
                 entityCoords: coords,
             }));
         } catch (error) {
-            console.error('[target-cursor] options du monde: erreur à la construction', error);
+            console.error('[context-menu] options du monde: erreur à la construction', error);
 
             return [];
         }
@@ -133,11 +310,7 @@ export class TargetProvider {
         const vehicle = GetVehiclePedIsIn(PlayerPedId(), false);
         if (!vehicle) return [];
 
-        // TODO: logs de diagnostic temporaires (F8), à retirer une fois le menu véhicule validé en jeu
-        if (!this._selfVehicleOptions) {
-            console.log('[target-cursor] menu véhicule: aucun fournisseur d’options enregistré');
-            return [];
-        }
+        if (!this._selfVehicleOptions) return [];
 
         const entityCoords = GetEntityCoords(vehicle, true) as Vector3;
         let options: TargetOption[];
@@ -145,11 +318,9 @@ export class TargetProvider {
         try {
             options = await this._selfVehicleOptions(vehicle);
         } catch (error) {
-            console.error('[target-cursor] menu véhicule: erreur à la construction des options', error);
+            console.error('[context-menu] menu véhicule: erreur à la construction des options', error);
             return [];
         }
-
-        console.log(`[target-cursor] menu véhicule: ${options.length} options`);
 
         return options.map(option => ({ category: 'citizen', ...option, id: uuidv4(), entity: vehicle, entityCoords }));
     }
@@ -211,12 +382,7 @@ export class TargetProvider {
                 // Quand le NUI prend le focus clavier, le jeu reçoit un faux relâchement de la touche juste après
                 // l'ouverture: on l'ignore pendant un court délai. Ensuite tout relâchement ferme le mode, y compris
                 // celui envoyé par le jeu quand la fenêtre perd le focus (alt-tab), que le NUI ne verrait jamais.
-                const sinceActivation = GetGameTimer() - this._cursorActivatedAt;
-
-                // TODO: log de diagnostic temporaire (F8), à retirer une fois l'alt-tab validé en jeu
-                console.log(`[target-cursor] relâchement de la touche ${sinceActivation}ms après l'ouverture`);
-
-                if (sinceActivation < CURSOR_FOCUS_GRACE) return;
+                if (GetGameTimer() - this._cursorActivatedAt < CURSOR_FOCUS_GRACE) return;
             } else if (IsNuiFocused()) {
                 // B-Target: le NUI ferme lui-même (keyup) une fois qu'il a le focus
                 return;
@@ -330,8 +496,13 @@ export class TargetProvider {
 
         if (this._cursorMenuOpen) return;
 
+        // Mort: le menu ne sert plus, sauf s'il propose des options sur soi (un admin qui veut se réanimer). Les autres
+        // entités sont de toute façon bloquées par la vérification générale des cibles: pas de survol à calculer.
         if (this.playerService.getPlayer()?.metadata.isdead) {
-            await this.resetTarget();
+            if ((await this.getSelfPedOptions()).length === 0) {
+                await this.resetTarget();
+            }
+
             return;
         }
 
@@ -352,12 +523,20 @@ export class TargetProvider {
 
         // Dans un véhicule, cliquer dans le vide (ou sur son propre véhicule) ouvre le menu du véhicule
         const ownVehicle = GetVehiclePedIsIn(PlayerPedId(), false);
-        // TODO: log de diagnostic temporaire (F8), à retirer une fois le menu véhicule validé en jeu
-        console.log(
-            `[target-cursor] clic: vehicule=${ownVehicle} entite_visee=${this._cursorHoverEntity} options_entite=${this._targetOptions.length}`
-        );
         if (ownVehicle && (this._cursorHoverEntity === ownVehicle || this._targetOptions.length === 0)) {
             if (await this.openSelfVehicleMenu(position)) return;
+        }
+
+        // Clic sur son propre personnage: ses options ont la priorité sur ce qui se trouve derrière lui
+        if (await this.isCursorOverPlayer([position.x, position.y])) {
+            const selfOptions = await this.getSelfPedOptions();
+
+            // Le mode a pu être fermé pendant le calcul
+            if (!this._cursorMode || !this._targetActive) return;
+
+            if (selfOptions.length > 0) {
+                this._targetOptions = selfOptions;
+            }
         }
 
         // Sol ou élément sans option: options du monde à ce point (ex: "Placer" pour les admins)
@@ -380,6 +559,59 @@ export class TargetProvider {
         this.nuiDispatch.dispatch('target', 'SetCursorMenu', position);
     }
 
+    // Les options d'une entité touchée par le curseur; joueurs, PNJ et véhicules: options d'entreprise rangées en
+    // sous-menus
+    private async computeEntityOptions(entity: number, coords: Vector3): Promise<TargetOption[]> {
+        const options = await this.checkTargetActions(entity, coords, getDistance(coords, this.getPlayerCoords()));
+
+        if (entity !== 0) {
+            const entityType = GetEntityType(entity);
+
+            if (entityType === 1 || entityType === 2) {
+                return this.groupOptions(options);
+            }
+        }
+
+        return options;
+    }
+
+    // Cherche une entité avec des options juste autour du curseur: deux anneaux de rayons (rayon en fraction de la
+    // hauteur de l'écran), du plus proche au plus éloigné
+    private async findOptionsNearCursor(
+        cursor: [number, number],
+        skipEntity: number
+    ): Promise<{ entity: number; coords: Vector3; options: TargetOption[] } | null> {
+        const [screenWidth, screenHeight] = GetActiveScreenResolution();
+        // Pour que les anneaux soient ronds à l'écran et pas étirés
+        const ratio = screenHeight / screenWidth;
+        const points: [number, number][] = [];
+
+        for (const radius of CLICK_TOLERANCE_RADII) {
+            for (let i = 0; i < CLICK_TOLERANCE_POINTS; i++) {
+                const angle = (i / CLICK_TOLERANCE_POINTS) * Math.PI * 2;
+
+                points.push([cursor[0] + Math.cos(angle) * radius * ratio, cursor[1] + Math.sin(angle) * radius]);
+            }
+        }
+
+        const results = await Promise.all(
+            points.map(point => this.screenService.getEntityOnPosition(point, this._playerCoordsOverride))
+        );
+        const seen = new Set<number>([skipEntity]);
+
+        for (const [entity, coords, hit] of results) {
+            if (!hit || !entity || seen.has(entity) || GetEntityType(entity) === 0) continue;
+
+            seen.add(entity);
+
+            const options = await this.computeEntityOptions(entity, coords);
+
+            if (options.length > 0) return { entity, coords, options };
+        }
+
+        return null;
+    }
+
     private async refreshCursorHover(force = false, cursor?: [number, number]): Promise<void> {
         if (force) {
             // Un clic doit toujours se baser sur un calcul frais, même si le tick de survol est en cours
@@ -391,56 +623,48 @@ export class TargetProvider {
         this._cursorRefreshing = true;
 
         try {
+            const cursorPosition = cursor ?? this.getCursorPosition();
             const [entity, rayEndCoords, hit] = await this.screenService.getEntityOnPosition(
-                cursor ?? this.getCursorPosition(),
+                cursorPosition,
                 this._playerCoordsOverride
             );
             // Sans impact (ciel...), le rayon renvoie son point d'arrivée, 1000 m plus loin: ce n'est pas un point du
             // monde où l'on peut interagir ou placer quelque chose
-            const entityCoords = hit ? rayEndCoords : null;
+            let entityCoords = hit ? rayEndCoords : null;
 
             // Le curseur a pu être fermé pendant le raycast
             if (!this._cursorMode || !this._targetActive) return;
 
-            const hoverEntity = entity || 0;
-            this._cursorHoverEntity = hoverEntity;
-            this._cursorHoverCoords = entityCoords ?? null;
-            const hoverCoords = entityCoords ?? this.getPlayerCoords();
+            let hoverEntity = entity || 0;
             // Les zones (polyzone) dépendent du point touché, on affine donc par mètre quand aucune entité n'est visée
             const hoverKey = hoverEntity
                 ? `entity:${hoverEntity}`
-                : `world:${hoverCoords.map(c => Math.round(c)).join(':')}`;
+                : `world:${(entityCoords ?? this.getPlayerCoords()).map(c => Math.round(c)).join(':')}`;
 
             if (!force && hoverKey === this._cursorHoverKey) return;
 
             this._cursorHoverKey = hoverKey;
 
-            this._targetOptions = entityCoords
-                ? await this.checkTargetActions(
-                      hoverEntity,
-                      hoverCoords,
-                      getDistance(hoverCoords, this.getPlayerCoords())
-                  )
-                : [];
+            let options = entityCoords ? await this.computeEntityOptions(hoverEntity, entityCoords) : [];
+
+            // Au clic: la coque de collision d'un véhicule est simplifiée et laisse des trous près des bords (coffre,
+            // pare-chocs...). Le B-Target les rattrape en relançant son rayon à chaque image; ici on n'a qu'un rayon, on
+            // en tire donc quelques autres juste autour du point cliqué.
+            if (force && options.length === 0) {
+                const nearby = await this.findOptionsNearCursor(cursorPosition, hoverEntity);
+
+                if (nearby) {
+                    hoverEntity = nearby.entity;
+                    entityCoords = nearby.coords;
+                    options = nearby.options;
+                }
+            }
 
             if (!this._cursorMode || !this._targetActive) return;
 
-            if (force) {
-                // TODO: log de diagnostic temporaire (F8), à retirer une fois le mode curseur validé en jeu
-                const [centerEntity] = await this.screenService.getEntityOnPosition([0.5, 0.5]);
-                console.log(
-                    `[target-cursor] raycast curseur=${(cursor ?? this.getCursorPosition())
-                        .map(c => c.toFixed(3))
-                        .join(',')} jeu=${this.getCursorPosition()
-                        .map(c => c.toFixed(3))
-                        .join(',')} entite=${hoverEntity} type=${hoverEntity ? GetEntityType(hoverEntity) : '-'} ` +
-                        `modele=${hoverEntity && GetEntityType(hoverEntity) !== 0 ? GetEntityModel(hoverEntity) : '-'} impact=${
-                            entityCoords ? entityCoords.map(c => c.toFixed(1)).join(',') : 'aucun'
-                        } distance=${
-                            entityCoords ? getDistance(hoverCoords, this.getPlayerCoords()).toFixed(1) : '-'
-                        } options=${this._targetOptions.length} entite_centre=${centerEntity}`
-                );
-            }
+            this._cursorHoverEntity = hoverEntity;
+            this._cursorHoverCoords = entityCoords;
+            this._targetOptions = options;
 
             // Le rond ne signale que les vrais éléments (ped, véhicule, objet), pas le sol ni le décor, même quand une
             // zone y a des options (le clic fonctionne quand même)

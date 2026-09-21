@@ -36,6 +36,11 @@ export class AdminMenuPlayerProvider {
         );
     }
 
+    // Le joueur tel que le menu admin le manipule, retrouvé par son id serveur (ex: joueur cliqué dans le monde)
+    public async findAdminPlayer(serverId: number): Promise<AdminPlayer | null> {
+        return await emitRpc<AdminPlayer | null>(RpcServerEvent.ADMIN_GET_PLAYER, serverId);
+    }
+
     @OnNuiEvent(NuiEvent.AdminGetPlayers)
     public async onGetPlayers() {
         const players = await this.getPlayers();
