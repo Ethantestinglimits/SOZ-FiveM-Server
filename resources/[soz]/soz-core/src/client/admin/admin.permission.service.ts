@@ -1,9 +1,9 @@
 import { Injectable } from '@core/decorators/injectable';
 import { emitRpc } from '@core/rpc';
 import { RpcServerEvent } from '@public/shared/rpc';
+import { ContextMenuLevel } from '@public/shared/target';
 
-/** 'any': tout rôle admin (helper et plus), 'staff': staff et admin, 'admin': admin uniquement */
-export type AdminLevel = 'any' | 'staff' | 'admin';
+export type AdminLevel = ContextMenuLevel;
 
 // La permission ne change pas en cours de session: on évite de la redemander au serveur à chaque affichage de menu
 const ADMIN_PERMISSION_TTL = 60 * 1000;
@@ -36,6 +36,7 @@ export class AdminPermissionService {
         if (!permission) return false;
         if (level === 'admin') return permission === 'admin';
         if (level === 'staff') return permission === 'admin' || permission === 'staff';
+        if (level === 'gamemaster') return ['admin', 'staff', 'gamemaster'].includes(permission);
 
         return true;
     }

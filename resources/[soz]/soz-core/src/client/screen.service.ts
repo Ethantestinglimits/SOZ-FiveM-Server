@@ -50,6 +50,17 @@ export class ScreenService {
         return [point3Dret, forwardDir];
     }
 
+    // Le rayon tiré par le curseur: son origine et sa direction (pas normalisée)
+    public getCursorRay(cursor: Vector2, coords?: Vector3, rotations?: Vector3): [Vector3, Vector3] {
+        coords = coords ?? (GetFinalRenderedCamCoord() as Vector3);
+        rotations = rotations ?? (GetFinalRenderedCamRot(0) as Vector3);
+
+        const [origin, forwardDir] = this.getScreenToWorldPosition(coords, rotations, cursor);
+        const end = add2Vector3(coords, multVector3(forwardDir, 1000.0));
+
+        return [origin, sub2Vector3(end, origin)];
+    }
+
     public async getEntityOnMousePosition(): Promise<[number, Vector3, boolean]> {
         const [screenX, screenY] = GetActiveScreenResolution();
         const [x, y] = GetNuiCursorPosition();
@@ -57,10 +68,12 @@ export class ScreenService {
         return await this.getEntityOnPosition([x / screenX, y / screenY]);
     }
 
+    // includePlayerPed: le rayon touche aussi le ped du joueur (il l'ignore par défaut, sinon il le toucherait toujours)
     public async getEntityOnPosition(
         cursor: Vector2,
         coords?: Vector3,
-        rotations?: Vector3
+        rotations?: Vector3,
+        includePlayerPed = false
     ): Promise<[number, Vector3, boolean]> {
         if (!coords) {
             coords = GetFinalRenderedCamCoord() as Vector3;
@@ -72,13 +85,14 @@ export class ScreenService {
         const [cam3DPos, forwardDir] = this.getScreenToWorldPosition(coords, rotations, cursor);
         const direction = add2Vector3(coords, multVector3(forwardDir, 1000.0));
 
-        return this.testShapeTestLosProbe(cam3DPos, direction);
+        return this.testShapeTestLosProbe(cam3DPos, direction, false, includePlayerPed);
     }
 
     private async testShapeTestLosProbe(
         cam3DPos: Vector3,
         direction: Vector3,
-        intersectEverything = false
+        intersectEverything = false,
+        includePlayerPed = false
     ): Promise<[number, Vector3, boolean]> {
         const rayHandle = StartShapeTestLosProbe(
             cam3DPos[0],
@@ -88,7 +102,7 @@ export class ScreenService {
             direction[1],
             direction[2],
             intersectEverything ? -1 : 30,
-            PlayerPedId(),
+            includePlayerPed ? 0 : PlayerPedId(),
             0
         );
 
@@ -98,7 +112,7 @@ export class ScreenService {
 
             if (result === 2) {
                 if (entity === 0 && !intersectEverything) {
-                    return await this.testShapeTestLosProbe(cam3DPos, direction, true);
+                    return await this.testShapeTestLosProbe(cam3DPos, direction, true, includePlayerPed);
                 }
 
                 return [entity, endCoords as Vector3, !!hit];
@@ -106,7 +120,7 @@ export class ScreenService {
 
             if (result !== 1) {
                 if (!intersectEverything) {
-                    return await this.testShapeTestLosProbe(cam3DPos, direction, true);
+                    return await this.testShapeTestLosProbe(cam3DPos, direction, true, includePlayerPed);
                 }
 
                 return [null, null, false];

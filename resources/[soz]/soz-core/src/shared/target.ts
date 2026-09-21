@@ -14,6 +14,12 @@ export const TargetModeLabels: Record<TargetMode, string> = {
     [TargetMode.Cursor]: 'Menu contextuel',
 };
 
+/**
+ * Rôle minimum pour une option admin du menu contextuel: 'any' = tout rôle admin (helper et plus), 'gamemaster' =
+ * gamemaster et plus, 'staff' = staff et admin, 'admin' = admin uniquement
+ */
+export type ContextMenuLevel = 'any' | 'gamemaster' | 'staff' | 'admin';
+
 export type TargetContext = {
     id?: string;
     entity?: number;
