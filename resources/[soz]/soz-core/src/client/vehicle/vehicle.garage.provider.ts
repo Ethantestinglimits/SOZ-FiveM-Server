@@ -294,43 +294,19 @@ export class VehicleGarageProvider {
                             return false;
                         }
 
-                        const value = await this.inputService.askInput<number>(
-                            {
-                                title: "Delai d'immobilisation du véhicule en heures (0-72)",
-                                defaultValue: '',
-                                maxCharacters: 30,
-                            },
-                            value => {
-                                if (!value) {
-                                    return Ok(null);
-                                }
-                                const int = parseInt(value);
-                                if (isNaN(int) || int < 0 || int > 72) {
-                                    return Err('Valeur incorrecte');
-                                }
-                                return Ok(int);
-                            }
-                        );
+                        const conditions = await this.askFederalPoundConditions();
 
-                        if (value === null) {
+                        if (conditions === null) {
                             return;
                         }
 
-                        await wait(50);
-
-                        const cost = await this.inputService.askInput<number>(
-                            {
-                                title: `Coût de sortie`,
-                                maxCharacters: 30,
-                            },
-                            PositiveNumberValidator
+                        await this.doStoreVehicle(
+                            closestPound[0],
+                            closestPound[1],
+                            entity,
+                            conditions.delay,
+                            conditions.cost
                         );
-
-                        if (cost === null) {
-                            return;
-                        }
-
-                        await this.doStoreVehicle(closestPound[0], closestPound[1], entity, value, cost);
                     },
                     job: { lspd: 0, bcso: 0, sasp: 0 },
                     blackoutGlobal: true,
@@ -357,6 +333,79 @@ export class VehicleGarageProvider {
             ],
             1.5
         );
+    }
+
+    // Délai d'immobilisation (heures) et coût de sortie d'une mise en fourrière fédérale, null si annulé
+    private async askFederalPoundConditions(): Promise<{ delay: number; cost: number } | null> {
+        const delay = await this.inputService.askInput<number>(
+            {
+                title: "Delai d'immobilisation du véhicule en heures (0-72)",
+                defaultValue: '',
+                maxCharacters: 30,
+            },
+            value => {
+                if (!value) {
+                    return Ok(null);
+                }
+                const int = parseInt(value);
+                if (isNaN(int) || int < 0 || int > 72) {
+                    return Err('Valeur incorrecte');
+                }
+                return Ok(int);
+            }
+        );
+
+        if (delay === null) {
+            return null;
+        }
+
+        await wait(50);
+
+        const cost = await this.inputService.askInput<number>(
+            {
+                title: `Coût de sortie`,
+                maxCharacters: 30,
+            },
+            PositiveNumberValidator
+        );
+
+        if (cost === null) {
+            return null;
+        }
+
+        return { delay, cost };
+    }
+
+    // Mise en fourrière fédérale par un admin (menu contextuel): sans condition de job ni de distance, dans la
+    // fourrière la plus proche du véhicule. Le serveur vérifie que le joueur est staff.
+    public async sendToFederalPound(vehicle: number): Promise<void> {
+        const position = GetEntityCoords(vehicle, true) as Vector3;
+        let nearest: [string, Garage] | null = null;
+        let nearestDistance = Infinity;
+
+        for (const garageIdentifier of Object.keys(this.pounds)) {
+            const garage = this.pounds[garageIdentifier];
+            const distance = getDistance(position, garage.zone.center);
+
+            if (distance < nearestDistance) {
+                nearest = [garageIdentifier, garage];
+                nearestDistance = distance;
+            }
+        }
+
+        if (!nearest) {
+            this.notifier.notify('Aucune fourrière disponible.', 'error');
+
+            return;
+        }
+
+        const conditions = await this.askFederalPoundConditions();
+
+        if (conditions === null) {
+            return;
+        }
+
+        await this.doStoreVehicle(nearest[0], nearest[1], vehicle, conditions.delay, conditions.cost, true);
     }
 
     private getClosestPound(): [string, Garage] | null {
@@ -436,7 +485,14 @@ export class VehicleGarageProvider {
         this.nuiMenu.closeMenu();
     }
 
-    public async doStoreVehicle(id: string, garage: Garage, vehicle: number, delai = 0, cost = 0) {
+    public async doStoreVehicle(
+        id: string,
+        garage: Garage,
+        vehicle: number,
+        delai = 0,
+        cost = 0,
+        federalByAdmin = false
+    ) {
         if (IsEntityDead(vehicle) && garage.type === GarageType.Depot) {
             this.notifier.notify(`Ce véhicule est ~r~détruit~s~ ! Il doit être déposé à la casse et non en fourrière.`);
             return;
@@ -457,7 +513,7 @@ export class VehicleGarageProvider {
             garage_type: garage.type,
             position: toVector3Object(GetEntityCoords(PlayerPedId()) as Vector3),
         });
-        TriggerServerEvent(ServerEvent.VEHICLE_GARAGE_STORE, id, garage, networkId, delai, cost);
+        TriggerServerEvent(ServerEvent.VEHICLE_GARAGE_STORE, id, garage, networkId, delai, cost, federalByAdmin);
     }
 
     @OnNuiEvent(NuiEvent.VehicleGarageShowPlaces)

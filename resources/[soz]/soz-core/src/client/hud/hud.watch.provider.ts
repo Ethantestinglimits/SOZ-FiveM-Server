@@ -9,6 +9,7 @@ import { ClientEvent } from '../../shared/event/client';
 import { NuiEvent } from '../../shared/event/nui';
 import { AllThemesConfig, AllWatches, AvailableTheme, HudSettings, HudTheme } from '../../shared/hud';
 import { MenuType } from '../../shared/nui/menu';
+import { TargetMode } from '../../shared/target';
 import { InventoryManager } from '../inventory/inventory.manager';
 import { AudioService } from '../nui/audio.service';
 import { NuiDispatch } from '../nui/nui.dispatch';
@@ -47,6 +48,7 @@ export class HudWatchProvider {
     private _showInjuryTracker = GetResourceKvpInt('soz_hud_injury_tracker_show') === 1;
     private _zoomInjuryTracker = this.zoomInjuryTrackerFromKvp;
     private _switchInjuryTrackerPosition = GetResourceKvpInt('soz_hud_switch_injury_tracker_position') === 1;
+    private _targetMode = this.targetModeFromKvp;
 
     private _availableTheme: AvailableTheme = {
         [HudTheme.Auto]: true,
@@ -66,6 +68,12 @@ export class HudWatchProvider {
         if (Object.keys(AllThemesConfig).includes(this._theme)) return;
 
         this.theme = HudTheme.Auto;
+    }
+
+    protected get targetModeFromKvp(): TargetMode {
+        const kvpValue = GetResourceKvpString('soz_target_mode') as TargetMode;
+
+        return Object.values(TargetMode).includes(kvpValue) ? kvpValue : TargetMode.Crosshair;
     }
 
     protected get zoomFromKvp(): number {
@@ -192,6 +200,7 @@ export class HudWatchProvider {
             showInjuryTracker: true,
             zoomInjuryTracker: this._zoomInjuryTracker,
             switchInjuryTrackerPosition: this._switchInjuryTrackerPosition,
+            targetMode: this._targetMode,
         });
         this.audioService.playAudio('audio/uwu.mp3', 0.1);
 
@@ -278,6 +287,11 @@ export class HudWatchProvider {
         this.switchInjuryTrackerPosition = value;
     }
 
+    @OnNuiEvent(NuiEvent.WatchMenuSetTargetMode)
+    public async setTargetMode(value: TargetMode) {
+        this.targetMode = value;
+    }
+
     public getSettings(): HudSettings {
         return {
             theme: this._theme,
@@ -296,7 +310,19 @@ export class HudWatchProvider {
             showInjuryTracker: this._showInjuryTracker,
             zoomInjuryTracker: this._zoomInjuryTracker,
             switchInjuryTrackerPosition: this._switchInjuryTrackerPosition,
+            targetMode: this._targetMode,
         };
+    }
+
+    public set targetMode(value: TargetMode) {
+        if (!Object.values(TargetMode).includes(value)) return;
+
+        this._targetMode = value;
+        SetResourceKvp('soz_target_mode', value);
+    }
+
+    public get targetMode(): TargetMode {
+        return this._targetMode;
     }
 
     public set theme(value: HudTheme) {

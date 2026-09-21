@@ -41,6 +41,7 @@ import { JobService } from '../job.service';
 import { LockService } from '../lock.service';
 import { Monitor } from '../monitor/monitor';
 import { Notifier } from '../notifier';
+import { PermissionService } from '../permission.service';
 import { PlayerCriminalService } from '../player/player.criminal.service';
 import { PlayerMoneyService } from '../player/player.money.service';
 import { PlayerService } from '../player/player.service';
@@ -128,6 +129,9 @@ export class VehicleGarageProvider {
 
     @Inject(FeatureProvider)
     private featureProvider: FeatureProvider;
+
+    @Inject(PermissionService)
+    private permissionService: PermissionService;
 
     @Once(OnceStep.RepositoriesLoaded)
     public async init(): Promise<void> {
@@ -611,7 +615,8 @@ export class VehicleGarageProvider {
         id: string,
         garage: Garage,
         vehicleId: number,
-        houseIdType?: 'apartment' | 'property'
+        houseIdType?: 'apartment' | 'property',
+        adminFederalPound = false
     ): Promise<Result<PlayerVehicle, string>> {
         const vehicle = await this.prismaService.playerVehicle.findUnique({
             where: { id: vehicleId },
@@ -661,6 +666,7 @@ export class VehicleGarageProvider {
             return Err("vous n'avez pas accès à ce garage entreprise");
         } else if (
             garage.type === GarageType.Depot &&
+            !adminFederalPound &&
             player.job.id !== JobType.Bennys &&
             !FDO.includes(player.job.id)
         ) {
@@ -730,13 +736,18 @@ export class VehicleGarageProvider {
         garage: Garage,
         vehicleNetworkId: number,
         delay: number,
-        cost: number
+        cost: number,
+        federal = false
     ): Promise<void> {
         const player = this.playerService.getPlayer(source);
 
         if (!player) {
             return;
         }
+
+        // Mise en fourrière fédérale par le staff (menu contextuel admin), sans être dans un job FDO. Le client ne peut
+        // pas s'attribuer ce droit: il est vérifié ici.
+        const adminFederalPound = federal === true && this.permissionService.isStaff(source);
 
         const vehicleEntityId = NetworkGetEntityFromNetworkId(vehicleNetworkId);
         const vehicleState = this.vehicleStateService.getVehicleState(vehicleNetworkId);
@@ -793,7 +804,8 @@ export class VehicleGarageProvider {
                 id,
                 garage,
                 vehicleState.volatile.id,
-                'apartment'
+                'apartment',
+                adminFederalPound
             );
 
             if (isErr(vehicleResult)) {
@@ -830,7 +842,9 @@ export class VehicleGarageProvider {
 
         let state = PlayerVehicleState.InGarage;
         if (garage.type === GarageType.Depot) {
-            if (player.job.id == JobType.Bennys) {
+            if (adminFederalPound) {
+                state = PlayerVehicleState.InFedPound;
+            } else if (player.job.id == JobType.Bennys) {
                 state = PlayerVehicleState.InPound;
             } else if (FDO.includes(player.job.id)) {
                 state = PlayerVehicleState.InFedPound;

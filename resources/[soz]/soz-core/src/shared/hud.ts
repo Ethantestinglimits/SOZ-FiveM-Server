@@ -1,3 +1,5 @@
+import { TargetMode } from './target';
+
 export enum HudComponent {
     WantedStars = 1,
     WeaponIcon = 2,
@@ -111,6 +113,7 @@ export type HudSettings = {
     showInjuryTracker: boolean;
     zoomInjuryTracker: number;
     switchInjuryTrackerPosition: boolean;
+    targetMode: TargetMode;
 };
 
 export type HudState = {

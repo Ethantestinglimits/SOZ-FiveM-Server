@@ -223,9 +223,10 @@ export class VehicleMenuProvider {
     }
 
     @OnNuiEvent(NuiEvent.VehicleOpenLSCustom)
-    async handleVehicleLSCustom(mode: LSCustomMode) {
+    async handleVehicleLSCustom(mode: LSCustomMode, target?: number) {
         const ped = PlayerPedId();
-        const vehicle = GetVehiclePedIsIn(ped, false);
+        // Depuis le menu véhicule (NUI): le véhicule du joueur; depuis le ciblage admin, un véhicule précis
+        const vehicle = typeof target === 'number' && target ? target : GetVehiclePedIsIn(ped, false);
 
         if (!vehicle) {
             return false;

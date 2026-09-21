@@ -293,9 +293,20 @@ export class BennysVehicleProvider {
         TriggerServerEvent(ServerEvent.BENNYS_WASH_VEHICLE, vehicleNetworkId);
     }
 
+    // Véhicule modifié par un admin depuis l'extérieur (menu contextuel), sans y être assis
+    private remoteVehicle: number | null = null;
+
+    public async upgradeVehicleRemotely(vehicle: number, mode: LSCustomMode) {
+        this.remoteVehicle = vehicle;
+
+        await this.upgradeVehicle(vehicle, mode);
+    }
+
     @Tick(TickInterval.EVERY_SECOND)
     public checkCloseMenu(): void {
         if (this.nuiMenu.getOpened() !== MenuType.BennysUpgradeVehicle) {
+            this.remoteVehicle = null;
+
             return;
         }
 
@@ -303,6 +314,10 @@ export class BennysVehicleProvider {
         const vehicle = GetVehiclePedIsIn(ped, false);
 
         if (vehicle) {
+            return;
+        }
+
+        if (this.remoteVehicle && DoesEntityExist(this.remoteVehicle)) {
             return;
         }
 
