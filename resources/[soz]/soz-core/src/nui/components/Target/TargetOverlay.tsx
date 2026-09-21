@@ -3,12 +3,14 @@ import { animated, useSpring } from '@react-spring/web';
 import { FunctionComponent, useCallback, useEffect, useRef, useState } from 'react';
 
 import { NuiEvent } from '../../../shared/event/nui';
-import { TargetOption } from '../../../shared/target';
+import { TargetCursorMenuPosition } from '../../../shared/nui/target';
+import { TargetMode, TargetOption } from '../../../shared/target';
 import { fetchNui } from '../../fetch';
 import { useNuiEvent, useNuiFocus } from '../../hook/nui';
 import { useHudColor } from '../Hud/hooks/useHudColor';
 import { TargetConnector } from './components/TargetConnector';
 import { TargetOptions } from './components/TargetOptions';
+import { TargetCursorOverlay } from './TargetCursorOverlay';
 
 const EXCLUDED_KEYS = ['z', 'q', 's', 'd', 'w', 'a'];
 
@@ -16,6 +18,9 @@ export const TargetOverlay: FunctionComponent = () => {
     const [isTargeting, setIsTargeting] = useState<boolean>(false);
     const [targetFound, setTargetFound] = useState<boolean>(false);
     const [targets, setTargets] = useState<TargetOption[]>([]);
+    const [mode, setMode] = useState<TargetMode>(TargetMode.Crosshair);
+    const [cursorHover, setCursorHover] = useState<boolean>(false);
+    const [cursorMenu, setCursorMenu] = useState<TargetCursorMenuPosition | null>(null);
     const closeTimeout = useRef<NodeJS.Timeout>();
 
     const { getPath } = useAssetPath();
@@ -33,11 +38,18 @@ export const TargetOverlay: FunctionComponent = () => {
         clearTimeout(closeTimeout.current);
     });
     useNuiEvent('target', 'SetTargets', setTargets);
+    useNuiEvent('target', 'SetTargetMode', setMode);
+    useNuiEvent('target', 'SetCursorHover', setCursorHover);
+    useNuiEvent('target', 'SetCursorMenu', setCursorMenu);
+
+    const isCursorMode = mode === TargetMode.Cursor;
 
     useNuiFocus(targetFound, targetFound, targetFound);
 
     const onKeyUpReceived = useCallback(
         async (event: KeyboardEvent) => {
+            // Le mode curseur gère lui-même sa fermeture (Echap / Alt / clic dans le vide)
+            if (isCursorMode) return;
             if (EXCLUDED_KEYS.includes(event.key.toLowerCase())) return;
 
             setIsTargeting(false);
@@ -46,7 +58,7 @@ export const TargetOverlay: FunctionComponent = () => {
 
             await fetchNui(NuiEvent.TargetReset);
         },
-        [setIsTargeting, setTargetFound]
+        [setIsTargeting, setTargetFound, isCursorMode]
     );
 
     const onMouseMove = useCallback(() => {
@@ -85,6 +97,14 @@ export const TargetOverlay: FunctionComponent = () => {
 
     const circumference = 60 * 2 * Math.PI;
     const offset = circumference - ((-30 * 100) / 100 / 100) * circumference;
+
+    if (isCursorMode) {
+        return (
+            <div ref={container} className="absolute inset-0">
+                <TargetCursorOverlay active={isTargeting} hover={cursorHover} menu={cursorMenu} targets={targets} />
+            </div>
+        );
+    }
 
     return (
         <div ref={container} className="absolute inset-0">

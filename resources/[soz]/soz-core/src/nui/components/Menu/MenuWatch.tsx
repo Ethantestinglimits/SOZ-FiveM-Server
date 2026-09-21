@@ -3,6 +3,7 @@ import { FunctionComponent } from 'react';
 import { NuiEvent } from '../../../shared/event';
 import { AllThemesConfig, HudSettings } from '../../../shared/hud';
 import { MenuType } from '../../../shared/nui/menu';
+import { TargetMode, TargetModeLabels } from '../../../shared/target';
 import { fetchNui } from '../../fetch';
 import { usePlayer } from '../../hook/data';
 import {
@@ -172,6 +173,20 @@ export const MenuWatch: FunctionComponent<MenuWatchProps> = ({ data }) => {
                     >
                         Instructions d'intéraction
                     </MenuItemCheckbox>
+                    <MenuItemSelect
+                        title="Type de menu alt"
+                        value={data.targetMode}
+                        description="B-Target: viseur au centre de l'écran. Menu contextuel: curseur libre, clic sur un prop, un joueur ou un véhicule"
+                        onConfirm={async (_, value) => {
+                            await fetchNui(NuiEvent.WatchMenuSetTargetMode, value);
+                        }}
+                    >
+                        {Object.values(TargetMode).map(mode => (
+                            <MenuItemSelectOption key={mode} value={mode}>
+                                {TargetModeLabels[mode]}
+                            </MenuItemSelectOption>
+                        ))}
+                    </MenuItemSelect>
                 </MenuContent>
             </MainMenu>
         </Menu>

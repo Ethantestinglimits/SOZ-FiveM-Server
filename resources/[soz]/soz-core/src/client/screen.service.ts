@@ -50,7 +50,7 @@ export class ScreenService {
         return [point3Dret, forwardDir];
     }
 
-    public async getEntityOnMousePosition(): Promise<[number, Vector3]> {
+    public async getEntityOnMousePosition(): Promise<[number, Vector3, boolean]> {
         const [screenX, screenY] = GetActiveScreenResolution();
         const [x, y] = GetNuiCursorPosition();
 
@@ -61,7 +61,7 @@ export class ScreenService {
         cursor: Vector2,
         coords?: Vector3,
         rotations?: Vector3
-    ): Promise<[number, Vector3]> {
+    ): Promise<[number, Vector3, boolean]> {
         if (!coords) {
             coords = GetFinalRenderedCamCoord() as Vector3;
         }
@@ -79,7 +79,7 @@ export class ScreenService {
         cam3DPos: Vector3,
         direction: Vector3,
         intersectEverything = false
-    ): Promise<[number, Vector3]> {
+    ): Promise<[number, Vector3, boolean]> {
         const rayHandle = StartShapeTestLosProbe(
             cam3DPos[0],
             cam3DPos[1],
@@ -94,14 +94,14 @@ export class ScreenService {
 
         // eslint-disable-next-line no-constant-condition
         while (true) {
-            const [result, , endCoords, , entity] = GetShapeTestResult(rayHandle);
+            const [result, hit, endCoords, , entity] = GetShapeTestResult(rayHandle);
 
             if (result === 2) {
                 if (entity === 0 && !intersectEverything) {
                     return await this.testShapeTestLosProbe(cam3DPos, direction, true);
                 }
 
-                return [entity, endCoords as Vector3];
+                return [entity, endCoords as Vector3, !!hit];
             }
 
             if (result !== 1) {
@@ -109,7 +109,7 @@ export class ScreenService {
                     return await this.testShapeTestLosProbe(cam3DPos, direction, true);
                 }
 
-                return [null, null];
+                return [null, null, false];
             }
 
             await wait(0);
