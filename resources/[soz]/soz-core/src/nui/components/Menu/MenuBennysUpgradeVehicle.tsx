@@ -368,11 +368,19 @@ export const MenuItemSelectVehicleRGBColor: FunctionComponent<MenuItemSelectVehi
 };
 
 const isPresetRGBColor = (color: RGBColor | undefined, choices: VehicleColorChoiceItem[]): boolean => {
-    if (!color) {
+    if (!color || !isRgbColorValue(color)) {
         return true;
     }
 
     return choices.some(choice => choice.color[0] === color[0] && choice.color[1] === color[1] && choice.color[2] === color[2]);
+};
+
+const toXenonRGBColor = (color: VehicleXenonColor | RGBColor | undefined): RGBColor | undefined => {
+    if (color === undefined || color === null) {
+        return undefined;
+    }
+
+    return isRgbColorValue(color) ? color : VehicleXenonColorChoices[color]?.color;
 };
 
 export const MenuBennysUpgradeVehicle: FunctionComponent<MenuBennysUpgradeVehicleProps> = ({ data }) => {
@@ -380,6 +388,9 @@ export const MenuBennysUpgradeVehicle: FunctionComponent<MenuBennysUpgradeVehicl
     const [options, setOptions] = useState<VehicleUpgradeOptions | null>(null);
     const [neonRgbMode, setNeonRgbMode] = useState(
         () => !isPresetRGBColor(data?.currentConfiguration?.neon?.color, Object.values(VehicleXenonColorChoices))
+    );
+    const [xenonRgbMode, setXenonRgbMode] = useState(
+        () => !isPresetRGBColor(toXenonRGBColor(data?.currentConfiguration?.xenonColor), Object.values(VehicleXenonColorChoices))
     );
     const item = useItem('veh_strip_piece_std');
     const crimi = ![LSCustomMode.Admin, LSCustomMode.LsCustom, LSCustomMode.NewGahray].includes(data.mode);
@@ -1068,18 +1079,46 @@ export const MenuBennysUpgradeVehicle: FunctionComponent<MenuBennysUpgradeVehicl
                         set={setConfig}
                         initialConfig={data?.originalConfiguration}
                     />
-                    <MenuItemSelectVehicleColor
-                        value={config?.xenonColor as VehicleXenonColor}
+                    <MenuItemSelectVehicleRGBColor
                         title="Couleur xénons"
-                        initialValue={data.originalConfiguration?.xenonColor as VehicleXenonColor}
+                        value={xenonRgbMode ? RgbSentinelChoice.color : toXenonRGBColor(config?.xenonColor)}
+                        initialValue={
+                            isPresetRGBColor(
+                                toXenonRGBColor(data.originalConfiguration?.xenonColor),
+                                Object.values(VehicleXenonColorChoices)
+                            )
+                                ? toXenonRGBColor(data.originalConfiguration?.xenonColor)
+                                : RgbSentinelChoice.color
+                        }
                         onChange={color => {
+                            if (!color) {
+                                return;
+                            }
+
+                            if (isRgbSentinelChoice(color)) {
+                                setXenonRgbMode(true);
+                                return;
+                            }
+
+                            setXenonRgbMode(false);
                             setConfig({
                                 ...config,
-                                xenonColor: color as VehicleXenonColor,
+                                xenonColor: color,
                             });
                         }}
-                        choices={VehicleXenonColorChoices}
+                        choices={[...Object.values(VehicleXenonColorChoices), RgbSentinelChoice]}
                     />
+                    {xenonRgbMode && (
+                        <ColorPicker
+                            value={toXenonRGBColor(config?.xenonColor)}
+                            onChange={color => {
+                                setConfig({
+                                    ...config,
+                                    xenonColor: color,
+                                });
+                            }}
+                        />
+                    )}
                     <MenuItemGoBack />
                 </MenuContent>
             </SubMenu>
