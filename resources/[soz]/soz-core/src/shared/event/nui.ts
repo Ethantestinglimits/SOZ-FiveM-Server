@@ -842,4 +842,6 @@ export enum NuiEvent {
     WhatIfHammerChoosePropToCreate = 'soz-core:nui:what-if:hammer-choose-prop-to-create',
 
     TextureReplacerChunk = 'soz-core:nui:texture:replacer-chunk',
+
+    GraffitiManageRemove = 'soz-core:nui:graffiti:manage-remove',
 }

@@ -435,6 +435,8 @@ export enum RpcServerEvent {
     PET_SHOULD_PLAYER_BE_ATTACKED = 'soz-core:server:pet:should-player-be-attacked',
 
     PLAYER_CLOTHES_UPDATE = 'soz-core:server:player:clothes:update',
+
+    GRAFFITI_GET_GANG_LIST = 'soz-core:server:graffiti:get-gang-list',
 }
 
 export enum RpcClientEvent {

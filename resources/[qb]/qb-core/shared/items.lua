@@ -13215,6 +13215,18 @@ QBShared.Items = {
         ["illustrator"] = ".Aurukh",
     },
 
+    ["soz_graffiti_tag"] = {
+        ["name"] = "soz_graffiti_tag",
+        ["label"] = "Bombe de peinture",
+        ["weight"] = 500,
+        ["useable"] = true,
+        ["type"] = "item",
+        ["shouldClose"] = false,
+        ["unique"] = false,
+        ["combinable"] = nil,
+        ["description"] = "Permet de taguer un mur pour marquer le territoire de votre gang.",
+    },
+
 
     --- Fishing Items
     ["basic_rod"] = {

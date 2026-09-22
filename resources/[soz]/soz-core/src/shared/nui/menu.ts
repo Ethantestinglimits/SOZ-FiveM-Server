@@ -5,6 +5,7 @@ import { RouletteMenuData } from '@private/shared/casino.roulette';
 import { SlotMachineMenuData } from '@private/shared/casino.slot';
 import { PetJobKennelMenuData, PetShopMenuData } from '@public/shared/animal';
 import { LaserGameAdminInfo, LaserGameData } from '@public/shared/games/laser';
+import { GraffitiMenuData } from '@public/shared/graffiti';
 import { ApartmentMenuData, ApartmentSelectUpgradesMenuData } from '@public/shared/housing/housing';
 import { HudSettings } from '@public/shared/hud';
 import { JobType } from '@public/shared/job';
@@ -175,6 +176,7 @@ export enum MenuType {
     CasinoInsideTrack = 'casino_inside_track',
     CasinoLuckyWheel = 'casino_lucky_wheel',
     WhatIfHammer = 'whatif_hammer',
+    GraffitiManageMenu = 'graffiti_manage_menu',
 }
 
 export interface MenuTypeMap extends Record<MenuType, any> {
@@ -266,6 +268,7 @@ export interface MenuTypeMap extends Record<MenuType, any> {
     [MenuType.PetShop]: PetShopMenuData;
     [MenuType.PetJobKennel]: PetJobKennelMenuData;
     [MenuType.GangZoneEditMenu]: string;
+    [MenuType.GraffitiManageMenu]: GraffitiMenuData;
 }
 
 export const ALLOWED_MENU_NAVIGATE: MenuType[] = [MenuType.AdminMenu, MenuType.PropPlacementMenu];

@@ -20,6 +20,7 @@ import { DuoAnimationModule } from './client/duo-animation/duo-animation.module'
 import { FactoryModule } from './client/factory/factory.module';
 import { FeatureModule } from './client/feature/feature.module';
 import { GamesModule } from './client/games/games.module';
+import { GraffitiModule } from './client/graffiti/graffiti.module';
 import { HousingModule } from './client/housing/housing.module';
 import { HudModule } from './client/hud/hud.module';
 import { InventoryModule } from './client/inventory/inventory.module';
@@ -130,6 +131,7 @@ async function bootstrap() {
         RaceModule,
         GarbageModule,
         BillboardModule,
+        GraffitiModule,
         CraftModule,
         FDFModule,
         NewsModule,

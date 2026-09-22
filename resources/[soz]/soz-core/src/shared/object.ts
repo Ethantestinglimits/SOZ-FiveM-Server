@@ -6,11 +6,13 @@ import { Vector3, Vector4 } from './polyzone/vector';
 
 export type WorldObjectMetadata = {
     gangId?: number;
+    ownerId?: string;
     index?: number;
     zoneId?: string;
     locked?: boolean;
     closed?: boolean;
     job?: JobType;
+    imageUrl?: string;
 };
 
 export type WorldObjectGrowth = {

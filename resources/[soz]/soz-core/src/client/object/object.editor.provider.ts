@@ -415,44 +415,45 @@ export class ObjectEditorProvider {
             return;
         }
 
-        if (!noCheck) {
-            const [ret] = GetGroundZFor_3dCoord(
-                object.position[0],
-                object.position[1],
-                object.position[2] + 0.1,
-                false
-            );
-            if (!ret) {
-                this.notifier.error('Position invalide');
-                return;
-            }
-
-            const coords = GetEntityCoords(PlayerPedId());
-            const handle = StartShapeTestLosProbe(
-                coords[0],
-                coords[1],
-                coords[2],
-                object.position[0],
-                object.position[1],
-                object.position[2] + 0.2,
-                49,
-                0,
-                4
-            );
-
-            let result: [number, any, number[], number[], number];
-            do {
-                result = GetShapeTestResult(handle);
-                await wait(0);
-            } while (result[0] == 1);
-
-            if (result[1]) {
-                this.notifier.error('Position incorrecte');
-                return;
-            }
+        if (!noCheck && !(await this.checkPlacementPosition(object.position))) {
+            return;
         }
 
         TriggerServerEvent(serverEvent, object.position, inventoryItem);
+    }
+
+    public async checkPlacementPosition(position: Vector4): Promise<boolean> {
+        const [ret] = GetGroundZFor_3dCoord(position[0], position[1], position[2] + 0.1, false);
+        if (!ret) {
+            this.notifier.error('Position invalide');
+            return false;
+        }
+
+        const coords = GetEntityCoords(PlayerPedId());
+        const handle = StartShapeTestLosProbe(
+            coords[0],
+            coords[1],
+            coords[2],
+            position[0],
+            position[1],
+            position[2] + 0.2,
+            49,
+            0,
+            4
+        );
+
+        let result: [number, any, number[], number[], number];
+        do {
+            result = GetShapeTestResult(handle);
+            await wait(0);
+        } while (result[0] == 1);
+
+        if (result[1]) {
+            this.notifier.error('Position incorrecte');
+            return false;
+        }
+
+        return true;
     }
 
     @Command('soz_object_editor_validate', {
