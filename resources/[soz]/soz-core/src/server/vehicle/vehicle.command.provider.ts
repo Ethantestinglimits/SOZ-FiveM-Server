@@ -42,6 +42,10 @@ export class VehicleCommandProvider {
     async dirtyCommand(source: number) {
         const closestVehicle = await this.vehicleSpawner.getClosestVehicle(source);
 
+        if (closestVehicle === null) {
+            return;
+        }
+
         this.vehicleStateService.updateVehicleCondition(closestVehicle.vehicleNetworkId, {
             dirtLevel: 15.0,
         });
@@ -51,6 +55,10 @@ export class VehicleCommandProvider {
     async fuelCommand(source: number, newlevel: number) {
         const closestVehicle = await this.vehicleSpawner.getClosestVehicle(source);
 
+        if (closestVehicle === null) {
+            return;
+        }
+
         this.vehicleStateService.updateVehicleCondition(closestVehicle.vehicleNetworkId, {
             fuelLevel: newlevel,
         });
@@ -59,6 +67,10 @@ export class VehicleCommandProvider {
     @Command('oil', { role: ['admin'], description: 'Set oil level (Admin Only)' })
     async oilCommand(source: number, newlevel: number) {
         const closestVehicle = await this.vehicleSpawner.getClosestVehicle(source);
+
+        if (closestVehicle === null) {
+            return;
+        }
 
         this.vehicleStateService.updateVehicleCondition(closestVehicle.vehicleNetworkId, {
             oilLevel: newlevel,
@@ -91,9 +103,13 @@ export class VehicleCommandProvider {
         TriggerClientEvent(ClientEvent.VEHICLE_ADMIN_MAX_PERFORMANCE, owner, closestVehicle.vehicleNetworkId);
     }
 
-    @Command('repair', { role: ['admin'], description: 'Repair closest vehicle (Admin Only)' })
-    async repairCommand(source: number) {
+    @Command('vehfix', { role: ['admin'], description: 'Repair closest vehicle (Admin Only)' })
+    async vehfixCommand(source: number) {
         const closestVehicle = await this.vehicleSpawner.getClosestVehicle(source);
+
+        if (closestVehicle === null) {
+            return;
+        }
 
         this.vehicleStateService.updateVehicleCondition(closestVehicle.vehicleNetworkId, {
             engineHealth: 1000,
