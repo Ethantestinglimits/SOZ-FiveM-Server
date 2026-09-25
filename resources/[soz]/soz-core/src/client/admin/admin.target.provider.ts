@@ -40,6 +40,7 @@ export class AdminTargetProvider {
                 options.push({
                     label: entry.label ?? entry.id,
                     group: entry.group,
+                    icon: entry.icon,
                     category: 'citizen',
                     action,
                     order: String(options.length).padStart(3, '0'),
