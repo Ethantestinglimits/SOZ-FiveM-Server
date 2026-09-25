@@ -6,6 +6,7 @@ import { Rpc } from '../../core/decorators/rpc';
 import { AdminPlayer, FullAdminPlayer, LightAdminPlayer } from '../../shared/admin/admin';
 import { RpcServerEvent } from '../../shared/rpc';
 import { PermissionService } from '../permission.service';
+import { PlayerService } from '../player/player.service';
 import { PlayerStateService } from '../player/player.state.service';
 import { ServerStateService } from '../server.state.service';
 import { VampireGameStateProvider } from '../story/vampire.game.state.provider';
@@ -14,6 +15,9 @@ import { VampireGameStateProvider } from '../story/vampire.game.state.provider';
 export class AdminMenuInteractiveProvider {
     @Inject(PermissionService)
     private permissionService: PermissionService;
+
+    @Inject(PlayerService)
+    private playerService: PlayerService;
 
     @Inject(PlayerStateService)
     private playerStateService: PlayerStateService;
@@ -35,6 +39,18 @@ export class AdminMenuInteractiveProvider {
             players.push(this.getPlayer(playerData));
         }
         return players;
+    }
+
+    // Un seul joueur (ex: joueur cliqué dans le menu contextuel), sans envoyer la liste de tous les joueurs
+    @Rpc(RpcServerEvent.ADMIN_GET_PLAYER)
+    public getPlayerById(source: number, playerId: number): AdminPlayer | null {
+        if (!this.permissionService.isHelper(source)) {
+            return null;
+        }
+
+        const playerData = this.playerService.getPlayer(playerId);
+
+        return playerData ? this.getPlayer(playerData) : null;
     }
 
     public getPlayer(playerData: PlayerData): AdminPlayer {

@@ -20,6 +20,7 @@ import { VehicleRadarProvider } from './vehicle.radar.provider';
 import { VehicleSeatbeltProvider } from './vehicle.seatbelt.provider';
 import { VehicleSpawnProvider } from './vehicle.spawn.provider';
 import { VehicleStateProvider } from './vehicle.state.provider';
+import { VehicleTargetMenuProvider } from './vehicle.target.menu.provider';
 import { VehicleTopSpeedProvider } from './vehicle.topspeed.provider';
 import { VehicleTowProvider } from './vehicle.tow.provider';
 import { VehicleTrainProvider } from './vehicle.train.provider';
@@ -44,6 +45,7 @@ import { VehicleTyreProvider } from './vehicle.tyre.provider';
         VehicleRadarProvider,
         VehicleElectricProvider,
         VehicleStateProvider,
+        VehicleTargetMenuProvider,
         VehiclePoliceLocator,
         VehiclePitStopProvider,
         VehicleTowProvider,

@@ -491,7 +491,7 @@ export class VehicleLockProvider {
             },
         ],
     })
-    async toggleVehicleLock() {
+    async toggleVehicleLock(definedVehicle?: number) {
         const player = this.playerService.getPlayer();
 
         if (!player) {
@@ -511,7 +511,12 @@ export class VehicleLockProvider {
             return;
         }
 
-        const vehicle = this.vehicleService.getClosestVehicle();
+        // Appelée par la touche, la commande reçoit la source en premier argument (0 côté client): seul un handle de
+        // véhicule valide (menu contextuel) désigne un véhicule précis, sinon c'est le plus proche
+        const vehicle =
+            typeof definedVehicle === 'number' && definedVehicle > 0 && DoesEntityExist(definedVehicle)
+                ? definedVehicle
+                : this.vehicleService.getClosestVehicle();
 
         if (!vehicle) {
             this.notifier.notify('Aucun vehicule à proximité.', 'error');
@@ -573,7 +578,7 @@ export class VehicleLockProvider {
         }
     }
 
-    private async hasVehicleKey(player: PlayerData, state: VehicleVolatileState) {
+    public async hasVehicleKey(player: PlayerData, state: VehicleVolatileState) {
         // Case for temporary care, only owner can unlock / lock vehicle
         if (state.id === null && state.rentOwner === null) {
             return state.owner === player.citizenid;

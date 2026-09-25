@@ -13,8 +13,10 @@ import { AdminMenuPlayerProvider } from './admin.menu.player.provider';
 import { AdminMenuProvider } from './admin.menu.provider';
 import { AdminMenuSkinProvider } from './admin.menu.skin.provider';
 import { AdminMenuVehicleProvider } from './admin.menu.vehicle.provider';
+import { AdminPlayerTargetProvider } from './admin.player.target.provider';
 import { AdminShopProvider } from './admin.shop.provider';
 import { AdminSpectateProvider } from './admin.spectate.provider';
+import { AdminTargetProvider } from './admin.target.provider';
 import { AdminZoneProvider } from './admin.zone.provider';
 
 @Module({
@@ -31,6 +33,8 @@ import { AdminZoneProvider } from './admin.zone.provider';
         AdminMenuSkinProvider,
         AdminMenuVehicleProvider,
         AdminSpectateProvider,
+        AdminTargetProvider,
+        AdminPlayerTargetProvider,
         AdminMenuMeteorProvider,
         AdminMenuHalloweenProvider,
         AdminMenuCeremonyProvider,

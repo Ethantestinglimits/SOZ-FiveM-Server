@@ -6,6 +6,7 @@ import { Provider } from '../../core/decorators/provider';
 import { emitRpc } from '../../core/rpc';
 import { ClientEvent, NuiEvent, ServerEvent } from '../../shared/event';
 import { PositiveNumberValidator } from '../../shared/nui/input';
+import { Vector3 } from '../../shared/polyzone/vector';
 import { Err, Ok } from '../../shared/result';
 import { RpcServerEvent } from '../../shared/rpc';
 import { groupBy } from '../../shared/utils/array';
@@ -35,6 +36,11 @@ export class AdminMenuVehicleProvider {
 
     private noBurstTyre = false;
 
+    // Depuis le menu admin (NUI) l'action vise le véhicule du joueur; depuis le ciblage, un véhicule précis
+    private getTargetVehicle(target?: unknown): number {
+        return typeof target === 'number' && target ? target : GetVehiclePedIsIn(PlayerPedId(), false);
+    }
+
     @OnNuiEvent(NuiEvent.AdminGetVehicles)
     public async getVehicles() {
         const vehicles = await emitRpc<any[]>(RpcServerEvent.ADMIN_GET_VEHICLES);
@@ -46,6 +52,34 @@ export class AdminMenuVehicleProvider {
             .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {}) as Record<keyof VehicleCategory, Vehicle[]>;
 
         return Ok({ catalog, vehicles });
+    }
+
+    // Depuis le menu contextuel: le véhicule apparaît au point cliqué plutôt qu'à côté du joueur
+    public async spawnVehicleAt(position: Vector3): Promise<void> {
+        const model = await this.inputService.askInput(
+            {
+                title: 'Modèle du véhicule',
+                maxCharacters: 32,
+            },
+            model => {
+                if (model && (IsModelInCdimage(model) || IsModelValid(model))) {
+                    return Ok(model);
+                }
+                return Err('Le modèle du véhicule est invalide');
+            }
+        );
+
+        if (!model) {
+            return;
+        }
+
+        // Légèrement au-dessus du sol pour ne pas apparaître à moitié dedans
+        TriggerServerEvent(ServerEvent.ADMIN_VEHICLE_SPAWN, model, [
+            position[0],
+            position[1],
+            position[2] + 0.5,
+            GetEntityHeading(PlayerPedId()),
+        ]);
     }
 
     @OnNuiEvent(NuiEvent.AdminMenuVehicleSpawn)
@@ -71,8 +105,8 @@ export class AdminMenuVehicleProvider {
     }
 
     @OnNuiEvent(NuiEvent.AdminMenuVehicleRepair)
-    public async onAdminMenuVehicleRepair() {
-        const vehicle = GetVehiclePedIsIn(PlayerPedId(), false);
+    public async onAdminMenuVehicleRepair(target?: number) {
+        const vehicle = this.getTargetVehicle(target);
         if (vehicle) {
             this.vehicleStateService.updateVehicleCondition(vehicle, {
                 bodyHealth: 1000,
@@ -81,13 +115,18 @@ export class AdminMenuVehicleProvider {
                 windowStatus: {},
                 doorStatus: {},
             });
+
+            // L'état de condition n'est appliqué que si la valeur change: une carrosserie déformée dont la santé est
+            // déjà à 1000 ne serait jamais réparée visuellement
+            SetVehicleDeformationFixed(vehicle);
+            SetVehicleFixed(vehicle);
         }
         return Ok(true);
     }
 
     @OnNuiEvent(NuiEvent.AdminMenuVehicleClean)
-    public async onAdminMenuVehicleClean() {
-        const vehicle = GetVehiclePedIsIn(PlayerPedId(), false);
+    public async onAdminMenuVehicleClean(target?: number) {
+        const vehicle = this.getTargetVehicle(target);
         if (vehicle) {
             this.vehicleStateService.updateVehicleCondition(vehicle, {
                 dirtLevel: 0.0,
@@ -97,8 +136,8 @@ export class AdminMenuVehicleProvider {
     }
 
     @OnNuiEvent(NuiEvent.AdminMenuVehicleRefill)
-    public async onAdminMenuVehicleRefill() {
-        const vehicle = GetVehiclePedIsIn(PlayerPedId(), false);
+    public async onAdminMenuVehicleRefill(target?: number) {
+        const vehicle = this.getTargetVehicle(target);
 
         if (vehicle) {
             this.vehicleStateService.updateVehicleCondition(vehicle, {
@@ -108,8 +147,8 @@ export class AdminMenuVehicleProvider {
     }
 
     @OnNuiEvent(NuiEvent.AdminMenuVehicleSave)
-    public async onAdminMenuVehicleSave() {
-        const vehicle = GetVehiclePedIsIn(PlayerPedId(), false);
+    public async onAdminMenuVehicleSave(target?: number) {
+        const vehicle = this.getTargetVehicle(target);
         const configuration = this.vehicleModificationService.getVehicleConfiguration(vehicle);
         const vehicleModel = GetEntityModel(vehicle);
         const vehicleName = GetDisplayNameFromVehicleModel(vehicleModel).toLowerCase();
@@ -120,8 +159,8 @@ export class AdminMenuVehicleProvider {
     }
 
     @OnNuiEvent(NuiEvent.AdminMenuVehicleSetFBIConfig)
-    public async onAdminMenuVehicleSetFBIConfig() {
-        const vehicle = GetVehiclePedIsIn(PlayerPedId(), false);
+    public async onAdminMenuVehicleSetFBIConfig(target?: number) {
+        const vehicle = this.getTargetVehicle(target);
 
         if (vehicle) {
             const configuration = this.vehicleModificationService.getVehicleConfiguration(vehicle);
@@ -184,8 +223,15 @@ export class AdminMenuVehicleProvider {
     }
 
     @OnNuiEvent(NuiEvent.AdminMenuVehicleDelete)
-    public async onAdminMenuVehicleDelete() {
-        TriggerServerEvent(ServerEvent.ADMIN_VEHICLE_DELETE);
+    public async onAdminMenuVehicleDelete(target?: number) {
+        // Depuis le menu admin (NUI): le véhicule le plus proche, choisi par le serveur
+        if (typeof target !== 'number' || !target) {
+            TriggerServerEvent(ServerEvent.ADMIN_VEHICLE_DELETE);
+
+            return;
+        }
+
+        TriggerServerEvent(ServerEvent.ADMIN_VEHICLE_DELETE, NetworkGetNetworkIdFromEntity(target));
     }
 
     @OnNuiEvent(NuiEvent.AdminToggleNoStall)
@@ -194,9 +240,9 @@ export class AdminMenuVehicleProvider {
     }
 
     @OnNuiEvent(NuiEvent.AdminToggleBurstTyres)
-    public async setNoBurstTyres(value: boolean): Promise<void> {
+    public async setNoBurstTyres(value: boolean, target?: number): Promise<void> {
         this.noBurstTyre = value;
-        const veh = GetVehiclePedIsIn(PlayerPedId(), false);
+        const veh = this.getTargetVehicle(target);
         if (veh) {
             SetVehicleTyresCanBurst(veh, !this.noBurstTyre);
         }
@@ -229,16 +275,16 @@ export class AdminMenuVehicleProvider {
     }
 
     @OnNuiEvent(NuiEvent.AdminMenuVehicleNos)
-    public async setNos(): Promise<void> {
-        const veh = GetVehiclePedIsIn(PlayerPedId(), false);
+    public async setNos(target?: number): Promise<void> {
+        const veh = this.getTargetVehicle(target);
         if (veh) {
             TriggerServerEvent(ServerEvent.ADMIN_VEHICLE_NOS, VehToNet(veh));
         }
     }
 
     @OnNuiEvent(NuiEvent.AdminMenuVehicleMapping)
-    public async setMapping(): Promise<void> {
-        const veh = GetVehiclePedIsIn(PlayerPedId(), false);
+    public async setMapping(target?: number): Promise<void> {
+        const veh = this.getTargetVehicle(target);
         if (veh) {
             this.vehicleBusinessProvider.mapping(veh, true);
         }
