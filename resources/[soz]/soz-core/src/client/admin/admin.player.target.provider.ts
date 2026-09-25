@@ -129,6 +129,7 @@ export class AdminPlayerTargetProvider {
                 option: {
                     label,
                     group: entry.group,
+                    icon: entry.icon,
                     category: 'citizen',
                     action: this.forPlayer(action),
                     order: String(list.length).padStart(3, '0'),

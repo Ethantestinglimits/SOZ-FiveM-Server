@@ -13,25 +13,41 @@ import { ContextMenuLevel } from '../shared/target';
  * - `label`: le texte affiché. Les blocs qui génèrent plusieurs options (portes, fenêtres, maladies...) gardent le nom
  *   de chaque option dans le code, seul le sous-menu qui les contient se règle ici.
  * - `group`: le sous-menu. Vide = à la racine du menu. Un "/" ouvre un sous-menu dans un sous-menu, sans limite de
- *   profondeur: "⚙️ Admin/Santé/Effets".
+ *   profondeur: "Admin/Santé/Effets".
  * - `level`: le rôle minimum ('any' par défaut). Voir ContextMenuLevel.
+ * - `icon`: l'icône affichée à gauche de l'option, "dossier/nom" sans extension: `icon: 'door/door'`. Les fichiers sont
+ *   sur le serveur statique (soz_public_endpoint), dans static/game/images/target/{icon}.webp. Un bloc qui génère
+ *   plusieurs options (portes, fenêtres...) donne la même icône à toutes. Une icône introuvable s'affiche cassée.
  *
  * Ordre: c'est celui de la liste. Un sous-menu prend la place de sa première entrée, donc pour mettre une action tout
  * en bas d'un sous-menu, sous ses sous-menus, il suffit de la mettre en dernier.
  *
  * Les conditions (conducteur seulement, véhicule avec radio, etc.) restent dans le code: une entrée listée ici peut ne
  * pas s'afficher si elle ne s'applique pas.
+ *
+ * Icône d'un sous-menu lui-même (la ligne "Portes ›", pas les options qu'il contient): voir ContextMenuGroupIcons plus
+ * bas, indexé par le dernier segment du nom du sous-menu (celui après le dernier "/").
  */
 export type ContextMenuEntry = {
     id: string;
     label?: string;
     group?: string;
     level?: ContextMenuLevel;
+    /** Icône, "dossier/nom" sans extension (voir plus haut) */
+    icon?: string;
     /** Menu joueur: propose aussi l'action quand on clique sur soi-même (oui par défaut) */
     onSelf?: boolean;
+    /** Menu d'un véhicule cliqué de l'extérieur: distance maximale entre le joueur et le point cliqué, en mètres */
+    distance?: number;
 };
 
-const ADMIN = '⚙️ Admin';
+const ADMIN = 'Admin';
+
+/** Icône (et couleur optionnelle, pour la distinguer) d'un sous-menu, indexée par son dernier segment de nom */
+export const ContextMenuGroupIcons: Record<string, { icon: string; color?: string }> = {
+    Portes: { icon: 'door/door' },
+    [ADMIN]: { icon: 'door/cogwheel', color: '#1b690b' },
+};
 
 /**
  * Menu du véhicule: clic sur son propre véhicule (ou dans le vide) quand on est dedans.
@@ -39,14 +55,14 @@ const ADMIN = '⚙️ Admin';
  */
 export const VehicleContextMenu: ContextMenuEntry[] = [
     { id: 'engine', label: 'Moteur' },
-    { id: 'lock', label: 'Véhicule verrouillé' },
+    { id: 'lock', label: 'Véhicule verrouillé', icon: 'crimi/unlock' },
     { id: 'belt', label: 'Ceinture de sécurité' },
-    { id: 'radio', label: 'Radio longue portée' },
+    { id: 'radio', label: 'Radio longue portée', icon: 'global/comment' },
     { id: 'anchor', label: 'Ancre baissée' },
 
     { id: 'doors', group: 'Portes' }, // une option par porte
     { id: 'roof', label: 'Toit ouvert', group: 'Portes' },
-    { id: 'closeDoors', label: 'Tout fermer', group: 'Portes' },
+    { id: 'closeDoors', label: 'Tout fermer', icon: 'door/double', group: 'Portes' },
 
     { id: 'windows', group: 'Fenêtres' }, // une option par fenêtre
     { id: 'windowsDown', label: 'Tout baisser', group: 'Fenêtres' },
@@ -61,7 +77,7 @@ export const VehicleContextMenu: ContextMenuEntry[] = [
     { id: 'interiorLight', label: 'Éclairage intérieur', group: 'Éclairage' },
     { id: 'neon', label: 'Néons', group: 'Éclairage' },
 
-    { id: 'seats', group: 'Sièges' }, // une option par place libre
+    { id: 'seats', group: 'Sièges', icon: 'global/chair' }, // une option par place libre
 
     { id: 'speedLimit', group: 'Limiteur de vitesse' }, // aucun, 50, 90, 110, 130
     { id: 'speedLimitCurrent', label: 'Vitesse actuelle', group: 'Limiteur de vitesse' },
@@ -74,16 +90,29 @@ export const VehicleContextMenu: ContextMenuEntry[] = [
 ];
 
 /**
+ * Menu d'un véhicule cliqué de l'extérieur (le sien ou celui d'un autre), pour tout le monde, sans métier.
+ * Code: client/vehicle/vehicle.target.menu.provider.ts (buildOutsideOptions)
+ * Les options d'entreprise (police, Bennys...) restent celles du B-Target et se rangent d'après ContextMenuGrouping.
+ */
+export const OutsideVehicleContextMenu: ContextMenuEntry[] = [
+    { id: 'lock', label: 'Véhicule verrouillé', icon: 'crimi/unlock', distance: 10 }, // interrupteur: ferme ou ouvre le véhicule
+    { id: 'trunk', label: 'Ouvrir le coffre', icon: 'police/fouiller_vehicle', distance: 4 },
+    { id: 'doors', group: 'Portes', distance: 4 }, // une option par porte, avec son état
+    { id: 'music', label: 'Mettre de la musique', icon: 'magasin/album', distance: 10 },
+    { id: 'plate', label: 'Plaque', icon: 'police/immatriculation', distance: 10 }, // affiche le numéro de plaque
+];
+
+/**
  * Outils admin sur un véhicule: dans le menu du véhicule (sous "⚙️ Admin") et en cliquant un véhicule de l'extérieur.
  * Code: client/vehicle/vehicle.target.menu.provider.ts (getAdminOptions)
  */
 export const AdminVehicleContextMenu: ContextMenuEntry[] = [
-    { id: 'repair', label: 'Réparer', group: ADMIN },
-    { id: 'clean', label: 'Nettoyer', group: ADMIN },
-    { id: 'refuel', label: 'Ravitailler', group: ADMIN },
-    { id: 'nos', label: 'NOS', group: ADMIN },
+    { id: 'repair', label: 'Réparer', icon: 'mechanic/reparer', group: ADMIN },
+    { id: 'clean', label: 'Nettoyer', icon: 'mechanic/nettoyer', group: ADMIN },
+    { id: 'refuel', label: 'Ravitailler', icon: 'fuel/remplir', group: ADMIN },
+    { id: 'nos', label: 'NOS', icon: 'global/bolt', group: ADMIN },
 
-    { id: 'upgrade', label: 'Améliorer le véhicule', group: `${ADMIN}/Personnalisation` },
+    { id: 'upgrade', label: 'Améliorer le véhicule', icon: 'mechanic/Mettre', group: `${ADMIN}/Personnalisation` },
     { id: 'lsCustom', label: 'LS Custom', group: `${ADMIN}/Personnalisation` },
     { id: 'fbi', label: 'Configuration FBI', group: `${ADMIN}/Personnalisation`, level: 'admin' },
     { id: 'mapping', label: 'Cartographie', group: `${ADMIN}/Personnalisation` },
@@ -92,11 +121,23 @@ export const AdminVehicleContextMenu: ContextMenuEntry[] = [
     { id: 'noStall', label: 'Calage désactivé', group: `${ADMIN}/Réglages`, level: 'staff' },
     { id: 'noSurface', label: 'Surface désactivée', group: `${ADMIN}/Réglages`, level: 'staff' },
 
-    { id: 'saveCopy', label: 'Enregistrer une copie du véhicule', group: `${ADMIN}/Gestion`, level: 'admin' },
-    { id: 'federalPound', label: 'Fourrière fédérale', group: `${ADMIN}/Gestion`, level: 'staff' },
+    {
+        id: 'saveCopy',
+        label: 'Enregistrer une copie du véhicule',
+        icon: 'inventory/archive',
+        group: `${ADMIN}/Gestion`,
+        level: 'admin',
+    },
+    {
+        id: 'federalPound',
+        label: 'Fourrière fédérale',
+        icon: 'mechanic/CarFourriere',
+        group: `${ADMIN}/Gestion`,
+        level: 'staff',
+    },
 
     // Dernier, sous les sous-menus
-    { id: 'delete', label: 'Supprimer le véhicule', group: ADMIN, level: 'staff' },
+    { id: 'delete', label: 'Supprimer le véhicule', icon: 'global/trash', group: ADMIN, level: 'staff' },
 ];
 
 /**
@@ -105,32 +146,56 @@ export const AdminVehicleContextMenu: ContextMenuEntry[] = [
  */
 export const AdminPlayerContextMenu: ContextMenuEntry[] = [
     { id: 'spectate', label: 'Observer', group: ADMIN, level: 'gamemaster', onSelf: false },
-    { id: 'goto', label: 'Aller vers le joueur', group: ADMIN, onSelf: false },
+    { id: 'goto', label: 'Aller vers le joueur', icon: 'halloween/teleportation', group: ADMIN, onSelf: false },
     { id: 'bring', label: 'Amener le joueur à moi', group: ADMIN, onSelf: false },
-    { id: 'revive', label: 'Réanimer', group: ADMIN },
-    { id: 'kill', label: 'Tuer', group: ADMIN },
-    { id: 'freeze', label: 'Bloquer', group: ADMIN },
-    { id: 'unfreeze', label: 'Débloquer', group: ADMIN },
-    { id: 'mute', label: 'Muter', group: ADMIN },
-    { id: 'unmute', label: 'Démuter', group: ADMIN },
-    { id: 'search', label: 'Fouiller', group: ADMIN, level: 'staff', onSelf: false },
+    { id: 'revive', label: 'Réanimer', icon: 'ems/revive', group: ADMIN },
+    { id: 'kill', label: 'Tuer', icon: 'crimi/destroy', group: ADMIN },
+    { id: 'freeze', label: 'Bloquer', icon: 'global/toggle-off', group: ADMIN },
+    { id: 'unfreeze', label: 'Débloquer', icon: 'global/toggle-on', group: ADMIN },
+    { id: 'mute', label: 'Muter', icon: 'global/toggle-off', group: ADMIN },
+    { id: 'unmute', label: 'Démuter', icon: 'global/toggle-on', group: ADMIN },
+    { id: 'search', label: 'Fouiller', icon: 'police/fouiller', group: ADMIN, level: 'staff', onSelf: false },
 
-    { id: 'diseases', group: `${ADMIN}/Santé/Rendre malade`, level: 'staff' }, // rhume, grippe... soigner
-    { id: 'effects', group: `${ADMIN}/Santé/Effets` }, // alcoolique, drogué, normal
-    { id: 'injuries', group: `${ADMIN}/Santé/Blessures` }, // 0 à 12
-    { id: 'attributes', group: `${ADMIN}/Santé/Attributs` }, // force, endurance... en min et max
+    { id: 'diseases', group: `${ADMIN}/Santé/Rendre malade`, icon: 'crimi/toxic_flesh', level: 'staff' }, // rhume, grippe... soigner
+    { id: 'effects', group: `${ADMIN}/Santé/Effets`, icon: 'global/beer' }, // alcoolique, drogué, normal
+    { id: 'injuries', group: `${ADMIN}/Santé/Blessures`, icon: 'ems/health_card' }, // 0 à 12
+    { id: 'attributes', group: `${ADMIN}/Santé/Attributs`, icon: 'sport/halteres' }, // force, endurance... en min et max
 
-    { id: 'voiceStatus', label: 'Statut', group: `${ADMIN}/Voix` },
-    { id: 'voiceDebugOn', label: 'Debug vocal activé', group: `${ADMIN}/Voix` },
-    { id: 'voiceDebugOff', label: 'Debug vocal désactivé', group: `${ADMIN}/Voix` },
+    { id: 'voiceStatus', label: 'Statut', icon: 'global/question', group: `${ADMIN}/Voix` },
+    { id: 'voiceDebugOn', label: 'Debug vocal activé', icon: 'global/toggle-on', group: `${ADMIN}/Voix` },
+    { id: 'voiceDebugOff', label: 'Debug vocal désactivé', icon: 'global/toggle-off', group: `${ADMIN}/Voix` },
 
-    { id: 'resetSkin', label: 'Réinitialiser le skin', group: `${ADMIN}/Personnage`, level: 'staff' },
-    { id: 'reputation', label: 'Changer la réputation', group: `${ADMIN}/Personnage`, level: 'staff' },
+    {
+        id: 'resetSkin',
+        label: 'Réinitialiser le skin',
+        icon: 'jobs/habiller',
+        group: `${ADMIN}/Personnage`,
+        level: 'staff',
+    },
+    {
+        id: 'reputation',
+        label: 'Changer la réputation',
+        icon: 'gouv/graph',
+        group: `${ADMIN}/Personnage`,
+        level: 'staff',
+    },
     { id: 'resetCrimi', label: 'Reset criminalité', group: `${ADMIN}/Personnage`, level: 'staff' },
     { id: 'resetClientState', label: 'Reset client state', group: `${ADMIN}/Personnage` },
-    { id: 'missiveOn', label: 'Représentant de Corbin: activer', group: `${ADMIN}/Personnage`, level: 'staff' },
-    { id: 'missiveOff', label: 'Représentant de Corbin: désactiver', group: `${ADMIN}/Personnage`, level: 'staff' },
-    { id: 'parties', group: `${ADMIN}/Personnage/Parti politique` }, // aucun + les partis du Sénat
+    {
+        id: 'missiveOn',
+        label: 'Représentant de Corbin: activer',
+        icon: 'global/toggle-on',
+        group: `${ADMIN}/Personnage`,
+        level: 'staff',
+    },
+    {
+        id: 'missiveOff',
+        label: 'Représentant de Corbin: désactiver',
+        icon: 'global/toggle-off',
+        group: `${ADMIN}/Personnage`,
+        level: 'staff',
+    },
+    { id: 'parties', group: `${ADMIN}/Personnage/Parti politique`, icon: 'gouv/identity' }, // aucun + les partis du Sénat
 ];
 
 /**
@@ -138,7 +203,7 @@ export const AdminPlayerContextMenu: ContextMenuEntry[] = [
  * Code: client/admin/admin.target.provider.ts
  */
 export const WorldContextMenu: ContextMenuEntry[] = [
-    { id: 'placeVehicle', label: 'Voiture', group: 'Placer' },
+    { id: 'placeVehicle', label: 'Voiture', icon: 'vehicle/car', group: 'Placer' },
     { id: 'placeProps', label: 'Props', group: 'Placer' },
 ];
 

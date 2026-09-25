@@ -129,6 +129,12 @@ export class TargetProvider {
     // Options affichées en cliquant sur son propre personnage (fournies par les modules)
     private _selfPedOptions: (() => Promise<TargetOption[]>) | null = null;
 
+    // Options d'un véhicule cliqué de l'extérieur, calculées à chaque clic (libellés et états dynamiques: verrouillage,
+    // portes, plaque...). Fournies par les modules, en plus des cibles B-Target déjà enregistrées.
+    private _vehicleOptions:
+        | ((vehicle: number, context: { coords: Vector3; distance: number }) => Promise<TargetOption[]>)
+        | null = null;
+
     // Regroupe les options d'entreprise d'une cible en sous-menus, d'après leur job (règles dans
     // config/context-menu.ts, ContextMenuGrouping). Les options qui ont déjà un sous-menu ne sont pas touchées.
     private groupOptions(options: TargetOption[]): TargetOption[] {
@@ -201,6 +207,32 @@ export class TargetProvider {
 
     public registerWorldOptions(factory: (coords: Vector3) => Promise<TargetOption[]>): void {
         this._worldOptions = factory;
+    }
+
+    public registerVehicleOptions(
+        factory: (vehicle: number, context: { coords: Vector3; distance: number }) => Promise<TargetOption[]>
+    ): void {
+        this._vehicleOptions = factory;
+    }
+
+    private async getVehicleOptions(vehicle: number, coords: Vector3, distance: number): Promise<TargetOption[]> {
+        if (!this._vehicleOptions) return [];
+
+        try {
+            const options = await this._vehicleOptions(vehicle, { coords, distance });
+
+            return options.map(option => ({
+                category: 'citizen',
+                ...option,
+                id: uuidv4(),
+                entity: vehicle,
+                entityCoords: coords,
+            }));
+        } catch (error) {
+            console.error('[context-menu] options du véhicule: erreur à la construction', error);
+
+            return [];
+        }
     }
 
     public registerSelfPedOptions(factory: () => Promise<TargetOption[]>): void {
@@ -562,10 +594,16 @@ export class TargetProvider {
     // Les options d'une entité touchée par le curseur; joueurs, PNJ et véhicules: options d'entreprise rangées en
     // sous-menus
     private async computeEntityOptions(entity: number, coords: Vector3): Promise<TargetOption[]> {
-        const options = await this.checkTargetActions(entity, coords, getDistance(coords, this.getPlayerCoords()));
+        const distance = getDistance(coords, this.getPlayerCoords());
+        const options = await this.checkTargetActions(entity, coords, distance);
 
         if (entity !== 0) {
             const entityType = GetEntityType(entity);
+
+            // Véhicule: les options de base (verrouillage, coffre, portes...) s'ajoutent aux cibles enregistrées
+            if (entityType === 2) {
+                options.push(...(await this.getVehicleOptions(entity, coords, distance)));
+            }
 
             if (entityType === 1 || entityType === 2) {
                 return this.groupOptions(options);

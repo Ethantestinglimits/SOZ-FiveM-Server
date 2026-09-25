@@ -2,6 +2,7 @@ import cn from 'classnames';
 import { FunctionComponent, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+import { ContextMenuGroupIcons } from '../../../config/context-menu';
 import { NuiEvent } from '../../../shared/event/nui';
 import { TargetCursorMenuPosition } from '../../../shared/nui/target';
 import { TargetOption } from '../../../shared/target';
@@ -78,6 +79,8 @@ type TargetCursorRowProps = {
     label: string;
     subLabel?: string;
     icon?: string;
+    // Sous-menu uniquement: teinte le fond derrière l'icône pour le distinguer (l'image elle-même n'est pas recolorée)
+    iconColor?: string;
     checked?: boolean;
     chevron?: 'right';
     active?: boolean;
@@ -88,6 +91,7 @@ const TargetCursorRow: FunctionComponent<TargetCursorRowProps> = ({
     label,
     subLabel,
     icon,
+    iconColor,
     checked,
     chevron,
     active,
@@ -103,7 +107,17 @@ const TargetCursorRow: FunctionComponent<TargetCursorRowProps> = ({
             onClick={onSelect}
             onAuxClick={onSelect}
         >
-            {icon && <img className="size-5 shrink-0" src={getPath(`images/target/${icon}.webp`)} alt="" />}
+            {icon && iconColor && (
+                <span
+                    className="flex size-6 shrink-0 items-center justify-center rounded-full"
+                    style={{ background: `${iconColor}26`, boxShadow: `inset 0 0 0 1px ${iconColor}66` }}
+                >
+                    <img className="size-4" src={getPath(`images/target/${icon}.webp`)} alt="" />
+                </span>
+            )}
+            {icon && !iconColor && (
+                <img className="size-5 shrink-0" src={getPath(`images/target/${icon}.webp`)} alt="" />
+            )}
             <span className="flex-1 truncate text-sm">{label}</span>
             {subLabel && <span className="shrink-0 text-xs opacity-70">{subLabel}</span>}
             {chevron === 'right' && <span className="shrink-0 text-sm opacity-70">›</span>}
@@ -224,6 +238,8 @@ export const TargetCursorOverlay: FunctionComponent<TargetCursorOverlayProps> = 
             <TargetCursorRow
                 key={name}
                 label={name}
+                icon={ContextMenuGroupIcons[name]?.icon}
+                iconColor={ContextMenuGroupIcons[name]?.color}
                 chevron="right"
                 active={name === openChild}
                 onSelect={() => setPath(name === openChild ? prefix : [...prefix, name])}

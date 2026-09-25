@@ -1,9 +1,11 @@
 import { Once, OnceStep } from '@core/decorators/event';
 import { Inject } from '@core/decorators/injectable';
 import { Provider } from '@core/decorators/provider';
+import { wait } from '@core/utils';
 import {
     AdminVehicleContextMenu,
     ContextMenuEntry,
+    OutsideVehicleContextMenu,
     VehicleContextMenu,
 } from '@public/config/context-menu';
 import { TargetOption } from '@public/shared/target';
@@ -12,6 +14,7 @@ import { LSCustomMode, VehicleClass, VehicleSeat, VehicleVolatileState } from '@
 import { AdminMenuVehicleProvider } from '../admin/admin.menu.vehicle.provider';
 import { AdminLevel, AdminPermissionService } from '../admin/admin.permission.service';
 import { BennysVehicleProvider } from '../job/bennys/bennys.vehicle.provider';
+import { Notifier } from '../notifier';
 import { PlayerService } from '../player/player.service';
 import { buildContextMenu } from '../target/context-menu';
 import { TargetFactory } from '../target/target.factory';
@@ -66,6 +69,11 @@ const SPEED_LIMITS: { label: string; value: number | null }[] = [
 // Durée pendant laquelle on affiche l'état demandé plutôt que l'état lu (animation d'une porte ~1s)
 const EXPECTED_DELAY = 1300;
 
+// Index du coffre dans DOORS (il a sa propre option, qui ouvre l'inventaire)
+const DOOR_TRUNK = 5;
+// Index du capot dans DOORS: absent du sous-menu "Portes" à l'extérieur (accès au moteur peu pertinent depuis dehors,
+// sans monter dessus), gardé depuis l'intérieur
+const DOOR_HOOD = 4;
 
 // Pas de limite de portée pour les outils admin sur un véhicule ciblé depuis l'extérieur (seule la portée du
 // raycast de ciblage, 1000 m, s'applique)
@@ -116,6 +124,9 @@ export class VehicleTargetMenuProvider {
     @Inject(VehicleGarageProvider)
     private vehicleGarageProvider: VehicleGarageProvider;
 
+    @Inject(Notifier)
+    private notifier: Notifier;
+
     // Aucune native ne permet de lire l'état d'une fenêtre: on retient celles qu'on a baissées, par véhicule
     private windowsDown = new Map<number, Set<number>>();
 
@@ -142,7 +153,110 @@ export class VehicleTargetMenuProvider {
     @Once(OnceStep.Start)
     public onStart(): void {
         this.targetProvider.registerSelfVehicleOptions(vehicle => this.buildOptions(vehicle));
+        this.targetProvider.registerVehicleOptions((vehicle, context) => this.buildOutsideOptions(vehicle, context));
         this.registerAdminTargets();
+    }
+
+    // Options de base d'un véhicule cliqué de l'extérieur, calculées à chaque clic (état du verrouillage, des portes,
+    // numéro de plaque...). La place, le nom et la portée de chaque entrée sont dans config/context-menu.ts
+    // (OutsideVehicleContextMenu).
+    private async buildOutsideOptions(vehicle: number, context: { distance: number }): Promise<TargetOption[]> {
+        const player = this.playerService.getPlayer();
+
+        if (!player || player.metadata.isdead || player.metadata.inlaststand || player.metadata.ishandcuffed) {
+            return [];
+        }
+
+        // Un véhicule inconnu du serveur (créé en dev, PNJ...) n'a pas d'état: il est considéré comme ouvert
+        const state = {
+            open: true,
+            forced: false,
+            ...(await this.vehicleStateService.getVehicleState(vehicle).catch(() => null)),
+        };
+        const locked = !(state.open || state.forced);
+        const options: TargetOption[] = [];
+
+        const add = (entry: ContextMenuEntry, action: TargetOption['action'], extra: Partial<TargetOption> = {}) => {
+            if (entry.distance !== undefined && context.distance > entry.distance) return;
+
+            options.push({
+                category: 'citizen',
+                label: entry.label ?? entry.id,
+                group: entry.group,
+                icon: entry.icon,
+                action,
+                order: String(options.length).padStart(3, '0'),
+                ...extra,
+            });
+        };
+
+        // Pas de clé: ni verrouiller ni déverrouiller, comme la touche U. On le vérifie ici plutôt qu'au clic pour ne
+        // pas proposer l'option à quelqu'un qui ne peut de toute façon rien en faire.
+        const hasKey = await this.vehicleLockProvider.hasVehicleKey(player, state);
+
+        buildContextMenu('véhicule extérieur', OutsideVehicleContextMenu, {
+            // Ferme ou ouvre le véhicule (mêmes règles que la touche: clés, vitesse, animation)
+            lock: entry => {
+                if (hasKey) add(entry, () => this.vehicleLockProvider.toggleVehicleLock(vehicle), { checked: locked });
+            },
+
+            trunk: entry => {
+                if (DoesVehicleHaveDoor(vehicle, DOOR_TRUNK)) {
+                    add(entry, () => this.vehicleLockProvider.openVehicle(vehicle));
+                }
+            },
+
+            // Une option par porte (le coffre a la sienne, le capot n'y est pas), avec son état ouvert ou fermé
+            doors: entry => {
+                for (const [key, label] of Object.entries(DOORS)) {
+                    const door = Number(key);
+                    if (door === DOOR_TRUNK || door === DOOR_HOOD || !DoesVehicleHaveDoor(vehicle, door)) continue;
+
+                    const open = GetVehicleDoorAngleRatio(vehicle, door) > 0.1;
+
+                    add({ ...entry, label }, () => this.setOutsideDoor(vehicle, door, !open, locked), {
+                        checked: open,
+                    });
+                }
+            },
+
+            music: entry => add(entry, () => this.startVehicleMusic()),
+
+            // Le numéro de plaque, en sous-titre; cliquer l'affiche aussi en notification
+            plate: entry => {
+                const plate = GetVehicleNumberPlateText(vehicle).trim();
+
+                add(entry, () => this.notifier.notify(`Plaque : ${plate}`, 'info'), { subLabel: plate });
+            },
+        });
+
+        return options;
+    }
+
+    // Ouvre ou ferme une porte d'un véhicule qui n'est pas celui du joueur: refusé si le véhicule est verrouillé, et
+    // on demande le contrôle réseau pour que le changement se voie chez les autres joueurs
+    private async setOutsideDoor(vehicle: number, door: number, open: boolean, locked: boolean): Promise<void> {
+        if (locked) {
+            this.notifier.notify('Véhicule verrouillé.', 'error');
+
+            return;
+        }
+
+        if (!NetworkHasControlOfEntity(vehicle)) {
+            NetworkRequestControlOfEntity(vehicle);
+
+            for (let i = 0; i < 10 && !NetworkHasControlOfEntity(vehicle); i++) {
+                await wait(50);
+            }
+        }
+
+        await this.vehicleMenuProvider.setVehicleDoorState({ doorIndex: door, open }, vehicle);
+    }
+
+    // Point d'accroche de la musique du véhicule (sozplay): aucun système de musique de véhicule n'existe encore dans
+    // ce dépôt, à relier quand il sera disponible
+    private startVehicleMusic(): void {
+        this.notifier.notify("La musique du véhicule n'est pas encore disponible.", 'warning');
     }
 
     // Outils admin: mêmes actions et mêmes règles de rôle que le sous-menu véhicule du menu admin. Chaque action
@@ -198,6 +312,7 @@ export class VehicleTargetMenuProvider {
                     option: {
                         label: entry.label ?? entry.id,
                         group: entry.group,
+                        icon: entry.icon,
                         category: 'citizen',
                         action,
                         keepOpen: true,
@@ -282,6 +397,7 @@ export class VehicleTargetMenuProvider {
                 category: 'citizen',
                 label: entry.label ?? entry.id,
                 group: entry.group,
+                icon: entry.icon,
                 action,
                 keepOpen: true,
                 order: String(order++).padStart(3, '0'),
@@ -565,10 +681,14 @@ export class VehicleTargetMenuProvider {
                 for (const { level, option } of this.getAdminOptions()) {
                     if (!this.adminPermissionService.hasLevel(adminPermission, level)) continue;
 
-                    add({ id: option.label, label: option.label, group: option.group }, option.action, {
-                        keepOpen: option.keepOpen,
-                        isChecked: option.isChecked,
-                    });
+                    add(
+                        { id: option.label, label: option.label, group: option.group, icon: option.icon },
+                        option.action,
+                        {
+                            keepOpen: option.keepOpen,
+                            isChecked: option.isChecked,
+                        }
+                    );
                 }
             },
 
