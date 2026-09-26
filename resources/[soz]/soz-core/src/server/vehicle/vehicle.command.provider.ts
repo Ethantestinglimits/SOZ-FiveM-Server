@@ -14,9 +14,6 @@ export class VehicleCommandProvider {
     @Inject(VehicleStateService)
     private vehicleStateService: VehicleStateService;
 
-    @Inject(Notifier)
-    private notifier: Notifier;
-
     @Inject(Logger)
     private logger: Logger;
 
@@ -64,30 +61,15 @@ export class VehicleCommandProvider {
         });
     }
 
-    @Command('perf', { role: ['admin'], description: 'Max out closest vehicle performance (Admin Only)' })
-    async perfCommand(source: number) {
+    @Command('vehmax', { role: ['admin'], description: 'Max out closest vehicle performance (Admin Only)' })
+    async vehmaxCommand(source: number) {
         const closestVehicle = await this.vehicleSpawner.getClosestVehicle(source);
 
-        if (!closestVehicle) {
-            this.notifier.notify(source, 'Aucun véhicule à proximité.', 'error');
-            return;
+        const owner = NetworkGetEntityOwner(NetworkGetEntityFromNetworkId(closestVehicle.vehicleNetworkId));
+
+        if (owner) {
+            TriggerClientEvent(ClientEvent.VEHICLE_ADMIN_MAX_PERFORMANCE, owner, closestVehicle.vehicleNetworkId);
         }
-
-        const entityId = NetworkGetEntityFromNetworkId(closestVehicle.vehicleNetworkId);
-
-        if (!entityId) {
-            this.notifier.notify(source, 'Ce véhicule est introuvable.', 'error');
-            return;
-        }
-
-        const owner = NetworkGetEntityOwner(entityId);
-
-        if (!owner) {
-            this.notifier.notify(source, "Ce véhicule n'a pas de propriétaire réseau.", 'error');
-            return;
-        }
-
-        TriggerClientEvent(ClientEvent.VEHICLE_ADMIN_MAX_PERFORMANCE, owner, closestVehicle.vehicleNetworkId);
     }
 
     @Command('vehfix', { role: ['admin'], description: 'Repair closest vehicle (Admin Only)' })
