@@ -3,7 +3,6 @@ import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Logger } from '../../core/logger';
 import { ClientEvent } from '../../shared/event';
-import { Notifier } from '../notifier';
 import { VehicleSpawner } from './vehicle.spawner';
 import { VehicleStateService } from './vehicle.state.service';
 
@@ -123,5 +122,11 @@ export class VehicleCommandProvider {
             doorStatus: {},
             windowStatus: {},
         });
+
+        const owner = NetworkGetEntityOwner(NetworkGetEntityFromNetworkId(closestVehicle.vehicleNetworkId));
+
+        if (owner) {
+            TriggerClientEvent(ClientEvent.VEHICLE_CONDITION_FIX_DEFORMATION, owner, closestVehicle.vehicleNetworkId);
+        }
     }
 }
