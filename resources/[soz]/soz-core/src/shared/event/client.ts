@@ -210,6 +210,7 @@ export enum ClientEvent {
     VEHICLE_CONDITION_UNREGISTER = 'soz-core:client:vehicle:condition:unregister',
     VEHICLE_CONDITION_APPLY = 'soz-core:client:vehicle:condition:apply',
     VEHICLE_CONDITION_SYNC = 'soz-core:client:vehicle:condition:sync',
+    VEHICLE_CONDITION_FIX_DEFORMATION = 'soz-core:client:vehicle:condition:fix-deformation',
     VEHICLE_CLOSE_TRUNK = 'soz-core:client:vehicle:close-trunk',
     VEHICLE_DELETE = 'soz-core:client:vehicle:delete',
     VEHICLE_FUEL_START = 'soz-core:client:vehicle:fuel:start',

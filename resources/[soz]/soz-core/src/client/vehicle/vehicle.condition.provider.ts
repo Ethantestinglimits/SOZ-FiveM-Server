@@ -235,6 +235,23 @@ export class VehicleConditionProvider {
         this.vehicleService.applyVehicleCondition(entityId, condition, newCondition);
     }
 
+    @OnEvent(ClientEvent.VEHICLE_CONDITION_FIX_DEFORMATION)
+    private fixVehicleDeformation(vehicleNetworkId: number) {
+        if (!NetworkDoesNetworkIdExist(vehicleNetworkId)) {
+            return;
+        }
+
+        const entityId = NetworkGetEntityFromNetworkId(vehicleNetworkId);
+
+        if (!entityId || !NetworkHasControlOfEntity(entityId)) {
+            return;
+        }
+
+        // bodyHealth apply skips SetVehicleFixed when health is already 1000, but the vehicle can still be dented
+        SetVehicleDeformationFixed(entityId);
+        SetVehicleFixed(entityId);
+    }
+
     @OnEvent(ClientEvent.VEHICLE_CONDITION_SYNC)
     private async syncVehicleCondition(
         vehicleNetworkId: number,
