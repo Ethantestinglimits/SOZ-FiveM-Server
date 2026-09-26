@@ -95,4 +95,15 @@ export class VehicleCommandProvider {
             TriggerClientEvent(ClientEvent.VEHICLE_CONDITION_FIX_DEFORMATION, owner, closestVehicle.vehicleNetworkId);
         }
     }
+
+    @Command('vehmax', { role: ['admin'], description: 'Max out closest vehicle performance (Admin Only)' })
+    async vehmaxCommand(source: number) {
+        const closestVehicle = await this.vehicleSpawner.getClosestVehicle(source);
+
+        const owner = NetworkGetEntityOwner(NetworkGetEntityFromNetworkId(closestVehicle.vehicleNetworkId));
+
+        if (owner) {
+            TriggerClientEvent(ClientEvent.VEHICLE_ADMIN_MAX_PERFORMANCE, owner, closestVehicle.vehicleNetworkId);
+        }
+    }
 }
