@@ -2,6 +2,7 @@ import { Command } from '../../core/decorators/command';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Logger } from '../../core/logger';
+import { ClientEvent } from '../../shared/event';
 import { VehicleSpawner } from './vehicle.spawner';
 import { VehicleStateService } from './vehicle.state.service';
 
@@ -58,5 +59,16 @@ export class VehicleCommandProvider {
         this.vehicleStateService.updateVehicleCondition(closestVehicle.vehicleNetworkId, {
             oilLevel: newlevel,
         });
+    }
+
+    @Command('vehmax', { role: ['admin'], description: 'Max out closest vehicle performance (Admin Only)' })
+    async vehmaxCommand(source: number) {
+        const closestVehicle = await this.vehicleSpawner.getClosestVehicle(source);
+
+        const owner = NetworkGetEntityOwner(NetworkGetEntityFromNetworkId(closestVehicle.vehicleNetworkId));
+
+        if (owner) {
+            TriggerClientEvent(ClientEvent.VEHICLE_ADMIN_MAX_PERFORMANCE, owner, closestVehicle.vehicleNetworkId);
+        }
     }
 }
