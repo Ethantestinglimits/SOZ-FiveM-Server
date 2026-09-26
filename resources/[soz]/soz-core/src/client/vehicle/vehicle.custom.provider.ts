@@ -277,7 +277,7 @@ export class VehicleCustomProvider {
                 engine: GetNumVehicleMods(vehicleEntityId, VehicleModType.Engine) - 1,
                 brakes: GetNumVehicleMods(vehicleEntityId, VehicleModType.Brakes) - 1,
                 transmission: GetNumVehicleMods(vehicleEntityId, VehicleModType.Transmission) - 1,
-                suspension: 1,
+                suspension: 0,
                 armor: GetNumVehicleMods(vehicleEntityId, VehicleModType.Armor) - 1,
             },
         };
