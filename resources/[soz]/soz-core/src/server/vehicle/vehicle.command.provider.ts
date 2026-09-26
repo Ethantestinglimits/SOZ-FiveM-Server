@@ -2,6 +2,7 @@ import { Command } from '../../core/decorators/command';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Logger } from '../../core/logger';
+import { ClientEvent } from '../../shared/event';
 import { VehicleSpawner } from './vehicle.spawner';
 import { VehicleStateService } from './vehicle.state.service';
 
@@ -58,5 +59,29 @@ export class VehicleCommandProvider {
         this.vehicleStateService.updateVehicleCondition(closestVehicle.vehicleNetworkId, {
             oilLevel: newlevel,
         });
+    }
+
+    @Command('vehfix', { role: ['admin'], description: 'Repair closest vehicle (Admin Only)' })
+    async vehfixCommand(source: number) {
+        const closestVehicle = await this.vehicleSpawner.getClosestVehicle(source);
+
+        this.vehicleStateService.updateVehicleCondition(closestVehicle.vehicleNetworkId, {
+            engineHealth: 1000,
+            bodyHealth: 1000,
+            tankHealth: 1000,
+            dirtLevel: 0,
+            tireHealth: {},
+            tireBurstState: {},
+            tireBurstCompletely: {},
+            tireTemporaryRepairDistance: {},
+            doorStatus: {},
+            windowStatus: {},
+        });
+
+        const owner = NetworkGetEntityOwner(NetworkGetEntityFromNetworkId(closestVehicle.vehicleNetworkId));
+
+        if (owner) {
+            TriggerClientEvent(ClientEvent.VEHICLE_CONDITION_FIX_DEFORMATION, owner, closestVehicle.vehicleNetworkId);
+        }
     }
 }
