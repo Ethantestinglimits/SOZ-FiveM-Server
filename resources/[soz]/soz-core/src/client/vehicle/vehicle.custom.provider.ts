@@ -17,6 +17,7 @@ import {
     VehicleConfiguration,
     VehicleCustomInput,
     VehicleCustomMenuData,
+    VehicleModType,
     VehicleUpgradeOptions,
 } from '../../shared/vehicle/modification';
 import { isVehicleModelElectric, LSCustomMode, VehicleClass, VehicleSeat } from '../../shared/vehicle/vehicle';
@@ -232,6 +233,41 @@ export class VehicleCustomProvider {
             mode: mode,
             advenced: advancedFlag > 0,
         });
+    }
+
+    @OnEvent(ClientEvent.VEHICLE_ADMIN_MAX_PERFORMANCE)
+    public async onVehicleAdminMaxPerformance(vehicleNetworkId: number) {
+        const vehicleEntityId = NetworkGetEntityFromNetworkId(vehicleNetworkId);
+
+        if (!vehicleEntityId || !NetworkHasControlOfEntity(vehicleEntityId)) {
+            return;
+        }
+
+        const originalConfiguration = await this.vehicleService.getVehicleConfiguration(vehicleEntityId);
+        const maxConfiguration: VehicleConfiguration = {
+            ...originalConfiguration,
+            modification: {
+                ...originalConfiguration.modification,
+                turbo: true,
+                engine: GetNumVehicleMods(vehicleEntityId, VehicleModType.Engine) - 1,
+                brakes: GetNumVehicleMods(vehicleEntityId, VehicleModType.Brakes) - 1,
+                transmission: GetNumVehicleMods(vehicleEntityId, VehicleModType.Transmission) - 1,
+                suspension: 1,
+                armor: GetNumVehicleMods(vehicleEntityId, VehicleModType.Armor) - 1,
+            },
+        };
+
+        const newVehicleConfiguration = await emitRpc<VehicleConfiguration>(
+            RpcServerEvent.VEHICLE_CUSTOM_SET_MODS,
+            vehicleNetworkId,
+            maxConfiguration,
+            originalConfiguration,
+            null,
+            true,
+            LSCustomMode.Admin
+        );
+
+        this.vehicleService.applyVehicleConfigurationPerformance(vehicleEntityId, newVehicleConfiguration);
     }
 
     @OnEvent(ClientEvent.BASE_ENTERED_VEHICLE)
