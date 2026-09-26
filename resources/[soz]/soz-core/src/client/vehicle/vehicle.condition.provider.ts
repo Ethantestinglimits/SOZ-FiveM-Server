@@ -247,7 +247,7 @@ export class VehicleConditionProvider {
             return;
         }
 
-        // bodyHealth apply skips SetVehicleFixed when health is already 1000, but the vehicle can still be dented
+        // body can be deformed while body health is still at 1000
         SetVehicleDeformationFixed(entityId);
         SetVehicleFixed(entityId);
     }
