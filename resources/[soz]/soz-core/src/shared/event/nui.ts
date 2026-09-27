@@ -688,6 +688,7 @@ export enum NuiEvent {
     TargetReset = 'soz-core:nui:target:reset',
     TargetSelect = 'soz-core:nui:target:select',
     TargetCursorClick = 'soz-core:nui:target:cursor-click',
+    TargetHover = 'soz-core:nui:target:hover',
     ProgressFinish = 'soz-core:nui:progress:finish',
 
     MinigameEnd = 'soz-core:nui:minigame:end',

@@ -83,6 +83,41 @@ export type Scenario = {
     position?: Vector4;
     isSittingScenario?: boolean;
     shouldTeleport?: boolean;
+    // Only for scenarios played in place (no position), defaults to true
+    playEnterAnim?: boolean;
+};
+
+// Animation played on a world prop (seat, lounger, ...) targeted by the player. Positions are
+// resolved at runtime from the targeted entity, so only the animation itself is configured here.
+export type WorldAnimationPlay =
+    | {
+          type: 'scenario';
+          name: string;
+          isSittingScenario: boolean;
+          shouldTeleport: boolean;
+          // Loop clip shown by the target preview, for scenarios that replay their enter clip even in place
+          preview?: Omit<AnimationInfo, 'coords'>;
+      }
+    | {
+          type: 'seat_animation';
+          enter: Omit<AnimationInfo, 'coords'>;
+          base: Omit<AnimationInfo, 'coords'>;
+          exit: Omit<AnimationInfo, 'coords'>;
+          shouldTeleport: boolean;
+      };
+
+export type WorldAnimationOption = {
+    label: string;
+    icon: string;
+    male: WorldAnimationPlay;
+    // Falls back to the male variant when absent
+    female?: WorldAnimationPlay;
+};
+
+export type WorldAnimationGroup = {
+    models: number[];
+    distance: number;
+    options: WorldAnimationOption[];
 };
 
 export type Walking = {

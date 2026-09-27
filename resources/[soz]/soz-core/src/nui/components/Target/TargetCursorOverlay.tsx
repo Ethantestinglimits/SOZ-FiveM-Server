@@ -85,6 +85,8 @@ type TargetCursorRowProps = {
     chevron?: 'right';
     active?: boolean;
     onSelect: () => void;
+    // Aperçu en jeu (ex: animation sur un siège) tant que la ligne est survolée
+    onHover?: (hovered: boolean) => void;
 };
 
 const TargetCursorRow: FunctionComponent<TargetCursorRowProps> = ({
@@ -96,6 +98,7 @@ const TargetCursorRow: FunctionComponent<TargetCursorRowProps> = ({
     chevron,
     active,
     onSelect,
+    onHover,
 }) => {
     const { getPath } = useAssetPath();
 
@@ -106,6 +109,8 @@ const TargetCursorRow: FunctionComponent<TargetCursorRowProps> = ({
             })}
             onClick={onSelect}
             onAuxClick={onSelect}
+            onMouseEnter={onHover && (() => onHover(true))}
+            onMouseLeave={onHover && (() => onHover(false))}
         >
             {icon && iconColor && (
                 <span
@@ -220,6 +225,7 @@ export const TargetCursorOverlay: FunctionComponent<TargetCursorOverlayProps> = 
             icon={target.icon}
             checked={target.checked}
             onSelect={() => fetchNui(NuiEvent.TargetSelect, target.id)}
+            onHover={hovered => fetchNui(NuiEvent.TargetHover, hovered ? target.id : null)}
         />
     );
 

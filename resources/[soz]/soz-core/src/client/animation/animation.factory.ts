@@ -391,7 +391,7 @@ export class AnimationFactory {
                     scenario.shouldTeleport ?? false
                 );
             } else {
-                TaskStartScenarioInPlace(ped, scenario.name, -1, true);
+                TaskStartScenarioInPlace(ped, scenario.name, -1, scenario.playEnterAnim ?? true);
             }
 
             // Wait for scenario to start

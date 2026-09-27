@@ -20,6 +20,10 @@ export const TargetItem: FunctionComponent<TargetOption & { onSelect: () => void
         await fetchNui(NuiEvent.TargetSelect, id);
     };
 
+    const handleMouseEnter = () => fetchNui(NuiEvent.TargetHover, id);
+
+    const handleMouseLeave = () => fetchNui(NuiEvent.TargetHover, null);
+
     const imageUrl = useMemo(() => {
         if (!icon) return null;
 
@@ -27,7 +31,13 @@ export const TargetItem: FunctionComponent<TargetOption & { onSelect: () => void
     }, [icon]);
 
     return (
-        <div className="h-12 w-full cursor-pointer" onClick={handleClick} onAuxClick={handleClick}>
+        <div
+            className="h-12 w-full cursor-pointer"
+            onClick={handleClick}
+            onAuxClick={handleClick}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
             <GlassMorphismContainer
                 borderClassName="rounded-full"
                 className="flex items-center gap-3 px-5 h-12 w-fit"
