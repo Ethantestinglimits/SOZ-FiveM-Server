@@ -253,6 +253,7 @@ export enum NuiEvent {
     PlayerMenuAnimationShortcutDelete = 'soz-core:nui:player:menu:animation-shortcut-delete',
     PlayerMenuAnimationFavorite = 'soz-core:nui:player:menu:animation-favorite',
     PlayerMenuAnimationFavoriteDelete = 'soz-core:nui:player:menu:animation-favorite-delete',
+    PlayerMenuAnimationMoveOffset = 'soz-core:nui:player:menu:animation-move-offset',
     PlayerAnimationUpdateCombatMode = 'soz-core:nui:player:menu:animation:keep-combat-mode',
     PlayerMenuHudSetGlobal = 'soz-core:nui:player:menu:hud-set-global',
     PlayerMenuHudSetCinematicMode = 'soz-core:nui:player:menu:hud-set-cinematic-mode',

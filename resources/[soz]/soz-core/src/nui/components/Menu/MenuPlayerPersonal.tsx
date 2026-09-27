@@ -36,6 +36,17 @@ export const MenuPlayerPersonal: FunctionComponent<MenuPlayerPersonalProps> = ({
     const player = usePlayer();
     const isHalloween = useSelector((state: RootState) => state.features.Halloween);
     const isWhatIf2 = useSelector((state: RootState) => state.features.WhatIfSecondEpisode);
+    const [animationRunning, setAnimationRunning] = useState(data.animationRunning);
+
+    // `data` is refreshed on every menu (re)open without necessarily remounting this component,
+    // so the `useState` initial value alone would go stale across opens — resync it explicitly.
+    useEffect(() => {
+        setAnimationRunning(data.animationRunning);
+    }, [data.animationRunning]);
+
+    useNuiEvent('player', 'UpdateAnimationRunning', running => {
+        setAnimationRunning(running);
+    });
 
     if (!player) {
         return null;
@@ -83,6 +94,15 @@ export const MenuPlayerPersonal: FunctionComponent<MenuPlayerPersonalProps> = ({
                             onConfirm={() => fetchNui(NuiEvent.PlayerMenuWhatIf2Retrieval)}
                         >
                             Demander un Rapatriement
+                        </MenuItemButton>
+                    )}
+                    {animationRunning && (
+                        <MenuItemButton
+                            onConfirm={() => {
+                                fetchNui(NuiEvent.PlayerMenuAnimationMoveOffset);
+                            }}
+                        >
+                            🎯 Déplacer l'animation
                         </MenuItemButton>
                     )}
                 </MenuContent>

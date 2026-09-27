@@ -127,6 +127,8 @@ export type ObjectEditorOptions = {
     snapToGround: boolean;
     useCircularCamera: boolean;
     initialPosition: Vector4;
+    invisible: boolean;
+    highlight: boolean;
 };
 
 export type EditorMenuData = Omit<ObjectEditorOptions, 'onDrawCallback'> & {
