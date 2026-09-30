@@ -264,7 +264,13 @@ export class VehicleCustomProvider {
     public async onVehicleAdminMaxPerformance(vehicleNetworkId: number) {
         const vehicleEntityId = NetworkGetEntityFromNetworkId(vehicleNetworkId);
 
-        if (!vehicleEntityId || !NetworkHasControlOfEntity(vehicleEntityId)) {
+        // cannot check a vehicle that does not exist
+        if (!vehicleEntityId) {
+            return;
+        }
+
+        // cannot apply a vehicle where we are not the owner
+        if (!NetworkHasControlOfEntity(vehicleEntityId)) {
             return;
         }
 

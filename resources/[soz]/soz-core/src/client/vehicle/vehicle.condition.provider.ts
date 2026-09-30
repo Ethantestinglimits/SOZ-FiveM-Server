@@ -243,7 +243,13 @@ export class VehicleConditionProvider {
 
         const entityId = NetworkGetEntityFromNetworkId(vehicleNetworkId);
 
-        if (!entityId || !NetworkHasControlOfEntity(entityId)) {
+        // cannot check a vehicle that does not exist
+        if (!entityId) {
+            return;
+        }
+
+        // cannot apply a vehicle where we are not the owner
+        if (!NetworkHasControlOfEntity(entityId)) {
             return;
         }
 
