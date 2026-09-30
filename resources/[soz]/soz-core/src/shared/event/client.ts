@@ -211,7 +211,6 @@ export enum ClientEvent {
     STATE_UPDATE_TIME = 'soz-core:client:state:update-time',
     STATE_FORCE_TIME = 'soz-core:client:state:force-time',
 
-    VEHICLE_ADMIN_MAX_PERFORMANCE = 'soz-core:client:vehicle:admin:max-performance',
     VEHICLE_CONDITION_REGISTER = 'soz-core:client:vehicle:condition:register',
     VEHICLE_CONDITION_UNREGISTER = 'soz-core:client:vehicle:condition:unregister',
     VEHICLE_CONDITION_APPLY = 'soz-core:client:vehicle:condition:apply',
@@ -245,6 +244,7 @@ export enum ClientEvent {
     VEH_FEATURE_SURFACE_RESET = 'reset-feature-surface',
     VEH_HAS_BEEN_TPM = 'soz-core:client:offroad:setTpm',
     VEHICLE_SYNC_DOOR_TRAIN = 'soz-core:client:vehicle:train-door-sync',
+    VEHICLE_ADMIN_MAX_PERFORMANCE = 'soz-core:client:vehicle:admin:max-performance',
 
     VEHICLE_SYNC_PUSHING_STATE = 'soz-core:client:vehicle:sync-pushing-state',
 
