@@ -1,4 +1,4 @@
-import { OnNuiEvent } from '../../core/decorators/event';
+import { Once, OnceStep, OnNuiEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Tick, TickInterval } from '../../core/decorators/tick';
@@ -10,6 +10,7 @@ import { Notifier } from '../notifier';
 import { NuiDispatch } from '../nui/nui.dispatch';
 import { ObjectEditorProvider } from '../object/object.editor.provider';
 import { ResourceLoader } from '../repository/resource.loader';
+import { TargetProvider } from '../target/target.provider';
 import { AnimationService } from './animation.service';
 
 const MARKER_MODEL = joaat('p_bloodsplat_s');
@@ -33,8 +34,33 @@ export class AnimationCalibrateProvider {
     @Inject(NuiDispatch)
     private nuiDispatch: NuiDispatch;
 
+    @Inject(TargetProvider)
+    private targetProvider: TargetProvider;
+
     private moving = false;
     private lastAnimationRunning = false;
+
+    // Menu contextuel: clic sur son propre personnage pendant une animation
+    @Once(OnceStep.Start)
+    public registerContextMenu(): void {
+        this.targetProvider.registerSelfPedOptions(async () => {
+            if (this.moving || !this.animationService.hasRunningAnimation()) {
+                return [];
+            }
+
+            return [
+                {
+                    label: "Déplacer l'animation",
+                    category: 'citizen',
+                    action: async () => {
+                        // Le menu contextuel se ferme juste après l'action et rend le focus: l'éditeur s'ouvre ensuite
+                        await wait(200);
+                        await this.moveAnimation();
+                    },
+                },
+            ];
+        });
+    }
 
     @Tick(TickInterval.EVERY_SECOND)
     public syncAnimationRunningState(): void {

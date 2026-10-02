@@ -6,7 +6,14 @@ import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Logger } from '../../core/logger';
 import { uuidv4 } from '../../core/utils';
-import { AnimationConfigItem, MoodConfigItem, WalkConfigBase, WalkConfigItem, Walking } from '../../shared/animation';
+import {
+    AnimationConfigItem,
+    MoodConfigItem,
+    PropAnimationItem,
+    WalkConfigBase,
+    WalkConfigItem,
+    Walking,
+} from '../../shared/animation';
 import { ClientEvent, NuiEvent } from '../../shared/event';
 import { Shortcut } from '../../shared/nui/player';
 import { getRandomItem } from '../../shared/random';
@@ -46,6 +53,23 @@ export class PlayerAnimationProvider {
 
     @Inject(DroneProvider)
     private droneProvider: DroneProvider;
+
+    private lastMenuAnimation: PropAnimationItem | null = null;
+
+    // Animation du menu (ou d'un raccourci/favori) que le joueur est en train de jouer, pour l'enregistrer sur un prop
+    public getRunningMenuAnimation(): PropAnimationItem | null {
+        const item = this.lastMenuAnimation;
+        if (!item) {
+            return null;
+        }
+
+        const running =
+            item.type === 'animation'
+                ? this.animationService.isRunning(item.animation.base.name, item.animation.base.dictionary)
+                : this.animationService.isRunning(item.scenario.name);
+
+        return running ? item : null;
+    }
 
     @Command('animation_stop', {
         description: "Stop l'animation en cours",
@@ -426,12 +450,14 @@ export class PlayerAnimationProvider {
 
         if (animationItem.type === 'animation') {
             this.animationService.toggleAnimation(animationItem.animation);
+            this.lastMenuAnimation = animationItem;
 
             return true;
         }
 
         if (animationItem.type === 'scenario') {
             this.animationService.toggleScenario(animationItem.scenario);
+            this.lastMenuAnimation = animationItem;
 
             return true;
         }

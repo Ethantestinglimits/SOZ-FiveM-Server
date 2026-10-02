@@ -189,6 +189,11 @@ export class AnimationService {
         return runner;
     }
 
+    // Animation: dictionnaire + nom de la boucle; scénario: son nom seul
+    public isRunning(name: string, dictionary?: string): boolean {
+        return this.runningAnimations.has((dictionary ?? '') + name);
+    }
+
     public hasRunningAnimation(): boolean {
         return this.runningAnimations.size > 0;
     }

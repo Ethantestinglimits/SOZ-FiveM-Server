@@ -259,6 +259,20 @@ model persistent_prop {
     position String  @db.LongText
 }
 
+model prop_animation {
+    id           Int      @id @default(autoincrement())
+    model        Int
+    label        String   @db.VarChar(32)
+    animation    String   @db.Text
+    offset       String   @db.VarChar(255)
+    citizen_id   String   @db.VarChar(50)
+    creator_name String   @db.VarChar(64)
+    created_at   DateTime @default(now()) @db.Timestamp(0)
+
+    @@index([model])
+    @@index([citizen_id])
+}
+
 model event {
     id          String  @id @default(uuid())
     name        String  @db.VarChar(255)

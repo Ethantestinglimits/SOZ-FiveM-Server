@@ -120,6 +120,26 @@ export type WorldAnimationGroup = {
     options: WorldAnimationOption[];
 };
 
+// Animation du menu enregistrée par un joueur sur un modèle de prop, rejouable par tous depuis le menu contextuel
+export type PropAnimationItem = AnimationConfigAnimation | AnimationConfigScenario;
+
+export type PropAnimation = {
+    id: number;
+    model: number;
+    label: string;
+    animation: PropAnimationItem;
+    // Position du ped dans le repère du prop (x, y, z) et son cap relatif à celui du prop
+    offset: Vector4;
+    citizenId: string;
+    creatorName: string;
+};
+
+export const PROP_ANIMATION_MAX_PER_MODEL = 10;
+export const PROP_ANIMATION_MAX_PER_PLAYER = 20;
+export const PROP_ANIMATION_LABEL_MAX_LENGTH = 32;
+// Distance max entre le ped et l'origine du prop à l'enregistrement (le calibrage déplace déjà de 2 m au plus)
+export const PROP_ANIMATION_MAX_OFFSET = 3.0;
+
 export type Walking = {
     walk: string;
     previous: string;

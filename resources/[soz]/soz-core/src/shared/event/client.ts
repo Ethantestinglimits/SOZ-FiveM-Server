@@ -368,6 +368,9 @@ export enum ClientEvent {
     BILLBOARD_UPDATE = 'soz-core:client:billboard:update',
     BILLBOARD_DELETE = 'soz-core:client:billboard:delete',
 
+    PROP_ANIMATION_ADDED = 'soz-core:client:prop-animation:added',
+    PROP_ANIMATION_DELETED = 'soz-core:client:prop-animation:deleted',
+
     VANDALISM_ABORT = 'soz-core:client:vandalism:abort',
     VANDALISM_STEP = 'soz-core:client:vandalism:step',
     VANDALISM_UPDATE_PROP = 'soz-core:client:vandalism:update-prop',
