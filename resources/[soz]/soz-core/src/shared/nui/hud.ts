@@ -25,6 +25,7 @@ export interface NuiHudMethodMap {
     SetShowStats: boolean;
     SetTwitchNewsOverlay: JobType | null;
     SetShowHud: boolean;
+    SetCinematicHud: { active: boolean; duration: number };
     SetInstructional: string[];
     ForceDisplayInstructional: boolean;
     DrawNotification: Omit<BasicNotification | AdvancedNotification | TPoliceNotification, 'id'> & { id?: string };

@@ -12,7 +12,7 @@ import { MenuType } from '../../shared/nui/menu';
 import { AnimationService } from '../animation/animation.service';
 import { HudGlassmorphismProvider } from '../hud/hud.glassmorphism.provider';
 import { HudMinimapProvider } from '../hud/hud.minimap.provider';
-import { HudStateProvider } from '../hud/hud.state.provider';
+import { CINEMATIC_TOGGLE_DURATION, HudStateProvider } from '../hud/hud.state.provider';
 import { JobMenuProvider } from '../job/job.menu.provider';
 import { NuiDispatch } from '../nui/nui.dispatch';
 import { NuiMenu } from '../nui/nui.menu';
@@ -164,7 +164,7 @@ export class PlayerMenuProvider {
 
     @OnNuiEvent(NuiEvent.PlayerMenuHudSetCinematicMode)
     public async hudComponentSetCinematicMode({ value }: { value: boolean }) {
-        this.hudStateProvider.setCinematicMode(value);
+        this.hudStateProvider.setCinematicMode(value, CINEMATIC_TOGGLE_DURATION);
     }
 
     @OnNuiEvent(NuiEvent.PlayerMenuHudSetCinematicCameraActive)
