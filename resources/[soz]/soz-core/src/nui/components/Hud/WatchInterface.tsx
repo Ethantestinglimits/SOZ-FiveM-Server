@@ -1,11 +1,9 @@
 import { animated, useSpring } from '@react-spring/web';
 import cn from 'classnames';
-import { FunctionComponent, useMemo, useState } from 'react';
+import { FunctionComponent } from 'react';
 import { useSelector } from 'react-redux';
 
-import { VoiceMode } from '../../../shared/hud';
 import { useHudHasStreetNames } from '../../hook/data';
-import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
 import { GlassMorphismBox } from '../Styleguide/GlassMorphismBox';
 import { Compass } from './components/Compass';
@@ -15,7 +13,7 @@ import { PetStats } from './components/PetStats';
 import { PlayerStats } from './components/PlayerStats';
 import { VoiceIcon } from './components/VoiceIcon';
 import { Weather } from './components/Weather';
-import { useHudColor } from './hooks/useHudColor';
+import { useVoiceIcon } from './hooks/useVoiceIcon';
 
 export const WatchInterface: FunctionComponent = () => {
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
@@ -24,34 +22,7 @@ export const WatchInterface: FunctionComponent = () => {
 
     const hasStreetNamesEnabled = useHudHasStreetNames();
 
-    const [voiceMode, setVoiceMode] = useState(VoiceMode.Normal);
-    const [voiceActive, setVoiceActive] = useState(true);
-
-    const { imagePrefix } = useHudColor();
-
-    useNuiEvent('hud', 'UpdateVoiceMode', setVoiceMode);
-    useNuiEvent('hud', 'UpdateVoiceActive', setVoiceActive);
-
-    const [voiceIcon, disableAutoHide] = useMemo(() => {
-        if (!voiceActive) {
-            return [`${imagePrefix}disconnected`, true];
-        }
-
-        switch (voiceMode) {
-            case VoiceMode.Mute:
-                return ['mute', true];
-            case VoiceMode.Whisper:
-                return ['whisper', false];
-            case VoiceMode.Normal:
-                return ['normal', false];
-            case VoiceMode.Shouting:
-                return ['shouting', false];
-            case VoiceMode.Microphone:
-                return ['microphone', false];
-            case VoiceMode.Megaphone:
-                return ['megaphone', false];
-        }
-    }, [voiceActive, voiceMode]);
+    const [voiceIcon, disableAutoHide] = useVoiceIcon();
 
     const headerStyles = useSpring({
         from: {

@@ -1,3 +1,4 @@
+import { Command } from '../../core/decorators/command';
 import { On, OnEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
@@ -16,6 +17,11 @@ const ALLOWED_RETICLE_WEAPONS = new Set([
     GetHashKey('WEAPON_MARKSMANRIFLE_MK2'),
 ]);
 
+const CINEMATIC_BAR_HEIGHT = 0.1;
+export const CINEMATIC_TOGGLE_DURATION = 750;
+
+const easeInOutCubic = (t: number): number => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
 @Provider()
 export class HudStateProvider {
     @Inject(NuiDispatch)
@@ -27,8 +33,9 @@ export class HudStateProvider {
     private isHudVisible = true;
 
     private isCinematicMode = false;
-    private cinematicModeTransitionEnd = 0;
-    private cinematicModeTransitionStart = 0;
+    private cinematicAnimationFrom = 0;
+    private cinematicAnimationStart = 0;
+    private cinematicAnimationDuration = 0;
 
     private isPhoneCameraMode = false;
 
@@ -57,10 +64,38 @@ export class HudStateProvider {
     }
 
     public setCinematicMode(enabled: boolean, transitionTime = 0): void {
+        // Start from the current bar position so toggling mid-animation reverses smoothly
+        this.cinematicAnimationFrom = this.getCinematicProgress();
+        this.cinematicAnimationStart = GetGameTimer();
+        this.cinematicAnimationDuration = transitionTime;
         this.isCinematicMode = enabled;
-        this.cinematicModeTransitionStart = Date.now();
-        this.cinematicModeTransitionEnd = this.cinematicModeTransitionStart + transitionTime;
-        this.updateHudState();
+        this.updateHudState(transitionTime);
+    }
+
+    @Command('hud-cinematic-toggle', {
+        description: 'Active/Désactive les barres noires',
+        keys: [
+            {
+                mapper: 'keyboard',
+                key: '',
+            },
+        ],
+    })
+    public toggleCinematicMode(): void {
+        this.setCinematicMode(!this.isCinematicMode, CINEMATIC_TOGGLE_DURATION);
+    }
+
+    private getCinematicProgress(): number {
+        const target = this.isCinematicMode ? 1 : 0;
+        const elapsed = GetGameTimer() - this.cinematicAnimationStart;
+
+        if (this.cinematicAnimationDuration <= 0 || elapsed >= this.cinematicAnimationDuration) {
+            return target;
+        }
+
+        const t = easeInOutCubic(Math.max(0, elapsed) / this.cinematicAnimationDuration);
+
+        return this.cinematicAnimationFrom + (target - this.cinematicAnimationFrom) * t;
     }
 
     public setCinematicCameraActive(enabled: boolean): void {
@@ -73,11 +108,15 @@ export class HudStateProvider {
         this.isCrosshairVisible = visible;
     }
 
-    private updateHudState(): void {
+    private updateHudState(transitionTime = 0): void {
         this._isComputedHudVisible = this.isHudVisible && !this.isCinematicMode && !this.isPhoneCameraMode;
 
         this.hudMinimapProvider.showHud = this._isComputedHudVisible;
         this.nuiDispatch.dispatch('global', 'HideHud', !this._isComputedHudVisible);
+        this.nuiDispatch.dispatch('hud', 'SetCinematicHud', {
+            active: this.isHudVisible && this.isCinematicMode && !this.isPhoneCameraMode,
+            duration: transitionTime,
+        });
     }
 
     @Tick()
@@ -108,20 +147,13 @@ export class HudStateProvider {
             ForceCinematicRenderingThisUpdate(true);
         }
 
-        if (this.isCinematicMode) {
-            const transaitionDuration = this.cinematicModeTransitionEnd - this.cinematicModeTransitionStart;
-            let h = 1.0;
-            if (transaitionDuration) {
-                h = (Date.now() - this.cinematicModeTransitionStart) / transaitionDuration;
-                if (h > 1.0) {
-                    this.cinematicModeTransitionStart = 0;
-                    this.cinematicModeTransitionEnd = 0;
-                    h = 1.0;
-                }
-            }
+        const cinematicProgress = this.getCinematicProgress();
+        if (cinematicProgress > 0) {
+            // Fixed-height bars sliding in from the screen edges
+            const offset = cinematicProgress * CINEMATIC_BAR_HEIGHT - CINEMATIC_BAR_HEIGHT / 2;
 
-            DrawRect(0.5, h / 20, 1.0, h / 10, 0, 0, 0, 255);
-            DrawRect(0.5, 1 - h / 20, 1.0, h / 10, 0, 0, 0, 255);
+            DrawRect(0.5, offset, 1.0, CINEMATIC_BAR_HEIGHT, 0, 0, 0, 255);
+            DrawRect(0.5, 1 - offset, 1.0, CINEMATIC_BAR_HEIGHT, 0, 0, 0, 255);
         }
 
         // handle reticle
