@@ -47,6 +47,7 @@ import { FieldHealthApp } from './Field/FieldHealthApp';
 import { FieldZoneHealthApp } from './Field/FieldZoneHealthApp';
 import { FlashApp } from './Flash/FlashApp';
 import { LaserGameApp } from './Games/LaserGameApp';
+import { CinematicHud } from './Hud/CinematicHud';
 import { HudApp } from './Hud/HudApp';
 import { InputApp } from './Input/InputApp';
 import { InventoryApp } from './Inventory/InventoryApp';
@@ -116,6 +117,9 @@ export const App: FunctionComponent = () => {
                     <HudApp />
                     <CardApp />
                     <ProgressApp />
+                </div>
+                <div className={menuClasses}>
+                    <CinematicHud />
                 </div>
                 <div className={menuClasses}>
                     <MenuApp />
