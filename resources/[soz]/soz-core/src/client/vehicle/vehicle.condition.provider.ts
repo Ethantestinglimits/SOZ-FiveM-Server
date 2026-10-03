@@ -235,6 +235,29 @@ export class VehicleConditionProvider {
         this.vehicleService.applyVehicleCondition(entityId, condition, newCondition);
     }
 
+    @OnEvent(ClientEvent.VEHICLE_CONDITION_FIX_DEFORMATION)
+    private fixVehicleDeformation(vehicleNetworkId: number) {
+        if (!NetworkDoesNetworkIdExist(vehicleNetworkId)) {
+            return;
+        }
+
+        const entityId = NetworkGetEntityFromNetworkId(vehicleNetworkId);
+
+        // cannot check a vehicle that does not exist
+        if (!entityId) {
+            return;
+        }
+
+        // cannot apply a vehicle where we are not the owner
+        if (!NetworkHasControlOfEntity(entityId)) {
+            return;
+        }
+
+        // body can be deformed while body health is still at 1000
+        SetVehicleDeformationFixed(entityId);
+        SetVehicleFixed(entityId);
+    }
+
     @OnEvent(ClientEvent.VEHICLE_CONDITION_SYNC)
     private async syncVehicleCondition(
         vehicleNetworkId: number,
