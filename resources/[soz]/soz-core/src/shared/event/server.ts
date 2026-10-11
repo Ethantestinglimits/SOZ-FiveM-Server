@@ -323,6 +323,8 @@ export enum ServerEvent {
 
     AFK_KICK = 'soz-core:server:afk:kick',
 
+    PAUSE_MENU_QUIT = 'soz-core:server:pause-menu:quit',
+
     // not core
     CHARACTER_SET_JOB_CLOTHES = 'soz-character:server:SetPlayerJobClothes',
     CHARACTER_SET_CLOTHES = 'soz-character:server:SetPlayerClothes',

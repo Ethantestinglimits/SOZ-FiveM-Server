@@ -236,6 +236,14 @@ export enum NuiEvent {
     PanelUpdateItemUrl = 'soz-core:nui:panel:update-item-url',
     PanelClosed = 'soz-core:nui:panel:closed',
 
+    PauseMenuClose = 'soz-core:nui:pause-menu:close',
+    PauseMenuOpenMap = 'soz-core:nui:pause-menu:open-map',
+    PauseMenuQuit = 'soz-core:nui:pause-menu:quit',
+    PauseMenuOpenSettings = 'soz-core:nui:pause-menu:open-settings',
+    PauseMenuSaveMapSettings = 'soz-core:nui:pause-menu:save-map-settings',
+    PauseMenuSetWaypoint = 'soz-core:nui:pause-menu:set-waypoint',
+    PauseMenuRemoveWaypoint = 'soz-core:nui:pause-menu:remove-waypoint',
+
     Ping = 'soz-core:nui:ping',
 
     PlayerGetMugshot = 'soz-core:nui:player:get-mugshot',

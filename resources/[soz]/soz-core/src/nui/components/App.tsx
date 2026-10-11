@@ -57,6 +57,7 @@ import { WalletApp } from './Inventory/WalletApp';
 import { MedicalApp } from './LSMC/DiagnosticPad/MedicalApp';
 import { MenuApp } from './Menu/MenuApp';
 import { PanelApp } from './Panel/PanelApp';
+import { PauseMenuApp } from './PauseMenu/PauseMenuApp';
 import { PhoneApp } from './Phone/PhoneApp';
 import { MapPickerApp } from './Picker/MapPickerApp';
 import { BreathAnalyzerApp } from './Police/BreathAnalyzer';
@@ -82,18 +83,23 @@ import { Meteor } from './World/Meteor';
 export const App: FunctionComponent = () => {
     const [pauseMenuActive, setPauseMenuActive] = useState(false);
     const [hideHud, setHideHud] = useState(false);
+    const [customPauseMenuActive, setCustomPauseMenuActive] = useState(false);
 
     useNuiEvent('global', 'PauseMenuActive', setPauseMenuActive);
     useNuiEvent('global', 'HideHud', setHideHud);
+    useNuiEvent('pause_menu', 'Open', () => setCustomPauseMenuActive(true));
+    useNuiEvent('pause_menu', 'Close', () => setCustomPauseMenuActive(false));
+
+    const menuHidden = pauseMenuActive || customPauseMenuActive;
 
     const classes = classNames('font-prompt transition-all duration-500', {
-        'opacity-0': pauseMenuActive || hideHud,
-        'opacity-100': !pauseMenuActive && !hideHud,
+        'opacity-0': menuHidden || hideHud,
+        'opacity-100': !menuHidden && !hideHud,
     });
 
     const menuClasses = classNames('font-prompt overflow-hidden', {
-        'opacity-0': pauseMenuActive,
-        'opacity-100': !pauseMenuActive,
+        'opacity-0': menuHidden,
+        'opacity-100': !menuHidden,
     });
 
     useEffect(() => {
@@ -110,7 +116,7 @@ export const App: FunctionComponent = () => {
                 <StateApp />
                 <StatePrivateApp />
                 <AudioApp />
-                <GlassMorphism globalHide={pauseMenuActive || hideHud} />
+                <GlassMorphism globalHide={menuHidden || hideHud} />
                 <div className={classes}>
                     <MapPickerApp />
                     <TargetOverlay />
@@ -183,6 +189,7 @@ export const App: FunctionComponent = () => {
                 <Meteor />
                 <Election />
                 <BlipApp />
+                <PauseMenuApp />
             </Provider>
         </GlassMorphismProvider>
     );

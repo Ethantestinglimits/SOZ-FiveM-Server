@@ -41,6 +41,7 @@ import { NuiMedicalDiagMethodMap } from './medical_diag';
 import { NuiMenuMethodMap } from './menu';
 import { NuiMeteorMap } from './meteor';
 import { NuiPanelMethodMap } from './panel';
+import { NuiPauseMenuMethodMap } from './pause_menu';
 import { NuiPetManagerMethodMap } from './pet_manager';
 import { NuiPLayerMethodMap } from './player';
 import { NuiPoliceMethodMap } from './police';
@@ -75,6 +76,7 @@ export interface NuiMethodMap {
     player: NuiPLayerMethodMap;
     progress: NuiProgressMethodMap;
     panel: NuiPanelMethodMap;
+    pause_menu: NuiPauseMenuMethodMap;
     talent: NuiTalentMethodMap;
     repair: NuiRepairMethodMap;
     missive: NuiMissiveMethodMap;
