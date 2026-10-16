@@ -3,10 +3,10 @@ import { useNuiEvent } from '@public/nui/hook/nui';
 import { FunctionComponent, useEffect, useState } from 'react';
 
 const YELLOW_VIGNETTE =
-    'radial-gradient(ellipse at center, rgba(255,220,90,0) 40%, rgba(255,215,80,0.35) 72%, rgba(255,200,60,0.8) 100%)';
+    'radial-gradient(ellipse at center, rgba(255,220,90,0) 35%, rgba(255,215,80,0.5) 65%, rgba(255,200,60,0.95) 100%)';
 
 const BLUE_VIGNETTE =
-    'radial-gradient(ellipse at center, rgba(90,160,255,0) 40%, rgba(80,150,255,0.35) 72%, rgba(60,120,255,0.8) 100%)';
+    'radial-gradient(ellipse at center, rgba(90,160,255,0) 35%, rgba(80,150,255,0.5) 65%, rgba(60,120,255,0.95) 100%)';
 
 export const TaserDazeApp: FunctionComponent = () => {
     const [intensity, setIntensity] = useState<number>(0);

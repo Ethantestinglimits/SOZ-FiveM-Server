@@ -13,7 +13,7 @@ export const TaserConfig = {
         timecycle: 'Drunk',
         maxTimecycleStrength: 1.6,
         timecycleFadeExponent: 2,
-        maxVignetteOpacity: 0.55,
+        maxVignetteOpacity: 0.9,
         tintCycleMs: 7000,
         initialBlurMs: 10000,
         initialBlurFadeInMs: 300,
