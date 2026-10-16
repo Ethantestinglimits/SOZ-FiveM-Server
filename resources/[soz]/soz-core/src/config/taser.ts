@@ -7,11 +7,10 @@ export const TaserConfig = {
         walkStyle: 'move_m@drunk@moderatedrunk',
     },
     cameraSway: {
-        shake: 'HAND_SHAKE',
         maxAmplitude: 1.5,
     },
     buzz: {
-        path: 'audio/taser/buzz.mp3',
+        path: '/public/assets/audio/taser/buzz.wav',
         maxVolume: 0.4,
     },
     stumble: {

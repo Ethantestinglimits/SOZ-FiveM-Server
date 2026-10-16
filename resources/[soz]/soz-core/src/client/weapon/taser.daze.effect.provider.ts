@@ -3,6 +3,7 @@ import { OnEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Tick } from '../../core/decorators/tick';
+import { uuidv4 } from '../../core/utils';
 import { ClientEvent } from '../../shared/event';
 import { anchorDaze, DazeState, getDazeIntensity } from '../../shared/taser';
 import { AudioService } from '../nui/audio.service';
@@ -54,7 +55,8 @@ export class TaserDazeEffectProvider {
         this.overlayVisible = true;
 
         if (this.buzzAudioId === null) {
-            this.buzzAudioId = this.audioService.playAudio(TaserConfig.buzz.path, volume, true);
+            this.buzzAudioId = uuidv4();
+            this.audioService.startAudio({ id: this.buzzAudioId, path: TaserConfig.buzz.path, volume, loop: true });
 
             return;
         }
