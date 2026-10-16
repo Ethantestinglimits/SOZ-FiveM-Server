@@ -1,10 +1,13 @@
 import { TaserConfig } from '../../config/taser';
 import { OnEvent } from '../../core/decorators/event';
+import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Tick, TickInterval } from '../../core/decorators/tick';
 import { ClientEvent, ServerEvent } from '../../shared/event';
 import { Control } from '../../shared/input';
 import { anchorDaze, DazeState, getDazeIntensity } from '../../shared/taser';
+import { DRUNK_CAMERA_SHAKE, PlayerEffectProvider } from '../player/player.effect.provider';
+import { PlayerService } from '../player/player.service';
 
 const DAZE_DISABLED_CONTROLS = [
     Control.Sprint,
@@ -31,6 +34,12 @@ const DAZE_DISABLED_CONTROLS = [
 
 @Provider()
 export class TaserDazeProvider {
+    @Inject(PlayerService)
+    private playerService: PlayerService;
+
+    @Inject(PlayerEffectProvider)
+    private playerEffectProvider: PlayerEffectProvider;
+
     private dazeState: DazeState | null = null;
 
     private wasElectrocuted = false;
@@ -87,22 +96,44 @@ export class TaserDazeProvider {
 
     @Tick(100)
     public onCameraSwayTick() {
+        if (!this.dazeState && !this.swaying) {
+            return;
+        }
+
+        const drunkAmplitude = this.getDrunkShakeAmplitude();
+
         if (!this.dazeState) {
             if (this.swaying) {
-                StopGameplayCamShaking(true);
                 this.swaying = false;
+
+                if (drunkAmplitude > 0) {
+                    ShakeGameplayCam(DRUNK_CAMERA_SHAKE, drunkAmplitude);
+                } else {
+                    StopGameplayCamShaking(true);
+                }
             }
 
             return;
         }
 
-        if (!this.swaying) {
-            ShakeGameplayCam(TaserConfig.cameraSway.shake, TaserConfig.cameraSway.maxAmplitude);
-            this.swaying = true;
-        }
-
-        SetGameplayCamShakeAmplitude(
+        const amplitude = Math.max(
+            drunkAmplitude,
             getDazeIntensity(this.dazeState, Date.now()) * TaserConfig.cameraSway.maxAmplitude,
         );
+
+        if (!this.swaying) {
+            ShakeGameplayCam(DRUNK_CAMERA_SHAKE, amplitude);
+            this.swaying = true;
+
+            return;
+        }
+
+        SetGameplayCamShakeAmplitude(amplitude);
+    }
+
+    private getDrunkShakeAmplitude(): number {
+        const player = this.playerService.getPlayer();
+
+        return player ? this.playerEffectProvider.getDrunkShakeAmplitude(player) : 0;
     }
 }
