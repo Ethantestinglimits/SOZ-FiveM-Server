@@ -72,3 +72,15 @@ export const getDazeIntensity = (state: DazeState, now: number): number => {
 
     return (duration - elapsed) / (duration - fullIntensityUntil);
 };
+
+export const getStumbleDelay = (intensity: number, random: number): number | null => {
+    const { minIntervalMs, maxIntervalMs, jitterRatio, minIntensity } = TaserConfig.stumble;
+
+    if (intensity < minIntensity) {
+        return null;
+    }
+
+    const interval = minIntervalMs + (1 - Math.min(intensity, 1)) * (maxIntervalMs - minIntervalMs);
+
+    return Math.round(interval * (1 + jitterRatio * (2 * random - 1)));
+};

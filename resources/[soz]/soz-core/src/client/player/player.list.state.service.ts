@@ -37,6 +37,10 @@ export class PlayerListStateService {
         return this.lists.dazed.has(player);
     }
 
+    public getDazedPlayers(): number[] {
+        return [...this.lists.dazed];
+    }
+
     public isWearingPatientOutfit(player: number) {
         return this.lists.wearingPatientOutfit.has(player);
     }
