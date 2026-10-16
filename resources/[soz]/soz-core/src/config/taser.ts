@@ -9,9 +9,15 @@ export const TaserConfig = {
     cameraSway: {
         maxAmplitude: 1.5,
     },
-    buzz: {
-        path: '/public/assets/audio/taser/buzz.wav',
-        maxVolume: 0.4,
+    visual: {
+        timecycle: 'Drunk',
+        maxTimecycleStrength: 1.6,
+        timecycleFadeExponent: 2,
+        maxVignetteOpacity: 0.55,
+        tintCycleMs: 7000,
+        initialBlurMs: 10000,
+        initialBlurFadeInMs: 300,
+        initialBlurFadeOutMs: 3000,
     },
     stumble: {
         ragdollDurationMs: 1000,

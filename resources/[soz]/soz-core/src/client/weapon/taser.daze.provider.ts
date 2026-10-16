@@ -109,7 +109,7 @@ export class TaserDazeProvider {
                 if (drunkAmplitude > 0) {
                     ShakeGameplayCam(DRUNK_CAMERA_SHAKE, drunkAmplitude);
                 } else {
-                    StopGameplayCamShaking(true);
+                    StopGameplayCamShaking(false);
                 }
             }
 

@@ -1,27 +1,33 @@
 import { TaserConfig } from '../../config/taser';
-import { OnEvent } from '../../core/decorators/event';
+import { Command } from '../../core/decorators/command';
+import { OnEvent, Once, OnceStep } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Tick } from '../../core/decorators/tick';
-import { uuidv4 } from '../../core/utils';
 import { ClientEvent } from '../../shared/event';
 import { anchorDaze, DazeState, getDazeIntensity } from '../../shared/taser';
-import { AudioService } from '../nui/audio.service';
 import { NuiDispatch } from '../nui/nui.dispatch';
+import { BlurService } from '../utils/blur.service';
+
+const BLUR_REASON = 'taser';
 
 @Provider()
 export class TaserDazeEffectProvider {
     @Inject(NuiDispatch)
     private nuiDispatch: NuiDispatch;
 
-    @Inject(AudioService)
-    private audioService: AudioService;
+    @Inject(BlurService)
+    private blurService: BlurService;
 
     private dazeState: DazeState | null = null;
 
-    private overlayVisible = false;
+    private effectVisible = false;
 
-    private buzzAudioId: string | null = null;
+    private blurred = false;
+
+    private timecycle = TaserConfig.visual.timecycle;
+
+    private maxTimecycleStrength = TaserConfig.visual.maxTimecycleStrength;
 
     @OnEvent(ClientEvent.PLAYER_TASER_UPDATE_DAZE)
     public onUpdateDaze(duration: number | null) {
@@ -30,6 +36,21 @@ export class TaserDazeEffectProvider {
         if (!this.dazeState) {
             this.stopEffect();
         }
+    }
+
+    @Command('taser_daze_timecycle', { role: 'admin', description: "Changer le timecycle de l'étourdissement" })
+    public setTimecycle(_source: number, timecycle?: string, strength?: string) {
+        this.timecycle = timecycle || TaserConfig.visual.timecycle;
+        this.maxTimecycleStrength = strength ? Number(strength) : TaserConfig.visual.maxTimecycleStrength;
+
+        if (this.effectVisible) {
+            SetTimecycleModifier(this.timecycle);
+        }
+    }
+
+    @Once(OnceStep.Stop)
+    public onStop() {
+        this.stopEffect();
     }
 
     @Tick(100)
@@ -49,30 +70,44 @@ export class TaserDazeEffectProvider {
             return;
         }
 
-        const volume = intensity * TaserConfig.buzz.maxVolume;
+        this.updateInitialBlur(Date.now() - this.dazeState.startedAt < TaserConfig.visual.initialBlurMs);
 
+        if (!this.effectVisible) {
+            PushTimecycleModifier();
+            SetTimecycleModifier(this.timecycle);
+            this.effectVisible = true;
+        }
+
+        SetTimecycleModifierStrength(
+            Math.pow(intensity, TaserConfig.visual.timecycleFadeExponent) * this.maxTimecycleStrength,
+        );
         this.nuiDispatch.dispatch('taser', 'setDazeIntensity', intensity);
-        this.overlayVisible = true;
+    }
 
-        if (this.buzzAudioId === null) {
-            this.buzzAudioId = uuidv4();
-            this.audioService.startAudio({ id: this.buzzAudioId, path: TaserConfig.buzz.path, volume, loop: true });
-
+    private updateInitialBlur(active: boolean) {
+        if (active === this.blurred) {
             return;
         }
 
-        this.audioService.volumeAudio({ id: this.buzzAudioId, path: TaserConfig.buzz.path, volume });
+        if (active) {
+            this.blurService.add(BLUR_REASON, TaserConfig.visual.initialBlurFadeInMs);
+        } else {
+            this.blurService.remove(BLUR_REASON, TaserConfig.visual.initialBlurFadeOutMs);
+        }
+
+        this.blurred = active;
     }
 
     private stopEffect() {
-        if (this.overlayVisible) {
-            this.nuiDispatch.dispatch('taser', 'setDazeIntensity', 0);
-            this.overlayVisible = false;
+        this.updateInitialBlur(false);
+
+        if (!this.effectVisible) {
+            return;
         }
 
-        if (this.buzzAudioId !== null) {
-            this.audioService.stopAudio(this.buzzAudioId);
-            this.buzzAudioId = null;
-        }
+        ClearTimecycleModifier();
+        PopTimecycleModifier();
+        this.nuiDispatch.dispatch('taser', 'setDazeIntensity', 0);
+        this.effectVisible = false;
     }
 }

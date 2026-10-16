@@ -1,5 +1,7 @@
 # L'effet visuel de l'étourdissement passe par un overlay NUI, pas par un postfx natif
 
+> Remplacé par [0002](0002-timecycle-pour-l-etourdissement.md).
+
 Pour rendre l'étourdissement visible à l'écran, l'approche évidente est `AnimpostfxPlay`, déjà utilisé dans `client/player/player.effect.provider.ts` pour la drogue et l'alcool. Nous avons choisi à la place un overlay React plein écran, sur le modèle de `nui/components/Flash/FlashApp.tsx`, parce qu'aucun postfx du jeu ne ressemble à de l'électricité — les effets disponibles sont des effets de drogue, de mort ou de course — et parce que l'overlay permet de piloter l'intensité en continu depuis l'état qui gouverne déjà le reste de la phase, ce que `AnimpostfxPlay` ne sait pas faire.
 
 ## Consequences
