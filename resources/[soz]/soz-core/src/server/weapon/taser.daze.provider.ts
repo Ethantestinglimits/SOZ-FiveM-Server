@@ -36,7 +36,20 @@ export class TaserDazeProvider {
         this.endDaze(source);
     }
 
+    @OnEvent(ServerEvent.LSMC_ON_DEATH)
+    public onDeath(source: number) {
+        this.endDaze(source);
+    }
+
+    public purgeDaze(source: number) {
+        this.endDaze(source);
+    }
+
     private daze(source: number) {
+        if (this.playerStateService.getClientState(source).isDead) {
+            return;
+        }
+
         const now = Date.now();
         const current = this.stateBySource.get(source);
         const state = current ? extendDaze(current, now, Math.random()) : startDaze(now, Math.random());

@@ -17,6 +17,7 @@ import { Vector3 } from '@public/shared/polyzone/vector';
 import { Feature } from '../../../shared/features';
 import { FeatureProvider } from '../../feature/feature.provider';
 import { PlayerStateService } from '../../player/player.state.service';
+import { TaserDazeProvider } from '../../weapon/taser.daze.provider';
 import { WhatIfProvider } from '../../world/whatif.provider';
 
 @Provider()
@@ -50,6 +51,9 @@ export class LSMCDeathProvider {
 
     @Inject(WhatIfProvider)
     private readonly whatIfProvider: WhatIfProvider;
+
+    @Inject(TaserDazeProvider)
+    private readonly taserDazeProvider: TaserDazeProvider;
 
     private occupiedBeds: Record<number, number> = {};
 
@@ -111,6 +115,8 @@ export class LSMCDeathProvider {
         }
 
         const isRPdeath = await this.playerInjuryProvider.handleInjuryRevive(source, targetid);
+
+        this.taserDazeProvider.purgeDaze(targetid);
 
         TriggerClientEvent(ClientEvent.LSMC_REVIVE, player.source, admin, uniteHU, uniteHUBed, isRPdeath);
         if (!admin) {

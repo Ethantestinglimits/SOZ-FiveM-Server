@@ -18,6 +18,13 @@ export class TaserDazeProvider {
         this.dazeState = duration === null ? null : anchorDaze(Date.now(), duration);
     }
 
+    @OnEvent(ClientEvent.PLAYER_ON_DEATH)
+    @OnEvent(ClientEvent.LSMC_REVIVE)
+    public onPurgeDaze() {
+        this.wasElectrocuted = false;
+        this.onUpdateDaze(null);
+    }
+
     @Tick(100)
     public onElectrocutionTick() {
         const playerPed = PlayerPedId();
