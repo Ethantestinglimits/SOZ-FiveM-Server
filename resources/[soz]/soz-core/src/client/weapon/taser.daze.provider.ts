@@ -53,6 +53,12 @@ export class TaserDazeProvider {
     public onElectrocutionTick() {
         const playerPed = PlayerPedId();
 
+        if (IsEntityDead(playerPed)) {
+            this.wasElectrocuted = false;
+
+            return;
+        }
+
         if (IsPedBeingStunned(playerPed, 0)) {
             this.wasElectrocuted = true;
 

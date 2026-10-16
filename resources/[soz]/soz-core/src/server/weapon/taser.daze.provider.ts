@@ -41,15 +41,7 @@ export class TaserDazeProvider {
         this.endDaze(source);
     }
 
-    public purgeDaze(source: number) {
-        this.endDaze(source);
-    }
-
     private daze(source: number) {
-        if (this.playerStateService.getClientState(source).isDead) {
-            return;
-        }
-
         const now = Date.now();
         const current = this.stateBySource.get(source);
         const state = current ? extendDaze(current, now, Math.random()) : startDaze(now, Math.random());
@@ -71,7 +63,7 @@ export class TaserDazeProvider {
         this.publishDaze(source, remaining);
     }
 
-    private endDaze(source: number) {
+    public endDaze(source: number) {
         this.clearDazeTimeout(source);
         this.stateBySource.delete(source);
 

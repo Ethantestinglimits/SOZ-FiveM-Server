@@ -116,7 +116,7 @@ export class LSMCDeathProvider {
 
         const isRPdeath = await this.playerInjuryProvider.handleInjuryRevive(source, targetid);
 
-        this.taserDazeProvider.purgeDaze(targetid);
+        this.taserDazeProvider.endDaze(targetid);
 
         TriggerClientEvent(ClientEvent.LSMC_REVIVE, player.source, admin, uniteHU, uniteHUBed, isRPdeath);
         if (!admin) {
