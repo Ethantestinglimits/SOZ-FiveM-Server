@@ -9,6 +9,7 @@ export class PlayerListStateService {
         wearingPatientOutfit: new Set<number>(),
         escorted: new Set<number>(),
         knockedOut: new Set<number>(),
+        dazed: new Set<number>(),
         validated: new Set<number>(),
     };
 
@@ -30,6 +31,10 @@ export class PlayerListStateService {
 
     public isKnockedOut(player: number) {
         return this.lists.knockedOut.has(player);
+    }
+
+    public isDazed(player: number) {
+        return this.lists.dazed.has(player);
     }
 
     public isWearingPatientOutfit(player: number) {

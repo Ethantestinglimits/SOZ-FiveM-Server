@@ -34,6 +34,7 @@ export class PlayerService {
         isInShop: false,
         isInventoryBusy: false,
         isKnockedOut: false,
+        isDazed: false,
         disableMoneyCase: false,
         hasPrisonerClothes: false,
         isWearingPatientOutfit: false,

@@ -262,6 +262,7 @@ export type PlayerClientState = {
     isEscorted: boolean;
     isEscorting: boolean;
     isKnockedOut: boolean;
+    isDazed: boolean;
     escorting: number | null;
     isInShop: boolean;
     isInHospital: boolean;
@@ -329,7 +330,14 @@ export const ShortPlayerLicenceLabels = {
     [PlayerLicenceType.Rescuer]: 'Secouriste',
 };
 
-export type PlayerListStateKey = 'dead' | 'zipped' | 'wearingPatientOutfit' | 'escorted' | 'knockedOut' | 'validated';
+export type PlayerListStateKey =
+    | 'dead'
+    | 'zipped'
+    | 'wearingPatientOutfit'
+    | 'escorted'
+    | 'knockedOut'
+    | 'dazed'
+    | 'validated';
 
 export enum PlayerCriminalState {
     None,

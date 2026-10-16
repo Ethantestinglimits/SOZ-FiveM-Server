@@ -157,6 +157,7 @@ export class PlayerStateService {
             isEscorting: false,
             isHandcuffed: false,
             isKnockedOut: false,
+            isDazed: false,
             isInventoryBusy: false,
             isInShop: false,
             isInHub: false,

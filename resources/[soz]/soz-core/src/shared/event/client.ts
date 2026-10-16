@@ -184,6 +184,7 @@ export enum ClientEvent {
     PLAYER_UPDATE_CROSSHAIR = 'soz-core:client:player:update-crosshair',
     PLAYER_UPDATE_STATE = 'soz-core:client:player:update-state',
     PLAYER_UPDATE_LIST_STATE = 'soz-core:client:player:update-list-state',
+    PLAYER_TASER_UPDATE_DAZE = 'soz-core:client:player:taser:update-daze',
     PLAYER_ON_DEATH = 'ems:client:onDeath',
     PLAYER_ZOMBIE_TRANSFORM = 'soz-core:client:player:zombie:transform',
     PLAYER_ZOMBIE_REMOVE = 'soz-core:client:player:zombie:remove',

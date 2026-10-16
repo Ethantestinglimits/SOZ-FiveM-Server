@@ -11,6 +11,7 @@ export class PlayerListStateService {
         wearingPatientOutfit: new Set<number>(),
         escorted: new Set<number>(),
         knockedOut: new Set<number>(),
+        dazed: new Set<number>(),
         validated: new Set<number>(),
     };
 
@@ -20,6 +21,7 @@ export class PlayerListStateService {
         this.handle('wearingPatientOutfit', player.source, playerState.isWearingPatientOutfit);
         this.handle('escorted', player.source, playerState.isEscorted);
         this.handle('knockedOut', player.source, playerState.isKnockedOut);
+        this.handle('dazed', player.source, playerState.isDazed);
         this.handle('validated', player.source, player.is_validated);
     }
 
@@ -29,6 +31,7 @@ export class PlayerListStateService {
         this.handle('wearingPatientOutfit', player, false);
         this.handle('escorted', player, false);
         this.handle('knockedOut', player, false);
+        this.handle('dazed', player, false);
         this.handle('validated', player, false);
     }
 
@@ -63,6 +66,7 @@ export class PlayerListStateService {
             wearingPatientOutfit: [],
             escorted: [],
             knockedOut: [],
+            dazed: [],
             validated: [],
         };
 
