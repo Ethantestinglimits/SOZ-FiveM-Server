@@ -1,9 +1,33 @@
 import { TaserConfig } from '../../config/taser';
 import { OnEvent } from '../../core/decorators/event';
 import { Provider } from '../../core/decorators/provider';
-import { Tick } from '../../core/decorators/tick';
+import { Tick, TickInterval } from '../../core/decorators/tick';
 import { ClientEvent, ServerEvent } from '../../shared/event';
+import { Control } from '../../shared/input';
 import { anchorDaze, DazeState, getDazeIntensity } from '../../shared/taser';
+
+const DAZE_DISABLED_CONTROLS = [
+    Control.Sprint,
+    Control.Aim,
+    Control.Attack,
+    Control.Attack2,
+    Control.MeleeAttack1,
+    Control.MeleeAttack2,
+    Control.MeleeAttackLight,
+    Control.MeleeAttackHeavy,
+    Control.MeleeAttackAlternate,
+    Control.VehicleAim,
+    Control.VehicleAttack,
+    Control.VehicleAttack2,
+    Control.VehiclePassengerAim,
+    Control.VehiclePassengerAttack,
+    Control.VehicleFlyAttack,
+    Control.VehicleFlyAttack2,
+    Control.VehicleFlyAttackCamera,
+    Control.VehicleMeleeHold,
+    Control.VehicleMeleeLeft,
+    Control.VehicleMeleeRight,
+];
 
 @Provider()
 export class TaserDazeProvider {
@@ -22,7 +46,7 @@ export class TaserDazeProvider {
     @OnEvent(ClientEvent.LSMC_REVIVE)
     public onPurgeDaze() {
         this.wasElectrocuted = false;
-        this.onUpdateDaze(null);
+        TriggerEvent(ClientEvent.PLAYER_TASER_UPDATE_DAZE, null);
     }
 
     @Tick(100)
@@ -42,6 +66,19 @@ export class TaserDazeProvider {
         }
     }
 
+    @Tick(TickInterval.EVERY_FRAME)
+    public onDisableControlsTick() {
+        if (!this.dazeState) {
+            return;
+        }
+
+        for (const control of DAZE_DISABLED_CONTROLS) {
+            DisableControlAction(0, control, true);
+        }
+
+        DisablePlayerFiring(PlayerId(), true);
+    }
+
     @Tick(100)
     public onCameraSwayTick() {
         if (!this.dazeState) {
@@ -59,7 +96,7 @@ export class TaserDazeProvider {
         }
 
         SetGameplayCamShakeAmplitude(
-            getDazeIntensity(this.dazeState, Date.now()) * TaserConfig.cameraSway.maxAmplitude
+            getDazeIntensity(this.dazeState, Date.now()) * TaserConfig.cameraSway.maxAmplitude,
         );
     }
 }
