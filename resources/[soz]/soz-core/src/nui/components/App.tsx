@@ -72,6 +72,7 @@ import { ClothShopMenu } from './Shop/ClothShopMenu';
 import { StateApp } from './StateApp';
 import { GlassMorphism } from './Styleguide/GlassMorphism';
 import { TargetOverlay } from './Target/TargetOverlay';
+import { TaserDazeApp } from './Taser/TaserDazeApp';
 import { TaxiHorodateurApp } from './Taxi/TaxiHorodateurApp';
 import { TextureLoaderApp } from './TextureLoader/TextureLoaderApp';
 import { WhatIfApp } from './WhatIf/WhatIfApp';
@@ -172,6 +173,7 @@ export const App: FunctionComponent = () => {
                 </div>
                 <HoodApp />
                 <FlashApp />
+                <TaserDazeApp />
                 <ScientistCamera />
                 <TextureLoaderApp />
                 <div className={menuClasses}>

@@ -1,4 +1,5 @@
 import { Module } from '../../core/decorators/module';
+import { TaserDazeEffectProvider } from './taser.daze.effect.provider';
 import { TaserDazeProvider } from './taser.daze.provider';
 import { TaserDazeRemoteWalkProvider } from './taser.daze.remote.walk.provider';
 import { TaserDazeStumbleProvider } from './taser.daze.stumble.provider';
@@ -14,6 +15,7 @@ import { WeaponProvider } from './weapon.provider';
         TaserDazeProvider,
         TaserDazeStumbleProvider,
         TaserDazeRemoteWalkProvider,
+        TaserDazeEffectProvider,
     ],
 })
 export class WeaponModule {}

@@ -10,6 +10,10 @@ export const TaserConfig = {
         shake: 'HAND_SHAKE',
         maxAmplitude: 1.5,
     },
+    buzz: {
+        path: 'audio/taser/buzz.mp3',
+        maxVolume: 0.4,
+    },
     stumble: {
         ragdollDurationMs: 1000,
         minIntervalMs: 4000,
