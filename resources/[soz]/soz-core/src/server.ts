@@ -24,6 +24,7 @@ import { DrivingSchoolModule } from './server/driving-school/ds.module';
 import { FeatureModule } from './server/feature/feature.module';
 import { FieldModule } from './server/field/field.module';
 import { GamesModule } from './server/games/games.module';
+import { GpsModule } from './server/gps/gps.module';
 import { HousingModule } from './server/housing/housing.module';
 import { InventoryModule } from './server/inventory/inventory.module';
 import { ItemModule } from './server/item/item.module';
@@ -126,6 +127,7 @@ async function bootstrap() {
         NewsModule,
         DMCModule,
         HousingModule,
+        GpsModule,
         UtilsModule,
         GouvModule,
         GarbageModule,
