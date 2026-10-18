@@ -413,6 +413,7 @@ export type PlayerMetadata = PlayerHealthBook & {
     itt_end: number;
     hazmat: boolean;
     mood?: string | null;
+    gpscolor?: number | null;
     rp_death: boolean;
     is_senator: boolean;
     injail: boolean;

@@ -288,6 +288,7 @@ export enum NuiEvent {
     PlayerMenuVoipSetIntent = 'soz-core:nui:player:menu:voip-set-intent',
     PlayerMenuSetVideoVolume = 'soz-core:nui:player:menu:set-video-volume',
     PlayerMenuHudSetArachnophobe = 'soz-core:nui:player:menu:arachnophobe',
+    PlayerMenuGpsSetColor = 'soz-core:nui:player:menu:gps-set-color',
     PlayerMenuWhatIf2Retrieval = 'soz-core:nui:player:menu:whatif2-retrival',
     PlayerMenuWhatIfRemoveHazmat = 'soz-core:nui:player:menu:whatif2-remove-hazmat',
     SetFocusInput = 'soz-core:nui:set-focus-input',
