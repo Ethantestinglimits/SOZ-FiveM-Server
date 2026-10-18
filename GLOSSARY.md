@@ -6,6 +6,19 @@ Les définitions sont en français ; les identifiants correspondants dans le cod
 
 ## Language
 
+### Carte
+
+**Point personnel** :
+Le point qu'un joueur pose lui-même sur sa carte, directement ou depuis une position reçue sur son téléphone. Il n'en a qu'un ; seul le joueur le pose ou le retire. Il s'affiche dans la couleur GPS du joueur.
+_Avoid_: waypoint, GPS, marqueur
+
+**Point de véhicule** :
+La copie du point personnel d'un occupant, partagée à tous ceux qui sont à bord du même véhicule. Elle appartient au véhicule, pas à son auteur : elle reste après la descente de celui-ci, et disparaît quand le véhicule arrive dessus, quand son auteur, encore à bord, la retire, ou quand le véhicule se vide. Un véhicule porte au plus un point de véhicule par auteur.
+_Avoid_: point partagé, point de groupe
+
+**Couleur GPS** :
+La couleur choisie par un joueur pour son point personnel et ses points de véhicule. Dans un véhicule, deux points de véhicule ne partagent jamais la même couleur.
+
 ### Taser
 
 **Électrocution** :
