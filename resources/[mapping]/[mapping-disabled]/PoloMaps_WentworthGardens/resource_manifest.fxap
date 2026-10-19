@@ -1,0 +1,260 @@
+{
+    "name": "PoloMaps_WentworthGardens",
+    "files": {
+        "resource.rpf": "64341b2d69cd98242ae398b61d0418f3164ec8fa"
+    },
+    "streamFiles": {
+        "_manifest.ymf": {
+            "hash": "185785eda11351c4390238eae0b1bed66b12ea7b",
+            "rscFlags": 1116,
+            "rscVersion": 0,
+            "size": 1116
+        },
+        "aj_wentworthgardens_1.ymap": {
+            "hash": "98fede686ecbc20b186e3a49886cf364803a0128",
+            "rscFlags": 2460,
+            "rscVersion": 2,
+            "size": 2460,
+            "rscPagesVirtual": 134217733,
+            "rscPagesPhysical": 536870912,
+            "e": false
+        },
+        "aj_wentworthgardens_2.ymap": {
+            "hash": "c19a704e186b4fcf2323df681501307ffd2dc3db",
+            "rscFlags": 6524,
+            "rscVersion": 2,
+            "size": 6524,
+            "rscPagesVirtual": 167772165,
+            "rscPagesPhysical": 536870912,
+            "e": false
+        },
+        "aj_wentworthgardens_3.ymap": {
+            "hash": "ba0c2cd20250335273921d9871086dda9cca0a95",
+            "rscFlags": 4852,
+            "rscVersion": 2,
+            "size": 4852,
+            "rscPagesVirtual": 33554437,
+            "rscPagesPhysical": 536870912,
+            "e": false
+        },
+        "aj_ww_emmi_01.ydr": {
+            "hash": "db29edad06991c5d29d0bce4994a0081e1a4d75a",
+            "rscFlags": 683352,
+            "rscVersion": 165,
+            "size": 683352,
+            "rscPagesVirtual": 2684616704,
+            "rscPagesPhysical": 1342177427,
+            "e": true
+        },
+        "aj_wwground_01.ydr": {
+            "hash": "05eea65968e75890451c04c1bf2f908ec9084f59",
+            "rscFlags": 3897750,
+            "rscVersion": 165,
+            "size": 3897750,
+            "rscPagesVirtual": 2684354581,
+            "rscPagesPhysical": 1342440963,
+            "e": true
+        },
+        "hi@lr_sc1_rd_7.ybn": {
+            "hash": "09960cb4368a2bc49a3aa80a0dd1362855d1d7e0",
+            "rscFlags": 158501,
+            "rscVersion": 43,
+            "size": 158501,
+            "rscPagesVirtual": 687998979,
+            "rscPagesPhysical": 2952790016,
+            "e": false
+        },
+        "hi@sc1_20_0.ybn": {
+            "hash": "8fd7ff91d4688f03c0f7d7baa0539055c4fdba00",
+            "rscFlags": 1717,
+            "rscVersion": 43,
+            "size": 1717,
+            "rscPagesVirtual": 537001984,
+            "rscPagesPhysical": 2952790016,
+            "e": false
+        },
+        "hi@sc1_22_0.ybn": {
+            "hash": "78076f4934296336b9e21be6c38a21369289b098",
+            "rscFlags": 434,
+            "rscVersion": 43,
+            "size": 434,
+            "rscPagesVirtual": 537001984,
+            "rscPagesPhysical": 2952790016,
+            "e": false
+        },
+        "ma@sc1_22_0.ybn": {
+            "hash": "b9d7343a80364c5b66c53bcff26e2e607a08b63d",
+            "rscFlags": 471,
+            "rscVersion": 43,
+            "size": 471,
+            "rscPagesVirtual": 537001984,
+            "rscPagesPhysical": 2952790016,
+            "e": false
+        },
+        "sc1_20_0.ybn": {
+            "hash": "1009eaca803f4f10421cf4ad8c74f3eb46a1fd90",
+            "rscFlags": 44732,
+            "rscVersion": 43,
+            "size": 44732,
+            "rscPagesVirtual": 604241922,
+            "rscPagesPhysical": 2952790016,
+            "e": false
+        },
+        "sc1_20_gd02.ydr": {
+            "hash": "e752acb66b42afd13e493b06121a230dd2d0fd35",
+            "rscFlags": 3634899,
+            "rscVersion": 165,
+            "size": 3634899,
+            "rscPagesVirtual": 2685009920,
+            "rscPagesPhysical": 1342199876,
+            "e": true
+        },
+        "wentworth_building_model_1.ydr": {
+            "hash": "61833ea446658026e1e7075dcf8543743aafd4f6",
+            "rscFlags": 4631903,
+            "rscVersion": 165,
+            "size": 4631903,
+            "rscPagesVirtual": 2684354642,
+            "rscPagesPhysical": 1342963861,
+            "e": true
+        },
+        "wentworth_building_windows_1.ydr": {
+            "hash": "5742d6c4c6ec306226b4cf9410aa65bf908bbd6b",
+            "rscFlags": 399649,
+            "rscVersion": 165,
+            "size": 399649,
+            "rscPagesVirtual": 2684356627,
+            "rscPagesPhysical": 1342308355,
+            "e": true
+        },
+        "wentworth_dirtcube_01.ydr": {
+            "hash": "c1e48a16c6b291567873abc03914a9e0ab262e7c",
+            "rscFlags": 148074,
+            "rscVersion": 165,
+            "size": 148074,
+            "rscPagesVirtual": 2852519936,
+            "rscPagesPhysical": 1342701571,
+            "e": true
+        },
+        "wentworth_dirtcube_02.ydr": {
+            "hash": "eb8d8e95a1820144c853f5435f94e39db7b3cef4",
+            "rscFlags": 307676,
+            "rscVersion": 165,
+            "size": 307676,
+            "rscPagesVirtual": 2936406016,
+            "rscPagesPhysical": 1343225859,
+            "e": true
+        },
+        "wentworth_grasscube_01.ydr": {
+            "hash": "2073334f020205b3319930aa2b14c3940642f503",
+            "rscFlags": 305689,
+            "rscVersion": 165,
+            "size": 305689,
+            "rscPagesVirtual": 2936406016,
+            "rscPagesPhysical": 1343225859,
+            "e": true
+        },
+        "wentworth_grasscube_02.ydr": {
+            "hash": "c45730176e8ab3c9f44fd996125623b1a1d687dd",
+            "rscFlags": 307679,
+            "rscVersion": 165,
+            "size": 307679,
+            "rscPagesVirtual": 2936406016,
+            "rscPagesPhysical": 1343225859,
+            "e": true
+        },
+        "wentworth_stonecube_01.ydr": {
+            "hash": "bd67ff80267e22e74a28e63ff8a85b0ca09b826c",
+            "rscFlags": 227229,
+            "rscVersion": 165,
+            "size": 227229,
+            "rscPagesVirtual": 2768633856,
+            "rscPagesPhysical": 1342963715,
+            "e": true
+        },
+        "wentworth_stonecube_02.ydr": {
+            "hash": "282b4325c8b17eb3cd1f81e84adefd7030f354e2",
+            "rscFlags": 307675,
+            "rscVersion": 165,
+            "size": 307675,
+            "rscPagesVirtual": 2936406016,
+            "rscPagesPhysical": 1343225859,
+            "e": true
+        },
+        "wentworthfix.ymap": {
+            "hash": "a4a57bdd67f10348da693039d8fb23c9cf60ab46",
+            "rscFlags": 1139,
+            "rscVersion": 2,
+            "size": 1139,
+            "rscPagesVirtual": 134217732,
+            "rscPagesPhysical": 536870912,
+            "e": false
+        },
+        "ww_all.ytyp": {
+            "hash": "df3955f64586eeefcd85213b01db2e293374a6a0",
+            "rscFlags": 1195,
+            "rscVersion": 2,
+            "size": 1195,
+            "rscPagesVirtual": 134217732,
+            "rscPagesPhysical": 536870912,
+            "e": false
+        },
+        "ww_decals_01.ydr": {
+            "hash": "9a9217b090aefb7ca54a03df47462422de266196",
+            "rscFlags": 1061037,
+            "rscVersion": 165,
+            "size": 1061037,
+            "rscPagesVirtual": 2684878848,
+            "rscPagesPhysical": 1342177827,
+            "e": true
+        },
+        "ww_fence.ydr": {
+            "hash": "568b33b7f925fa5e543ed20a577a5fff458136d9",
+            "rscFlags": 8227,
+            "rscVersion": 165,
+            "size": 8227,
+            "rscPagesVirtual": 2684487680,
+            "rscPagesPhysical": 1342308354,
+            "e": true
+        },
+        "ww_parkcube_01.ydr": {
+            "hash": "980695b5daeb1f0a35e1127309ec7b108ac66072",
+            "rscFlags": 200194,
+            "rscVersion": 165,
+            "size": 200194,
+            "rscPagesVirtual": 2684618752,
+            "rscPagesPhysical": 1342179332,
+            "e": true
+        },
+        "ww_parkcube_02.ydr": {
+            "hash": "a2167e86f7342f5cb599575d9365fdc93c532f95",
+            "rscFlags": 198748,
+            "rscVersion": 165,
+            "size": 198748,
+            "rscPagesVirtual": 2684616704,
+            "rscPagesPhysical": 1342177411,
+            "e": true
+        },
+        "ww_parkcube_03.ydr": {
+            "hash": "60ab8846d97500734eed8f5ab9249bb66fdf370a",
+            "rscFlags": 1155659,
+            "rscVersion": 165,
+            "size": 1155659,
+            "rscPagesVirtual": 2684747776,
+            "rscPagesPhysical": 1342178179,
+            "e": true
+        },
+        "ww_trashbox.ydr": {
+            "hash": "da027fc9037e7351b0a71fa4f05cddcae5022632",
+            "rscFlags": 330013,
+            "rscVersion": 165,
+            "size": 330013,
+            "rscPagesVirtual": 2684747776,
+            "rscPagesPhysical": 1342177539,
+            "e": true
+        }
+    },
+    "fileServer": "http://cdn.fivem-server.net/srv_293exvc2jtlj12l0qtt0vuj13/files",
+    "uri": "ci://PoloMaps_WentworthGardens/v3#kZSnREVGQVVMVKZDaGFDaGHEILVpIC55ME09lqwO38o1ZJc0uJgKwLx2leF/u6ktezocxAjsVrzQJtCy1w==",
+    "id": "38"
+}
