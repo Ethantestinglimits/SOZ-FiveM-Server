@@ -1,3 +1,4 @@
+import { AnimationInfo, WorldAnimationGroup, WorldAnimationPlay } from '@public/shared/animation';
 import { joaat } from '@public/shared/joaat';
 import { Vector4 } from '@public/shared/polyzone/vector';
 
@@ -201,6 +202,10 @@ export const EntityConfig: Record<number, Record<string, Vector4>> = {
     },
 };
 
+// Nom des places d'un prop à plusieurs places, dans le sous-menu du menu contextuel (même clés que EntityConfig).
+// Sans entrée ici, les places sont nommées automatiquement de gauche à droite, vues de face (ex: "Place de gauche").
+export const EntitySeatLabels: Record<number, Record<string, string>> = {};
+
 export const LoungerTargetList = [-1498352975];
 export const LayingTargetList = [-2024837020];
 export const BarbecueList = [1903501406, 286252949, 1129053052, -1581502570];
@@ -268,6 +273,113 @@ export const SeatsTargetList = [
     GetHashKey('cube_mppd_sofa_02a'),
     GetHashKey('cube_mppd_sofa_02b'),
     GetHashKey('vw_prop_casino_chair_01a'),
+];
+
+const seatScenario = (
+    name: string,
+    isSittingScenario = false,
+    preview?: Omit<AnimationInfo, 'coords'>
+): WorldAnimationPlay => ({
+    type: 'scenario',
+    name,
+    isSittingScenario,
+    shouldTeleport: true,
+    preview,
+});
+
+export const WorldAnimationGroups: WorldAnimationGroup[] = [
+    {
+        models: SeatsTargetList,
+        distance: 2.0,
+        options: [
+            {
+                label: "S'asseoir",
+                icon: 'global/chair',
+                male: seatScenario('PROP_HUMAN_SEAT_CHAIR_MP_PLAYER', true, {
+                    dictionary: 'amb@prop_human_seat_chair_mp@male@generic@base',
+                    name: 'base',
+                }),
+                female: {
+                    type: 'seat_animation',
+                    enter: {
+                        dictionary: 'amb@prop_human_seat_chair@female@legs_crossed@enter',
+                        name: 'enter_fwd',
+                        options: { freezeLastFrame: true, ignoreGravity: true },
+                        duration: 2500,
+                    },
+                    base: {
+                        dictionary: 'amb@prop_human_seat_chair@female@legs_crossed@base',
+                        name: 'base',
+                        options: { repeat: true, ignoreGravity: true },
+                    },
+                    exit: {
+                        dictionary: 'amb@prop_human_seat_chair@female@legs_crossed@exit',
+                        name: 'exit_fwd',
+                        options: { ignoreGravity: true, turnOffCollision: true },
+                        duration: 2500,
+                    },
+                    shouldTeleport: true,
+                },
+            },
+            {
+                label: "S'asseoir droit",
+                icon: 'global/chair',
+                male: seatScenario('PROP_HUMAN_SEAT_CHAIR_UPRIGHT', true),
+            },
+            {
+                label: "S'asseoir et attendre",
+                icon: 'global/chair',
+                male: seatScenario('PROP_HUMAN_SEAT_BUS_STOP_WAIT', true),
+            },
+            {
+                label: "S'asseoir et boire un café",
+                icon: 'global/beer',
+                male: seatScenario('PROP_HUMAN_SEAT_CHAIR_DRINK'),
+            },
+            {
+                label: "S'asseoir et Boire",
+                icon: 'global/beer',
+                male: seatScenario('PROP_HUMAN_SEAT_CHAIR_DRINK_BEER'),
+            },
+            {
+                label: "S'asseoir et Manger",
+                icon: 'food/hamburger',
+                male: seatScenario('PROP_HUMAN_SEAT_CHAIR_FOOD'),
+            },
+        ],
+    },
+    {
+        models: LoungerTargetList,
+        distance: 2.2,
+        options: [
+            {
+                label: "S'allonger",
+                icon: 'global/umbrella-beach',
+                male: { type: 'scenario', name: 'PROP_HUMAN_SEAT_SUNLOUNGER', isSittingScenario: false, shouldTeleport: false },
+            },
+            {
+                label: 'Se détendre et boire',
+                icon: 'global/beer',
+                male: {
+                    type: 'scenario',
+                    name: 'PROP_HUMAN_SEAT_DECKCHAIR_DRINK',
+                    isSittingScenario: false,
+                    shouldTeleport: false,
+                },
+            },
+        ],
+    },
+    {
+        models: BarbecueList,
+        distance: 1.8,
+        options: [
+            {
+                label: 'Cuisiner',
+                icon: 'food/stroopwafel',
+                male: { type: 'scenario', name: 'PROP_HUMAN_BBQ', isSittingScenario: false, shouldTeleport: false },
+            },
+        ],
+    },
 ];
 
 export const ComputerTargetList = [

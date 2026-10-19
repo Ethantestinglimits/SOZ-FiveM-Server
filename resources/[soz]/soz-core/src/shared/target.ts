@@ -26,6 +26,8 @@ export type TargetContext = {
     entityCoords?: Vector3;
 };
 
+export type TargetPreviewCleanup = (() => void) | void;
+
 export type TargetOption = TargetContext & {
     label: string;
     subLabel?: string;
@@ -33,6 +35,8 @@ export type TargetOption = TargetContext & {
     category: 'citizen' | 'society' | 'criminal';
     order?: string;
 
+    /** Option proposée uniquement dans ce mode de ciblage (ex: une variante par sous-menu pour le menu contextuel) */
+    mode?: TargetMode;
     /** Menu contextuel uniquement: les options d'un même groupe sont regroupées dans un sous-menu */
     group?: string;
     /** Menu contextuel uniquement: affiche l'option comme un interrupteur (allumé/éteint) */
@@ -50,5 +54,7 @@ export type TargetOption = TargetContext & {
     canInteract?: (entity?: number) => boolean | Promise<boolean>;
 
     action?: (entity?: number, entityCoords?: Vector3) => void;
+    // Called while the option is hovered in the target list; returns the cleanup run once it is not anymore.
+    preview?: (entity?: number, entityCoords?: Vector3) => TargetPreviewCleanup | Promise<TargetPreviewCleanup>;
     distance?: number;
 };

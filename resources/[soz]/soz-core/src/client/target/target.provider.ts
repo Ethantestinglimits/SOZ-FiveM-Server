@@ -107,6 +107,14 @@ export class TargetProvider {
 
     private _activeTargetedEntity: Array<number> = [];
 
+    private _previewCleanup: (() => void) | null = null;
+
+    // A preview entity usually sits right under the cursor, so the lost-target check must not run meanwhile.
+    private _previewActive = false;
+
+    // Bumped on every hover change, so a preview whose start resolves after the hover moved on is cleaned up right away.
+    private _previewToken = 0;
+
     private _debugPoly = false;
 
     // Mode "menu contextuel": curseur libre, les options sont calculées pour l'entité sous la souris
@@ -433,8 +441,10 @@ export class TargetProvider {
     public async checkTargetMode(): Promise<void> {
         if (this._cursorMode) return;
         if (!this._targetFound) return;
+        if (this._previewActive) return;
 
         const [entityId] = await this.screenService.getEntityOnPosition([0.5, 0.5], this._playerCoordsOverride);
+        if (this._previewActive) return;
 
         if (entityId !== 0) {
             this._activeTargetedEntity.push(entityId);
@@ -544,6 +554,9 @@ export class TargetProvider {
     @OnNuiEvent(NuiEvent.TargetCursorClick)
     public async cursorClick(position: TargetCursorMenuPosition): Promise<void> {
         if (!this._cursorMode || !this._targetActive) return;
+
+        // La ligne survolée disparaît avec le menu sans que le NUI ne signale la fin du survol
+        this.stopPreview();
 
         // Un clic dans le vide ferme le menu ouvert, puis peut en rouvrir un sur l'entité visée
         this._cursorMenuOpen = false;
@@ -728,8 +741,36 @@ export class TargetProvider {
         return this.resetTarget();
     }
 
+    @OnNuiEvent(NuiEvent.TargetHover)
+    public async hover(id: string | null): Promise<void> {
+        this.stopPreview();
+
+        const token = this._previewToken;
+        const option = id ? this._targetOptions.find(t => t.id === id) : null;
+        if (!option?.preview) return;
+
+        if (this.getOptionDistance(option) > option.distance) return;
+
+        this._previewActive = true;
+        const cleanup = await option.preview(option.entity, option.entityCoords);
+
+        if (!cleanup) {
+            if (token === this._previewToken) this._previewActive = false;
+            return;
+        }
+
+        if (token !== this._previewToken) {
+            cleanup();
+            return;
+        }
+
+        this._previewCleanup = cleanup;
+    }
+
     @OnNuiEvent(NuiEvent.TargetSelect)
     public async select(id: string): Promise<void> {
+        this.stopPreview();
+
         const option = this._targetOptions.find(t => t.id === id);
         if (!option) return;
 
@@ -737,8 +778,7 @@ export class TargetProvider {
             await this.phoneManager.stopPhoneCall();
         }
 
-        const distance = getDistance(this.getPlayerCoords(), option.entityCoords);
-        if (distance > option.distance) {
+        if (this.getOptionDistance(option) > option.distance) {
             this.notifier.error('Vous êtes trop loin pour effectuer cette action');
             return;
         }
@@ -907,8 +947,11 @@ export class TargetProvider {
         const targetsFound: TargetOption[] = [];
         if (!store || store.length === 0) return targetsFound;
 
+        const mode = this._cursorMode ? TargetMode.Cursor : TargetMode.Crosshair;
+
         for (const [, targetStore] of store) {
             for (const target of targetStore.targets) {
+                if (target.mode && target.mode !== mode) continue;
                 if (playerDistance > target.distance) continue;
 
                 const isValid = await this.targetService.validateTarget(target, entity);
@@ -922,13 +965,38 @@ export class TargetProvider {
         return targetsFound;
     }
 
+    // Options are resolved once, on the point aimed at when the target opened. The player can still
+    // walk while the list is shown (e.g. along a bench), so the entity's own position counts too.
+    protected getOptionDistance(option: TargetOption): number {
+        const playerCoords = this.getPlayerCoords();
+        const distance = getDistance(playerCoords, option.entityCoords);
+
+        if (!option.entity || !DoesEntityExist(option.entity)) {
+            return distance;
+        }
+
+        return Math.min(distance, getDistance(playerCoords, GetEntityCoords(option.entity) as Vector3));
+    }
+
     protected getPlayerCoords(): Vector3 {
         return this._playerCoordsOverride ?? (GetEntityCoords(PlayerPedId(), true) as Vector3);
+    }
+
+    private stopPreview(): void {
+        this._previewToken++;
+        this._previewActive = false;
+        this._activeTargetedEntity = [];
+
+        if (this._previewCleanup) {
+            this._previewCleanup();
+            this._previewCleanup = null;
+        }
     }
 
     protected async resetTarget(): Promise<void> {
         const wasCursorMode = this._cursorMode;
 
+        this.stopPreview();
         this._targetActive = false;
         this._targetFound = false;
         this._targetOptions = [];
