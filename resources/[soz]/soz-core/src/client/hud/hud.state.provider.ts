@@ -64,7 +64,6 @@ export class HudStateProvider {
     }
 
     public setCinematicMode(enabled: boolean, transitionTime = 0): void {
-        // Start from the current bar position so toggling mid-animation reverses smoothly
         this.cinematicAnimationFrom = this.getCinematicProgress();
         this.cinematicAnimationStart = GetGameTimer();
         this.cinematicAnimationDuration = transitionTime;
@@ -149,7 +148,6 @@ export class HudStateProvider {
 
         const cinematicProgress = this.getCinematicProgress();
         if (cinematicProgress > 0) {
-            // Fixed-height bars sliding in from the screen edges
             const offset = cinematicProgress * CINEMATIC_BAR_HEIGHT - CINEMATIC_BAR_HEIGHT / 2;
 
             DrawRect(0.5, offset, 1.0, CINEMATIC_BAR_HEIGHT, 0, 0, 0, 255);
