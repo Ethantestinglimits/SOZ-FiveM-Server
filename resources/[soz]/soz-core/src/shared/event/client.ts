@@ -29,6 +29,9 @@ export enum ClientEvent {
 
     GET_CLOTHES = 'soz-core:client:get-clothes',
 
+    GPS_SET_VEHICLE_POINTS = 'soz-core:client:gps:set-vehicle-points',
+    GPS_EXPLICIT_PERSONAL_POINT = 'soz-core:client:gps:explicit-personal-point',
+
     AUDIO_PLAY = 'soz-core:client:audio:play',
     AUDIO_STOP = 'soz-core:client:audio:stop',
     CRIMI_USE_CLOAKROOM = 'soz-core:client:crimi:use-cloakroom',

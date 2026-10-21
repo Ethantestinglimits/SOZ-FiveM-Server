@@ -322,13 +322,30 @@ export class PauseMapRenderer {
         this.invalidate();
     };
 
+    /**
+     * Converts a pointer event's viewport coordinates into this renderer's own logical pixel
+     * space (the size resize() was last called with). The canvas's visually rendered size can
+     * differ from that (e.g. an ancestor CSS transform from NUI scaling), while getBoundingClientRect()
+     * and clientX/clientY always report the visual, post-transform size — mixing the two silently
+     * throws off every world-coordinate computation by that ratio.
+     */
+    private toLocal(clientX: number, clientY: number): [number, number] {
+        const rect = this.canvas.getBoundingClientRect();
+
+        if (rect.width === 0 || rect.height === 0) {
+            return [0, 0];
+        }
+
+        return [(clientX - rect.left) * (this.width / rect.width), (clientY - rect.top) * (this.height / rect.height)];
+    }
+
     private onWheel = (event: WheelEvent): void => {
         event.preventDefault();
 
-        const rect = this.canvas.getBoundingClientRect();
+        const [sx, sy] = this.toLocal(event.clientX, event.clientY);
         const factor = event.deltaY < 0 ? ZOOM_FACTOR : 1 / ZOOM_FACTOR;
 
-        this.zoomAnchor = { sx: event.clientX - rect.left, sy: event.clientY - rect.top };
+        this.zoomAnchor = { sx, sy };
         this.targetCenter = null;
         this.targetScale = Math.min(MAX_SCALE, Math.max(this.minScale(), this.targetScale * factor));
     };
@@ -340,20 +357,19 @@ export class PauseMapRenderer {
         }
 
         this.canvas.setPointerCapture(event.pointerId);
-        this.drag = {
-            sx: event.clientX,
-            sy: event.clientY,
-            center: { ...this.center },
-            moved: false,
-            button: event.button,
-        };
+
+        const [sx, sy] = this.toLocal(event.clientX, event.clientY);
+
+        this.drag = { sx, sy, center: { ...this.center }, moved: false, button: event.button };
         this.targetCenter = null;
     };
 
     private onPointerMove = (event: PointerEvent): void => {
+        const [sx, sy] = this.toLocal(event.clientX, event.clientY);
+
         if (this.drag) {
-            const dx = event.clientX - this.drag.sx;
-            const dy = event.clientY - this.drag.sy;
+            const dx = sx - this.drag.sx;
+            const dy = sy - this.drag.sy;
 
             if (!this.drag.moved && Math.hypot(dx, dy) < DRAG_THRESHOLD) {
                 return;
@@ -368,9 +384,7 @@ export class PauseMapRenderer {
             return;
         }
 
-        const rect = this.canvas.getBoundingClientRect();
-
-        this.updateHover(event.clientX - rect.left, event.clientY - rect.top);
+        this.updateHover(sx, sy);
     };
 
     private onPointerUp = (event: PointerEvent): void => {
@@ -389,9 +403,7 @@ export class PauseMapRenderer {
         }
 
         if (drag.button === 0) {
-            const rect = this.canvas.getBoundingClientRect();
-            const sx = event.clientX - rect.left;
-            const sy = event.clientY - rect.top;
+            const [sx, sy] = this.toLocal(event.clientX, event.clientY);
             const blip = this.layers.includes('blips') ? this.findBlipAt(sx, sy, false) : null;
 
             this.callbacks.onClick(blip ? { x: blip.x, y: blip.y } : this.toWorld(sx, sy));
@@ -729,10 +741,7 @@ export class PauseMapRenderer {
         ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
         ctx.shadowBlur = 4;
         ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.bezierCurveTo(-4, -8, -12, -14, -12, -22);
-        ctx.arc(0, -22, 12, Math.PI, 0);
-        ctx.bezierCurveTo(12, -14, 4, -8, 0, 0);
+        ctx.arc(0, 0, 9, 0, Math.PI * 2);
         ctx.fillStyle = '#a855f7';
         ctx.fill();
         ctx.shadowBlur = 0;
@@ -740,7 +749,7 @@ export class PauseMapRenderer {
         ctx.strokeStyle = '#ffffff';
         ctx.stroke();
         ctx.beginPath();
-        ctx.arc(0, -22, 4.5, 0, Math.PI * 2);
+        ctx.arc(0, 0, 3, 0, Math.PI * 2);
         ctx.fillStyle = '#ffffff';
         ctx.fill();
         ctx.restore();

@@ -25,6 +25,7 @@ import { DuoAnimationModule } from './server/duo-animation/duo-animation.module'
 import { FeatureModule } from './server/feature/feature.module';
 import { FieldModule } from './server/field/field.module';
 import { GamesModule } from './server/games/games.module';
+import { GpsModule } from './server/gps/gps.module';
 import { GraffitiModule } from './server/graffiti/graffiti.module';
 import { HousingModule } from './server/housing/housing.module';
 import { InventoryModule } from './server/inventory/inventory.module';
@@ -130,6 +131,7 @@ async function bootstrap() {
         NewsModule,
         DMCModule,
         HousingModule,
+        GpsModule,
         UtilsModule,
         GouvModule,
         GarbageModule,

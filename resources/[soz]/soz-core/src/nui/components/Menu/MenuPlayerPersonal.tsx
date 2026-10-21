@@ -3,8 +3,10 @@ import { Fragment, FunctionComponent, JSXElementConstructor, ReactElement, useEf
 import { useSelector } from 'react-redux';
 
 import { AimStyles, Animations, Moods, Walks } from '../../../config/animation';
+import { GpsColors } from '../../../config/gps';
 import { AnimationConfigItem, AnimationConfigList, WalkConfigItem } from '../../../shared/animation';
 import { NuiEvent } from '../../../shared/event';
+import { findGpsColor } from '../../../shared/gps';
 import { JobPermission } from '../../../shared/job';
 import { MenuType } from '../../../shared/nui/menu';
 import { JobMenuData, PlayerPersonalMenuData, Shortcut } from '../../../shared/nui/player';
@@ -72,6 +74,29 @@ export const MenuPlayerPersonal: FunctionComponent<MenuPlayerPersonalProps> = ({
                     <MenuItemSubMenuLink id="hud">HUD</MenuItemSubMenuLink>
                     {data.job.enabled && <MenuItemSubMenuLink id="job">Gestion de votre métier</MenuItemSubMenuLink>}
                     <MenuItemSubMenuLink id="voip">Voip & Vidéo</MenuItemSubMenuLink>
+                    <MenuItemSelect
+                        title="Couleur GPS"
+                        value={findGpsColor(player.metadata.gpscolor).blipColor}
+                        description="Couleur de votre point GPS"
+                        onConfirm={async (_, blipColor) => {
+                            await fetchNui(NuiEvent.PlayerMenuGpsSetColor, { blipColor });
+                        }}
+                    >
+                        {GpsColors.map(gpsColor => (
+                            <MenuItemSelectOption key={gpsColor.blipColor} value={gpsColor.blipColor}>
+                                {gpsColor.label}
+                            </MenuItemSelectOption>
+                        ))}
+                    </MenuItemSelect>
+                    <MenuItemButton
+                        description="Pose votre point personnel à votre position actuelle, même en véhicule partagé"
+                        onConfirm={() => fetchNui(NuiEvent.PlayerMenuGpsSetPersonalPointHere)}
+                    >
+                        Poser mon point GPS ici
+                    </MenuItemButton>
+                    <MenuItemButton onConfirm={() => fetchNui(NuiEvent.PlayerMenuGpsClearPersonalPoint)}>
+                        Retirer mon point GPS
+                    </MenuItemButton>
                     {isHalloween && (
                         <MenuItemCheckbox
                             checked={data.arachnophobe}

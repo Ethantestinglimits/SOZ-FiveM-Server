@@ -20,6 +20,7 @@ import { DuoAnimationModule } from './client/duo-animation/duo-animation.module'
 import { FactoryModule } from './client/factory/factory.module';
 import { FeatureModule } from './client/feature/feature.module';
 import { GamesModule } from './client/games/games.module';
+import { GpsModule } from './client/gps/gps.module';
 import { GraffitiModule } from './client/graffiti/graffiti.module';
 import { HousingModule } from './client/housing/housing.module';
 import { HudModule } from './client/hud/hud.module';
@@ -91,6 +92,7 @@ async function bootstrap() {
         RepositoryModule,
         MonitorModule,
         HudModule,
+        GpsModule,
         WorldModule,
         ClothingModule,
         ObjectModule,
