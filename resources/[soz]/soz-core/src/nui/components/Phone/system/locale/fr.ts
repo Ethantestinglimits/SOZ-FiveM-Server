@@ -312,6 +312,7 @@ export const fr = {
         APPS_TETRIS: 'Zetris',
         APPS_SNAKE: 'Snake',
         APPS_TAX: 'Taxes',
+        APPS_GPS: 'GPS',
         GENERIC_CLICK_TO_REVEAL: 'Cliquer pour révéler',
         GENERIC_LOADING: 'Chargement...',
         GENERIC_WAIT: 'Veuillez patienter...',

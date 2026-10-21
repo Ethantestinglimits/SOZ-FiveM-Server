@@ -3,6 +3,7 @@ import { Provider } from '@core/decorators/provider';
 import { Tick } from '@core/decorators/tick';
 import { ClientEvent, NuiEvent, ServerEvent } from '@public/shared/event';
 import { GpsPointPosition, isSameGpsPointPosition, VehicleGpsPoint } from '@public/shared/gps';
+import { PauseMapPoint } from '@public/shared/nui/pause_menu';
 import { getDistance, Vector3 } from '@public/shared/polyzone/vector';
 
 const WAYPOINT_BLIP_SPRITE = 8;
@@ -65,6 +66,12 @@ export class GpsVehiclePointProvider {
     public async clearPersonalPoint(): Promise<void> {
         DeleteWaypoint();
         this.setExplicitPersonalPoint(null);
+    }
+
+    @OnNuiEvent(NuiEvent.PlayerMenuGpsSetPersonalPointAt)
+    public async setPersonalPointAt({ x, y }: PauseMapPoint): Promise<void> {
+        SetNewWaypoint(x, y);
+        this.setExplicitPersonalPoint([x, y]);
     }
 
     @Tick(500, 'gps:vehicle-point:check-arrival')

@@ -13,6 +13,8 @@ import { DarkWebApp } from '../../../apps/darkweb/DarkWebApp';
 import DarkWebIcon from '../../../apps/darkweb/icon';
 import { DialerApp } from '../../../apps/dialer/DialerApp';
 import DialerIcon from '../../../apps/dialer/icon';
+import { GpsApp } from '../../../apps/gps/GpsApp';
+import GpsIcon from '../../../apps/gps/icon';
 import MessagesIcon from '../../../apps/messages/icon';
 import { MessagesApp } from '../../../apps/messages/MessagesApp';
 import NewsIcon from '../../../apps/news/icon';
@@ -177,6 +179,14 @@ export const useApps = () => {
             icon: TaxIcon,
             component: <TaxApp />,
             position: 8,
+        },
+        {
+            id: 'gps',
+            nameLocale: 'APPS_GPS',
+            path: '/gps',
+            icon: GpsIcon,
+            component: <GpsApp />,
+            position: 9,
         },
 
         /* Games apps */
