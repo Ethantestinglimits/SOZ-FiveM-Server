@@ -1,10 +1,13 @@
 import { Once, OnceStep, OnEvent, OnNuiEvent } from '@core/decorators/event';
+import { Inject } from '@core/decorators/injectable';
 import { Provider } from '@core/decorators/provider';
 import { Tick } from '@core/decorators/tick';
 import { ClientEvent, NuiEvent, ServerEvent } from '@public/shared/event';
-import { GpsPointPosition, isSameGpsPointPosition, VehicleGpsPoint } from '@public/shared/gps';
+import { findGpsColor, GpsPointPosition, isSameGpsPointPosition, VehicleGpsPoint } from '@public/shared/gps';
 import { PauseMapPoint } from '@public/shared/nui/pause_menu';
 import { getDistance, Vector3 } from '@public/shared/polyzone/vector';
+
+import { PlayerService } from '../player/player.service';
 
 const WAYPOINT_BLIP_SPRITE = 8;
 const VEHICLE_POINT_BLIP_SPRITE = 1;
@@ -17,7 +20,12 @@ type VehicleGpsPointBlip = {
 
 @Provider()
 export class GpsVehiclePointProvider {
+    @Inject(PlayerService)
+    private playerService: PlayerService;
+
     private personalPoint: GpsPointPosition | null = null;
+
+    private ownBlip: number | null = null;
 
     private blips = new Map<number, VehicleGpsPointBlip>();
 
@@ -30,6 +38,7 @@ export class GpsVehiclePointProvider {
         }
 
         this.blips.clear();
+        this.setOwnBlip(null);
     }
 
     @Tick(500, 'gps:personal-point:check')
@@ -44,34 +53,62 @@ export class GpsVehiclePointProvider {
             return;
         }
 
-        this.personalPoint = position;
-        TriggerServerEvent(ServerEvent.GPS_SET_PERSONAL_POINT, position);
+        this.notifyPersonalPoint(position);
     }
 
     @OnEvent(ClientEvent.GPS_EXPLICIT_PERSONAL_POINT, false)
     public setExplicitPersonalPoint(position: GpsPointPosition | null): void {
-        this.personalPoint = position;
-        TriggerServerEvent(ServerEvent.GPS_SET_PERSONAL_POINT, position);
+        this.notifyPersonalPoint(position);
     }
 
     @OnNuiEvent(NuiEvent.PlayerMenuGpsSetPersonalPointHere)
     public async setPersonalPointHere(): Promise<void> {
         const [x, y] = GetEntityCoords(PlayerPedId(), true) as Vector3;
 
-        SetNewWaypoint(x, y);
-        this.setExplicitPersonalPoint([x, y]);
+        this.setOwnBlip([x, y]);
+        this.notifyPersonalPoint([x, y]);
     }
 
     @OnNuiEvent(NuiEvent.PlayerMenuGpsClearPersonalPoint)
     public async clearPersonalPoint(): Promise<void> {
-        DeleteWaypoint();
-        this.setExplicitPersonalPoint(null);
+        this.setOwnBlip(null);
+        this.notifyPersonalPoint(null);
     }
 
     @OnNuiEvent(NuiEvent.PlayerMenuGpsSetPersonalPointAt)
     public async setPersonalPointAt({ x, y }: PauseMapPoint): Promise<void> {
-        SetNewWaypoint(x, y);
-        this.setExplicitPersonalPoint([x, y]);
+        this.setOwnBlip([x, y]);
+        this.notifyPersonalPoint([x, y]);
+    }
+
+    private notifyPersonalPoint(position: GpsPointPosition | null): void {
+        this.personalPoint = position;
+        TriggerServerEvent(ServerEvent.GPS_SET_PERSONAL_POINT, position);
+    }
+
+    private setOwnBlip(position: GpsPointPosition | null): void {
+        if (this.ownBlip !== null) {
+            RemoveBlip(this.ownBlip);
+            this.ownBlip = null;
+        }
+
+        if (!position) {
+            return;
+        }
+
+        const [x, y] = position;
+        const blipColor = findGpsColor(this.playerService.getPlayer()?.metadata.gpscolor).blipColor;
+        const blip = AddBlipForCoord(x, y, 0.0);
+
+        SetBlipSprite(blip, VEHICLE_POINT_BLIP_SPRITE);
+        SetBlipColour(blip, blipColor);
+        SetBlipRoute(blip, true);
+        SetBlipRouteColour(blip, blipColor);
+        BeginTextCommandSetBlipName('STRING');
+        AddTextComponentSubstringPlayerName('Point personnel');
+        EndTextCommandSetBlipName(blip);
+
+        this.ownBlip = blip;
     }
 
     @Tick(500, 'gps:vehicle-point:check-arrival')
@@ -138,6 +175,10 @@ export class GpsVehiclePointProvider {
         }
 
         const ownBlips = new Set(Array.from(this.blips.values(), ({ blip }) => blip));
+
+        if (this.ownBlip !== null) {
+            ownBlips.add(this.ownBlip);
+        }
 
         for (
             let blip = GetFirstBlipInfoId(WAYPOINT_BLIP_SPRITE);
