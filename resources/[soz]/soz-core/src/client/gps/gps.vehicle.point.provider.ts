@@ -33,7 +33,11 @@ export class GpsVehiclePointProvider {
 
     @Tick(500, 'gps:personal-point:check')
     public checkPersonalPoint(): void {
-        const position = this.getPersonalPoint();
+        let position = this.getPersonalPoint();
+
+        if (position && this.isSomeoneElsesVehiclePoint(position)) {
+            position = null;
+        }
 
         if (isSameGpsPointPosition(position, this.personalPoint)) {
             return;
@@ -41,6 +45,16 @@ export class GpsVehiclePointProvider {
 
         this.personalPoint = position;
         TriggerServerEvent(ServerEvent.GPS_SET_PERSONAL_POINT, position);
+    }
+
+    private isSomeoneElsesVehiclePoint(position: GpsPointPosition): boolean {
+        for (const { point } of this.blips.values()) {
+            if (isSameGpsPointPosition(position, point.position)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Tick(500, 'gps:vehicle-point:check-arrival')
