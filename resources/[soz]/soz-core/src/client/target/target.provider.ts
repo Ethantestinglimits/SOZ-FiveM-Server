@@ -135,13 +135,16 @@ export class TargetProvider {
     private _worldOptions: ((coords: Vector3) => Promise<TargetOption[]>) | null = null;
 
     // Options affichées en cliquant sur son propre personnage (fournies par les modules)
-    private _selfPedOptions: (() => Promise<TargetOption[]>) | null = null;
+    private _selfPedOptions: (() => Promise<TargetOption[]>)[] = [];
 
     // Options d'un véhicule cliqué de l'extérieur, calculées à chaque clic (libellés et états dynamiques: verrouillage,
     // portes, plaque...). Fournies par les modules, en plus des cibles B-Target déjà enregistrées.
     private _vehicleOptions:
         | ((vehicle: number, context: { coords: Vector3; distance: number }) => Promise<TargetOption[]>)
         | null = null;
+
+    // Options d'un objet (prop) cliqué, calculées à chaque clic (ex: animations enregistrées par les joueurs)
+    private _objectOptions: ((object: number, coords: Vector3) => Promise<TargetOption[]>) | null = null;
 
     // Regroupe les options d'entreprise d'une cible en sous-menus, d'après leur job (règles dans
     // config/context-menu.ts, ContextMenuGrouping). Les options qui ont déjà un sous-menu ne sont pas touchées.
@@ -243,30 +246,54 @@ export class TargetProvider {
         }
     }
 
-    public registerSelfPedOptions(factory: () => Promise<TargetOption[]>): void {
-        this._selfPedOptions = factory;
+    public registerObjectOptions(factory: (object: number, coords: Vector3) => Promise<TargetOption[]>): void {
+        this._objectOptions = factory;
     }
 
-    private async getSelfPedOptions(): Promise<TargetOption[]> {
-        if (!this._selfPedOptions) return [];
-
-        const ped = PlayerPedId();
+    private async getObjectOptions(object: number, coords: Vector3): Promise<TargetOption[]> {
+        if (!this._objectOptions) return [];
 
         try {
-            const options = await this._selfPedOptions();
+            const options = await this._objectOptions(object, coords);
 
             return options.map(option => ({
                 category: 'citizen',
                 ...option,
                 id: uuidv4(),
-                entity: ped,
-                entityCoords: GetEntityCoords(ped, true) as Vector3,
+                entity: object,
+                entityCoords: coords,
             }));
         } catch (error) {
-            console.error('[context-menu] options du joueur: erreur à la construction', error);
+            console.error("[context-menu] options de l'objet: erreur à la construction", error);
 
             return [];
         }
+    }
+
+    public registerSelfPedOptions(factory: () => Promise<TargetOption[]>): void {
+        this._selfPedOptions.push(factory);
+    }
+
+    private async getSelfPedOptions(): Promise<TargetOption[]> {
+        const ped = PlayerPedId();
+        const options: TargetOption[] = [];
+
+        // Une source en erreur ne doit pas priver le joueur des options des autres
+        for (const factory of this._selfPedOptions) {
+            try {
+                options.push(...(await factory()));
+            } catch (error) {
+                console.error('[context-menu] options du joueur: erreur à la construction', error);
+            }
+        }
+
+        return options.map(option => ({
+            category: 'citizen',
+            ...option,
+            id: uuidv4(),
+            entity: ped,
+            entityCoords: GetEntityCoords(ped, true) as Vector3,
+        }));
     }
 
     // Le rayon du curseur ignore le ped du joueur (sinon il le toucherait toujours). Pour savoir si on clique sur son
@@ -616,6 +643,10 @@ export class TargetProvider {
             // Véhicule: les options de base (verrouillage, coffre, portes...) s'ajoutent aux cibles enregistrées
             if (entityType === 2) {
                 options.push(...(await this.getVehicleOptions(entity, coords, distance)));
+            }
+
+            if (entityType === 3) {
+                options.push(...(await this.getObjectOptions(entity, coords)));
             }
 
             if (entityType === 1 || entityType === 2) {

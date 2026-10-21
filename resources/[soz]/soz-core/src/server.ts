@@ -12,6 +12,7 @@ import { ChainMiddlewareTickServerFactory } from './core/middleware/middleware.t
 import { AdminModule } from './server/admin/admin.module';
 import { AfkModule } from './server/afk/afk.module';
 import { AnimalModule } from './server/animal/animal.module';
+import { AnimationModule } from './server/animation/animation.module';
 import { ApiModule } from './server/api/api.module';
 import { BankModule } from './server/bank/bank.module';
 import { BillboardModule } from './server/billboard/billboard.module';
@@ -146,6 +147,7 @@ async function bootstrap() {
         GraffitiModule,
         AnimalModule,
         DuoAnimationModule,
+        AnimationModule,
         ...PrivateModules
     );
 
