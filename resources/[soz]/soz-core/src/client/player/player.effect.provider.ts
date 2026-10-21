@@ -9,6 +9,8 @@ import { VampireGameStateProvider } from '../story/vampire.game.state.provider';
 import { PlayerService } from './player.service';
 import { PlayerWalkstyleProvider } from './player.walkstyle.provider';
 
+export const DRUNK_CAMERA_SHAKE = 'DRUNK_SHAKE';
+
 @Provider()
 export class PlayerEffectProvider {
     @Inject(PlayerService)
@@ -87,31 +89,46 @@ export class PlayerEffectProvider {
             AnimpostfxStopAndDoUnk('DrugsTrevorClownsFightIn');
         }
 
+        ShakeGameplayCam(DRUNK_CAMERA_SHAKE, this.getDrunkShakeAmplitude(player));
+
         if (
             this.forceAlcoholEffect ||
             this.forceDrugEffect ||
             player.metadata.drug > 80 ||
             player.metadata.alcohol > 80
         ) {
-            ShakeGameplayCam('DRUNK_SHAKE', 1.0);
             SetPedIsDrunk(PlayerPedId(), true);
 
             await this.playerWalkstyleProvider.updateWalkStyle('drugAlcool', 'move_m@drunk@verydrunk');
         } else if (player.metadata.drug > 40 || player.metadata.alcohol > 40) {
-            ShakeGameplayCam('DRUNK_SHAKE', 0.5);
             SetPedIsDrunk(PlayerPedId(), true);
 
             await this.playerWalkstyleProvider.updateWalkStyle('drugAlcool', 'move_m@drunk@moderatedrunk');
         } else if (player.metadata.drug > 0 || player.metadata.alcohol > 0) {
-            ShakeGameplayCam('DRUNK_SHAKE', 0.0);
             SetPedIsDrunk(PlayerPedId(), false);
 
             await this.playerWalkstyleProvider.updateWalkStyle('drugAlcool', 'move_m@drunk@slightlydrunk');
         } else {
-            ShakeGameplayCam('DRUNK_SHAKE', 0.0);
             SetPedIsDrunk(PlayerPedId(), false);
 
             await this.playerWalkstyleProvider.updateWalkStyle('drugAlcool', null);
         }
+    }
+
+    public getDrunkShakeAmplitude(player: PlayerData): number {
+        if (
+            this.forceAlcoholEffect ||
+            this.forceDrugEffect ||
+            player.metadata.drug > 80 ||
+            player.metadata.alcohol > 80
+        ) {
+            return 1.0;
+        }
+
+        if (player.metadata.drug > 40 || player.metadata.alcohol > 40) {
+            return 0.5;
+        }
+
+        return 0.0;
     }
 }

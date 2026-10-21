@@ -54,6 +54,7 @@ import {
 import { NuiRaceMethodMap } from './race';
 import { NuiRepairMethodMap } from './repair';
 import { NuiSozedexMethodMap } from './sozedex';
+import { NuiTaserMethodMap } from './taser';
 import { NuiTaxiMethodMap } from './taxi';
 import { NuiWeatherMethodMap } from './wheather';
 
@@ -120,6 +121,7 @@ export interface NuiMethodMap {
     laser_game_manage: NuiLaserGameManageMethodMap;
     screenshot: NuiScreenshotMethodMap;
     flash: NuiFlashMap;
+    taser: NuiTaserMethodMap;
     whatif: WhatIfMap;
     pet_manager: NuiPetManagerMethodMap;
     texture: NuiImageLoaderMethodMap;

@@ -262,6 +262,7 @@ export type PlayerClientState = {
     isEscorted: boolean;
     isEscorting: boolean;
     isKnockedOut: boolean;
+    isDazed: boolean;
     escorting: number | null;
     isInShop: boolean;
     isInHospital: boolean;
@@ -335,6 +336,7 @@ export type PlayerListStateKey =
     | 'wearingPatientOutfit'
     | 'escorted'
     | 'knockedOut'
+    | 'dazed'
     | 'validated'
     | 'inLastStand';
 

@@ -1,9 +1,21 @@
 import { Module } from '../../core/decorators/module';
+import { TaserDazeEffectProvider } from './taser.daze.effect.provider';
+import { TaserDazeProvider } from './taser.daze.provider';
+import { TaserDazeRemoteWalkProvider } from './taser.daze.remote.walk.provider';
+import { TaserDazeStumbleProvider } from './taser.daze.stumble.provider';
 import { WeaponDrawingProvider } from './weapon.drawing.provider';
 import { WeaponGunsmithProvider } from './weapon.gunsmith.provider';
 import { WeaponProvider } from './weapon.provider';
 
 @Module({
-    providers: [WeaponProvider, WeaponDrawingProvider, WeaponGunsmithProvider],
+    providers: [
+        WeaponProvider,
+        WeaponDrawingProvider,
+        WeaponGunsmithProvider,
+        TaserDazeProvider,
+        TaserDazeStumbleProvider,
+        TaserDazeRemoteWalkProvider,
+        TaserDazeEffectProvider,
+    ],
 })
 export class WeaponModule {}
