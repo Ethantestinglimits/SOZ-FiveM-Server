@@ -1,6 +1,8 @@
 import { Once, OnceStep, OnEvent, OnNuiEvent } from '@core/decorators/event';
+import { Inject } from '@core/decorators/injectable';
 import { Provider } from '@core/decorators/provider';
 import { Tick } from '@core/decorators/tick';
+import { Logger } from '@core/logger';
 import { ClientEvent, NuiEvent, ServerEvent } from '@public/shared/event';
 import { GpsPointPosition, isSameGpsPointPosition, VehicleGpsPoint } from '@public/shared/gps';
 import { PauseMapPoint } from '@public/shared/nui/pause_menu';
@@ -17,6 +19,9 @@ type VehicleGpsPointBlip = {
 
 @Provider()
 export class GpsVehiclePointProvider {
+    @Inject(Logger)
+    private logger: Logger;
+
     private personalPoint: GpsPointPosition | null = null;
 
     private blips = new Map<number, VehicleGpsPointBlip>();
@@ -72,6 +77,11 @@ export class GpsVehiclePointProvider {
     public async setPersonalPointAt({ x, y }: PauseMapPoint): Promise<void> {
         SetNewWaypoint(x, y);
         this.setExplicitPersonalPoint([x, y]);
+    }
+
+    @OnNuiEvent(NuiEvent.DebugGpsMapClick)
+    public async debugGpsMapClick(data: unknown): Promise<void> {
+        this.logger.info(`[gps-map-debug] ${JSON.stringify(data)}`);
     }
 
     @Tick(500, 'gps:vehicle-point:check-arrival')

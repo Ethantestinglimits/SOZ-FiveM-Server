@@ -292,6 +292,7 @@ export enum NuiEvent {
     PlayerMenuGpsSetPersonalPointHere = 'soz-core:nui:player:menu:gps-set-personal-point-here',
     PlayerMenuGpsClearPersonalPoint = 'soz-core:nui:player:menu:gps-clear-personal-point',
     PlayerMenuGpsSetPersonalPointAt = 'soz-core:nui:player:menu:gps-set-personal-point-at',
+    DebugGpsMapClick = 'soz-core:nui:debug:gps-map-click',
     PlayerMenuWhatIf2Retrieval = 'soz-core:nui:player:menu:whatif2-retrival',
     PlayerMenuWhatIfRemoveHazmat = 'soz-core:nui:player:menu:whatif2-remove-hazmat',
     SetFocusInput = 'soz-core:nui:set-focus-input',

@@ -393,8 +393,29 @@ export class PauseMapRenderer {
             const sx = event.clientX - rect.left;
             const sy = event.clientY - rect.top;
             const blip = this.layers.includes('blips') ? this.findBlipAt(sx, sy, false) : null;
+            const world = this.toWorld(sx, sy);
 
-            this.callbacks.onClick(blip ? { x: blip.x, y: blip.y } : this.toWorld(sx, sy));
+            fetch(`https://${(window as any).GetParentResourceName()}/${'soz-core:nui:debug:gps-map-click'}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+                body: JSON.stringify({
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+                    rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
+                    sx,
+                    sy,
+                    rendererWidth: this.width,
+                    rendererHeight: this.height,
+                    dpr: this.dpr,
+                    canvasWidth: this.canvas.width,
+                    canvasHeight: this.canvas.height,
+                    scale: this.scale,
+                    center: this.center,
+                    world,
+                }),
+            }).catch(() => undefined);
+
+            this.callbacks.onClick(blip ? { x: blip.x, y: blip.y } : world);
         }
     };
 
