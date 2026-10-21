@@ -65,11 +65,13 @@ export class PhoneProvider {
         }
 
         SetNewWaypoint(coords[0], coords[1]);
+        TriggerEvent(ClientEvent.GPS_EXPLICIT_PERSONAL_POINT, [coords[0], coords[1]]);
     }
 
     @OnNuiEvent(NuiEvent.DeleteWaypoint)
     async deleteWaypoint() {
         DeleteWaypoint();
+        TriggerEvent(ClientEvent.GPS_EXPLICIT_PERSONAL_POINT, null);
     }
 
     @OnNuiEvent(NuiEvent.GetPlayerPosition)
