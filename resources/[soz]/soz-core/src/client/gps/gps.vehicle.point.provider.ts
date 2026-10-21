@@ -4,7 +4,6 @@ import { Tick } from '@core/decorators/tick';
 import { ClientEvent, ServerEvent } from '@public/shared/event';
 import { GpsPointPosition, isSameGpsPointPosition, VehicleGpsPoint } from '@public/shared/gps';
 import { getDistance, Vector3 } from '@public/shared/polyzone/vector';
-import { VehicleSeat } from '@public/shared/vehicle/vehicle';
 
 const WAYPOINT_BLIP_SPRITE = 8;
 const VEHICLE_POINT_BLIP_SPRITE = 1;
@@ -40,7 +39,7 @@ export class GpsVehiclePointProvider {
             return;
         }
 
-        if (this.isSharingVehicleWithOthers()) {
+        if (this.blips.size > 0) {
             return;
         }
 
@@ -52,25 +51,6 @@ export class GpsVehiclePointProvider {
     public setExplicitPersonalPoint(position: GpsPointPosition | null): void {
         this.personalPoint = position;
         TriggerServerEvent(ServerEvent.GPS_SET_PERSONAL_POINT, position);
-    }
-
-    private isSharingVehicleWithOthers(): boolean {
-        const ped = PlayerPedId();
-        const vehicle = GetVehiclePedIsIn(ped, false);
-
-        if (!vehicle) {
-            return false;
-        }
-
-        for (let seat = VehicleSeat.Driver; seat < GetVehicleMaxNumberOfPassengers(vehicle); seat++) {
-            const occupant = GetPedInVehicleSeat(vehicle, seat);
-
-            if (occupant && occupant !== ped) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     @Tick(500, 'gps:vehicle-point:check-arrival')
