@@ -38,6 +38,22 @@ export class GpsVehiclePointProvider {
         this.pushVehiclePoints(vehicleNetworkId);
     }
 
+    @OnEvent(ServerEvent.GPS_VEHICLE_POINT_REACHED)
+    public onVehiclePointReached(source: number, author: unknown): void {
+        if (typeof author !== 'number') {
+            return;
+        }
+
+        const vehicleNetworkId = this.playerVehicles.get(source);
+
+        if (vehicleNetworkId === undefined) {
+            return;
+        }
+
+        this.removeAuthorPoint(vehicleNetworkId, author);
+        this.pushVehiclePoints(vehicleNetworkId);
+    }
+
     @OnEvent(ServerEvent.BASE_ENTERED_VEHICLE)
     public onEnteredVehicle(source: number, vehicleNetworkId: number): void {
         if (this.playerVehicles.get(source) === vehicleNetworkId) {

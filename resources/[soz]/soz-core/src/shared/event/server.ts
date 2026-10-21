@@ -586,6 +586,7 @@ export enum ServerEvent {
     DISPENSER_BUY = 'soz-core:server:dispenser:buy',
 
     GPS_SET_PERSONAL_POINT = 'soz-core:server:gps:set-personal-point',
+    GPS_VEHICLE_POINT_REACHED = 'soz-core:server:gps:vehicle-point-reached',
 
     GOUV_UPDATE_TAX = 'soz-core:server:gouv:update-tax',
     GOUV_SENAT_SALARY = 'soz-core:server:gouv:senat-salary',
