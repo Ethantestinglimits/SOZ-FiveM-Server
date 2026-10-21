@@ -33,11 +33,7 @@ export class GpsVehiclePointProvider {
 
     @Tick(500, 'gps:personal-point:check')
     public checkPersonalPoint(): void {
-        let position = this.getPersonalPoint();
-
-        if (position && this.isSomeoneElsesVehiclePoint(position)) {
-            position = null;
-        }
+        const position = this.getPersonalPoint();
 
         if (isSameGpsPointPosition(position, this.personalPoint)) {
             return;
@@ -45,16 +41,6 @@ export class GpsVehiclePointProvider {
 
         this.personalPoint = position;
         TriggerServerEvent(ServerEvent.GPS_SET_PERSONAL_POINT, position);
-    }
-
-    private isSomeoneElsesVehiclePoint(position: GpsPointPosition): boolean {
-        for (const { point } of this.blips.values()) {
-            if (isSameGpsPointPosition(position, point.position)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     @Tick(500, 'gps:vehicle-point:check-arrival')
@@ -120,15 +106,23 @@ export class GpsVehiclePointProvider {
             return null;
         }
 
-        const blip = GetFirstBlipInfoId(WAYPOINT_BLIP_SPRITE);
+        const ownBlips = new Set(Array.from(this.blips.values(), ({ blip }) => blip));
 
-        if (!DoesBlipExist(blip)) {
-            return null;
+        for (
+            let blip = GetFirstBlipInfoId(WAYPOINT_BLIP_SPRITE);
+            DoesBlipExist(blip);
+            blip = GetNextBlipInfoId(WAYPOINT_BLIP_SPRITE)
+        ) {
+            if (ownBlips.has(blip)) {
+                continue;
+            }
+
+            const [x, y] = GetBlipInfoIdCoord(blip);
+
+            return [x, y];
         }
 
-        const [x, y] = GetBlipInfoIdCoord(blip);
-
-        return [x, y];
+        return null;
     }
 
     private createBlip(point: VehicleGpsPoint): number {
