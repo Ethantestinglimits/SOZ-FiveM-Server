@@ -729,10 +729,7 @@ export class PauseMapRenderer {
         ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
         ctx.shadowBlur = 4;
         ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.bezierCurveTo(-4, -8, -12, -14, -12, -22);
-        ctx.arc(0, -22, 12, Math.PI, 0);
-        ctx.bezierCurveTo(12, -14, 4, -8, 0, 0);
+        ctx.arc(0, 0, 9, 0, Math.PI * 2);
         ctx.fillStyle = '#a855f7';
         ctx.fill();
         ctx.shadowBlur = 0;
@@ -740,7 +737,7 @@ export class PauseMapRenderer {
         ctx.strokeStyle = '#ffffff';
         ctx.stroke();
         ctx.beginPath();
-        ctx.arc(0, -22, 4.5, 0, Math.PI * 2);
+        ctx.arc(0, 0, 3, 0, Math.PI * 2);
         ctx.fillStyle = '#ffffff';
         ctx.fill();
         ctx.restore();
