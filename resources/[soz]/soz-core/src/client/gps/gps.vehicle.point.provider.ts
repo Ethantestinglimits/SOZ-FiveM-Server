@@ -1,7 +1,7 @@
-import { Once, OnceStep, OnEvent } from '@core/decorators/event';
+import { Once, OnceStep, OnEvent, OnNuiEvent } from '@core/decorators/event';
 import { Provider } from '@core/decorators/provider';
 import { Tick } from '@core/decorators/tick';
-import { ClientEvent, ServerEvent } from '@public/shared/event';
+import { ClientEvent, NuiEvent, ServerEvent } from '@public/shared/event';
 import { GpsPointPosition, isSameGpsPointPosition, VehicleGpsPoint } from '@public/shared/gps';
 import { getDistance, Vector3 } from '@public/shared/polyzone/vector';
 
@@ -51,6 +51,20 @@ export class GpsVehiclePointProvider {
     public setExplicitPersonalPoint(position: GpsPointPosition | null): void {
         this.personalPoint = position;
         TriggerServerEvent(ServerEvent.GPS_SET_PERSONAL_POINT, position);
+    }
+
+    @OnNuiEvent(NuiEvent.PlayerMenuGpsSetPersonalPointHere)
+    public async setPersonalPointHere(): Promise<void> {
+        const [x, y] = GetEntityCoords(PlayerPedId(), true) as Vector3;
+
+        SetNewWaypoint(x, y);
+        this.setExplicitPersonalPoint([x, y]);
+    }
+
+    @OnNuiEvent(NuiEvent.PlayerMenuGpsClearPersonalPoint)
+    public async clearPersonalPoint(): Promise<void> {
+        DeleteWaypoint();
+        this.setExplicitPersonalPoint(null);
     }
 
     @Tick(500, 'gps:vehicle-point:check-arrival')

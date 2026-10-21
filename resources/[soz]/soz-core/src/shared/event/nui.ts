@@ -289,6 +289,8 @@ export enum NuiEvent {
     PlayerMenuSetVideoVolume = 'soz-core:nui:player:menu:set-video-volume',
     PlayerMenuHudSetArachnophobe = 'soz-core:nui:player:menu:arachnophobe',
     PlayerMenuGpsSetColor = 'soz-core:nui:player:menu:gps-set-color',
+    PlayerMenuGpsSetPersonalPointHere = 'soz-core:nui:player:menu:gps-set-personal-point-here',
+    PlayerMenuGpsClearPersonalPoint = 'soz-core:nui:player:menu:gps-clear-personal-point',
     PlayerMenuWhatIf2Retrieval = 'soz-core:nui:player:menu:whatif2-retrival',
     PlayerMenuWhatIfRemoveHazmat = 'soz-core:nui:player:menu:whatif2-remove-hazmat',
     SetFocusInput = 'soz-core:nui:set-focus-input',

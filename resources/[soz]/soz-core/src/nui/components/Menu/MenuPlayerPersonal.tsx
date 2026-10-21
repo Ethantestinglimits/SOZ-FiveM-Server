@@ -77,6 +77,15 @@ export const MenuPlayerPersonal: FunctionComponent<MenuPlayerPersonalProps> = ({
                             </MenuItemSelectOption>
                         ))}
                     </MenuItemSelect>
+                    <MenuItemButton
+                        description="Pose votre point personnel à votre position actuelle, même en véhicule partagé"
+                        onConfirm={() => fetchNui(NuiEvent.PlayerMenuGpsSetPersonalPointHere)}
+                    >
+                        Poser mon point GPS ici
+                    </MenuItemButton>
+                    <MenuItemButton onConfirm={() => fetchNui(NuiEvent.PlayerMenuGpsClearPersonalPoint)}>
+                        Retirer mon point GPS
+                    </MenuItemButton>
                     {isHalloween && (
                         <MenuItemCheckbox
                             checked={data.arachnophobe}
