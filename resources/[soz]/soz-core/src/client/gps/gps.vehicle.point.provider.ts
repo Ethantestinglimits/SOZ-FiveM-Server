@@ -3,8 +3,11 @@ import { Provider } from '@core/decorators/provider';
 import { Tick } from '@core/decorators/tick';
 import { ClientEvent, ServerEvent } from '@public/shared/event';
 import { GpsPointPosition, isSameGpsPointPosition, VehicleGpsPoint } from '@public/shared/gps';
+import { getDistance, Vector3 } from '@public/shared/polyzone/vector';
+import { VehicleSeat } from '@public/shared/vehicle/vehicle';
 
 const WAYPOINT_BLIP_SPRITE = 8;
+const VEHICLE_POINT_ARRIVAL_RADIUS = 20.0;
 
 type VehicleGpsPointBlip = {
     blip: number;
@@ -16,6 +19,8 @@ export class GpsVehiclePointProvider {
     private personalPoint: GpsPointPosition | null = null;
 
     private blips = new Map<number, VehicleGpsPointBlip>();
+
+    private reachedAuthors = new Set<number>();
 
     @Tick(500, 'gps:personal-point:check')
     public checkPersonalPoint(): void {
@@ -29,6 +34,33 @@ export class GpsVehiclePointProvider {
         TriggerServerEvent(ServerEvent.GPS_SET_PERSONAL_POINT, position);
     }
 
+    @Tick(500, 'gps:vehicle-point:check-arrival')
+    public checkVehiclePointArrival(): void {
+        if (this.blips.size === 0) {
+            return;
+        }
+
+        const ped = PlayerPedId();
+        const vehicle = GetVehiclePedIsIn(ped, false);
+
+        if (!vehicle || GetPedInVehicleSeat(vehicle, VehicleSeat.Driver) !== ped) {
+            return;
+        }
+
+        const position = GetEntityCoords(vehicle, true) as Vector3;
+
+        for (const [author, { point }] of this.blips) {
+            if (this.reachedAuthors.has(author)) {
+                continue;
+            }
+
+            if (getDistance(position, point.position) <= VEHICLE_POINT_ARRIVAL_RADIUS) {
+                this.reachedAuthors.add(author);
+                TriggerServerEvent(ServerEvent.GPS_VEHICLE_POINT_REACHED, author);
+            }
+        }
+    }
+
     @OnEvent(ClientEvent.GPS_SET_VEHICLE_POINTS)
     public setVehiclePoints(points: VehicleGpsPoint[]): void {
         const authors = new Set(points.map(point => point.author));
@@ -37,6 +69,7 @@ export class GpsVehiclePointProvider {
             if (!authors.has(author)) {
                 RemoveBlip(blip);
                 this.blips.delete(author);
+                this.reachedAuthors.delete(author);
             }
         }
 
