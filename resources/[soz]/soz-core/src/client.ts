@@ -48,6 +48,7 @@ import { LocationModule } from './client/location/location.module';
 import { MonitorModule } from './client/monitor/monitor.module';
 import { NuiModule } from './client/nui/nui.module';
 import { ObjectModule } from './client/object/object.module';
+import { PauseModule } from './client/pause/pause.module';
 import { PhoneModule } from './client/phone/phone.module';
 import { PickerModule } from './client/picker/picker.module';
 import { PlayerModule } from './client/player/player.module';
@@ -113,6 +114,7 @@ async function bootstrap() {
         ShopModule,
         StoryModule,
         AfkModule,
+        PauseModule,
         VehicleModule,
         FactoryModule,
         OilModule,

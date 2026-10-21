@@ -49,6 +49,7 @@ import { TaxiModule } from './server/job/taxi/taxi.module';
 import { UpwModule } from './server/job/upw/upw.module';
 import { MonitorModule } from './server/monitor/monitor.module';
 import { ObjectModule } from './server/object/object.module';
+import { PauseModule } from './server/pause/pause.module';
 import { PhoneModule } from './server/phone/phone.module';
 import { PlayerModule } from './server/player/player.module';
 import { PropsModule } from './server/props/props.module';
@@ -110,6 +111,7 @@ async function bootstrap() {
         RebootModule,
         StoryModule,
         AfkModule,
+        PauseModule,
         BankModule,
         OilModule,
         PawlModule,
