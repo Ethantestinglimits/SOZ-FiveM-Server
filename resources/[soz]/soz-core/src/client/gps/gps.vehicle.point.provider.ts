@@ -1,6 +1,8 @@
 import { Once, OnceStep, OnEvent } from '@core/decorators/event';
+import { Inject } from '@core/decorators/injectable';
 import { Provider } from '@core/decorators/provider';
 import { Tick } from '@core/decorators/tick';
+import { Logger } from '@core/logger';
 import { ClientEvent, ServerEvent } from '@public/shared/event';
 import { GpsPointPosition, isSameGpsPointPosition, VehicleGpsPoint } from '@public/shared/gps';
 import { getDistance, Vector3 } from '@public/shared/polyzone/vector';
@@ -16,6 +18,9 @@ type VehicleGpsPointBlip = {
 
 @Provider()
 export class GpsVehiclePointProvider {
+    @Inject(Logger)
+    private logger: Logger;
+
     private personalPoint: GpsPointPosition | null = null;
 
     private blips = new Map<number, VehicleGpsPointBlip>();
@@ -38,6 +43,8 @@ export class GpsVehiclePointProvider {
         if (isSameGpsPointPosition(position, this.personalPoint)) {
             return;
         }
+
+        this.logger.info(`[gps-debug] local personal point changed to ${JSON.stringify(position)}`);
 
         this.personalPoint = position;
         TriggerServerEvent(ServerEvent.GPS_SET_PERSONAL_POINT, position);

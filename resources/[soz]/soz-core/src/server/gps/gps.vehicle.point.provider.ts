@@ -2,6 +2,7 @@ import { On, OnEvent } from '@core/decorators/event';
 import { Inject } from '@core/decorators/injectable';
 import { Provider } from '@core/decorators/provider';
 import { Tick, TickInterval } from '@core/decorators/tick';
+import { Logger } from '@core/logger';
 import { GpsColors } from '@public/config/gps';
 import { ClientEvent, ServerEvent } from '@public/shared/event';
 import { findGpsColor, GpsPointPosition, VehicleGpsPoint } from '@public/shared/gps';
@@ -16,6 +17,9 @@ export class GpsVehiclePointProvider {
     @Inject(PlayerService)
     private playerService: PlayerService;
 
+    @Inject(Logger)
+    private logger: Logger;
+
     private personalPoints = new Map<number, GpsPointPosition>();
 
     private playerVehicles = new Map<number, number>();
@@ -24,6 +28,8 @@ export class GpsVehiclePointProvider {
 
     @OnEvent(ServerEvent.GPS_SET_PERSONAL_POINT)
     public onSetPersonalPoint(source: number, position: unknown): void {
+        this.logger.info(`[gps-debug] onSetPersonalPoint source=${source} position=${JSON.stringify(position)}`);
+
         if (isGpsPointPosition(position)) {
             this.personalPoints.set(source, [position[0], position[1]]);
         } else {
@@ -38,6 +44,12 @@ export class GpsVehiclePointProvider {
 
         this.shareAuthorPoint(vehicleNetworkId, source);
         this.pushVehiclePoints(vehicleNetworkId);
+
+        this.logger.info(
+            `[gps-debug] after share, vehicle ${vehicleNetworkId} points=${JSON.stringify(
+                Array.from(this.vehiclePoints.get(vehicleNetworkId)?.entries() ?? [])
+            )}`
+        );
     }
 
     @OnEvent(ServerEvent.GPS_VEHICLE_POINT_REACHED)
