@@ -6,6 +6,7 @@ import { GpsPointPosition, isSameGpsPointPosition, VehicleGpsPoint } from '@publ
 import { getDistance, Vector3 } from '@public/shared/polyzone/vector';
 
 const WAYPOINT_BLIP_SPRITE = 8;
+const VEHICLE_POINT_BLIP_SPRITE = 1;
 const VEHICLE_POINT_ARRIVAL_RADIUS = 20.0;
 
 type VehicleGpsPointBlip = {
@@ -120,6 +121,7 @@ export class GpsVehiclePointProvider {
         const [x, y] = point.position;
         const blip = AddBlipForCoord(x, y, 0.0);
 
+        SetBlipSprite(blip, VEHICLE_POINT_BLIP_SPRITE);
         SetBlipColour(blip, point.blipColor);
         SetBlipRoute(blip, true);
         SetBlipRouteColour(blip, point.blipColor);
