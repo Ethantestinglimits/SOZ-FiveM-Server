@@ -1,6 +1,7 @@
 import { On, OnEvent } from '@core/decorators/event';
 import { Inject } from '@core/decorators/injectable';
 import { Provider } from '@core/decorators/provider';
+import { GpsColors } from '@public/config/gps';
 import { ClientEvent, ServerEvent } from '@public/shared/event';
 import { findGpsColor, GpsPointPosition, VehicleGpsPoint } from '@public/shared/gps';
 
@@ -105,14 +106,46 @@ export class GpsVehiclePointProvider {
 
         const points = this.vehiclePoints.get(vehicleNetworkId) ?? new Map<number, VehicleGpsPoint>();
         const player = this.playerService.getPlayer(author);
+        const preferredBlipColor = findGpsColor(player?.metadata.gpscolor).blipColor;
 
         points.set(author, {
             author,
             position,
-            blipColor: findGpsColor(player?.metadata.gpscolor).blipColor,
+            blipColor: this.resolveFreeBlipColor(points, author, preferredBlipColor),
         });
 
         this.vehiclePoints.set(vehicleNetworkId, points);
+    }
+
+    private resolveFreeBlipColor(
+        points: Map<number, VehicleGpsPoint>,
+        author: number,
+        preferredBlipColor: number
+    ): number {
+        const usedBlipColors = new Set<number>();
+
+        for (const [pointAuthor, point] of points) {
+            if (pointAuthor !== author) {
+                usedBlipColors.add(point.blipColor);
+            }
+        }
+
+        if (!usedBlipColors.has(preferredBlipColor)) {
+            return preferredBlipColor;
+        }
+
+        const preferredIndex = GpsColors.findIndex(gpsColor => gpsColor.blipColor === preferredBlipColor);
+        const startIndex = preferredIndex === -1 ? 0 : preferredIndex;
+
+        for (let offset = 1; offset <= GpsColors.length; offset++) {
+            const candidate = GpsColors[(startIndex + offset) % GpsColors.length];
+
+            if (!usedBlipColors.has(candidate.blipColor)) {
+                return candidate.blipColor;
+            }
+        }
+
+        return preferredBlipColor;
     }
 
     private removeAuthorPoint(vehicleNetworkId: number, author: number): void {
