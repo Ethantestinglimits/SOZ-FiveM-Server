@@ -1,6 +1,7 @@
 import { On, OnEvent } from '@core/decorators/event';
 import { Inject } from '@core/decorators/injectable';
 import { Provider } from '@core/decorators/provider';
+import { Tick, TickInterval } from '@core/decorators/tick';
 import { ClientEvent, ServerEvent } from '@public/shared/event';
 import { findGpsColor, GpsPointPosition, VehicleGpsPoint } from '@public/shared/gps';
 
@@ -63,6 +64,32 @@ export class GpsVehiclePointProvider {
     public onPlayerDropped(source: number): void {
         this.leaveVehicle(source);
         this.personalPoints.delete(source);
+    }
+
+    @Tick(TickInterval.EVERY_SECOND, 'gps:vehicle-point:despawn-check')
+    public checkDespawnedVehicles(): void {
+        for (const vehicleNetworkId of this.vehiclePoints.keys()) {
+            const entityId = NetworkGetEntityFromNetworkId(vehicleNetworkId);
+
+            if (entityId && DoesEntityExist(entityId)) {
+                continue;
+            }
+
+            this.clearVehicle(vehicleNetworkId);
+        }
+    }
+
+    private clearVehicle(vehicleNetworkId: number): void {
+        this.vehiclePoints.delete(vehicleNetworkId);
+
+        for (const [occupant, occupantVehicleNetworkId] of this.playerVehicles) {
+            if (occupantVehicleNetworkId !== vehicleNetworkId) {
+                continue;
+            }
+
+            this.playerVehicles.delete(occupant);
+            TriggerClientEvent(ClientEvent.GPS_SET_VEHICLE_POINTS, occupant, []);
+        }
     }
 
     private leaveVehicle(source: number): void {
