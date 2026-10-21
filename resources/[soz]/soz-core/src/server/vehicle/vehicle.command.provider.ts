@@ -61,7 +61,7 @@ export class VehicleCommandProvider {
         });
     }
 
-    @Command('vehfix', { role: ['admin', 'roam'], description: 'Repair closest vehicle (Admin Only)' })
+    @Command('vehfix', { role: ['admin'], description: 'Repair closest vehicle (Admin Only)' })
     async vehfixCommand(source: number) {
         const closestVehicle = await this.vehicleSpawner.getClosestVehicle(source);
 
@@ -85,7 +85,7 @@ export class VehicleCommandProvider {
         }
     }
 
-    @Command('vehmax', { role: ['admin', 'roam'], description: 'Max out closest vehicle performance (Admin Only)' })
+    @Command('vehmax', { role: ['admin'], description: 'Max out closest vehicle performance (Admin Only)' })
     async vehmaxCommand(source: number) {
         const closestVehicle = await this.vehicleSpawner.getClosestVehicle(source);
 
