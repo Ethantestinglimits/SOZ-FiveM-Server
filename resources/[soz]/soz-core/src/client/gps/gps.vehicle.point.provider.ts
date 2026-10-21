@@ -1,10 +1,9 @@
-import { OnEvent } from '@core/decorators/event';
+import { Once, OnceStep, OnEvent } from '@core/decorators/event';
 import { Provider } from '@core/decorators/provider';
 import { Tick } from '@core/decorators/tick';
 import { ClientEvent, ServerEvent } from '@public/shared/event';
 import { GpsPointPosition, isSameGpsPointPosition, VehicleGpsPoint } from '@public/shared/gps';
 import { getDistance, Vector3 } from '@public/shared/polyzone/vector';
-import { VehicleSeat } from '@public/shared/vehicle/vehicle';
 
 const WAYPOINT_BLIP_SPRITE = 8;
 const VEHICLE_POINT_ARRIVAL_RADIUS = 20.0;
@@ -21,6 +20,15 @@ export class GpsVehiclePointProvider {
     private blips = new Map<number, VehicleGpsPointBlip>();
 
     private reachedAuthors = new Set<number>();
+
+    @Once(OnceStep.Stop)
+    public onStop(): void {
+        for (const { blip } of this.blips.values()) {
+            RemoveBlip(blip);
+        }
+
+        this.blips.clear();
+    }
 
     @Tick(500, 'gps:personal-point:check')
     public checkPersonalPoint(): void {
@@ -43,7 +51,7 @@ export class GpsVehiclePointProvider {
         const ped = PlayerPedId();
         const vehicle = GetVehiclePedIsIn(ped, false);
 
-        if (!vehicle || GetPedInVehicleSeat(vehicle, VehicleSeat.Driver) !== ped) {
+        if (!vehicle) {
             return;
         }
 
