@@ -2,6 +2,7 @@ import { Module } from '../../core/decorators/module';
 import { PlayerAnimationProvider } from './player.animation.provider';
 import { PlayerClothesProvider } from './player.clothes.provider';
 import { PlayerDamageProvider } from './player.damage.provider';
+import { PlayerDisconnectedBodyProvider } from './player.disconnected-body.provider';
 import { PlayerDiseaseProvider } from './player.disease.provider';
 import { PlayerEffectProvider } from './player.effect.provider';
 import { PlayerHealthProvider } from './player.health.provider';
@@ -46,6 +47,7 @@ import { ProgressProvider } from './progress.provider';
         PlayerHeatProvider,
         PlayerDamageProvider,
         PlayerClothesProvider,
+        PlayerDisconnectedBodyProvider,
     ],
 })
 export class PlayerModule {}

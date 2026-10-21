@@ -228,6 +228,9 @@ export enum ServerEvent {
     OIL_UNLOCK_TANKER = 'soz-core:server:oil:unlock-tanker',
 
     PLAYER_LOADED = 'soz-core:server:player:loaded',
+    PLAYER_BODY_STATE_SYNC = 'soz-core:server:player:body:state-sync',
+    PLAYER_BODY_START_CARRY = 'soz-core:server:player:body:start-carry',
+    PLAYER_BODY_STOP_CARRY = 'soz-core:server:player:body:stop-carry',
     PLAYER_INCREASE_STRENGTH = 'soz-core:server:player:increase-strength',
     PLAYER_SET_CURRENT_DISEASE = 'soz-core:server:server:set-current-disease',
     PLAYER_INCREASE_RUN_TIME = 'soz-core:server:player:health:increase-run-time',
