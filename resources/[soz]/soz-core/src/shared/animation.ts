@@ -6,6 +6,8 @@ type BaseAnimationConfigItem = {
     name: string;
     rightLabel: string | null;
     icon: string | null;
+    command?: string;
+    source?: string;
 };
 
 export type AnimationConfigEvent = BaseAnimationConfigItem & {
@@ -43,6 +45,8 @@ export type WalkConfigBase = {
     name: string;
     walk: string;
     icon?: string;
+    command?: string;
+    source?: string;
 };
 
 export type WalkConfigCategory = {
@@ -64,6 +68,8 @@ export type WalkConfigList = WalkConfigItem[];
 export type MoodConfigItem = {
     name: string;
     mood: string;
+    command?: string;
+    source?: string;
 };
 
 export type MoodConfigList = MoodConfigItem[];
@@ -76,6 +82,41 @@ export type AimStyleConfigItem = {
 };
 
 export type AimStyleConfigList = AimStyleConfigItem[];
+
+export type AnimationReviewItem = AnimationConfigItem | (MoodConfigItem & { type: 'mood' });
+
+export type AnimationReviewDecision = 'keep' | 'reject';
+
+export type AnimationReviewEntry = {
+    key: string;
+    label: string;
+    section: string;
+    duplicateOf: string | null;
+    notes: string[];
+    item: AnimationReviewItem;
+};
+
+export type AnimationReviewPack = {
+    id: string;
+    title: string;
+    source: string;
+    entries: AnimationReviewEntry[];
+};
+
+export type AnimationReviewVerdict = {
+    decision: AnimationReviewDecision;
+    note?: string;
+};
+
+export type AnimationReviewDecisions = Record<string, AnimationReviewVerdict>;
+
+export type AnimationReviewPackSummary = {
+    id: string;
+    title: string;
+    count: number;
+    decided: number;
+    kept: number;
+};
 
 export type Animation = {
     props?: AnimationProps[];

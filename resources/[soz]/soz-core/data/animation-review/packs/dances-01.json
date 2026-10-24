@@ -1,0 +1,1713 @@
+{
+    "id": "dances-01",
+    "title": "Danses 1/2 (boxdance → dj10)",
+    "source": "rpemotes-reborn",
+    "entries": [
+        {
+            "key": "boxdance",
+            "label": "Boxing Dance Solo",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Boxing Dance Solo",
+                "rightLabel": null,
+                "icon": null,
+                "command": "boxdance",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@beach_boxing@",
+                        "name": "med_right_down",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dance",
+            "label": "Dance",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dance",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@dancers@podium_dancers@",
+                        "name": "hi_dance_facedj_17_v2_male^5",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dance4",
+            "label": "Dance 4",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance 4",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dance4",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@male@var_b@",
+                        "name": "high_center_up",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dance5",
+            "label": "Dance 5",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance 5",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dance5",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@casino@mini@dance@dance_solo@female@var_a@",
+                        "name": "med_center",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dance6",
+            "label": "Dance 6",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance 6",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dance6",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "misschinese2_crystalmazemcs1_cs",
+                        "name": "dance_loop_tao",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dance9",
+            "label": "Dance 9",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance 9",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dance9",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@female@var_a@",
+                        "name": "med_center_up",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "danceclube",
+            "label": "Dance Club 5",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Club 5",
+                "rightLabel": null,
+                "icon": null,
+                "command": "danceclube",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub_island@dancers@club@",
+                        "name": "hi_idle_a_f02",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "danceclubf",
+            "label": "Dance Club 6",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Club 6",
+                "rightLabel": null,
+                "icon": null,
+                "command": "danceclubf",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub_island@dancers@club@",
+                        "name": "hi_idle_b_m03",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "danceclubh",
+            "label": "Dance Club 8",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Club 8",
+                "rightLabel": null,
+                "icon": null,
+                "command": "danceclubh",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub_island@dancers@crowddance_facedj@",
+                        "name": "mi_dance_facedj_17_v2_male^4",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "danceclubi",
+            "label": "Dance Club 9",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Club 9",
+                "rightLabel": null,
+                "icon": null,
+                "command": "danceclubi",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub_island@dancers@crowddance_single_props@",
+                        "name": "mi_dance_prop_13_v1_male^3",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "danceclubj",
+            "label": "Dance Club 10",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Club 10",
+                "rightLabel": null,
+                "icon": null,
+                "command": "danceclubj",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub_island@dancers@crowddance_groups@groupd@",
+                        "name": "mi_dance_crowd_13_v2_male^1",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "danceclubk",
+            "label": "Dance Club 11",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Club 11",
+                "rightLabel": null,
+                "icon": null,
+                "command": "danceclubk",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub_island@dancers@crowddance_facedj@",
+                        "name": "mi_dance_facedj_15_v2_male^4",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "danceclubl",
+            "label": "Dance Club 12",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Club 12",
+                "rightLabel": null,
+                "icon": null,
+                "command": "danceclubl",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@female@var_a@",
+                        "name": "high_center_up",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "danceclubm",
+            "label": "Dance Club 13",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Club 13",
+                "rightLabel": null,
+                "icon": null,
+                "command": "danceclubm",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub_island@dancers@crowddance_facedj@",
+                        "name": "hi_dance_facedj_hu_15_v2_male^5",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "danceclubp",
+            "label": "Dance Club 16",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Club 16",
+                "rightLabel": null,
+                "icon": null,
+                "command": "danceclubp",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@shuffle@",
+                        "name": "high_left_down",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "danceclubq",
+            "label": "Dance Club 17",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Club 17",
+                "rightLabel": null,
+                "icon": null,
+                "command": "danceclubq",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "fix_stu_ext-25",
+                        "name": "a_f_y_studioparty_01_dual-25",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancecrankdat",
+            "label": "Dance Crank Dat",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Crank Dat",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancecrankdat",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@shuffle@",
+                        "name": "high_right_up",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancecrankdat2",
+            "label": "Dance Crank Dat 2",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Crank Dat 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancecrankdat2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@shuffle@",
+                        "name": "high_right_down",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancedrink",
+            "label": "Dance Drink (Beer)",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Drink (Beer)",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancedrink",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub_island@dancers@beachdanceprop@",
+                        "name": "mi_idle_c_m01",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_beer_amopen",
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                20
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "dancedrink2",
+            "label": "Dance Drink 2 (Wine)",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Drink 2 (Wine)",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancedrink2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub_island@dancers@beachdanceprop@",
+                        "name": "mi_loop_f1",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "p_wine_glass_s",
+                            "position": [
+                                0,
+                                0,
+                                -0.09
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "dancedrink3",
+            "label": "Dance Drink 3 (Whiskey)",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Drink 3 (Whiskey)",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancedrink3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub_island@dancers@beachdanceprop@",
+                        "name": "mi_loop_m04",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "ba_prop_battle_whiskey_opaque_s",
+                            "position": [
+                                -0.01,
+                                0,
+                                0
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                10
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "dancedrink4",
+            "label": "Dance Drink 4 (Whiskey)",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Drink 4 (Whiskey)",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancedrink4",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub_island@dancers@beachdanceprops@male@",
+                        "name": "mi_idle_b_m04",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "ba_prop_battle_whiskey_opaque_s",
+                            "position": [
+                                -0.01,
+                                0,
+                                0
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                10
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "dancedrink5",
+            "label": "Dance Drink 5 (Wine)",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Drink 5 (Wine)",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancedrink5",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub_island@dancers@crowddance_single_props@",
+                        "name": "hi_dance_prop_09_v1_female^3",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "p_wine_glass_s",
+                            "position": [
+                                0,
+                                0,
+                                -0.09
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "dancedrink6",
+            "label": "Dance Drink 6 (Beer)",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Drink 6 (Beer)",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancedrink6",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub_island@dancers@crowddance_single_props@",
+                        "name": "hi_dance_prop_09_v1_male^3",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_beer_logopen",
+                            "position": [
+                                0.009,
+                                0.001,
+                                -0.031
+                            ],
+                            "rotation": [
+                                180,
+                                180,
+                                -69.99
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "dancedrink7",
+            "label": "Dance Drink 7 (Wine)",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Drink 7 (Wine)",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancedrink7",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub_island@dancers@crowddance_single_props@",
+                        "name": "hi_dance_prop_11_v1_female^3",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "p_wine_glass_s",
+                            "position": [
+                                0,
+                                0,
+                                -0.09
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "dancedrink8",
+            "label": "Dance Drink 8 (Wine)",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Drink 8 (Wine)",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancedrink8",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub_island@dancers@crowddance_single_props@",
+                        "name": "hi_dance_prop_11_v1_female^1",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "p_wine_glass_s",
+                            "position": [
+                                0,
+                                0,
+                                -0.09
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "dancedrink9",
+            "label": "Dance Drink 9 (Beer)",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Drink 9 (Beer)",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancedrink9",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@techno_karate@",
+                        "name": "med_right_down",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 60309,
+                            "model": "prop_beer_amopen",
+                            "position": [
+                                0.09,
+                                -0.2,
+                                0.05
+                            ],
+                            "rotation": [
+                                -100,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "dancef",
+            "label": "Dance F",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance F",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancef",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@dancers@solomun_entourage@",
+                        "name": "mi_dance_facedj_17_v1_female^1",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancef2",
+            "label": "Dance F2",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance F2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancef2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@female@var_a@",
+                        "name": "high_center",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancef3",
+            "label": "Dance F3",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance F3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancef3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@female@var_a@",
+                        "name": "high_center_up",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancef4",
+            "label": "Dance F4",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance F4",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancef4",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@dancers@crowddance_facedj@hi_intensity",
+                        "name": "hi_dance_facedj_09_v2_female^1",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancef5",
+            "label": "Dance F5",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance F5",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancef5",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@dancers@crowddance_facedj@hi_intensity",
+                        "name": "hi_dance_facedj_09_v2_female^3",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancef6",
+            "label": "Dance F6",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance F6",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancef6",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@female@var_a@",
+                        "name": "high_center_up",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "danceglowstick",
+            "label": "Dance Glowsticks",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Glowsticks",
+                "rightLabel": null,
+                "icon": null,
+                "command": "danceglowstick",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@lazlow@hi_railing@",
+                        "name": "ambclub_13_mi_hi_sexualgriding_laz",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "ba_prop_battle_glowstick_01",
+                            "position": [
+                                0.07,
+                                0.14,
+                                0
+                            ],
+                            "rotation": [
+                                -80,
+                                20,
+                                0
+                            ]
+                        },
+                        {
+                            "bone": 60309,
+                            "model": "ba_prop_battle_glowstick_01",
+                            "position": [
+                                0.07,
+                                0.09,
+                                0
+                            ],
+                            "rotation": [
+                                -120,
+                                -20,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "danceglowstick3",
+            "label": "Dance Glowsticks 3",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Glowsticks 3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "danceglowstick3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@lazlow@hi_railing@",
+                        "name": "ambclub_09_mi_hi_bellydancer_laz",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "ba_prop_battle_glowstick_01",
+                            "position": [
+                                0.07,
+                                0.14,
+                                0
+                            ],
+                            "rotation": [
+                                -80,
+                                20,
+                                0
+                            ]
+                        },
+                        {
+                            "bone": 60309,
+                            "model": "ba_prop_battle_glowstick_01",
+                            "position": [
+                                0.07,
+                                0.09,
+                                0
+                            ],
+                            "rotation": [
+                                -120,
+                                -20,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "dancehiphop",
+            "label": "Hip Hop Dance",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Hip Hop Dance",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancehiphop",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_paired@dance_d@",
+                        "name": "ped_a_dance_idle",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancehiphop2",
+            "label": "Hip Hop Dance 2",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Hip Hop Dance 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancehiphop2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_paired@dance_b@",
+                        "name": "ped_a_dance_idle",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancehiphop3",
+            "label": "Hip Hop Dance 3",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Hip Hop Dance 3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancehiphop3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_paired@dance_a@",
+                        "name": "ped_a_dance_idle",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancehorse",
+            "label": "Dance Horse",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Horse",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancehorse",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@lazlow@hi_dancefloor@",
+                        "name": "dancecrowd_li_15_handup_laz",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "ba_prop_battle_hobby_horse",
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "dancehorse2",
+            "label": "Dance Horse 2",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Horse 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancehorse2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@lazlow@hi_dancefloor@",
+                        "name": "crowddance_hi_11_handup_laz",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "ba_prop_battle_hobby_horse",
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "dancehorse3",
+            "label": "Dance Horse 3",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Horse 3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancehorse3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@lazlow@hi_dancefloor@",
+                        "name": "dancecrowd_li_11_hu_shimmy_laz",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "ba_prop_battle_hobby_horse",
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "dancemonkey2",
+            "label": "Monkey Dance 2",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Monkey Dance 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancemonkey2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@techno_monkey@",
+                        "name": "high_center_down",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancemonkey3",
+            "label": "Monkey Dance 3",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Monkey Dance 3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancemonkey3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@techno_monkey@",
+                        "name": "med_center_down",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "danceold",
+            "label": "Dance Old",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Old",
+                "rightLabel": null,
+                "icon": null,
+                "command": "danceold",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_player_intupperuncle_disco",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "danceshy3",
+            "label": "Dance Shy 3",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Shy 3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "danceshy3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@drinking@bar@player_bartender@idle_a",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancesilly1",
+            "label": "Dance Silly 1",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Silly 1",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancesilly1",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "rcmnigel1bnmt_1b",
+                        "name": "dance_loop_tyler",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancesilly12",
+            "label": "Dance Silly 12",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Silly 12",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancesilly12",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@lazlow@hi_podium@",
+                        "name": "danceidle_hi_17_smackthat_laz",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancesilly2",
+            "label": "Dance Silly 2",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Silly 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancesilly2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "move_clown@p_m_zero_idles@",
+                        "name": "fidget_short_dance",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancesilly3",
+            "label": "Dance Silly 3",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Silly 3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancesilly3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "move_clown@p_m_two_idles@",
+                        "name": "fidget_short_dance",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancesilly4",
+            "label": "Dance Silly 4",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Silly 4",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancesilly4",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@lazlow@hi_podium@",
+                        "name": "danceidle_hi_11_buttwiggle_b_laz",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancesilly5",
+            "label": "Dance Silly 5",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Silly 5",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancesilly5",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "timetable@tracy@ig_5@idle_a",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancesilly6",
+            "label": "Dance Silly 6",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Silly 6",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancesilly6",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "timetable@tracy@ig_8@idle_b",
+                        "name": "idle_d",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancesilly7",
+            "label": "Dance Silly 7",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Silly 7",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancesilly7",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@casino@mini@dance@dance_solo@female@var_b@",
+                        "name": "med_center",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dancesilly8",
+            "label": "Dance Silly 8",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Silly 8",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dancesilly8",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@casino@mini@dance@dance_solo@female@var_b@",
+                        "name": "high_center",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "danceslow2",
+            "label": "Dance Slow 2",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Slow 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "danceslow2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@female@var_a@",
+                        "name": "low_center",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "danceslow4",
+            "label": "Dance Slow 4",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Slow 4",
+                "rightLabel": null,
+                "icon": null,
+                "command": "danceslow4",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@female@var_b@",
+                        "name": "low_center",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "danceupper",
+            "label": "Dance Upper",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dance Upper",
+                "rightLabel": null,
+                "icon": null,
+                "command": "danceupper",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@female@var_b@",
+                        "name": "high_center",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dj",
+            "label": "DJ",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "DJ",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dj",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@djs@dixon@",
+                        "name": "dixn_dance_cntr_open_dix",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dj1",
+            "label": "DJ 1",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "DJ 1",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dj1",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@djs@dixon@",
+                        "name": "dixn_end_dix",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dj10",
+            "label": "DJ 10",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [
+                "⚠ contexte suggestif possible: mini@strip_club@idles@dj@base base"
+            ],
+            "item": {
+                "type": "animation",
+                "name": "DJ 10",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dj10",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "mini@strip_club@idles@dj@base",
+                        "name": "base",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

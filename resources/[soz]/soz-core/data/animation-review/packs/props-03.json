@@ -1,0 +1,2538 @@
+{
+    "id": "props-03",
+    "title": "Emotes avec props 3/5 (foodtrayo → newspaper3)",
+    "source": "rpemotes-reborn",
+    "entries": [
+        {
+            "key": "foodtrayo",
+            "label": "Food Tray O",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Food Tray O",
+                "rightLabel": null,
+                "icon": null,
+                "command": "foodtrayo",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@move_f@waitress",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_food_tray_02",
+                            "position": [
+                                0,
+                                0,
+                                0.02
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "fuel",
+            "label": "Fuel",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Fuel",
+                "rightLabel": null,
+                "icon": null,
+                "command": "fuel",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "weapons@misc@jerrycan@",
+                        "name": "fire",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 57005,
+                            "model": "w_am_jerrycan",
+                            "position": [
+                                0.18,
+                                0.13,
+                                -0.24
+                            ],
+                            "rotation": [
+                                -165.8694,
+                                -11.2123,
+                                -32.9453
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "fuel2",
+            "label": "Fuel 2 (Carry)",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Fuel 2 (Carry)",
+                "rightLabel": null,
+                "icon": null,
+                "command": "fuel2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "weapons@misc@jerrycan@franklin",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "w_am_jerrycan",
+                            "position": [
+                                0.26,
+                                0.05,
+                                0.03
+                            ],
+                            "rotation": [
+                                80,
+                                180,
+                                79.99
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "gbag",
+            "label": "Garbage Bag",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Garbage Bag",
+                "rightLabel": null,
+                "icon": null,
+                "command": "gbag",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "missfbi4prepp1",
+                        "name": "_idle_garbage_man",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_cs_street_binbag_01",
+                            "position": [
+                                0,
+                                0.04,
+                                -0.02
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "gbin",
+            "label": "Garbage Bin",
+            "section": "PropEmotes",
+            "duplicateOf": "Porter Carton",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Garbage Bin",
+                "rightLabel": null,
+                "icon": null,
+                "command": "gbin",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@heists@box_carry@",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_bin_08open",
+                            "position": [
+                                0,
+                                -0.42,
+                                -1.29
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "gbin2",
+            "label": "Garbage Bin 2",
+            "section": "PropEmotes",
+            "duplicateOf": "Porter Carton",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Garbage Bin 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "gbin2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@heists@box_carry@",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_cs_bin_01",
+                            "position": [
+                                0,
+                                -0.42,
+                                -1.29
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "gbin3",
+            "label": "Garbage Bin 3",
+            "section": "PropEmotes",
+            "duplicateOf": "Porter Carton",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Garbage Bin 3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "gbin3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@heists@box_carry@",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_cs_bin_03",
+                            "position": [
+                                0,
+                                -0.42,
+                                -1.29
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "gbin4",
+            "label": "Garbage Bin 4",
+            "section": "PropEmotes",
+            "duplicateOf": "Porter Carton",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Garbage Bin 4",
+                "rightLabel": null,
+                "icon": null,
+                "command": "gbin4",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@heists@box_carry@",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_bin_08a",
+                            "position": [
+                                0,
+                                -0.42,
+                                -1.29
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "gbin5",
+            "label": "Garbage Bin 5",
+            "section": "PropEmotes",
+            "duplicateOf": "Porter Carton",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Garbage Bin 5",
+                "rightLabel": null,
+                "icon": null,
+                "command": "gbin5",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@heists@box_carry@",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_bin_07d",
+                            "position": [
+                                -0.01,
+                                -0.22,
+                                -0.86
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "givedrink",
+            "label": "Give Drink - Beer",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Give Drink - Beer",
+                "rightLabel": null,
+                "icon": null,
+                "command": "givedrink",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@drinking@bar@drink@beer",
+                        "name": "intro_bartender",
+                        "options": {}
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_amb_beer_bottle",
+                            "position": [
+                                0,
+                                0,
+                                0.06
+                            ],
+                            "rotation": [
+                                0,
+                                15,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "givedrink2",
+            "label": "Give Drink - Beer In Bag",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Give Drink - Beer In Bag",
+                "rightLabel": null,
+                "icon": null,
+                "command": "givedrink2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@drinking@bar@drink@beer",
+                        "name": "intro_bartender",
+                        "options": {}
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "p_cs_bottle_01",
+                            "position": [
+                                0,
+                                0,
+                                0.06
+                            ],
+                            "rotation": [
+                                0,
+                                15,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "givedrink3",
+            "label": "Give Drink - Beer Can",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Give Drink - Beer Can",
+                "rightLabel": null,
+                "icon": null,
+                "command": "givedrink3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@drinking@bar@drink@beer",
+                        "name": "intro_bartender",
+                        "options": {}
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "v_res_tt_can01",
+                            "position": [
+                                0,
+                                0,
+                                0.06
+                            ],
+                            "rotation": [
+                                0,
+                                15,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "golfswing",
+            "label": "Golf Swing",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Golf Swing",
+                "rightLabel": null,
+                "icon": null,
+                "command": "golfswing",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "rcmnigel1d",
+                        "name": "swing_a_mark",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_golf_wood_01",
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "guitar",
+            "label": "Guitar",
+            "section": "PropEmotes",
+            "duplicateOf": "Guitare Electrique  #2",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Guitar",
+                "rightLabel": null,
+                "icon": null,
+                "command": "guitar",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "amb@world_human_musician@guitar@male@idle_a",
+                        "name": "idle_b",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 24818,
+                            "model": "prop_acc_guitar_01",
+                            "position": [
+                                -0.1,
+                                0.31,
+                                0.1
+                            ],
+                            "rotation": [
+                                0,
+                                20,
+                                150
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "guitar2",
+            "label": "Guitar 2",
+            "section": "PropEmotes",
+            "duplicateOf": "Guitare  #2",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Guitar 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "guitar2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "switch@trevor@guitar_beatdown",
+                        "name": "001370_02_trvs_8_guitar_beatdown_idle_busker",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 24818,
+                            "model": "prop_acc_guitar_01",
+                            "position": [
+                                -0.05,
+                                0.31,
+                                0.1
+                            ],
+                            "rotation": [
+                                0,
+                                20,
+                                150
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "guitarcarry",
+            "label": "Guitar Case Carry",
+            "section": "PropEmotes",
+            "duplicateOf": "Valise sécurisée",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Guitar Case Carry",
+                "rightLabel": null,
+                "icon": null,
+                "command": "guitarcarry",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "move_weapon@jerrycan@generic",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "sf_prop_sf_guitar_case_01a",
+                            "position": [
+                                0.28,
+                                -0.2,
+                                -0.06
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                15
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "guitarcarry2",
+            "label": "Guitar Carry Accoustic",
+            "section": "PropEmotes",
+            "duplicateOf": "Valise sécurisée",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Guitar Carry Accoustic",
+                "rightLabel": null,
+                "icon": null,
+                "command": "guitarcarry2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "move_weapon@jerrycan@generic",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_acc_guitar_01",
+                            "position": [
+                                0.15,
+                                -0.14,
+                                -0.02
+                            ],
+                            "rotation": [
+                                -101.5083,
+                                5.7251,
+                                29.4987
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "guitarcarry5",
+            "label": "Guitar Carry Electric",
+            "section": "PropEmotes",
+            "duplicateOf": "Valise sécurisée",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Guitar Carry Electric",
+                "rightLabel": null,
+                "icon": null,
+                "command": "guitarcarry5",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "move_weapon@jerrycan@generic",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_el_guitar_01",
+                            "position": [
+                                0.11,
+                                -0.12,
+                                -0.05
+                            ],
+                            "rotation": [
+                                -80,
+                                0,
+                                21.9999
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "guitarcarry6",
+            "label": "Guitar Carry Electric 2",
+            "section": "PropEmotes",
+            "duplicateOf": "Valise sécurisée",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Guitar Carry Electric 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "guitarcarry6",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "move_weapon@jerrycan@generic",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_el_guitar_02",
+                            "position": [
+                                0.11,
+                                -0.12,
+                                -0.05
+                            ],
+                            "rotation": [
+                                -80,
+                                0,
+                                21.9999
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "guitarcarry7",
+            "label": "Guitar Carry Electric 3",
+            "section": "PropEmotes",
+            "duplicateOf": "Valise sécurisée",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Guitar Carry Electric 3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "guitarcarry7",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "move_weapon@jerrycan@generic",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_el_guitar_03",
+                            "position": [
+                                0.11,
+                                -0.12,
+                                -0.05
+                            ],
+                            "rotation": [
+                                -80,
+                                0,
+                                21.9999
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "guitarcarry8",
+            "label": "Guitar Carry Electric 4",
+            "section": "PropEmotes",
+            "duplicateOf": "Valise sécurisée",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Guitar Carry Electric 4",
+                "rightLabel": null,
+                "icon": null,
+                "command": "guitarcarry8",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "move_weapon@jerrycan@generic",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "vw_prop_casino_art_guitar_01a",
+                            "position": [
+                                0.11,
+                                -0.12,
+                                -0.05
+                            ],
+                            "rotation": [
+                                -80,
+                                0,
+                                21.9999
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "guitarcarry9",
+            "label": "Guitar Carry Electric 5",
+            "section": "PropEmotes",
+            "duplicateOf": "Valise sécurisée",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Guitar Carry Electric 5",
+                "rightLabel": null,
+                "icon": null,
+                "command": "guitarcarry9",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "move_weapon@jerrycan@generic",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "sf_prop_sf_el_guitar_02a",
+                            "position": [
+                                0.11,
+                                -0.12,
+                                -0.05
+                            ],
+                            "rotation": [
+                                -80,
+                                0,
+                                21.9999
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "guitarelectric",
+            "label": "Guitar Electric",
+            "section": "PropEmotes",
+            "duplicateOf": "Guitare Electrique  #2",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Guitar Electric",
+                "rightLabel": null,
+                "icon": null,
+                "command": "guitarelectric",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "amb@world_human_musician@guitar@male@idle_a",
+                        "name": "idle_b",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 24818,
+                            "model": "prop_el_guitar_01",
+                            "position": [
+                                -0.1,
+                                0.31,
+                                0.1
+                            ],
+                            "rotation": [
+                                0,
+                                20,
+                                150
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "guitarelectric2",
+            "label": "Guitar Electric 2",
+            "section": "PropEmotes",
+            "duplicateOf": "Guitare Electrique  #2",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Guitar Electric 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "guitarelectric2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "amb@world_human_musician@guitar@male@idle_a",
+                        "name": "idle_b",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 24818,
+                            "model": "prop_el_guitar_03",
+                            "position": [
+                                -0.1,
+                                0.31,
+                                0.1
+                            ],
+                            "rotation": [
+                                0,
+                                20,
+                                150
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "guncase",
+            "label": "Guncase",
+            "section": "PropEmotes",
+            "duplicateOf": "Valise sécurisée",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Guncase",
+                "rightLabel": null,
+                "icon": null,
+                "command": "guncase",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "move_weapon@jerrycan@generic",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 57005,
+                            "model": "prop_gun_case_01",
+                            "position": [
+                                0.1,
+                                0.02,
+                                -0.02
+                            ],
+                            "rotation": [
+                                40,
+                                145,
+                                115
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "handbag2",
+            "label": "Hand Bag 2",
+            "section": "PropEmotes",
+            "duplicateOf": "Valise sécurisée",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Hand Bag 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "handbag2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "move_weapon@jerrycan@generic",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "v_ret_ps_bag_02",
+                            "position": [
+                                0.52,
+                                0.03,
+                                0
+                            ],
+                            "rotation": [
+                                0,
+                                -90,
+                                100
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "hitchhike",
+            "label": "Hitchhike",
+            "section": "PropEmotes",
+            "duplicateOf": "Faire du stop",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Hitchhike",
+                "rightLabel": null,
+                "icon": null,
+                "command": "hitchhike",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "random@hitch_lift",
+                        "name": "idle_f",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 18905,
+                            "model": "w_am_jerrycan",
+                            "position": [
+                                0.32,
+                                -0.01,
+                                0
+                            ],
+                            "rotation": [
+                                -162.423,
+                                74.83,
+                                58.79
+                            ]
+                        },
+                        {
+                            "bone": 40269,
+                            "model": "prop_michael_backpack",
+                            "position": [
+                                -0.07,
+                                -0.21,
+                                -0.11
+                            ],
+                            "rotation": [
+                                -144.93,
+                                117.358,
+                                -6.16
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "hoe",
+            "label": "Hoe",
+            "section": "PropEmotes",
+            "duplicateOf": "Creuser",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Hoe",
+                "rightLabel": null,
+                "icon": null,
+                "command": "hoe",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@drug_field_workers@rake@male_a@base",
+                        "name": "base",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_tool_shovel5",
+                            "position": [
+                                0,
+                                0.02,
+                                -0.5
+                            ],
+                            "rotation": [
+                                -15,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "hoe2",
+            "label": "Hoe 2",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Hoe 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "hoe2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@drug_field_workers@rake@male_a@idles",
+                        "name": "idle_b",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_tool_shovel5",
+                            "position": [
+                                0,
+                                0.02,
+                                -0.5
+                            ],
+                            "rotation": [
+                                -15,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "hoe3",
+            "label": "Hoe 3",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Hoe 3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "hoe3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@drug_field_workers@rake@male_b@idles",
+                        "name": "idle_c",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_tool_shovel5",
+                            "position": [
+                                0,
+                                0.02,
+                                -0.5
+                            ],
+                            "rotation": [
+                                -15,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "hoe4",
+            "label": "Hoe 4",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Hoe 4",
+                "rightLabel": null,
+                "icon": null,
+                "command": "hoe4",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@drug_field_workers@rake@male_b@idles",
+                        "name": "idle_d",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_tool_shovel5",
+                            "position": [
+                                0,
+                                0.02,
+                                -0.5
+                            ],
+                            "rotation": [
+                                -15,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "hotdog",
+            "label": "Hotdog",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Hotdog",
+                "rightLabel": null,
+                "icon": null,
+                "command": "hotdog",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "mp_player_inteat@burger",
+                        "name": "mp_player_int_eat_burger",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 60309,
+                            "model": "prop_cs_hotdog_02",
+                            "position": [
+                                -0.03,
+                                0.01,
+                                -0.01
+                            ],
+                            "rotation": [
+                                95.1071,
+                                94.7001,
+                                -66.9179
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "idcardb",
+            "label": "ID Card 2 - FIB",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "ID Card 2 - FIB",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idcardb",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "paper_1_rcm_alt1-8",
+                        "name": "player_one_dual-8",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_fib_badge",
+                            "position": [
+                                0.06,
+                                0.021,
+                                -0.04
+                            ],
+                            "rotation": [
+                                -90,
+                                -180,
+                                78.999
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "idcardi",
+            "label": "ID Card 9 - Drivers License",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "ID Card 9 - Drivers License",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idcardi",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "paper_1_rcm_alt1-8",
+                        "name": "player_one_dual-8",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "bkr_prop_fakeid_singledriverl",
+                            "position": [
+                                0.07,
+                                0.026,
+                                -0.032
+                            ],
+                            "rotation": [
+                                -10.8683,
+                                -177.8499,
+                                23.6377
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "lawnchair",
+            "label": "Lawnchair",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Lawnchair",
+                "rightLabel": null,
+                "icon": null,
+                "command": "lawnchair",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "timetable@ron@ig_5_p3",
+                        "name": "ig_5_p3_base",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 0,
+                            "model": "prop_skid_chair_02",
+                            "position": [
+                                0.025,
+                                -0.2,
+                                -0.1
+                            ],
+                            "rotation": [
+                                45,
+                                -5,
+                                180
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "lawnchair2",
+            "label": "Lawnchair 2",
+            "section": "PropEmotes",
+            "duplicateOf": "?",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Lawnchair 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "lawnchair2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "timetable@reunited@ig_10",
+                        "name": "base_amanda",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 0,
+                            "model": "prop_skid_chair_02",
+                            "position": [
+                                0.025,
+                                -0.15,
+                                -0.1
+                            ],
+                            "rotation": [
+                                45,
+                                5,
+                                180
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "lawnchair3",
+            "label": "Lawnchair 3",
+            "section": "PropEmotes",
+            "duplicateOf": "Assis bras sur les genoux",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Lawnchair 3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "lawnchair3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "timetable@ron@ig_3_couch",
+                        "name": "base",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 0,
+                            "model": "prop_skid_chair_02",
+                            "position": [
+                                -0.05,
+                                0,
+                                -0.2
+                            ],
+                            "rotation": [
+                                5,
+                                0,
+                                180
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "leanphone",
+            "label": "Leaning With Phone",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [
+                "variantes de texture du prop ignorées"
+            ],
+            "item": {
+                "type": "animation",
+                "name": "Leaning With Phone",
+                "rightLabel": null,
+                "icon": null,
+                "command": "leanphone",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "amb@world_human_leaning@male@wall@back@mobile@base",
+                        "name": "base",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_phone_ing",
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "mallet",
+            "label": "Mallet",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Mallet",
+                "rightLabel": null,
+                "icon": null,
+                "command": "mallet",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "amb@world_human_hammering@male@base",
+                        "name": "base",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_tool_mallet",
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "map",
+            "label": "Map",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Map",
+                "rightLabel": null,
+                "icon": null,
+                "command": "map",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "amb@world_human_tourist_map@male@base",
+                        "name": "base",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_tourist_map_01",
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "map2",
+            "label": "Map 2",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Map 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "map2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "amb@code_human_in_bus_passenger_idles@female@tablet@idle_a",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_tourist_map_01",
+                            "position": [
+                                -0.05,
+                                0,
+                                0
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "maskdown",
+            "label": "Firefighter Mask",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Firefighter Mask",
+                "rightLabel": null,
+                "icon": null,
+                "command": "maskdown",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_helmets@on_foot",
+                        "name": "visor_down",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "masktakeoff",
+            "label": "Take Off Mask",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Take Off Mask",
+                "rightLabel": null,
+                "icon": null,
+                "command": "masktakeoff",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@scripted@bty5@ig1_intimidate_actor@female_heeled@",
+                        "name": "mask_action_b",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "maskup",
+            "label": "Firefighter Unmask",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Firefighter Unmask",
+                "rightLabel": null,
+                "icon": null,
+                "command": "maskup",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_helmets@on_foot",
+                        "name": "visor_up",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "medbag",
+            "label": "Medic Bag",
+            "section": "PropEmotes",
+            "duplicateOf": "Valise sécurisée",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Medic Bag",
+                "rightLabel": null,
+                "icon": null,
+                "command": "medbag",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "move_weapon@jerrycan@generic",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 57005,
+                            "model": "xm_prop_x17_bag_med_01a",
+                            "position": [
+                                0.39,
+                                -0.06,
+                                -0.06
+                            ],
+                            "rotation": [
+                                -100,
+                                -180,
+                                -78
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "medbag2",
+            "label": "Medic Bag 2",
+            "section": "PropEmotes",
+            "duplicateOf": "Valise sécurisée",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Medic Bag 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "medbag2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "move_weapon@jerrycan@generic",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 57005,
+                            "model": "v_ret_ta_firstaid",
+                            "position": [
+                                0.21,
+                                0,
+                                -0.03
+                            ],
+                            "rotation": [
+                                -100,
+                                -180,
+                                -78
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "medbox",
+            "label": "Medic Box",
+            "section": "PropEmotes",
+            "duplicateOf": "Valise sécurisée",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Medic Box",
+                "rightLabel": null,
+                "icon": null,
+                "command": "medbox",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "move_weapon@jerrycan@generic",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "xm_prop_smug_crate_s_medical",
+                            "position": [
+                                0.25,
+                                0.02,
+                                -0.01
+                            ],
+                            "rotation": [
+                                90,
+                                0,
+                                -81.9999
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "mnc",
+            "label": "Milk & Cookies",
+            "section": "PropEmotes",
+            "duplicateOf": "Porter Carton",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Milk & Cookies",
+                "rightLabel": null,
+                "icon": null,
+                "command": "mnc",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@heists@box_carry@",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 57005,
+                            "model": "m23_2_prop_m32_milkncookies_01a",
+                            "position": [
+                                0.215,
+                                0.114,
+                                0.024
+                            ],
+                            "rotation": [
+                                -81.9185,
+                                -176.2526,
+                                -28.4674
+                            ]
+                        },
+                        {
+                            "bone": 18905,
+                            "model": "m23_2_prop_m32_milkncookies_01a",
+                            "position": [
+                                0.215,
+                                0.114,
+                                0.024
+                            ],
+                            "rotation": [
+                                -95.9185,
+                                -176.2526,
+                                -28.4674
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "mojito",
+            "label": "Mojito",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Mojito",
+                "rightLabel": null,
+                "icon": null,
+                "command": "mojito",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "amb@code_human_wander_drinking@female@base",
+                        "name": "static",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_mojito",
+                            "position": [
+                                0,
+                                0,
+                                -0.09
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                130
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "mop",
+            "label": "Mop",
+            "section": "PropEmotes",
+            "duplicateOf": "Tenir Serpillère",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Mop",
+                "rightLabel": null,
+                "icon": null,
+                "command": "mop",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "missfbi4prepp1",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_cs_mop_s",
+                            "position": [
+                                -0.02,
+                                -0.06,
+                                -0.2
+                            ],
+                            "rotation": [
+                                -13.377,
+                                10.3568,
+                                17.9681
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "mop2",
+            "label": "Mop 2",
+            "section": "PropEmotes",
+            "duplicateOf": "Passer la Serpillère",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Mop 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "mop2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "move_mop",
+                        "name": "idle_scrub_small_player",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_cs_mop_s",
+                            "position": [
+                                0,
+                                0,
+                                0.12
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "mugshot",
+            "label": "Mugshot",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Mugshot",
+                "rightLabel": null,
+                "icon": null,
+                "command": "mugshot",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "mp_character_creation@customise@male_a",
+                        "name": "loop",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 58868,
+                            "model": "prop_police_id_board",
+                            "position": [
+                                0.12,
+                                0.24,
+                                0
+                            ],
+                            "rotation": [
+                                5,
+                                0,
+                                70
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "murder2",
+            "label": "Murder Pistol",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Murder Pistol",
+                "rightLabel": null,
+                "icon": null,
+                "command": "murder2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "dead",
+                        "name": "dead_a",
+                        "options": {
+                            "repeat": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 18905,
+                            "model": "w_pi_heavypistol",
+                            "position": [
+                                0.27,
+                                0.35,
+                                0.05
+                            ],
+                            "rotation": [
+                                -98,
+                                2,
+                                183
+                            ]
+                        },
+                        {
+                            "bone": 57005,
+                            "model": "p_bloodsplat_s",
+                            "position": [
+                                -0.8,
+                                0.41,
+                                0
+                            ],
+                            "rotation": [
+                                -98,
+                                -7,
+                                237
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "nailgun",
+            "label": "Nail Gun",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Nail Gun",
+                "rightLabel": null,
+                "icon": null,
+                "command": "nailgun",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@heists@fleeca_bank@drilling",
+                        "name": "drill_straight_end",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_tool_nailgun",
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                90
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "newsbmic",
+            "label": "News Boom Microphone",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "News Boom Microphone",
+                "rightLabel": null,
+                "icon": null,
+                "command": "newsbmic",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "missfra1",
+                        "name": "mcs2_crew_idle_m_boom",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_v_bmike_01",
+                            "position": [
+                                0,
+                                0,
+                                0
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "newscam",
+            "label": "News Camera",
+            "section": "PropEmotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "News Camera",
+                "rightLabel": null,
+                "icon": null,
+                "command": "newscam",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "missfinale_c2mcs_1",
+                        "name": "fin_c2_mcs_1_camman",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 28422,
+                            "model": "prop_v_cam_01",
+                            "position": [
+                                0,
+                                0.03,
+                                0.01
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                0
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "newsmic",
+            "label": "News Microphone",
+            "section": "PropEmotes",
+            "duplicateOf": "Coupe Champagne",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "News Microphone",
+                "rightLabel": null,
+                "icon": null,
+                "command": "newsmic",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@heists@humane_labs@finale@keycards",
+                        "name": "ped_a_enter_loop",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 4154,
+                            "model": "p_ing_microphonel_01",
+                            "position": [
+                                0,
+                                -0.02,
+                                0.11
+                            ],
+                            "rotation": [
+                                0,
+                                0,
+                                60
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "newspaper",
+            "label": "Newspaper",
+            "section": "PropEmotes",
+            "duplicateOf": "Journal #3",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Newspaper",
+                "rightLabel": null,
+                "icon": null,
+                "command": "newspaper",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "amb@world_human_clipboard@male@idle_a",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 60309,
+                            "model": "prop_cliff_paper",
+                            "position": [
+                                0.097,
+                                -0.028,
+                                -0.017
+                            ],
+                            "rotation": [
+                                107.4008,
+                                3.2712,
+                                -10.508
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "newspaper2",
+            "label": "Newspaper 2",
+            "section": "PropEmotes",
+            "duplicateOf": "Journal #3",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Newspaper 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "newspaper2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "amb@world_human_clipboard@male@idle_a",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 60309,
+                            "model": "ng_proc_paper_news_quik",
+                            "position": [
+                                0.159,
+                                0.029,
+                                -0.01
+                            ],
+                            "rotation": [
+                                90.9998,
+                                0.0087,
+                                0.5
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "key": "newspaper3",
+            "label": "Newspaper 3",
+            "section": "PropEmotes",
+            "duplicateOf": "Journal #3",
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Newspaper 3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "newspaper3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "amb@world_human_clipboard@male@idle_a",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    },
+                    "props": [
+                        {
+                            "bone": 60309,
+                            "model": "ng_proc_paper_news_rag",
+                            "position": [
+                                0.176,
+                                -0.0007,
+                                0.02
+                            ],
+                            "rotation": [
+                                99.8306,
+                                3.2841,
+                                -4.7185
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    ]
+}

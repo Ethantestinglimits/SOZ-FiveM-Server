@@ -1,0 +1,347 @@
+{
+    "id": "dances-02",
+    "title": "Danses 2/2 (dj11 → technodance4)",
+    "source": "rpemotes-reborn",
+    "entries": [
+        {
+            "key": "dj11",
+            "label": "DJ 11",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [
+                "⚠ contexte suggestif possible: mini@strip_club@idles@dj@idle_04 idle_04"
+            ],
+            "item": {
+                "type": "animation",
+                "name": "DJ 11",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dj11",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "mini@strip_club@idles@dj@idle_04",
+                        "name": "idle_04",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dj12",
+            "label": "DJ 12",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [
+                "⚠ contexte suggestif possible: mini@strip_club@idles@dj@idle_02 idle_02"
+            ],
+            "item": {
+                "type": "animation",
+                "name": "DJ 12",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dj12",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "mini@strip_club@idles@dj@idle_02",
+                        "name": "idle_02",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dj2",
+            "label": "DJ 2",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "DJ 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dj2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@djs@solomun@",
+                        "name": "sol_idle_ctr_mid_a_sol",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dj3",
+            "label": "DJ 3",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "DJ 3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dj3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@djs@solomun@",
+                        "name": "sol_dance_l_sol",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dj4",
+            "label": "DJ 4",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "DJ 4",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dj4",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@djs@black_madonna@",
+                        "name": "dance_b_idle_a_blamadon",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dj5",
+            "label": "DJ 5",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "DJ 5",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dj5",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@djs@dixon@",
+                        "name": "dixn_idle_cntr_a_dix",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dj6",
+            "label": "DJ 6",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "DJ 6",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dj6",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@djs@dixon@",
+                        "name": "dixn_idle_cntr_b_dix",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dj7",
+            "label": "DJ 7",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "DJ 7",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dj7",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@djs@dixon@",
+                        "name": "dixn_idle_cntr_g_dix",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dj8",
+            "label": "DJ 8",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "DJ 8",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dj8",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@djs@dixon@",
+                        "name": "dixn_idle_cntr_gb_dix",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "dj9",
+            "label": "DJ 9",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "DJ 9",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dj9",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@djs@dixon@",
+                        "name": "dixn_sync_cntr_j_dix",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "salsa",
+            "label": "Salso Roll",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Salso Roll",
+                "rightLabel": null,
+                "icon": null,
+                "command": "salsa",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_player_intuppersalsa_roll",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "technodance",
+            "label": "Techno Dance",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Techno Dance",
+                "rightLabel": null,
+                "icon": null,
+                "command": "technodance",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@techno_karate@",
+                        "name": "high_left_up",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "technodance2",
+            "label": "Techno Dance 2",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Techno Dance 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "technodance2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@techno_karate@",
+                        "name": "med_center_up",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "technodance4",
+            "label": "Techno Dance 4",
+            "section": "Dances",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Techno Dance 4",
+                "rightLabel": null,
+                "icon": null,
+                "command": "technodance4",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@mini@dance@dance_solo@techno_karate@",
+                        "name": "high_right_up",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}

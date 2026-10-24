@@ -1,0 +1,119 @@
+{
+    "id": "moods",
+    "title": "Humeurs",
+    "source": "rpemotes-reborn",
+    "entries": [
+        {
+            "key": "High",
+            "label": "High",
+            "section": "Expressions",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "mood",
+                "name": "High",
+                "mood": "mood_dancing_high_1",
+                "command": "High",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Joyful2",
+            "label": "Joyful 2",
+            "section": "Expressions",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "mood",
+                "name": "Joyful 2",
+                "mood": "mood_dancing_low_2",
+                "command": "Joyful2",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Mouthbreather2",
+            "label": "Mouthbreather 2",
+            "section": "Expressions",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "mood",
+                "name": "Mouthbreather 2",
+                "mood": "smoking_inhale_1",
+                "command": "Mouthbreather2",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Scheme",
+            "label": "Scheme",
+            "section": "Expressions",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "mood",
+                "name": "Scheme",
+                "mood": "mood_dancing_high_2",
+                "command": "Scheme",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Smug2",
+            "label": "Smug 2",
+            "section": "Expressions",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "mood",
+                "name": "Smug 2",
+                "mood": "mood_dancing_medium_4",
+                "command": "Smug2",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Talking",
+            "label": "Talking",
+            "section": "Expressions",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "mood",
+                "name": "Talking",
+                "mood": "mood_talking_1",
+                "command": "Talking",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Twitch",
+            "label": "Twitch",
+            "section": "Expressions",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "mood",
+                "name": "Twitch",
+                "mood": "mood_skydive_1",
+                "command": "Twitch",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Weird3",
+            "label": "Weird 3",
+            "section": "Expressions",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "mood",
+                "name": "Weird 3",
+                "mood": "melee_effort_1",
+                "command": "Weird3",
+                "source": "rpemotes-reborn"
+            }
+        }
+    ]
+}

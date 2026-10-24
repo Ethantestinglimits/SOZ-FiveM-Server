@@ -1,0 +1,1523 @@
+{
+    "id": "emotes-02",
+    "title": "Emotes 2/6 (crouchreach2 → idle8)",
+    "source": "rpemotes-reborn",
+    "entries": [
+        {
+            "key": "crouchreach2",
+            "label": "Crouch & Reach 2",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [
+                "startDelay: 700"
+            ],
+            "item": {
+                "type": "animation",
+                "name": "Crouch & Reach 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "crouchreach2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@scripted@npc@mission@pln_ig4_cargo@",
+                        "name": "line_5_dax",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "cuffedback",
+            "label": "Handcuffed - Back",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [
+                "exit rpemotes: breakfreeback"
+            ],
+            "item": {
+                "type": "animation",
+                "name": "Handcuffed - Back",
+                "rightLabel": null,
+                "icon": null,
+                "command": "cuffedback",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "mp_arresting",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "cuffedfront",
+            "label": "Handcuffed - Front",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [
+                "exit rpemotes: breakfreefont"
+            ],
+            "item": {
+                "type": "animation",
+                "name": "Handcuffed - Front",
+                "rightLabel": null,
+                "icon": null,
+                "command": "cuffedfront",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@move_m@prisoner_cuffed",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "curtsy",
+            "label": "Curtsy",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Curtsy",
+                "rightLabel": null,
+                "icon": null,
+                "command": "curtsy",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_player_intcelebrationpaired@f_f_sarcastic",
+                        "name": "sarcastic_left",
+                        "options": {}
+                    }
+                }
+            }
+        },
+        {
+            "key": "cutthroat2",
+            "label": "Cut Throat 2",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Cut Throat 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "cutthroat2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_player_intcelebrationfemale@cut_throat",
+                        "name": "cut_throat",
+                        "options": {}
+                    }
+                }
+            }
+        },
+        {
+            "key": "damn2",
+            "label": "Damn 2",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Damn 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "damn2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@am_hold_up@male",
+                        "name": "shoplift_mid",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        },
+                        "duration": 1000
+                    }
+                }
+            }
+        },
+        {
+            "key": "dead2",
+            "label": "Play Dead Act",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Play Dead Act",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dead2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@scripted@data_leak@fixf_fin_ig2_johnnyguns_wounded@",
+                        "name": "enter",
+                        "options": {}
+                    }
+                }
+            }
+        },
+        {
+            "key": "devestated",
+            "label": "Devestated",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Devestated",
+                "rightLabel": null,
+                "icon": null,
+                "command": "devestated",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "misscarsteal2car_stolen",
+                        "name": "chad_car_stolen_reaction",
+                        "options": {}
+                    }
+                }
+            }
+        },
+        {
+            "key": "dispenser",
+            "label": "Dispenser",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dispenser",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dispenser",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "mini@sprunk",
+                        "name": "plyr_buy_drink_pt1",
+                        "options": {}
+                    }
+                }
+            }
+        },
+        {
+            "key": "dock",
+            "label": "Dock",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Dock",
+                "rightLabel": null,
+                "icon": null,
+                "command": "dock",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_player_intincardockstd@rds@",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "earpiece",
+            "label": "Earpiece",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Earpiece",
+                "rightLabel": null,
+                "icon": null,
+                "command": "earpiece",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "cellphone@",
+                        "name": "cellphone_call_listen_base",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "elbow",
+            "label": "Window Elbow",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Window Elbow",
+                "rightLabel": null,
+                "icon": null,
+                "command": "elbow",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@veh@lowrider@std@ds@arm@base",
+                        "name": "sit_low_lowdoor",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "facepalm2",
+            "label": "Facepalm 2",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Facepalm 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "facepalm2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_player_intcelebrationfemale@face_palm",
+                        "name": "face_palm",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        },
+                        "duration": 8000
+                    }
+                }
+            }
+        },
+        {
+            "key": "facepalm3",
+            "label": "Facepalm 3",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Facepalm 3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "facepalm3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "missminuteman_1ig_2",
+                        "name": "tasered_2",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        },
+                        "duration": 8000
+                    }
+                }
+            }
+        },
+        {
+            "key": "facepalm4",
+            "label": "Facepalm 4",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Facepalm 4",
+                "rightLabel": null,
+                "icon": null,
+                "command": "facepalm4",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_player_intupperface_palm",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "fallasleep2",
+            "label": "Fall Asleep 2",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Fall Asleep 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "fallasleep2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "mp_sleep",
+                        "name": "sleep_loopfemale",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "fallover",
+            "label": "Fall Over",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Fall Over",
+                "rightLabel": null,
+                "icon": null,
+                "command": "fallover",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "random@drunk_driver_1",
+                        "name": "drunk_fall_over",
+                        "options": {}
+                    }
+                }
+            }
+        },
+        {
+            "key": "fallover3",
+            "label": "Fall Over 3",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Fall Over 3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "fallover3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "mp_suicide",
+                        "name": "pill",
+                        "options": {}
+                    }
+                }
+            }
+        },
+        {
+            "key": "fallover4",
+            "label": "Fall Over 4",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Fall Over 4",
+                "rightLabel": null,
+                "icon": null,
+                "command": "fallover4",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "friends@frf@ig_2",
+                        "name": "knockout_plyr",
+                        "options": {}
+                    }
+                }
+            }
+        },
+        {
+            "key": "fallover5",
+            "label": "Fall Over 5",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Fall Over 5",
+                "rightLabel": null,
+                "icon": null,
+                "command": "fallover5",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@gangops@hostage@",
+                        "name": "victim_fail",
+                        "options": {}
+                    }
+                }
+            }
+        },
+        {
+            "key": "fightme",
+            "label": "Fight Me",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Fight Me",
+                "rightLabel": null,
+                "icon": null,
+                "command": "fightme",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@deathmatch_intros@unarmed",
+                        "name": "intro_male_unarmed_c",
+                        "options": {}
+                    }
+                }
+            }
+        },
+        {
+            "key": "fightme2",
+            "label": "Fight Me 2",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Fight Me 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "fightme2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@deathmatch_intros@unarmed",
+                        "name": "intro_male_unarmed_e",
+                        "options": {}
+                    }
+                }
+            }
+        },
+        {
+            "key": "finger",
+            "label": "Finger",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Finger",
+                "rightLabel": null,
+                "icon": null,
+                "command": "finger",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_player_intselfiethe_bird",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "finger2",
+            "label": "Finger 2",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Finger 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "finger2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_player_intupperfinger",
+                        "name": "idle_a_fp",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "fishdance",
+            "label": "Fish Dance",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Fish Dance",
+                "rightLabel": null,
+                "icon": null,
+                "command": "fishdance",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_player_intupperfind_the_fish",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "flipoff",
+            "label": "Flip Off",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Flip Off",
+                "rightLabel": null,
+                "icon": null,
+                "command": "flipoff",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@arena@celeb@podium@no_prop@",
+                        "name": "flip_off_a_1st",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "flipoff2",
+            "label": "Flip Off 2",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Flip Off 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "flipoff2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@arena@celeb@podium@no_prop@",
+                        "name": "flip_off_c_1st",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "foldarms",
+            "label": "Fold Arms",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Fold Arms",
+                "rightLabel": null,
+                "icon": null,
+                "command": "foldarms",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@business@bgen@bgen_no_work@",
+                        "name": "stand_phone_phoneputdown_idle_nowork",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "foldarms2",
+            "label": "Fold Arms 2",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Fold Arms 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "foldarms2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@amb@nightclub@peds@",
+                        "name": "rcmme_amanda1_stand_loop_cop",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "gangsign2",
+            "label": "Gang Sign 2",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Gang Sign 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "gangsign2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "mp_player_int_uppergang_sign_b",
+                        "name": "mp_player_int_gang_sign_b",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "gangsign3",
+            "label": "Gang Sign 3",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Gang Sign 3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "gangsign3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "amb@code_human_in_car_mp_actions@gang_sign_b@low@ps@base",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "gangsign4",
+            "label": "Gang Sign 4",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Gang Sign 4",
+                "rightLabel": null,
+                "icon": null,
+                "command": "gangsign4",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "amb@code_human_in_car_mp_actions@v_sign@std@rds@base",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "grieve",
+            "label": "Grieve The Dead",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Grieve The Dead",
+                "rightLabel": null,
+                "icon": null,
+                "command": "grieve",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@miss@low@fin@vagos@",
+                        "name": "idle_ped05",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "handshake2",
+            "label": "Handshake 2",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Handshake 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "handshake2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "mp_ped_interaction",
+                        "name": "handshake_guy_b",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        },
+                        "duration": 3000
+                    }
+                }
+            }
+        },
+        {
+            "key": "handsup",
+            "label": "Hands Up",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Hands Up",
+                "rightLabel": null,
+                "icon": null,
+                "command": "handsup",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "missminuteman_1ig_2",
+                        "name": "handsup_base",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "handsup2",
+            "label": "Hands Up 2",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Hands Up 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "handsup2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_player_intuppersurrender",
+                        "name": "idle_a_fp",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "handsup3",
+            "label": "Hands Up 3",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Hands Up 3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "handsup3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_rollarcoaster",
+                        "name": "hands_up_idle_a_player_one",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "handsup4",
+            "label": "Hands Up 4",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Hands Up 4",
+                "rightLabel": null,
+                "icon": null,
+                "command": "handsup4",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@scripted@bty2@ig2_beat_target@male@",
+                        "name": "leaning_idle_bounty",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "handsup5",
+            "label": "Hands Up 5",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Hands Up 5",
+                "rightLabel": null,
+                "icon": null,
+                "command": "handsup5",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@scripted@bty2@ig2_beat_target@male@",
+                        "name": "standing_idle_bounty",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "headbutt",
+            "label": "Headbutt",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Headbutt",
+                "rightLabel": null,
+                "icon": null,
+                "command": "headbutt",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "melee@unarmed@streamed_variations",
+                        "name": "plyr_takedown_front_headbutt",
+                        "options": {}
+                    }
+                }
+            }
+        },
+        {
+            "key": "hiking",
+            "label": "Hiking",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Hiking",
+                "rightLabel": null,
+                "icon": null,
+                "command": "hiking",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "move_m@hiking",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "hunched",
+            "label": "Hunched",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [
+                "exit rpemotes: getup2"
+            ],
+            "item": {
+                "type": "animation",
+                "name": "Hunched",
+                "rightLabel": null,
+                "icon": null,
+                "command": "hunched",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "missexile3",
+                        "name": "ex03_train_roof_idle",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle",
+            "label": "Idle",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Idle",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@heists@heist_corona@team_idles@male_a",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle10",
+            "label": "Idle 10",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [
+                "⚠ contexte suggestif possible: mp_move@prostitute@m@french idle"
+            ],
+            "item": {
+                "type": "animation",
+                "name": "Idle 10",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle10",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "mp_move@prostitute@m@french",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true,
+                            "freezeLastFrame": true,
+                            "onlyUpperBody": true,
+                            "enablePlayerControl": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle11",
+            "label": "Idle 11",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Idle 11",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle11",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "random@countrysiderobbery",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle12",
+            "label": "Idle 12",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Idle 12",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle12",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "mp_corona_idles@female_b@base",
+                        "name": "base",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle13",
+            "label": "Idle 13",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Idle 13",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle13",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "mp_corona_idles@female_c@base",
+                        "name": "base",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle14",
+            "label": "Idle 14",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Idle 14",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle14",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "random@countrysiderobbery",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle15",
+            "label": "Idle 15",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Idle 15",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle15",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim_heist@arcade_combined@",
+                        "name": "female_hold_arm@_base_base",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle16",
+            "label": "Idle 16",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Idle 16",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle16",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim_heist@arcade_combined@",
+                        "name": "ped_female@_stand@_02a@_base_base",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle17",
+            "label": "Idle 17",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Idle 17",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle17",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim_heist@arcade_combined@",
+                        "name": "amb_world_human_hang_out_street_female_hold_arm_idle_b",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle18",
+            "label": "Idle 18",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [
+                "⚠ contexte suggestif possible: mp_move@prostitute@m@hooker idle"
+            ],
+            "item": {
+                "type": "animation",
+                "name": "Idle 18",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle18",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "mp_move@prostitute@m@hooker",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle19",
+            "label": "Idle 19",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Idle 19",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle19",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "missdocksshowoffcar@base",
+                        "name": "base_4",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle2",
+            "label": "Idle 2",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Idle 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle2",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@heists@heist_corona@team_idles@female_a",
+                        "name": "idle",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle3",
+            "label": "Idle 3",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [
+                "⚠ contexte suggestif possible: anim@heists@humane_labs@finale@strip_club ped_b_celebrate_loop"
+            ],
+            "item": {
+                "type": "animation",
+                "name": "Idle 3",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle3",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@heists@humane_labs@finale@strip_club",
+                        "name": "ped_b_celebrate_loop",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle4",
+            "label": "Idle 4",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Idle 4",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle4",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_celebration@idles@female",
+                        "name": "celebration_idle_f_a",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle5",
+            "label": "Idle 5",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Idle 5",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle5",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_corona_idles@female_b@idle_a",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle6",
+            "label": "Idle 6",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Idle 6",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle6",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_corona_idles@male_c@idle_a",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle7",
+            "label": "Idle 7",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Idle 7",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle7",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "anim@mp_corona_idles@male_d@idle_a",
+                        "name": "idle_a",
+                        "options": {
+                            "repeat": true
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "key": "idle8",
+            "label": "Idle 8",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "animation",
+                "name": "Idle 8",
+                "rightLabel": null,
+                "icon": null,
+                "command": "idle8",
+                "source": "rpemotes-reborn",
+                "animation": {
+                    "base": {
+                        "dictionary": "amb@world_human_hang_out_street@male_b@idle_a",
+                        "name": "idle_b",
+                        "options": {}
+                    }
+                }
+            }
+        }
+    ]
+}

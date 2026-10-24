@@ -1,0 +1,721 @@
+{
+    "id": "walks",
+    "title": "Démarches",
+    "source": "rpemotes-reborn",
+    "entries": [
+        {
+            "key": "Bigfoot",
+            "label": "Bigfoot",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Bigfoot",
+                "walk": "move_characters@orleans@core@",
+                "command": "Bigfoot",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Brave3",
+            "label": "Brave 3",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Brave 3",
+                "walk": "move_m@brave@b",
+                "command": "Brave3",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Fat3",
+            "label": "Fat & Bulky",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Fat & Bulky",
+                "walk": "move_m@fat@bulky",
+                "command": "Fat3",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Gangsterj",
+            "label": "Gangster 10",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Gangster 10",
+                "walk": "move_m@gangster@var_g",
+                "command": "Gangsterj",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Gangsterk",
+            "label": "Gangster 11",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Gangster 11",
+                "walk": "move_m@gangster@var_h",
+                "command": "Gangsterk",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Gangsterm",
+            "label": "Gangster 13",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Gangster 13",
+                "walk": "move_m@gangster@var_j",
+                "command": "Gangsterm",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Generic",
+            "label": "Generic Male",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Generic Male",
+                "walk": "move_m@generic",
+                "command": "Generic",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Generic2",
+            "label": "Generic Female",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Generic Female",
+                "walk": "move_f@generic",
+                "command": "Generic2",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Guard",
+            "label": "Guard",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Guard",
+                "walk": "move_m@prison_gaurd",
+                "command": "Guard",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Hipster",
+            "label": "Hipster",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Hipster",
+                "walk": "move_m@hipster@a",
+                "command": "Hipster",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Hobo2",
+            "label": "Hobo 2",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Hobo 2",
+                "walk": "move_m@hobo@b",
+                "command": "Hobo2",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Hurry",
+            "label": "Hurry Male",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Hurry Male",
+                "walk": "move_m@hurry@a",
+                "command": "Hurry",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Hurry3",
+            "label": "Hurry Female 2",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Hurry Female 2",
+                "walk": "move_f@hurry@b",
+                "command": "Hurry3",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Hurry4",
+            "label": "Hurry 4",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Hurry 4",
+                "walk": "move_m@hurry@b",
+                "command": "Hurry4",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Hurry5",
+            "label": "Hurry 5",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Hurry 5",
+                "walk": "move_m@hurry@c",
+                "command": "Hurry5",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Injured",
+            "label": "Injured",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Injured",
+                "walk": "move_m@injured",
+                "command": "Injured",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Injured2",
+            "label": "Injured 2 - Female",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Injured 2 - Female",
+                "walk": "move_f@injured",
+                "command": "Injured2",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Intimidation",
+            "label": "Intimidation",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Intimidation",
+                "walk": "move_m@intimidation@1h",
+                "command": "Intimidation",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Intimidation2",
+            "label": "Intimidation 2",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Intimidation 2",
+                "walk": "move_m@intimidation@cop@unarmed",
+                "command": "Intimidation2",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Intimidation3",
+            "label": "Intimidation 3",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Intimidation 3",
+                "walk": "move_m@intimidation@unarmed",
+                "command": "Intimidation3",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Janitor2",
+            "label": "Janitor 2",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Janitor 2",
+                "walk": "move_p_m_zero_slow",
+                "command": "Janitor2",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Jimmy",
+            "label": "Jimmy",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Jimmy",
+                "walk": "move_characters@jimmy",
+                "command": "Jimmy",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Jog",
+            "label": "Jog",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Jog",
+                "walk": "move_m@jog@",
+                "command": "Jog",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Lamar",
+            "label": "Lamar",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Lamar",
+                "walk": "move_characters@lamar",
+                "command": "Lamar",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Lamar2",
+            "label": "Lamar 2",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Lamar 2",
+                "walk": "anim_group_move_lemar_alley",
+                "command": "Lamar2",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Lester2",
+            "label": "Lester 2",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Lester 2",
+                "walk": "move_lester_caneup",
+                "command": "Lester2",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Michael",
+            "label": "Michael",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Michael",
+                "walk": "move_ped_bucket",
+                "command": "Michael",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Money",
+            "label": "Money",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Money",
+                "walk": "move_m@money",
+                "command": "Money",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Muscle",
+            "label": "Muscle",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Muscle",
+                "walk": "move_m@muscle@a",
+                "command": "Muscle",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Nervous",
+            "label": "Nervous",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Nervous",
+                "walk": "move_characters@jimmy@nervous@",
+                "command": "Nervous",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Paramedic",
+            "label": "Paramedic",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Paramedic",
+                "walk": "move_paramedic",
+                "command": "Paramedic",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Patricia",
+            "label": "Patricia",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Patricia",
+                "walk": "move_characters@patricia",
+                "command": "Patricia",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Ron",
+            "label": "Ron",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Ron",
+                "walk": "move_characters@ron",
+                "command": "Ron",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Runner",
+            "label": "Runner",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Runner",
+                "walk": "female_fast_runner",
+                "command": "Runner",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Sad2",
+            "label": "Sad Male 2",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Sad Male 2",
+                "walk": "move_m@sad@b",
+                "command": "Sad2",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Sad3",
+            "label": "Sad Male 3",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Sad Male 3",
+                "walk": "move_m@sad@c",
+                "command": "Sad3",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Sad4",
+            "label": "Sad Female",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Sad Female",
+                "walk": "move_f@sad@a",
+                "command": "Sad4",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Sad5",
+            "label": "Sad Female 2",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Sad Female 2",
+                "walk": "move_f@sad@b",
+                "command": "Sad5",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Sassy2",
+            "label": "Sassy 2",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Sassy 2",
+                "walk": "move_f@sassy",
+                "command": "Sassy2",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Slow",
+            "label": "Slow",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Slow",
+                "walk": "move_characters@jimmy@slow@",
+                "command": "Slow",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Swagger2",
+            "label": "Swagger 2",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Swagger 2",
+                "walk": "move_m@swagger@b",
+                "command": "Swagger2",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Tense",
+            "label": "Tense",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Tense",
+                "walk": "move_action@generic@core",
+                "command": "Tense",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Toolbelt",
+            "label": "Toolbelt Male",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Toolbelt Male",
+                "walk": "move_m@tool_belt@a",
+                "command": "Toolbelt",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Toolbelt2",
+            "label": "Toolbelt Female",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Toolbelt Female",
+                "walk": "move_f@tool_belt@a",
+                "command": "Toolbelt2",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Tracey",
+            "label": "Tracey",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Tracey",
+                "walk": "move_characters@tracey",
+                "command": "Tracey",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Trash",
+            "label": "Trash",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Trash",
+                "walk": "clipset@move@trash_fast_turn",
+                "command": "Trash",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Trash2",
+            "label": "Trash 2",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Trash 2",
+                "walk": "missfbi4prepp1_garbageman",
+                "command": "Trash2",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Trevor",
+            "label": "Trevor",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Trevor",
+                "walk": "move_p_m_two",
+                "command": "Trevor",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Veryslow",
+            "label": "Very Slow",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Very Slow",
+                "walk": "move_m@leaf_blower",
+                "command": "Veryslow",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Wide",
+            "label": "Wide",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Wide",
+                "walk": "move_m@bag",
+                "command": "Wide",
+                "source": "rpemotes-reborn"
+            }
+        },
+        {
+            "key": "Zombie",
+            "label": "Zombie",
+            "section": "Walks",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "walk",
+                "name": "Zombie",
+                "walk": "clipset@anim@ingame@move_m@zombie@core",
+                "command": "Zombie",
+                "source": "rpemotes-reborn"
+            }
+        }
+    ]
+}
