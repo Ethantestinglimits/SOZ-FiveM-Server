@@ -32,6 +32,13 @@ for (const m of sozConfig.matchAll(/name: '([^']+)',\s*rightLabel[\s\S]*?diction
 for (const m of sozConfig.matchAll(/dictionary: '([^']+)',\s*name: '([^']+)'/g)) {
     if (!sozAnims.has(`${m[1]}|${m[2]}`)) sozAnims.set(`${m[1]}|${m[2]}`, '?');
 }
+const sozAnimsWithProps = new Map();
+for (const m of sozConfig.matchAll(
+    /name: '([^']+)',\s*rightLabel[\s\S]*?dictionary: '([^']+)',\s*name: '([^']+)'[\s\S]*?(?=type: '(?:animation|scenario|category)'|$)/g
+)) {
+    const models = [...m[0].matchAll(/model: '([^']+)'/g)].map(x => x[1]).sort().join(',');
+    sozAnimsWithProps.set(`${m[2]}|${m[3]}|${models}`, m[1]);
+}
 const sozScenarios = new Set([...sozConfig.matchAll(/scenario: \{\s*name: '([^']+)'/g)].map(m => m[1]));
 const sozMoods = new Set([...sozConfig.matchAll(/mood: '([^']+)'/g)].map(m => m[1].toLowerCase()));
 const sozWalks = new Set([...sozConfig.matchAll(/walk: '([^']+)'/g)].map(m => m[1].toLowerCase()));
@@ -131,6 +138,9 @@ function convertAnim(section, e) {
 
     const duplicate = sozAnims.get(`${dict}|${clip}`);
     if (duplicate && !opts.Prop) return exclude(section, e, 'duplicate-soz', { label, soz: duplicate });
+    const models = [opts.Prop, opts.SecondProp].filter(Boolean).sort().join(',');
+    const duplicateWithProps = opts.Prop && sozAnimsWithProps.get(`${dict}|${clip}|${models}`);
+    if (duplicateWithProps) return exclude(section, e, 'duplicate-soz', { label, soz: duplicateWithProps });
 
     let flag = resolveFlag(opts.onFootFlag ?? opts.Flag);
     if (flag === null) flag = opts.EmoteMoving ? 51 : opts.EmoteLoop ? 1 : 0;
