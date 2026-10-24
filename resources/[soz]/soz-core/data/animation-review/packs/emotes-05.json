@@ -63,7 +63,7 @@
             "notes": [
                 "exit rpemotes: getup",
                 "startDelay: 900",
-                "⚠ proche de SOZ (même dict) : Triste par terre"
+                "⚠ proche de SOZ (même dict) : Tristesse › Triste par terre"
             ],
             "item": {
                 "type": "animation",
@@ -585,7 +585,7 @@
             "section": "Emotes",
             "duplicateOf": null,
             "notes": [
-                "⚠ proche de SOZ (même dict) : « Shhht » bourré, Rire #1, Backflip, Capoeira +5"
+                "⚠ proche de SOZ (même dict) : « Shhht » bourré, Joie › Rire #1, Backflip, Capoeira +5"
             ],
             "item": {
                 "type": "animation",
@@ -609,7 +609,7 @@
             "section": "Emotes",
             "duplicateOf": null,
             "notes": [
-                "⚠ proche de SOZ (même dict) : « Shhht » bourré, Rire #1, Backflip, Capoeira +5"
+                "⚠ proche de SOZ (même dict) : « Shhht » bourré, Joie › Rire #1, Backflip, Capoeira +5"
             ],
             "item": {
                 "type": "animation",
@@ -714,7 +714,7 @@
             "section": "Emotes",
             "duplicateOf": null,
             "notes": [
-                "⚠ proche de SOZ (même dict) : « Shhht » bourré, Rire #1, Backflip, Capoeira +5"
+                "⚠ proche de SOZ (même dict) : « Shhht » bourré, Joie › Rire #1, Backflip, Capoeira +5"
             ],
             "item": {
                 "type": "animation",
