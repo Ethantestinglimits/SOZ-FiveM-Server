@@ -163,50 +163,49 @@ export const Moods: MoodConfigList = [
     { name: 'Viser', mood: 'mood_aiming_1' },
 ];
 
-export const Animations: AnimationConfigList = [   
-
+export const Animations: AnimationConfigList = [
     // Gestures category
 
-{
-    type: 'category',
-    name: 'Gestes',
-    items: [
-        {
-            type: 'animation',
-            name: 'Se secouer',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'move_m@_idles@shake_off',
-                    name: 'shakeoff_1',
+    {
+        type: 'category',
+        name: 'Gestes',
+        items: [
+            {
+                type: 'animation',
+                name: 'Se secouer',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'move_m@_idles@shake_off',
+                        name: 'shakeoff_1',
+                    },
                 },
             },
-        },        
-        {
-            type: 'animation',
-            name: 'Moi',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'gestures@f@standing@casual',
-                    name: 'gesture_me_hard',
+            {
+                type: 'animation',
+                name: 'Moi',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'gestures@f@standing@casual',
+                        name: 'gesture_me_hard',
+                    },
                 },
             },
-        },        
-        {
-            type: 'animation',
-            name: 'Tousser',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'timetable@gardener@smoking_joint',
-                    name: 'idle_cough',
+            {
+                type: 'animation',
+                name: 'Tousser',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'timetable@gardener@smoking_joint',
+                        name: 'idle_cough',
+                    },
                 },
             },
-        },        
             {
                 type: 'animation',
                 name: "Briquet en l'air",
@@ -232,40 +231,40 @@ export const Animations: AnimationConfigList = [
                         },
                     ],
                 },
-            },        
-        {
-            type: 'animation',
-            name: 'Baisser la tête',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'mp_sleep',
-                    name: 'sleep_loop',
-                    options: {
-                        freezeLastFrame: true,
-                        onlyUpperBody: true,
-                        enablePlayerControl: true,
-                        repeat: true,
+            },
+            {
+                type: 'animation',
+                name: 'Baisser la tête',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'mp_sleep',
+                        name: 'sleep_loop',
+                        options: {
+                            freezeLastFrame: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            repeat: true,
+                        },
                     },
                 },
             },
-        },
-                    {
-                        type: 'animation',
-                        name: 'Impatient',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'oddjobs@bailbond_surf_farm',
-                                name: 'idle_a',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+            {
+                type: 'animation',
+                name: 'Impatient',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'oddjobs@bailbond_surf_farm',
+                        name: 'idle_a',
+                        options: {
+                            repeat: true,
                         },
-                    },       
+                    },
+                },
+            },
             {
                 type: 'animation',
                 name: 'Circulation',
@@ -288,10 +287,10 @@ export const Animations: AnimationConfigList = [
                         },
                     ],
                 },
-            },                   
-{
-    type: 'animation',
-    name: 'Cherche au sol',
+            },
+            {
+                type: 'animation',
+                name: 'Cherche au sol',
                 rightLabel: null,
                 icon: null,
                 animation: {
@@ -475,7 +474,7 @@ export const Animations: AnimationConfigList = [
                 rightLabel: null,
                 icon: null,
                 event: ClientEvent.TAKE_DOWN,
-            },           
+            },
             {
                 type: 'category',
                 name: 'Grossier',
@@ -863,7 +862,7 @@ export const Animations: AnimationConfigList = [
                         },
                     },
                 },
-            },                          
+            },
             {
                 type: 'animation',
                 name: 'Bras croisés #1',
@@ -929,7 +928,7 @@ export const Animations: AnimationConfigList = [
                         name: 'giggle_a_player_a',
                     },
                 },
-            },     
+            },
             {
                 type: 'animation',
                 name: 'Aucune idée',
@@ -944,7 +943,7 @@ export const Animations: AnimationConfigList = [
                         },
                     },
                 },
-            },   
+            },
             {
                 type: 'animation',
                 name: 'Bro',
@@ -974,137 +973,137 @@ export const Animations: AnimationConfigList = [
                         },
                     },
                 },
-            }, 
-    ],
-},
+            },
+        ],
+    },
     // Positions category
 
     {
         type: 'category',
         name: 'Positions',
         items: [
-{
-        type: 'category',
-        name: 'Bras et mains',
-        items: [ 
             {
-                type: 'animation',
-                name: 'Main dans les poches (Sweat)',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'bzzz@animations@hands',
-                        name: 'bz_hands',
-                        options: {
-                            repeat: true,
-                            onlyUpperBody: true,
-                            enablePlayerControl: true,
-                            freezeLastFrame: true,
+                type: 'category',
+                name: 'Bras et mains',
+                items: [
+                    {
+                        type: 'animation',
+                        name: 'Main dans les poches (Sweat)',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'bzzz@animations@hands',
+                                name: 'bz_hands',
+                                options: {
+                                    repeat: true,
+                                    onlyUpperBody: true,
+                                    enablePlayerControl: true,
+                                    freezeLastFrame: true,
+                                },
+                            },
                         },
                     },
-                },         
-            },                                
-            {
-                type: 'animation',
-                name: 'Tenir son sac',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'move_p_m_zero_rucksack',
-                        name: 'idle',
-                    },
-                },
-            },
-            {
-                type: 'animation',
-                name: 'Mains sur le GPB',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'anim@male@holding_vest',
-                        name: 'holding_vest_clip',
-                        options: {
-                            repeat: true,
-                            onlyUpperBody: true,
-                            enablePlayerControl: true,
-                            freezeLastFrame: true,
+                    {
+                        type: 'animation',
+                        name: 'Tenir son sac',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'move_p_m_zero_rucksack',
+                                name: 'idle',
+                            },
                         },
                     },
-                },
-            },
-            {
-                type: 'animation',
-                name: 'Mains sur le GPB #2',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'anim@holding_side_vest',
-                        name: 'holding_side_vest_clip',
-                        options: {
-                            repeat: true,
-                            onlyUpperBody: true,
-                            enablePlayerControl: true,
-                            freezeLastFrame: true,
+                    {
+                        type: 'animation',
+                        name: 'Mains sur le GPB',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'anim@male@holding_vest',
+                                name: 'holding_vest_clip',
+                                options: {
+                                    repeat: true,
+                                    onlyUpperBody: true,
+                                    enablePlayerControl: true,
+                                    freezeLastFrame: true,
+                                },
+                            },
                         },
                     },
-                },
-            },
-            {
-                type: 'animation',
-                name: 'UwU',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'uwu@egirl',
-                        name: 'base',
-                        options: {
-                            repeat: true,
-                            onlyUpperBody: true,
-                            enablePlayerControl: true,
-                            freezeLastFrame: true,
+                    {
+                        type: 'animation',
+                        name: 'Mains sur le GPB #2',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'anim@holding_side_vest',
+                                name: 'holding_side_vest_clip',
+                                options: {
+                                    repeat: true,
+                                    onlyUpperBody: true,
+                                    enablePlayerControl: true,
+                                    freezeLastFrame: true,
+                                },
+                            },
                         },
                     },
-                },
-            },
-            {
-                type: 'animation',
-                name: 'Bras Croisés',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'anim@heists@heist_corona@single_team',
-                        name: 'single_team_loop_boss',
-                        options: {
-                            repeat: true,
-                            onlyUpperBody: true,
-                            enablePlayerControl: true,
+                    {
+                        type: 'animation',
+                        name: 'UwU',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'uwu@egirl',
+                                name: 'base',
+                                options: {
+                                    repeat: true,
+                                    onlyUpperBody: true,
+                                    enablePlayerControl: true,
+                                    freezeLastFrame: true,
+                                },
+                            },
                         },
                     },
-                },
-            },          
-            {
-                type: 'animation',
-                name: 'Cow Boy',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'amb@world_human_cop_idles@male@base',
-                        name: 'base',
-                        options: {
-                            repeat: true,
-                            onlyUpperBody: true,
-                            enablePlayerControl: true,
+                    {
+                        type: 'animation',
+                        name: 'Bras Croisés',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'anim@heists@heist_corona@single_team',
+                                name: 'single_team_loop_boss',
+                                options: {
+                                    repeat: true,
+                                    onlyUpperBody: true,
+                                    enablePlayerControl: true,
+                                },
+                            },
                         },
                     },
-                },
-            },  
+                    {
+                        type: 'animation',
+                        name: 'Cow Boy',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'amb@world_human_cop_idles@male@base',
+                                name: 'base',
+                                options: {
+                                    repeat: true,
+                                    onlyUpperBody: true,
+                                    enablePlayerControl: true,
+                                },
+                            },
+                        },
+                    },
                     {
                         type: 'animation',
                         name: 'Mains dans le dos',
@@ -1172,110 +1171,110 @@ export const Animations: AnimationConfigList = [
                                 },
                             },
                         },
-                    },                  
-            {
-                type: 'animation',
-                name: 'Ecouteur',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'cellphone@female',
-                        name: 'cellphone_call_listen_base',
-                        options: {
-                            repeat: true,
-                            onlyUpperBody: true,
-                            enablePlayerControl: true,
+                    },
+                    {
+                        type: 'animation',
+                        name: 'Ecouteur',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'cellphone@female',
+                                name: 'cellphone_call_listen_base',
+                                options: {
+                                    repeat: true,
+                                    onlyUpperBody: true,
+                                    enablePlayerControl: true,
+                                },
+                            },
                         },
                     },
-                },
+                    {
+                        type: 'animation',
+                        name: 'Holster',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'move_m@intimidation@cop@unarmed',
+                                name: 'idle',
+                                options: {
+                                    repeat: true,
+                                    onlyUpperBody: true,
+                                    enablePlayerControl: true,
+                                },
+                            },
+                        },
+                    },
+                    {
+                        type: 'animation',
+                        name: 'Police - Stop Holster (arme ou holster droite)',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'anim@hlstr_7360_hold',
+                                name: 'holster_stop',
+                                options: {
+                                    repeat: true,
+                                    onlyUpperBody: true,
+                                    enablePlayerControl: true,
+                                    freezeLastFrame: true,
+                                },
+                            },
+                        },
+                    },
+                ],
             },
-            {
-                type: 'animation',
-                name: 'Holster',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'move_m@intimidation@cop@unarmed',
-                        name: 'idle',
-                        options: {
-                            repeat: true,
-                            onlyUpperBody: true,
-                            enablePlayerControl: true,
-                        },
-                    },
-                },
-            },                                      
-            {
-                type: 'animation',
-                name: 'Police - Stop Holster (arme ou holster droite)',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'anim@hlstr_7360_hold',
-                        name: 'holster_stop',
-                        options: {
-                            repeat: true,
-                            onlyUpperBody: true,
-                            enablePlayerControl: true,
-                            freezeLastFrame: true,
-                        },
-                    },
-                },
-            },            
-        ],
-    },    
             {
                 type: 'category',
                 name: 'Debout',
                 items: [
-            {
-                type: 'animation',
-                name: 'Patient',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'move_characters@tracey@core@',
-                        name: 'idle',
-                        options: {
-                            repeat: true,
+                    {
+                        type: 'animation',
+                        name: 'Patient',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'move_characters@tracey@core@',
+                                name: 'idle',
+                                options: {
+                                    repeat: true,
+                                },
+                            },
                         },
                     },
-                },
-            },
-            {
-                type: 'animation',
-                name: 'Pensif',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'anim@amb@casino@hangout@ped_male@stand@02b@base',
-                        name: 'base',
-                        options: {
-                            repeat: true,
+                    {
+                        type: 'animation',
+                        name: 'Pensif',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'anim@amb@casino@hangout@ped_male@stand@02b@base',
+                                name: 'base',
+                                options: {
+                                    repeat: true,
+                                },
+                            },
                         },
                     },
-                },
-            },                     
-            {
-                type: 'animation',
-                name: 'Attendre',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'rcmjosh1',
-                        name: 'idle',
-                        options: {
-                            repeat: true,
-                        }                        
+                    {
+                        type: 'animation',
+                        name: 'Attendre',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'rcmjosh1',
+                                name: 'idle',
+                                options: {
+                                    repeat: true,
+                                },
+                            },
+                        },
                     },
-                },
-            },    
                     {
                         type: 'animation',
                         name: 'Attendre #2',
@@ -1290,7 +1289,7 @@ export const Animations: AnimationConfigList = [
                                 },
                             },
                         },
-                    },  
+                    },
                     {
                         type: 'animation',
                         name: 'Attendre #3',
@@ -1307,7 +1306,7 @@ export const Animations: AnimationConfigList = [
                                 },
                             },
                         },
-                    },  
+                    },
                     {
                         type: 'animation',
                         name: 'Attendre #4',
@@ -1322,8 +1321,8 @@ export const Animations: AnimationConfigList = [
                                 },
                             },
                         },
-                    },   
-                   {
+                    },
+                    {
                         type: 'animation',
                         name: 'Attendre #5',
                         rightLabel: null,
@@ -1337,67 +1336,67 @@ export const Animations: AnimationConfigList = [
                                 },
                             },
                         },
-                    },  
-       {
-            type: 'animation',
-            name: 'Attendre #6',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'anim@miss@low@fin@vagos@',
-                    name: 'idle_ped06',
-                    options: {
-                        repeat: true,
                     },
-                },
-            },
-        },              
-        {
-            type: 'animation',
-            name: 'Attendre #7',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'amb@world_human_hang_out_street@female_arms_crossed@base',
-                    name: 'base',
-                    options: {
-                        repeat: true,
+                    {
+                        type: 'animation',
+                        name: 'Attendre #6',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'anim@miss@low@fin@vagos@',
+                                name: 'idle_ped06',
+                                options: {
+                                    repeat: true,
+                                },
+                            },
+                        },
                     },
-                },
-            },
-        }, 
-        {
-            type: 'animation',
-            name: 'Attendre #8',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'misshair_shop@hair_dressers',
-                    name: 'keeper_base',
-                    options: {
-                        repeat: true,
+                    {
+                        type: 'animation',
+                        name: 'Attendre #7',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'amb@world_human_hang_out_street@female_arms_crossed@base',
+                                name: 'base',
+                                options: {
+                                    repeat: true,
+                                },
+                            },
+                        },
                     },
-                },
-            },
-        }, 
-        {
-            type: 'animation',
-            name: 'Attendre #9',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'timetable@tracy@ig_8@base',
-                    name: 'base',
-                    options: {
-                        repeat: true,
+                    {
+                        type: 'animation',
+                        name: 'Attendre #8',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'misshair_shop@hair_dressers',
+                                name: 'keeper_base',
+                                options: {
+                                    repeat: true,
+                                },
+                            },
+                        },
                     },
-                },
-            },
-        },                                                         
+                    {
+                        type: 'animation',
+                        name: 'Attendre #9',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'timetable@tracy@ig_8@base',
+                                name: 'base',
+                                options: {
+                                    repeat: true,
+                                },
+                            },
+                        },
+                    },
                     {
                         type: 'animation',
                         name: 'Bras croisés',
@@ -1414,7 +1413,7 @@ export const Animations: AnimationConfigList = [
                                 },
                             },
                         },
-                    },  
+                    },
                     {
                         type: 'animation',
                         name: 'Bras croisés #2',
@@ -1470,61 +1469,61 @@ export const Animations: AnimationConfigList = [
                                 name: 'pst_arrest_loop_cop',
                             },
                         },
-                    },                      
-            {
-                type: 'animation',
-                name: 'Police - Garde à Vous',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'airforce@attention',
-                        name: 'base',
-                        options: {
-                            repeat: true,
-                            onlyUpperBody: false,
-                            enablePlayerControl: false,
-                            freezeLastFrame: true,
+                    },
+                    {
+                        type: 'animation',
+                        name: 'Police - Garde à Vous',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'airforce@attention',
+                                name: 'base',
+                                options: {
+                                    repeat: true,
+                                    onlyUpperBody: false,
+                                    enablePlayerControl: false,
+                                    freezeLastFrame: true,
+                                },
+                            },
                         },
                     },
-                },
-            },            
-            {
-                type: 'animation',
-                name: 'Police - Repos',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'airforce@parade_rest',
-                        name: 'base',
-                        options: {
-                            repeat: true,
-                            onlyUpperBody: false,
-                            enablePlayerControl: false,
-                            freezeLastFrame: true,
+                    {
+                        type: 'animation',
+                        name: 'Police - Repos',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'airforce@parade_rest',
+                                name: 'base',
+                                options: {
+                                    repeat: true,
+                                    onlyUpperBody: false,
+                                    enablePlayerControl: false,
+                                    freezeLastFrame: true,
+                                },
+                            },
                         },
                     },
-                },
-            },
-            {
-                type: 'animation',
-                name: 'Gardien de sécurité',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'mini@strip_club@idles@bouncer@base',
-                        name: 'base',
-                        options: {
-                            repeat: true,
-                            onlyUpperBody: false,
-                            enablePlayerControl: false,
-                            freezeLastFrame: true,
+                    {
+                        type: 'animation',
+                        name: 'Gardien de sécurité',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'mini@strip_club@idles@bouncer@base',
+                                name: 'base',
+                                options: {
+                                    repeat: true,
+                                    onlyUpperBody: false,
+                                    enablePlayerControl: false,
+                                    freezeLastFrame: true,
+                                },
+                            },
                         },
                     },
-                },
-            },                                
                     {
                         type: 'animation',
                         name: 'Stressé',
@@ -1575,7 +1574,7 @@ export const Animations: AnimationConfigList = [
                         },
                     },
                 },
-            },                                  
+            },
             {
                 type: 'animation',
                 name: 'Départ de course',
@@ -1587,13 +1586,13 @@ export const Animations: AnimationConfigList = [
                         name: 'grid_girl_race_start',
                     },
                 },
-            },  
+            },
         ],
-    },           
+    },
     {
         type: 'category',
-        name: 'S\'appuyer',
-        items: [    
+        name: "S'appuyer",
+        items: [
             {
                 type: 'animation',
                 name: 'Accoudé',
@@ -1605,86 +1604,86 @@ export const Animations: AnimationConfigList = [
                         name: 'idle_c',
                         options: {
                             repeat: true,
-                        }
+                        },
                     },
                 },
-            },   
-                    {
-                        type: 'animation',
-                        name: 'Adossé au bar',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'anim@amb@nightclub@gt_idle@',
-                                name: 'base',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+            },
+            {
+                type: 'animation',
+                name: 'Adossé au bar',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@amb@nightclub@gt_idle@',
+                        name: 'base',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'De côté contre un mur',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'rcmnigel1a_band_groupies',
-                                name: 'idle_a_m2',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'De côté contre un mur',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'rcmnigel1a_band_groupies',
+                        name: 'idle_a_m2',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'De côté contre un mur #2',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'anim@scripted@island@special_peds@couple@hs4_couple_stage2_ig10',
-                                name: 'base_idle_male',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
-                        },
-                    },                    
-                    {
-                        type: 'animation',
-                        name: 'Appuyé sur un muret',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'missstrip_club_lean',
-                                name: 'player_lean_rail_loop',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'De côté contre un mur #2',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@scripted@island@special_peds@couple@hs4_couple_stage2_ig10',
+                        name: 'base_idle_male',
+                        options: {
+                            repeat: true,
                         },
                     },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Appuyé sur un muret',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'missstrip_club_lean',
+                        name: 'player_lean_rail_loop',
+                        options: {
+                            repeat: true,
+                        },
+                    },
+                },
+            },
 
-                    {
-                        type: 'animation',
-                        name: 'Sur la table',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'missheist_agency2aig_4',
-                                name: 'look_plan_b_worker2',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+            {
+                type: 'animation',
+                name: 'Sur la table',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'missheist_agency2aig_4',
+                        name: 'look_plan_b_worker2',
+                        options: {
+                            repeat: true,
                         },
                     },
+                },
+            },
             {
                 type: 'category',
                 name: 'Dos au mur',
@@ -2210,685 +2209,685 @@ export const Animations: AnimationConfigList = [
                                 name: 'exit',
                             },
                         },
-                    },                    
+                    },
+                ],
+            },
         ],
-    },
-],
     },
 
     // Sitting category
 
-{
-    type: 'category',
-    name: 'Assis',
-    items: [
-                {
-            type: 'animation',
-            name: 'sur le canapé',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'timetable@maid@couch@',
-                    name: 'base',
-                    options: {
-                        repeat: true,
-                    },
-                },
-            },
-        },         
-        {
-            type: 'animation',
-            name: 'Assis parterre',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'rcm_barry3',
-                    name: 'barry_3_sit_loop',
-                    options: {
-                        repeat: true,
-                    },
-                },
-            },
-        }, 
-        {
-            type: 'animation',
-            name: 'Assis parterre #2',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'anim@heists@fleeca_bank@ig_7_jetski_owner',
-                    name: 'owner_idle',
-                    options: {
-                        repeat: true,
-                    },
-                },
-            },
-        }, 
-        {
-            type: 'animation',
-            name: 'Assis parterre #3',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'anim@amb@business@bgen@bgen_no_work@',
-                    name: 'sit_phone_phoneputdown_idle_nowork',
-                    options: {
-                        repeat: true,
-                    },
-                },
-            },
-        },                        
-        {
-            type: 'animation',
-            name: 'Assis bras sur les genoux',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'timetable@ron@ig_3_couch',
-                    name: 'base',
-                    options: {
-                        repeat: true,
-                    },
-                },
-            },
-        },         
-        {
-            type: 'animation',
-            name: 'Assis sur une chaise',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'anim@heists@fleeca_bank@hostages@intro',
-                    name: 'intro_loop_ped_a',
-                    options: {
-                        repeat: true,
-                    },
-                },
-            },
-        },  
-        {
-            type: 'animation',
-            name: 'Assis sur une chaise #2',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'rcmtmom_1leadinout',
-                    name: 'tmom_1_rcm_p3_leadout_loop',
-                    options: {
-                        repeat: true,
-                    },
-                },
-            },
-        },         
-                    {
-                        type: 'animation',
-                        name: "S'asseoir",
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'switch@michael@sitting',
-                                name: 'idle',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+    {
+        type: 'category',
+        name: 'Assis',
+        items: [
+            {
+                type: 'animation',
+                name: 'sur le canapé',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'timetable@maid@couch@',
+                        name: 'base',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'scenario',
-                        name: "S'asseoir #2",
-                        rightLabel: null,
-                        icon: null,
-                        scenario: {
-                            name: 'PROP_HUMAN_SEAT_CHAIR',
-                            fixPositionDelta: [-0.48, -0.5],
-                        },
-                    },  
-                    {
-                        type: 'scenario',
-                        name: "S'asseoir #3",
-                        rightLabel: null,
-                        icon: null,
-                        scenario: {
-                            name: 'PROP_HUMAN_SEAT_CHAIR_MP_PLAYER',
-                            fixPositionDelta: [-0.48, -0.5],
-                        },
-                    },                                      
-                    {
-                        type: 'animation',
-                        name: "S'asseoir (femme)",
-                        rightLabel: null,
-                        icon: null,
-                          animation: {
-                            base: {
-                                dictionary: 'timetable@reunited@ig_10',
-                                name: 'base_amanda',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
-                    }, 
                 },
-                    {
-                        type: 'animation',
-                        name: "S'asseoir (Capot #1)",
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'anim@scripted@carmeet@tun_meet_ig2_race@',
-                                name: 'look_at_player',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+            },
+            {
+                type: 'animation',
+                name: 'Assis parterre',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'rcm_barry3',
+                        name: 'barry_3_sit_loop',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: "S'asseoir (Capot #2)",
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'anim@scripted@carmeet@tun_meet_ig2_race@',
-                                name: 'base',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Assis parterre #2',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@heists@fleeca_bank@ig_7_jetski_owner',
+                        name: 'owner_idle',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'scenario',
-                        name: "S'asseoir sur une chaise (dos droit)",
-                        rightLabel: null,
-                        icon: null,
-                        scenario: {
-                            name: 'PROP_HUMAN_SEAT_CHAIR_UPRIGHT',
-                            fixPositionDelta: [-0.48, -0.5],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Assis parterre #3',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@amb@business@bgen@bgen_no_work@',
+                        name: 'sit_phone_phoneputdown_idle_nowork',
+                        options: {
+                            repeat: true,
                         },
                     },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Assis bras sur les genoux',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'timetable@ron@ig_3_couch',
+                        name: 'base',
+                        options: {
+                            repeat: true,
+                        },
+                    },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Assis sur une chaise',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@heists@fleeca_bank@hostages@intro',
+                        name: 'intro_loop_ped_a',
+                        options: {
+                            repeat: true,
+                        },
+                    },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Assis sur une chaise #2',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'rcmtmom_1leadinout',
+                        name: 'tmom_1_rcm_p3_leadout_loop',
+                        options: {
+                            repeat: true,
+                        },
+                    },
+                },
+            },
+            {
+                type: 'animation',
+                name: "S'asseoir",
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'switch@michael@sitting',
+                        name: 'idle',
+                        options: {
+                            repeat: true,
+                        },
+                    },
+                },
+            },
+            {
+                type: 'scenario',
+                name: "S'asseoir #2",
+                rightLabel: null,
+                icon: null,
+                scenario: {
+                    name: 'PROP_HUMAN_SEAT_CHAIR',
+                    fixPositionDelta: [-0.48, -0.5],
+                },
+            },
+            {
+                type: 'scenario',
+                name: "S'asseoir #3",
+                rightLabel: null,
+                icon: null,
+                scenario: {
+                    name: 'PROP_HUMAN_SEAT_CHAIR_MP_PLAYER',
+                    fixPositionDelta: [-0.48, -0.5],
+                },
+            },
+            {
+                type: 'animation',
+                name: "S'asseoir (femme)",
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'timetable@reunited@ig_10',
+                        name: 'base_amanda',
+                        options: {
+                            repeat: true,
+                        },
+                    },
+                },
+            },
+            {
+                type: 'animation',
+                name: "S'asseoir (Capot #1)",
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@scripted@carmeet@tun_meet_ig2_race@',
+                        name: 'look_at_player',
+                        options: {
+                            repeat: true,
+                        },
+                    },
+                },
+            },
+            {
+                type: 'animation',
+                name: "S'asseoir (Capot #2)",
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@scripted@carmeet@tun_meet_ig2_race@',
+                        name: 'base',
+                        options: {
+                            repeat: true,
+                        },
+                    },
+                },
+            },
+            {
+                type: 'scenario',
+                name: "S'asseoir sur une chaise (dos droit)",
+                rightLabel: null,
+                icon: null,
+                scenario: {
+                    name: 'PROP_HUMAN_SEAT_CHAIR_UPRIGHT',
+                    fixPositionDelta: [-0.48, -0.5],
+                },
+            },
 
-                    {
-                        type: 'scenario',
-                        name: "S'asseoir sur une chaise longue",
-                        rightLabel: null,
-                        icon: null,
-                        scenario: {
-                            name: 'PROP_HUMAN_SEAT_DECKCHAIR',
-                            fixPositionDelta: [-0.48, -0.6],
-                        },
-                    },
+            {
+                type: 'scenario',
+                name: "S'asseoir sur une chaise longue",
+                rightLabel: null,
+                icon: null,
+                scenario: {
+                    name: 'PROP_HUMAN_SEAT_DECKCHAIR',
+                    fixPositionDelta: [-0.48, -0.6],
+                },
+            },
 
-                    {
-                        type: 'animation',
-                        name: "S'asseoir (PLS)",
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'anim@amb@nightclub@lazlow@lo_toilet@',
-                                name: 'lowtoilet_base_v2_laz',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+            {
+                type: 'animation',
+                name: "S'asseoir (PLS)",
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@amb@nightclub@lazlow@lo_toilet@',
+                        name: 'lowtoilet_base_v2_laz',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'scenario',
-                        name: "S'asseoir (Sol)",
-                        rightLabel: null,
-                        icon: null,
-                        scenario: {
-                            name: 'WORLD_HUMAN_PICNIC',
+                },
+            },
+            {
+                type: 'scenario',
+                name: "S'asseoir (Sol)",
+                rightLabel: null,
+                icon: null,
+                scenario: {
+                    name: 'WORLD_HUMAN_PICNIC',
+                },
+            },
+            {
+                type: 'animation',
+                name: "S'asseoir (Sol homme)",
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    enter: {
+                        dictionary: 'amb@world_human_picnic@male@enter',
+                        name: 'enter',
+                        duration: 7933,
+                    },
+                    base: {
+                        dictionary: 'amb@world_human_picnic@male@base',
+                        name: 'base',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: "S'asseoir (Sol homme)",
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            enter: {
-                                dictionary: 'amb@world_human_picnic@male@enter',
-                                name: 'enter',
-                                duration: 7933,
-                            },
-                            base: {
-                                dictionary: 'amb@world_human_picnic@male@base',
-                                name: 'base',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
-                            exit: {
-                                dictionary: 'amb@world_human_picnic@male@exit',
-                                name: 'exit',
-                                duration: 2099,
-                            },
+                    exit: {
+                        dictionary: 'amb@world_human_picnic@male@exit',
+                        name: 'exit',
+                        duration: 2099,
+                    },
+                },
+            },
+            {
+                type: 'animation',
+                name: "S'asseoir (Sol femme)",
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    enter: {
+                        dictionary: 'amb@world_human_picnic@female@enter',
+                        name: 'enter',
+                        duration: 6700,
+                    },
+                    base: {
+                        dictionary: 'amb@world_human_picnic@female@base',
+                        name: 'base',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: "S'asseoir (Sol femme)",
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            enter: {
-                                dictionary: 'amb@world_human_picnic@female@enter',
-                                name: 'enter',
-                                duration: 6700,
-                            },
-                            base: {
-                                dictionary: 'amb@world_human_picnic@female@base',
-                                name: 'base',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
-                            exit: {
-                                dictionary: 'amb@world_human_picnic@female@exit',
-                                name: 'exit',
-                                duration: 3666,
-                            },
+                    exit: {
+                        dictionary: 'amb@world_human_picnic@female@exit',
+                        name: 'exit',
+                        duration: 3666,
+                    },
+                },
+            },
+            {
+                type: 'scenario',
+                name: "S'asseoir (Stripclub)",
+                rightLabel: null,
+                icon: null,
+                scenario: {
+                    name: 'PROP_HUMAN_SEAT_STRIP_WATCH',
+                    fixPositionDelta: [-0.48, -0.5],
+                },
+            },
+            {
+                type: 'animation',
+                name: "S'asseoir (WC)",
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'switch@trevor@on_toilet',
+                        name: 'trev_on_toilet_loop',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'scenario',
-                        name: "S'asseoir (Stripclub)",
-                        rightLabel: null,
-                        icon: null,
-                        scenario: {
-                            name: 'PROP_HUMAN_SEAT_STRIP_WATCH',
-                            fixPositionDelta: [-0.48, -0.5],
-                        },
-                    },
-                    {
-                        type: 'animation',
-                        name: "S'asseoir (WC)",
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'switch@trevor@on_toilet',
-                                name: 'trev_on_toilet_loop',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
-                        },
-                    },
-                ],
-            },          
-    
-    // Kneeling category    
+                },
+            },
+        ],
+    },
+
+    // Kneeling category
 
     {
         type: 'category',
         name: 'À genoux / accroupi',
         items: [
-        {
-            type: 'animation',
-            name: 'Bidouiller',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'anim@amb@clubhouse@tutorial@bkr_tut_ig3@',
-                    name: 'machinic_loop_mechandplayer',
-                    options: {
-                        repeat: true,
+            {
+                type: 'animation',
+                name: 'Bidouiller',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@amb@clubhouse@tutorial@bkr_tut_ig3@',
+                        name: 'machinic_loop_mechandplayer',
+                        options: {
+                            repeat: true,
+                        },
                     },
                 },
             },
-        },             
             {
                 type: 'event',
                 name: 'À genoux mains sur la tête',
                 rightLabel: null,
                 icon: null,
                 event: ClientEvent.ANIMATION_SURRENDER,
-            },            
-                    {
-                        type: 'animation',
-                        name: 'À genoux',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'amb@world_human_bum_wash@male@low@idle_a',
-                                name: 'idle_a',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+            },
+            {
+                type: 'animation',
+                name: 'À genoux',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'amb@world_human_bum_wash@male@low@idle_a',
+                        name: 'idle_a',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'À genoux 2',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'amb@medic@standing@tendtodead@base',
-                                name: 'base',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
-                        },
-                    }, 
-                    {
-                        type: 'animation',
-                        name: 'À genoux 3',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'misschinese2_crystalmaze',
-                                name: '2int_loop_base_taotranslator',
-                               options: {
-                                    repeat: true,
-                                },                                
-                            },
-                        },
-                    },                                         
-                    {
-                        type: 'animation',
-                        name: 'Accroupi',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'amb@medic@standing@kneel@idle_a',
-                                name: 'idle_a',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'À genoux 2',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'amb@medic@standing@tendtodead@base',
+                        name: 'base',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Accroupi 2',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'rcmextreme3',
-                                name: 'idle',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'À genoux 3',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'misschinese2_crystalmaze',
+                        name: '2int_loop_base_taotranslator',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Accroupi 3',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'move_crouch_proto',
-                                name: 'idle',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
-                        },
-                    },                                       
-                    {
-                        type: 'animation',
-                        name: 'Peur à genoux',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'anim@scripted@bty4@ig2_bounty_kneel@male@',
-                                name: 'on_knee_idle_b',
-                                options: {
-                                repeat: true,
-                                },
-                            },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Accroupi',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'amb@medic@standing@kneel@idle_a',
+                        name: 'idle_a',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Peur à genoux 2',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'misstrevor1',
-                                name: 'ortega_kneel_outro_ort',
-                                options: {
-                                repeat: true,
-                                },
-                            },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Accroupi 2',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'rcmextreme3',
+                        name: 'idle',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Peur à genoux 3',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'anim@scripted@bty2@ig1_hiding_target@male@',
-                                name: 'hiding_kneel',
-                                options: {
-                                repeat: true,
-                                },
-                            },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Accroupi 3',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'move_crouch_proto',
+                        name: 'idle',
+                        options: {
+                            repeat: true,
                         },
                     },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Peur à genoux',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@scripted@bty4@ig2_bounty_kneel@male@',
+                        name: 'on_knee_idle_b',
+                        options: {
+                            repeat: true,
+                        },
+                    },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Peur à genoux 2',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'misstrevor1',
+                        name: 'ortega_kneel_outro_ort',
+                        options: {
+                            repeat: true,
+                        },
+                    },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Peur à genoux 3',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@scripted@bty2@ig1_hiding_target@male@',
+                        name: 'hiding_kneel',
+                        options: {
+                            repeat: true,
+                        },
+                    },
+                },
+            },
         ],
     },
 
     // Laying down category
 
-        {
+    {
         type: 'category',
-        name: 'S\'allonger',
-        items: [ 
-        {
-            type: 'animation',
-            name: 'couché sur le côté',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'switch@trevor@scares_tramp',
-                    name: 'trev_scares_tramp_idle_tramp',
-                    options: {
-                        repeat: true,
+        name: "S'allonger",
+        items: [
+            {
+                type: 'animation',
+                name: 'couché sur le côté',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'switch@trevor@scares_tramp',
+                        name: 'trev_scares_tramp_idle_tramp',
+                        options: {
+                            repeat: true,
+                        },
                     },
                 },
             },
-        },             
-        {
-            type: 'animation',
-            name: 'Couché sur le côté',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'timetable@tracy@sleep@',
-                    name: 'base',
-                    options: {
-                        repeat: true,
+            {
+                type: 'animation',
+                name: 'Couché sur le côté',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'timetable@tracy@sleep@',
+                        name: 'base',
+                        options: {
+                            repeat: true,
+                        },
                     },
                 },
             },
-        },              
-        {
-            type: 'animation',
-            name: 'Couché sur le ventre',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'amb@world_human_sunbathe@male@front@base',
-                    name: 'base',
-                    options: {
-                        repeat: true,
+            {
+                type: 'animation',
+                name: 'Couché sur le ventre',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'amb@world_human_sunbathe@male@front@base',
+                        name: 'base',
+                        options: {
+                            repeat: true,
+                        },
                     },
                 },
             },
-        },              
-        {
-            type: 'animation',
-            name: 'Couché sur le ventre',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'anim@heists@ornate_bank@hostages@hit',
-                    name: 'hit_react_die_loop_ped_a',
-                    options: {
-                        repeat: true,
+            {
+                type: 'animation',
+                name: 'Couché sur le ventre',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@heists@ornate_bank@hostages@hit',
+                        name: 'hit_react_die_loop_ped_a',
+                        options: {
+                            repeat: true,
+                        },
                     },
                 },
             },
-        },                    
-                    {
-                        type: 'animation',
-                        name: 'Blessé sur le dos',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'missheist_jewel',
-                                name: 'gassed_npc_customer1',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+            {
+                type: 'animation',
+                name: 'Blessé sur le dos',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'missheist_jewel',
+                        name: 'gassed_npc_customer1',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Blessé sur le dos #2',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'missfbi5ig_0',
-                                name: 'lyinginpain_loop_steve',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Blessé sur le dos #2',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'missfbi5ig_0',
+                        name: 'lyinginpain_loop_steve',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Allongé sur le dos',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'missheist_jewel',
-                                name: 'gassed_npc_customer2',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Allongé sur le dos',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'missheist_jewel',
+                        name: 'gassed_npc_customer2',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Allongé sur le dos #2',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'amb@world_human_sunbathe@female@back@base',
-                                name: 'base',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Allongé sur le dos #2',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'amb@world_human_sunbathe@female@back@base',
+                        name: 'base',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Allongé sur le ventre',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'amb@world_human_sunbathe@female@front@base',
-                                name: 'base',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Allongé sur le ventre',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'amb@world_human_sunbathe@female@front@base',
+                        name: 'base',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Allongé sur le ventre #2',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'missheist_jewel',
-                                name: 'gassed_npc_guard',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
-                        },
-                    },                    
-                    {
-                        type: 'animation',
-                        name: 'Allongé sur le côté',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'amb@world_human_bum_slumped@male@laying_on_left_side@idle_a',
-                                name: 'idle_b',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Allongé sur le ventre #2',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'missheist_jewel',
+                        name: 'gassed_npc_guard',
+                        options: {
+                            repeat: true,
                         },
                     },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Allongé sur le côté',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'amb@world_human_bum_slumped@male@laying_on_left_side@idle_a',
+                        name: 'idle_b',
+                        options: {
+                            repeat: true,
+                        },
+                    },
+                },
+            },
 
-                    {
-                        type: 'animation',
-                        name: 'Allongé sur le côté #2',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'missheist_jewel',
-                                name: 'gassed_npc_customer4',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
+            {
+                type: 'animation',
+                name: 'Allongé sur le côté #2',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'missheist_jewel',
+                        name: 'gassed_npc_customer4',
+                        options: {
+                            repeat: true,
                         },
                     },
+                },
+            },
         ],
     },
 
-    // Emotions & states category    
-    
+    // Emotions & states category
+
     {
         type: 'category',
         name: 'Émotions & états',
@@ -2969,21 +2968,21 @@ export const Animations: AnimationConfigList = [
                             },
                         },
                     },
-            {
-                type: 'animation',
-                name: 'Bouder',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'mini@hookers_sp',
-                        name: 'idle_reject_loop_b',
-                        options: {
-                            repeat: true,
+                    {
+                        type: 'animation',
+                        name: 'Bouder',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'mini@hookers_sp',
+                                name: 'idle_reject_loop_b',
+                                options: {
+                                    repeat: true,
+                                },
+                            },
                         },
                     },
-                },
-            },                    
                 ],
             },
             {
@@ -3151,115 +3150,115 @@ export const Animations: AnimationConfigList = [
         type: 'category',
         name: 'Célébrations',
         items: [
-                    {
-                        type: 'animation',
-                        name: 'Bang Bang',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'anim@mp_player_intcelebrationmale@bang_bang',
-                                name: 'bang_bang',
-                            },
+            {
+                type: 'animation',
+                name: 'Bang Bang',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@mp_player_intcelebrationmale@bang_bang',
+                        name: 'bang_bang',
+                    },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'BOOM !',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@mp_player_intcelebrationmale@mind_blown',
+                        name: 'mind_blown',
+                    },
+                },
+            },
+            {
+                type: 'animation',
+                name: "C'est ma musique !",
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@mp_player_intcelebrationmale@bro_love',
+                        name: 'bro_love',
+                    },
+                },
+            },
+            {
+                type: 'animation',
+                name: "J'adore !",
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@mp_player_intcelebrationmale@blow_kiss',
+                        name: 'blow_kiss',
+                        options: {
+                            repeat: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'BOOM !',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'anim@mp_player_intcelebrationmale@mind_blown',
-                                name: 'mind_blown',
-                            },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Jeter des billets',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@mp_player_intcelebrationmale@raining_cash',
+                        name: 'raining_cash',
+                    },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Non mais allo ?!',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@mp_player_intcelebrationfemale@call_me',
+                        name: 'call_me',
+                        options: {
+                            freezeLastFrame: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: "C'est ma musique !",
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'anim@mp_player_intcelebrationmale@bro_love',
-                                name: 'bro_love',
-                            },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Pile ou Face ?',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@mp_player_intcelebrationmale@coin_roll_and_toss',
+                        name: 'coin_roll_and_toss',
+                    },
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Viser la lune',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'oddjobs@basejump@',
+                        name: 'ped_a_loop',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: "J'adore !",
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'anim@mp_player_intcelebrationmale@blow_kiss',
-                                name: 'blow_kiss',
-                                options: {
-                                    repeat: true,
-                                },
-                            },
-                        },
-                    },
-                    {
-                        type: 'animation',
-                        name: 'Jeter des billets',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'anim@mp_player_intcelebrationmale@raining_cash',
-                                name: 'raining_cash',
-                            },
-                        },
-                    },
-                    {
-                        type: 'animation',
-                        name: 'Non mais allo ?!',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'anim@mp_player_intcelebrationfemale@call_me',
-                                name: 'call_me',
-                                options: {
-                                    freezeLastFrame: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                },
-                            },
-                        },
-                    },
-                    {
-                        type: 'animation',
-                        name: 'Pile ou Face ?',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'anim@mp_player_intcelebrationmale@coin_roll_and_toss',
-                                name: 'coin_roll_and_toss',
-                            },
-                        },
-                    },
-                    {
-                        type: 'animation',
-                        name: 'Viser la lune',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'oddjobs@basejump@',
-                                name: 'ped_a_loop',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                },
-                            },
-                        },
-                    },            
+                },
+            },
             {
                 type: 'animation',
                 name: 'Backflip',
@@ -3371,7 +3370,6 @@ export const Animations: AnimationConfigList = [
                     },
                 },
             },
-
         ],
     },
 
@@ -3385,33 +3383,33 @@ export const Animations: AnimationConfigList = [
                 type: 'category',
                 name: 'Médical',
                 items: [
-       {
-            type: 'animation',
-            name: 'Appliquer un pansement - à genoux',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'amb@medic@standing@tendtodead@idle_a',
-                    name: 'idle_a',
-                },
-            },
-        },                    
-            {
-                type: 'animation',
-                name: 'Massage Cardiaque',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'mini@cpr@char_a@cpr_str',
-                        name: 'cpr_pumpchest',
-                        options: {
-                            repeat: true,
+                    {
+                        type: 'animation',
+                        name: 'Appliquer un pansement - à genoux',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'amb@medic@standing@tendtodead@idle_a',
+                                name: 'idle_a',
+                            },
                         },
                     },
-                },
-            },
+                    {
+                        type: 'animation',
+                        name: 'Massage Cardiaque',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'mini@cpr@char_a@cpr_str',
+                                name: 'cpr_pumpchest',
+                                options: {
+                                    repeat: true,
+                                },
+                            },
+                        },
+                    },
                     {
                         type: 'animation',
                         name: 'Appliquer un pansement - debout',
@@ -3426,8 +3424,7 @@ export const Animations: AnimationConfigList = [
                                 },
                             },
                         },
-                    },  
-
+                    },
                 ],
             },
             {
@@ -3588,12 +3585,12 @@ export const Animations: AnimationConfigList = [
                         },
                     },
                 ],
-                },
+            },
             {
                 type: 'category',
                 name: 'Hygiène',
                 items: [
-                        {
+                    {
                         type: 'animation',
                         name: 'Balayer',
                         rightLabel: null,
@@ -3606,16 +3603,16 @@ export const Animations: AnimationConfigList = [
                                     repeat: true,
                                 },
                             },
-                                    props: [
-                                    {
-                                        bone: 28422,
-                                        model: 'prop_tool_broom',
-                                        position: [-0.01, 0.04, -0.03],
-                                        rotation: [0, 0, 0],
-                                    },
-                                ],                
-                            },
+                            props: [
+                                {
+                                    bone: 28422,
+                                    model: 'prop_tool_broom',
+                                    position: [-0.01, 0.04, -0.03],
+                                    rotation: [0, 0, 0],
+                                },
+                            ],
                         },
+                    },
                     {
                         type: 'scenario',
                         name: 'Laver les vitres',
@@ -3702,7 +3699,7 @@ export const Animations: AnimationConfigList = [
                                 },
                             ],
                         },
-                    },                    
+                    },
                     {
                         type: 'animation',
                         name: 'Prendre une douche',
@@ -3739,30 +3736,29 @@ export const Animations: AnimationConfigList = [
                 type: 'category',
                 name: 'Jardinage',
                 items: [
-
-                {
-            type: 'animation',
-            name: 'ratisser',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'anim@amb@drug_field_workers@rake@male_b@base',
-                    name: 'base',
-                    options: {
-                        repeat: true,
-                    },
-                },
-                        props: [
-                        {
-                            bone: 28422,
-                            model: 'prop_tool_rake',
-                            position: [0, 0, -0.03],
-                            rotation: [0, 0, 0],
+                    {
+                        type: 'animation',
+                        name: 'ratisser',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'anim@amb@drug_field_workers@rake@male_b@base',
+                                name: 'base',
+                                options: {
+                                    repeat: true,
+                                },
+                            },
+                            props: [
+                                {
+                                    bone: 28422,
+                                    model: 'prop_tool_rake',
+                                    position: [0, 0, -0.03],
+                                    rotation: [0, 0, 0],
+                                },
+                            ],
                         },
-                    ],                
-                },
-            },                    
+                    },
                     {
                         type: 'animation',
                         name: 'Creuser',
@@ -3802,109 +3798,109 @@ export const Animations: AnimationConfigList = [
                             name: 'world_human_gardener_plant',
                         },
                     },
-            {
-                type: 'animation',
-                name: 'Souffler les feuilles',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'amb@world_human_gardener_leaf_blower@base',
-                        name: 'base',
-                        options: {
-                            repeat: true,
-                            onlyUpperBody: true,
-                            enablePlayerControl: true,
-                            freezeLastFrame: true,
+                    {
+                        type: 'animation',
+                        name: 'Souffler les feuilles',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'amb@world_human_gardener_leaf_blower@base',
+                                name: 'base',
+                                options: {
+                                    repeat: true,
+                                    onlyUpperBody: true,
+                                    enablePlayerControl: true,
+                                    freezeLastFrame: true,
+                                },
+                            },
+                            props: [
+                                {
+                                    bone: 0,
+                                    model: 'scr_armenian3/ent_anim_leaf_blower',
+                                    position: [1, 0, -0.25],
+                                    rotation: [0, 0, 0],
+                                },
+                            ],
                         },
                     },
-                    props: [
-                        {
-                            bone: 0,
-                            model: 'scr_armenian3/ent_anim_leaf_blower',
-                            position: [1, 0, -0.25],
-                            rotation: [0, 0, 0],
+                    {
+                        type: 'animation',
+                        name: 'Arroser les plantes',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'amb@world_human_gardener_leaf_blower@base',
+                                name: 'base',
+                                options: {
+                                    repeat: true,
+                                    onlyUpperBody: true,
+                                    enablePlayerControl: true,
+                                    freezeLastFrame: true,
+                                },
+                            },
+                            props: [
+                                {
+                                    bone: 57005,
+                                    model: 'prop_wateringcan',
+                                    position: [0.32, -0.15, 0],
+                                    rotation: [260, 0, 0],
+                                },
+                            ],
                         },
-                    ],
-                },
+                    },
+                ],
             },
-            {
-                type: 'animation',
-                name: 'Arroser les plantes',
-                rightLabel: null,
-                icon: null,
-                animation: {
-                    base: {
-                        dictionary: 'amb@world_human_gardener_leaf_blower@base',
-                        name: 'base',
-                        options: {
-                            repeat: true,
-                            onlyUpperBody: true,
-                            enablePlayerControl: true,
-                            freezeLastFrame: true,
-                        },
-                    },
-                    props: [
-                        {
-                            bone: 57005,
-                            model: 'prop_wateringcan',
-                            position: [0.32, -0.15, 0],
-                            rotation: [260, 0, 0],
-                        },
-                    ],
-                },
-            },    
-        ],
-    },                  
             {
                 type: 'category',
                 name: 'Mécanique',
                 items: [
-        {
-            type: 'animation',
-            name: 'bricoler parterre',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'amb@world_human_vehicle_mechanic@male@base',
-                    name: 'base',
-                    options: {
-                        repeat: true,
+                    {
+                        type: 'animation',
+                        name: 'bricoler parterre',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'amb@world_human_vehicle_mechanic@male@base',
+                                name: 'base',
+                                options: {
+                                    repeat: true,
+                                },
+                            },
+                        },
                     },
-                },
-            },
-        },                     
-        {
-            type: 'animation',
-            name: 'Changer une ampoule',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'amb@prop_human_movie_bulb@idle_a',
-                    name: 'idle_b',
-                    options: {
-                        repeat: true,
+                    {
+                        type: 'animation',
+                        name: 'Changer une ampoule',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'amb@prop_human_movie_bulb@idle_a',
+                                name: 'idle_b',
+                                options: {
+                                    repeat: true,
+                                },
+                            },
+                        },
                     },
-                },
-            },
-        },                    
-        {
-            type: 'animation',
-            name: 'Réparer',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'mini@repair',
-                    name: 'fixing_a_player',
-                    options: {
-                        repeat: true,
+                    {
+                        type: 'animation',
+                        name: 'Réparer',
+                        rightLabel: null,
+                        icon: null,
+                        animation: {
+                            base: {
+                                dictionary: 'mini@repair',
+                                name: 'fixing_a_player',
+                                options: {
+                                    repeat: true,
+                                },
+                            },
+                        },
                     },
-                },
-            },
-        },                    
                     {
                         type: 'scenario',
                         name: 'Réparer 2',
@@ -4230,55 +4226,54 @@ export const Animations: AnimationConfigList = [
         ],
     },
 
-
     // Duo & interacting category
 
     {
         type: 'category',
         name: 'Interactions',
         items: [
-        {
-            type: 'animation',
-            name: 'Embrasser 1',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'hs3_ext-20',
-                    name: 'cs_lestercrest_3_dual-20',
-                    options: {
-                        repeat: true,
+            {
+                type: 'animation',
+                name: 'Embrasser 1',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'hs3_ext-20',
+                        name: 'cs_lestercrest_3_dual-20',
+                        options: {
+                            repeat: true,
+                        },
                     },
                 },
             },
-        },        
-        {
-            type: 'animation',
-            name: 'Embrasser 2',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'hs3_ext-20',
-                    name: 'csb_georginacheng_dual-20',
-                    options: {
-                        repeat: true,
+            {
+                type: 'animation',
+                name: 'Embrasser 2',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'hs3_ext-20',
+                        name: 'csb_georginacheng_dual-20',
+                        options: {
+                            repeat: true,
+                        },
                     },
                 },
             },
-        },  
-        {
-            type: 'animation',
-            name: 'Enlacer',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'mp_ped_interaction',
-                    name: 'kisses_guy_b',
+            {
+                type: 'animation',
+                name: 'Enlacer',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'mp_ped_interaction',
+                        name: 'kisses_guy_b',
+                    },
                 },
             },
-        },            
             {
                 type: 'animation',
                 name: 'Câliner',
@@ -4705,7 +4700,7 @@ export const Animations: AnimationConfigList = [
                 ],
             },
         ],
-    },    
+    },
 
     // Dances category
 
@@ -4713,21 +4708,21 @@ export const Animations: AnimationConfigList = [
         type: 'category',
         name: 'Danses et instruments',
         items: [
-        {
-            type: 'animation',
-            name: 'Petite danse sexy',
-            rightLabel: null,
-            icon: null,
-            animation: {
-                base: {
-                    dictionary: 'mini@strip_club@lap_dance_2g@ld_2g_p2',
-                    name: 'ld_2g_p2_s2',
-                    options: {
-                        repeat: true,
+            {
+                type: 'animation',
+                name: 'Petite danse sexy',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'mini@strip_club@lap_dance_2g@ld_2g_p2',
+                        name: 'ld_2g_p2_s2',
+                        options: {
+                            repeat: true,
+                        },
                     },
                 },
             },
-        },             
             {
                 type: 'animation',
                 name: "50's",
@@ -13279,7 +13274,6 @@ export const Animations: AnimationConfigList = [
         ],
     },
 
-
     {
         type: 'event',
         name: 'Ramasser de la neige',
@@ -13288,7 +13282,7 @@ export const Animations: AnimationConfigList = [
         event: ClientEvent.WEAPON_PICK_SNOWBALL,
     },
 
-  {
+    {
         type: 'category',
         name: 'Event',
         items: [
@@ -13742,799 +13736,799 @@ export const Animations: AnimationConfigList = [
             },
         ],
     },
-    
+
     // Props category
 
+    {
+        type: 'category',
+        name: 'Props',
+        items: [
             {
-                type: 'category',
-                name: 'Props',
-                items: [
-                    {
-                        type: 'animation',
-                        name: 'Boite à Outils  #1',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'move_weapon@jerrycan@generic',
-                                name: 'idle',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 28422,
-                                    model: 'prop_tool_box_04',
-                                    position: [0.396, 0.041, -0.003],
-                                    rotation: [-90, 0, 90],
-                                },
-                            ],
+                type: 'animation',
+                name: 'Boite à Outils  #1',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'move_weapon@jerrycan@generic',
+                        name: 'idle',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Boite à Outils  #2',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'move_weapon@jerrycan@generic',
-                                name: 'idle',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 28422,
-                                    model: 'imp_prop_tool_box_01a',
-                                    position: [0.37, 0.02, 0],
-                                    rotation: [-90, 0, 90],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 28422,
+                            model: 'prop_tool_box_04',
+                            position: [0.396, 0.041, -0.003],
+                            rotation: [-90, 0, 90],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Boite à Outils  #2',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'move_weapon@jerrycan@generic',
+                        name: 'idle',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Bongos',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'amb@world_human_musician@bongos@male@base',
-                                name: 'base',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 60309,
-                                    model: 'prop_bongos_01',
-                                    position: [0, 0, 0],
-                                    rotation: [0, 0, 0],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 28422,
+                            model: 'imp_prop_tool_box_01a',
+                            position: [0.37, 0.02, 0],
+                            rotation: [-90, 0, 90],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Bongos',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'amb@world_human_musician@bongos@male@base',
+                        name: 'base',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Coupe Champagne',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'anim@heists@humane_labs@finale@keycards',
-                                name: 'ped_a_enter_loop',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: false,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 18905,
-                                    model: 'prop_drink_champ',
-                                    position: [0.1, -0.03, 0.03],
-                                    rotation: [-100, 0, -10],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 60309,
+                            model: 'prop_bongos_01',
+                            position: [0, 0, 0],
+                            rotation: [0, 0, 0],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Coupe Champagne',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@heists@humane_labs@finale@keycards',
+                        name: 'ped_a_enter_loop',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: false,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Demande Bague',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'ultra@propose',
-                                name: 'propose',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: false,
-                                    enablePlayerControl: false,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 64064,
-                                    model: 'pata_freevalentinesday2',
-                                    position: [0.019, 0.048, 0.011],
-                                    rotation: [-9.035, 88.4373, -9.8783],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 18905,
+                            model: 'prop_drink_champ',
+                            position: [0.1, -0.03, 0.03],
+                            rotation: [-100, 0, -10],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Demande Bague',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'ultra@propose',
+                        name: 'propose',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: false,
+                            enablePlayerControl: false,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Guitare  #1',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'amb@world_human_musician@guitar@male@idle_a',
-                                name: 'idle_b',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 24818,
-                                    model: 'prop_acc_guitar_01',
-                                    position: [-0.1, 0.3, 0.05],
-                                    rotation: [20, -15, 150],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 64064,
+                            model: 'pata_freevalentinesday2',
+                            position: [0.019, 0.048, 0.011],
+                            rotation: [-9.035, 88.4373, -9.8783],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Guitare  #1',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'amb@world_human_musician@guitar@male@idle_a',
+                        name: 'idle_b',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Guitare  #2',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'switch@trevor@guitar_beatdown',
-                                name: '001370_02_trvs_8_guitar_beatdown_idle_busker',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 24818,
-                                    model: 'prop_acc_guitar_01',
-                                    position: [-0.05, 0.3, 0.05],
-                                    rotation: [20, -15, 150],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 24818,
+                            model: 'prop_acc_guitar_01',
+                            position: [-0.1, 0.3, 0.05],
+                            rotation: [20, -15, 150],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Guitare  #2',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'switch@trevor@guitar_beatdown',
+                        name: '001370_02_trvs_8_guitar_beatdown_idle_busker',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Guitare assis',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'misssnowie@gatlax',
-                                name: 'base',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: false,
-                                    enablePlayerControl: false,
-                                    freezeLastFrame: false,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 24818,
-                                    model: 'prop_acc_guitar_01',
-                                    position: [-0.05, 0.31, 0],
-                                    rotation: [30, 5, 150],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 24818,
+                            model: 'prop_acc_guitar_01',
+                            position: [-0.05, 0.3, 0.05],
+                            rotation: [20, -15, 150],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Guitare assis',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'misssnowie@gatlax',
+                        name: 'base',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: false,
+                            enablePlayerControl: false,
+                            freezeLastFrame: false,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Guitare Electrique  #1',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'amb@world_human_musician@guitar@male@idle_a',
-                                name: 'idle_b',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 24818,
-                                    model: 'prop_el_guitar_03',
-                                    position: [-0.1, 0.31, 0.1],
-                                    rotation: [20, -15, 150],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 24818,
+                            model: 'prop_acc_guitar_01',
+                            position: [-0.05, 0.31, 0],
+                            rotation: [30, 5, 150],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Guitare Electrique  #1',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'amb@world_human_musician@guitar@male@idle_a',
+                        name: 'idle_b',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Guitare Electrique  #2',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'amb@world_human_musician@guitar@male@idle_a',
-                                name: 'idle_b',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 24818,
-                                    model: 'prop_el_guitar_01',
-                                    position: [-0.1, 0.3, 0.05],
-                                    rotation: [20, -15, 150],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 24818,
+                            model: 'prop_el_guitar_03',
+                            position: [-0.1, 0.31, 0.1],
+                            rotation: [20, -15, 150],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Guitare Electrique  #2',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'amb@world_human_musician@guitar@male@idle_a',
+                        name: 'idle_b',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Guitare Transport',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'move_weapon@jerrycan@generic',
-                                name: 'idle',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 28422,
-                                    model: 'sf_prop_sf_guitar_case_01a',
-                                    position: [0.28, -0.2, -0.06],
-                                    rotation: [0, 0, 15],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 24818,
+                            model: 'prop_el_guitar_01',
+                            position: [-0.1, 0.3, 0.05],
+                            rotation: [20, -15, 150],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Guitare Transport',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'move_weapon@jerrycan@generic',
+                        name: 'idle',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Journal #1',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'amb@world_human_clipboard@male@idle_a',
-                                name: 'idle_a',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 60309,
-                                    model: 'prop_cliff_paper',
-                                    position: [0.097, -0.028, -0.017],
-                                    rotation: [107.4008, 3.2712, -10.508],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 28422,
+                            model: 'sf_prop_sf_guitar_case_01a',
+                            position: [0.28, -0.2, -0.06],
+                            rotation: [0, 0, 15],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Journal #1',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'amb@world_human_clipboard@male@idle_a',
+                        name: 'idle_a',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Journal #2',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'amb@world_human_clipboard@male@idle_a',
-                                name: 'idle_a',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 60309,
-                                    model: 'ng_proc_paper_news_quik',
-                                    position: [0.159, 0.029, -0.01],
-                                    rotation: [90.9998, 0.0087, 0.5],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 60309,
+                            model: 'prop_cliff_paper',
+                            position: [0.097, -0.028, -0.017],
+                            rotation: [107.4008, 3.2712, -10.508],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Journal #2',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'amb@world_human_clipboard@male@idle_a',
+                        name: 'idle_a',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Journal #3',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'amb@world_human_clipboard@male@idle_a',
-                                name: 'idle_a',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 60309,
-                                    model: 'ng_proc_paper_news_rag',
-                                    position: [0.176, -0.0007, 0.02],
-                                    rotation: [99.8306, 3.2841, -4.7185],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 60309,
+                            model: 'ng_proc_paper_news_quik',
+                            position: [0.159, 0.029, -0.01],
+                            rotation: [90.9998, 0.0087, 0.5],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Journal #3',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'amb@world_human_clipboard@male@idle_a',
+                        name: 'idle_a',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Lire Livre Assis/Appuyé dos',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'holding_book_5@dark',
-                                name: 'holding_book_5_clip',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: false,
-                                    enablePlayerControl: false,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 18905,
-                                    model: 'v_ilev_mp_bedsidebook',
-                                    position: [0.21, 0.06, 0.04],
-                                    rotation: [170.6161, -14.296, 28.8727],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 60309,
+                            model: 'ng_proc_paper_news_rag',
+                            position: [0.176, -0.0007, 0.02],
+                            rotation: [99.8306, 3.2841, -4.7185],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Lire Livre Assis/Appuyé dos',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'holding_book_5@dark',
+                        name: 'holding_book_5_clip',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: false,
+                            enablePlayerControl: false,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Lire Livre Debout',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'cellphone@',
-                                name: 'cellphone_text_read_base',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: false,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 6286,
-                                    model: 'prop_novel_01',
-                                    position: [0.17, 0, -0.066],
-                                    rotation: [180, 0, 90],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 18905,
+                            model: 'v_ilev_mp_bedsidebook',
+                            position: [0.21, 0.06, 0.04],
+                            rotation: [170.6161, -14.296, 28.8727],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Lire Livre Debout',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'cellphone@',
+                        name: 'cellphone_text_read_base',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: false,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Microphone Rock',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'lunyx@mic@p7',
-                                name: 'mic@p7',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 28422,
-                                    model: 'v_ilev_fos_mic',
-                                    position: [-0.821, 0.09, -1.19],
-                                    rotation: [-2.1478, 36.3684, -11.7503],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 6286,
+                            model: 'prop_novel_01',
+                            position: [0.17, 0, -0.066],
+                            rotation: [180, 0, 90],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Microphone Rock',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'lunyx@mic@p7',
+                        name: 'mic@p7',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Pointer au Sol (avoir arme en main)',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'chocoholic@single12',
-                                name: 'single12_clip',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: false,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 17188,
-                                    model: 'prop_cigar_01',
-                                    position: [0.045, 0.013, 0.017],
-                                    rotation: [0, 0, 0],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 28422,
+                            model: 'v_ilev_fos_mic',
+                            position: [-0.821, 0.09, -1.19],
+                            rotation: [-2.1478, 36.3684, -11.7503],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Pointer au Sol (avoir arme en main)',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'chocoholic@single12',
+                        name: 'single12_clip',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: false,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Porter Carton',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'anim@heists@box_carry@',
-                                name: 'idle',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 60309,
-                                    model: 'hei_prop_heist_box',
-                                    position: [0.025, 0.08, 0.255],
-                                    rotation: [-145, 290, 0],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 17188,
+                            model: 'prop_cigar_01',
+                            position: [0.045, 0.013, 0.017],
+                            rotation: [0, 0, 0],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Porter Carton',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'anim@heists@box_carry@',
+                        name: 'idle',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Radiocassette',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'move_weapon@jerrycan@generic',
-                                name: 'idle',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 57005,
-                                    model: 'prop_boombox_01',
-                                    position: [0.27, 0, 0],
-                                    rotation: [90, 180, -90],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 60309,
+                            model: 'hei_prop_heist_box',
+                            position: [0.025, 0.08, 0.255],
+                            rotation: [-145, 290, 0],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Radiocassette',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'move_weapon@jerrycan@generic',
+                        name: 'idle',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Radiocassette (avec lunettes)',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'molly@boombox1',
-                                name: 'boombox1_clip',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 31086,
-                                    model: 'prop_cs_sol_glasses',
-                                    position: [0.044, 0.074, 0],
-                                    rotation: [-160.9843, -88.7288, -0.6197],
-                                },
-                                {
-                                    bone: 10706,
-                                    model: 'prop_ghettoblast_02',
-                                    position: [-0.231, -0.077, 0.241],
-                                    rotation: [-179.7256, 176.7406, -30.019],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 57005,
+                            model: 'prop_boombox_01',
+                            position: [0.27, 0, 0],
+                            rotation: [90, 180, -90],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Radiocassette (avec lunettes)',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'molly@boombox1',
+                        name: 'boombox1_clip',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Sac de Sport',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'move_weapon@jerrycan@generic',
-                                name: 'idle',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 28422,
-                                    model: 'bkr_prop_duffel_bag_01a',
-                                    position: [0.26, 0.04, 0],
-                                    rotation: [90, 0, -78.99],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 31086,
+                            model: 'prop_cs_sol_glasses',
+                            position: [0.044, 0.074, 0],
+                            rotation: [-160.9843, -88.7288, -0.6197],
+                        },
+                        {
+                            bone: 10706,
+                            model: 'prop_ghettoblast_02',
+                            position: [-0.231, -0.077, 0.241],
+                            rotation: [-179.7256, 176.7406, -30.019],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Sac de Sport',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'move_weapon@jerrycan@generic',
+                        name: 'idle',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Sac Shopping  #1',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'move_weapon@jerrycan@generic',
-                                name: 'idle',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 28422,
-                                    model: 'prop_cs_shopping_bag',
-                                    position: [0.24, 0.03, -0.04],
-                                    rotation: [0, -90, 10],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 28422,
+                            model: 'bkr_prop_duffel_bag_01a',
+                            position: [0.26, 0.04, 0],
+                            rotation: [90, 0, -78.99],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Sac Shopping  #1',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'move_weapon@jerrycan@generic',
+                        name: 'idle',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Sac Shopping  #2',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'move_weapon@jerrycan@generic',
-                                name: 'idle',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 28422,
-                                    model: 'prop_shopping_bags02',
-                                    position: [0.05, 0.02, 0],
-                                    rotation: [178.8, 91.19, 9.97],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 28422,
+                            model: 'prop_cs_shopping_bag',
+                            position: [0.24, 0.03, -0.04],
+                            rotation: [0, -90, 10],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Sac Shopping  #2',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'move_weapon@jerrycan@generic',
+                        name: 'idle',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Sac Shopping  #3',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'move_weapon@jerrycan@generic',
-                                name: 'idle',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 28422,
-                                    model: 'vw_prop_casino_shopping_bag_01a',
-                                    position: [0.24, 0.03, -0.04],
-                                    rotation: [0, -90, 10],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 28422,
+                            model: 'prop_shopping_bags02',
+                            position: [0.05, 0.02, 0],
+                            rotation: [178.8, 91.19, 9.97],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Sac Shopping  #3',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'move_weapon@jerrycan@generic',
+                        name: 'idle',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Saxophone  #1',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'play_saxophone@dark',
-                                name: 'play_saxophone_clip',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: false,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 57005,
-                                    model: 'rpemotes_prop_saxophone01',
-                                    position: [0.07, 0.04, 0.03],
-                                    rotation: [-71.2242, 29.3364, 5.9514],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 28422,
+                            model: 'vw_prop_casino_shopping_bag_01a',
+                            position: [0.24, 0.03, -0.04],
+                            rotation: [0, -90, 10],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Saxophone  #1',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'play_saxophone@dark',
+                        name: 'play_saxophone_clip',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: false,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Saxophone  #2',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'play_saxophone@dark',
-                                name: 'play_saxophone_clip',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: false,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 57005,
-                                    model: 'rpemotes_prop_saxophone02',
-                                    position: [0.07, 0.04, 0.03],
-                                    rotation: [-71.2242, 29.3364, 5.9514],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 57005,
+                            model: 'rpemotes_prop_saxophone01',
+                            position: [0.07, 0.04, 0.03],
+                            rotation: [-71.2242, 29.3364, 5.9514],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Saxophone  #2',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'play_saxophone@dark',
+                        name: 'play_saxophone_clip',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: false,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Tenir Livre (torse)',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'holding_book_3@dark',
-                                name: 'holding_book_3_clip',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: false,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 18905,
-                                    model: 'prop_cs_stock_book',
-                                    position: [0.07, 0.04, 0.07],
-                                    rotation: [0, 0, -15],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 57005,
+                            model: 'rpemotes_prop_saxophone02',
+                            position: [0.07, 0.04, 0.03],
+                            rotation: [-71.2242, 29.3364, 5.9514],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Tenir Livre (torse)',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'holding_book_3@dark',
+                        name: 'holding_book_3_clip',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: false,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Tenir Serpillère',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'missfbi4prepp1',
-                                name: 'idle',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 28422,
-                                    model: 'prop_cs_mop_s',
-                                    position: [-0.05, -0.12, -0.3],
-                                    rotation: [-13.377, 10.3568, 17.9681],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 18905,
+                            model: 'prop_cs_stock_book',
+                            position: [0.07, 0.04, 0.07],
+                            rotation: [0, 0, -15],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Tenir Serpillère',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'missfbi4prepp1',
+                        name: 'idle',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                    {
-                        type: 'animation',
-                        name: 'Trousse Médicale',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'move_weapon@jerrycan@generic',
-                                name: 'idle',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 57005,
-                                    model: 'xm_prop_x17_bag_med_01a',
-                                    position: [0.42, 0.01, -0.01],
-                                    rotation: [90, -180, -90],
-                                },
-                            ],
+                    props: [
+                        {
+                            bone: 28422,
+                            model: 'prop_cs_mop_s',
+                            position: [-0.05, -0.12, -0.3],
+                            rotation: [-13.377, 10.3568, 17.9681],
+                        },
+                    ],
+                },
+            },
+            {
+                type: 'animation',
+                name: 'Trousse Médicale',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'move_weapon@jerrycan@generic',
+                        name: 'idle',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
+                    props: [
+                        {
+                            bone: 57005,
+                            model: 'xm_prop_x17_bag_med_01a',
+                            position: [0.42, 0.01, -0.01],
+                            rotation: [90, -180, -90],
+                        },
+                    ],
+                },
+            },
             {
                 type: 'animation',
                 name: 'Lampe torche',
@@ -14559,33 +14553,33 @@ export const Animations: AnimationConfigList = [
                         },
                     ],
                 },
-            },                    
-                    {
-                        type: 'animation',
-                        name: 'Valise sécurisée',
-                        rightLabel: null,
-                        icon: null,
-                        animation: {
-                            base: {
-                                dictionary: 'move_weapon@jerrycan@generic',
-                                name: 'idle',
-                                options: {
-                                    repeat: true,
-                                    onlyUpperBody: true,
-                                    enablePlayerControl: true,
-                                    freezeLastFrame: true,
-                                },
-                            },
-                            props: [
-                                {
-                                    bone: 28422,
-                                    model: 'w_am_case',
-                                    position: [0, 0, 0],
-                                    rotation: [-90, 0, 90],
-                                },
-                            ],
+            },
+            {
+                type: 'animation',
+                name: 'Valise sécurisée',
+                rightLabel: null,
+                icon: null,
+                animation: {
+                    base: {
+                        dictionary: 'move_weapon@jerrycan@generic',
+                        name: 'idle',
+                        options: {
+                            repeat: true,
+                            onlyUpperBody: true,
+                            enablePlayerControl: true,
+                            freezeLastFrame: true,
                         },
                     },
-                ],
-            },    
+                    props: [
+                        {
+                            bone: 28422,
+                            model: 'w_am_case',
+                            position: [0, 0, 0],
+                            rotation: [-90, 0, 90],
+                        },
+                    ],
+                },
+            },
+        ],
+    },
 ];
