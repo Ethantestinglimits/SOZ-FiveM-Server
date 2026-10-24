@@ -32,11 +32,29 @@ for (const m of sozConfig.matchAll(/name: '([^']+)',\s*rightLabel[\s\S]*?diction
 for (const m of sozConfig.matchAll(/dictionary: '([^']+)',\s*name: '([^']+)'/g)) {
     if (!sozAnims.has(`${m[1]}|${m[2]}`)) sozAnims.set(`${m[1]}|${m[2]}`, '?');
 }
+const loadSozAnimations = () => {
+    const ts = require(require.resolve('typescript', { paths: [path.dirname(sozConfigPath)] }));
+    const js = ts.transpileModule(sozConfig, {
+        compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
+    }).outputText;
+    const mod = { exports: {} };
+    const stub = { ClientEvent: new Proxy({}, { get: (_, k) => String(k) }) };
+    new Function('module', 'exports', 'require', js)(mod, mod.exports, () => stub);
+    return mod.exports.Animations;
+};
+
 const sozAnimsByDict = new Map();
-for (const m of sozConfig.matchAll(/name: '([^']+)',\s*rightLabel[\s\S]*?dictionary: '([^']+)',\s*name: '([^']+)'/g)) {
-    if (!sozAnimsByDict.has(m[2])) sozAnimsByDict.set(m[2], []);
-    sozAnimsByDict.get(m[2]).push({ name: m[1], clip: m[3] });
-}
+const indexSoz = (items, trail) => {
+    for (const item of items) {
+        if (item.type === 'category') indexSoz(item.items, [...trail, item.name]);
+        else if (item.type === 'animation') {
+            const { dictionary, name } = item.animation.base;
+            if (!sozAnimsByDict.has(dictionary)) sozAnimsByDict.set(dictionary, []);
+            sozAnimsByDict.get(dictionary).push({ name: [...trail.slice(1), item.name].slice(-2).join(' › '), clip: name });
+        }
+    }
+};
+indexSoz(loadSozAnimations(), []);
 
 const variantOf = clip => clip.replace(/\^\d+$/, '').toLowerCase();
 const listNames = anims => {

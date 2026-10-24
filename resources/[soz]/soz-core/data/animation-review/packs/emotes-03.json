@@ -1201,7 +1201,7 @@
             "section": "Emotes",
             "duplicateOf": null,
             "notes": [
-                "⚠ proche de SOZ (même dict) : « Shhht » bourré, Rire #1, Backflip, Capoeira +5"
+                "⚠ proche de SOZ (même dict) : « Shhht » bourré, Joie › Rire #1, Backflip, Capoeira +5"
             ],
             "item": {
                 "type": "animation",
@@ -1227,7 +1227,7 @@
             "section": "Emotes",
             "duplicateOf": null,
             "notes": [
-                "⚠ proche de SOZ (même dict) : #6"
+                "⚠ proche de SOZ (même dict) : Joie › #6"
             ],
             "item": {
                 "type": "animation",
@@ -1251,7 +1251,7 @@
             "section": "Emotes",
             "duplicateOf": null,
             "notes": [
-                "⚠ proche de SOZ (même dict) : Réparer"
+                "⚠ proche de SOZ (même dict) : Mécanique › Réparer"
             ],
             "item": {
                 "type": "animation",

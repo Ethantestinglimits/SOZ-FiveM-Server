@@ -382,7 +382,7 @@
             "section": "Emotes",
             "duplicateOf": null,
             "notes": [
-                "⚠ proche de SOZ (même dict) : Attendre"
+                "⚠ proche de SOZ (même dict) : Debout › Attendre"
             ],
             "item": {
                 "type": "animation",
@@ -738,7 +738,7 @@
             "section": "Emotes",
             "duplicateOf": null,
             "notes": [
-                "⚠ proche de SOZ (même dict) : #2, #3"
+                "⚠ proche de SOZ (même dict) : Saluer › #2, Saluer › #3"
             ],
             "item": {
                 "type": "animation",
@@ -767,7 +767,7 @@
             "section": "Emotes",
             "duplicateOf": null,
             "notes": [
-                "⚠ proche de SOZ (même dict) : #2, #3"
+                "⚠ proche de SOZ (même dict) : Saluer › #2, Saluer › #3"
             ],
             "item": {
                 "type": "animation",
@@ -796,7 +796,7 @@
             "section": "Emotes",
             "duplicateOf": null,
             "notes": [
-                "⚠ proche de SOZ (même dict) : #2, #3"
+                "⚠ proche de SOZ (même dict) : Saluer › #2, Saluer › #3"
             ],
             "item": {
                 "type": "animation",
@@ -825,7 +825,7 @@
             "section": "Emotes",
             "duplicateOf": null,
             "notes": [
-                "⚠ proche de SOZ (même dict) : #6"
+                "⚠ proche de SOZ (même dict) : Joie › #6"
             ],
             "item": {
                 "type": "animation",
