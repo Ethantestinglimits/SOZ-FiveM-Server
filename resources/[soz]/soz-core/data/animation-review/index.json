@@ -1,0 +1,82 @@
+[
+    {
+        "id": "dances-01",
+        "title": "Danses 1/2 (boxdance → dj10)",
+        "count": 60
+    },
+    {
+        "id": "dances-02",
+        "title": "Danses 2/2 (dj11 → technodance4)",
+        "count": 14
+    },
+    {
+        "id": "scenarios",
+        "title": "Scénarios",
+        "count": 32
+    },
+    {
+        "id": "emotes-01",
+        "title": "Emotes 1/6 (addict → crouchreach)",
+        "count": 60
+    },
+    {
+        "id": "emotes-02",
+        "title": "Emotes 2/6 (crouchreach2 → idle8)",
+        "count": 60
+    },
+    {
+        "id": "emotes-03",
+        "title": "Emotes 3/6 (idle9 → nervous4)",
+        "count": 60
+    },
+    {
+        "id": "emotes-04",
+        "title": "Emotes 4/6 (no → sit3)",
+        "count": 60
+    },
+    {
+        "id": "emotes-05",
+        "title": "Emotes 5/6 (sit4 → tpose)",
+        "count": 60
+    },
+    {
+        "id": "emotes-06",
+        "title": "Emotes 6/6 (tpose2 → zombiewalk4)",
+        "count": 40
+    },
+    {
+        "id": "props-01",
+        "title": "Emotes avec props 1/5 (adjustbag → cashbox)",
+        "count": 60
+    },
+    {
+        "id": "props-02",
+        "title": "Emotes avec props 2/5 (cashcase → foodtrayn)",
+        "count": 60
+    },
+    {
+        "id": "props-03",
+        "title": "Emotes avec props 3/5 (foodtrayo → newspaper3)",
+        "count": 60
+    },
+    {
+        "id": "props-04",
+        "title": "Emotes avec props 4/5 (notepad → stickhummingbird)",
+        "count": 60
+    },
+    {
+        "id": "props-05",
+        "title": "Emotes avec props 5/5 (stire → wt5)",
+        "count": 51
+    },
+    {
+        "id": "walks",
+        "title": "Démarches",
+        "count": 51
+    },
+    {
+        "id": "moods",
+        "title": "Humeurs",
+        "count": 8
+    }
+]

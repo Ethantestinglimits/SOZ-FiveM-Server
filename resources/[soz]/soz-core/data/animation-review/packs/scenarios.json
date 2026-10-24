@@ -1,0 +1,589 @@
+{
+    "id": "scenarios",
+    "title": "Scénarios",
+    "source": "rpemotes-reborn",
+    "entries": [
+        {
+            "key": "atm",
+            "label": "ATM",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "ATM",
+                "rightLabel": null,
+                "icon": null,
+                "command": "atm",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "PROP_HUMAN_ATM"
+                }
+            }
+        },
+        {
+            "key": "bbq",
+            "label": "BBQ",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [
+                "scénario homme uniquement"
+            ],
+            "item": {
+                "type": "scenario",
+                "name": "BBQ",
+                "rightLabel": null,
+                "icon": null,
+                "command": "bbq",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "PROP_HUMAN_BBQ"
+                }
+            }
+        },
+        {
+            "key": "bumbin",
+            "label": "Bum Bin",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Bum Bin",
+                "rightLabel": null,
+                "icon": null,
+                "command": "bumbin",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "PROP_HUMAN_BUM_BIN"
+                }
+            }
+        },
+        {
+            "key": "cheer",
+            "label": "Cheer",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Cheer",
+                "rightLabel": null,
+                "icon": null,
+                "command": "cheer",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_CHEERING"
+                }
+            }
+        },
+        {
+            "key": "chinup",
+            "label": "Chinup",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Chinup",
+                "rightLabel": null,
+                "icon": null,
+                "command": "chinup",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "PROP_HUMAN_MUSCLE_CHIN_UPS"
+                }
+            }
+        },
+        {
+            "key": "clipboard2",
+            "label": "Clipboard 2",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [
+                "scénario homme uniquement"
+            ],
+            "item": {
+                "type": "scenario",
+                "name": "Clipboard 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "clipboard2",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_CLIPBOARD"
+                }
+            }
+        },
+        {
+            "key": "cop",
+            "label": "Cop",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Cop",
+                "rightLabel": null,
+                "icon": null,
+                "command": "cop",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_COP_IDLES"
+                }
+            }
+        },
+        {
+            "key": "drill",
+            "label": "Construction Drilling",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Construction Drilling",
+                "rightLabel": null,
+                "icon": null,
+                "command": "drill",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_CONST_DRILL"
+                }
+            }
+        },
+        {
+            "key": "garden",
+            "label": "Gardening",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Gardening",
+                "rightLabel": null,
+                "icon": null,
+                "command": "garden",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_GARDENER_PLANT"
+                }
+            }
+        },
+        {
+            "key": "guard",
+            "label": "Guard",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Guard",
+                "rightLabel": null,
+                "icon": null,
+                "command": "guard",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_GUARD_STAND"
+                }
+            }
+        },
+        {
+            "key": "hammer",
+            "label": "Hammer",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Hammer",
+                "rightLabel": null,
+                "icon": null,
+                "command": "hammer",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_HAMMERING"
+                }
+            }
+        },
+        {
+            "key": "hangout",
+            "label": "Hangout",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Hangout",
+                "rightLabel": null,
+                "icon": null,
+                "command": "hangout",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_HANG_OUT_STREET"
+                }
+            }
+        },
+        {
+            "key": "impatient",
+            "label": "Impatient",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Impatient",
+                "rightLabel": null,
+                "icon": null,
+                "command": "impatient",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_STAND_IMPATIENT"
+                }
+            }
+        },
+        {
+            "key": "janitor",
+            "label": "Janitor",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Janitor",
+                "rightLabel": null,
+                "icon": null,
+                "command": "janitor",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_JANITOR"
+                }
+            }
+        },
+        {
+            "key": "jog",
+            "label": "Jog",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Jog",
+                "rightLabel": null,
+                "icon": null,
+                "command": "jog",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_JOG_STANDING"
+                }
+            }
+        },
+        {
+            "key": "kneel",
+            "label": "Kneel",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Kneel",
+                "rightLabel": null,
+                "icon": null,
+                "command": "kneel",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "CODE_HUMAN_MEDIC_KNEEL"
+                }
+            }
+        },
+        {
+            "key": "leanbar",
+            "label": "Lean Bar",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Lean Bar",
+                "rightLabel": null,
+                "icon": null,
+                "command": "leanbar",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "PROP_HUMAN_BUM_SHOPPING_CART"
+                }
+            }
+        },
+        {
+            "key": "lookout",
+            "label": "Lookout",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Lookout",
+                "rightLabel": null,
+                "icon": null,
+                "command": "lookout",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "CODE_HUMAN_CROSS_ROAD_WAIT"
+                }
+            }
+        },
+        {
+            "key": "maid",
+            "label": "Maid",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Maid",
+                "rightLabel": null,
+                "icon": null,
+                "command": "maid",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_MAID_CLEAN"
+                }
+            }
+        },
+        {
+            "key": "medic",
+            "label": "Medic",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Medic",
+                "rightLabel": null,
+                "icon": null,
+                "command": "medic",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "CODE_HUMAN_MEDIC_TEND_TO_DEAD"
+                }
+            }
+        },
+        {
+            "key": "notepad2",
+            "label": "Notepad 2",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Notepad 2",
+                "rightLabel": null,
+                "icon": null,
+                "command": "notepad2",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "CODE_HUMAN_MEDIC_TIME_OF_DEATH"
+                }
+            }
+        },
+        {
+            "key": "parkingmeter",
+            "label": "Parking Meter",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Parking Meter",
+                "rightLabel": null,
+                "icon": null,
+                "command": "parkingmeter",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "PROP_HUMAN_PARKING_METER"
+                }
+            }
+        },
+        {
+            "key": "party",
+            "label": "Party",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Party",
+                "rightLabel": null,
+                "icon": null,
+                "command": "party",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_PARTYING"
+                }
+            }
+        },
+        {
+            "key": "puddle",
+            "label": "Puddle",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Puddle",
+                "rightLabel": null,
+                "icon": null,
+                "command": "puddle",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_BUM_WASH"
+                }
+            }
+        },
+        {
+            "key": "smoke",
+            "label": "Smoke",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Smoke",
+                "rightLabel": null,
+                "icon": null,
+                "command": "smoke",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_SMOKING"
+                }
+            }
+        },
+        {
+            "key": "smokeweed",
+            "label": "Smoke Weed (Male)",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [
+                "scénario homme uniquement"
+            ],
+            "item": {
+                "type": "scenario",
+                "name": "Smoke Weed (Male)",
+                "rightLabel": null,
+                "icon": null,
+                "command": "smokeweed",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_DRUG_DEALER"
+                }
+            }
+        },
+        {
+            "key": "smokeweed2",
+            "label": "Smoke Weed (Female)",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Smoke Weed (Female)",
+                "rightLabel": null,
+                "icon": null,
+                "command": "smokeweed2",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_SMOKING_POT"
+                }
+            }
+        },
+        {
+            "key": "statue",
+            "label": "Statue",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Statue",
+                "rightLabel": null,
+                "icon": null,
+                "command": "statue",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_HUMAN_STATUE"
+                }
+            }
+        },
+        {
+            "key": "texting",
+            "label": "Texting",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Texting",
+                "rightLabel": null,
+                "icon": null,
+                "command": "texting",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_STAND_MOBILE"
+                }
+            }
+        },
+        {
+            "key": "weld",
+            "label": "Weld",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Weld",
+                "rightLabel": null,
+                "icon": null,
+                "command": "weld",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_WELDING"
+                }
+            }
+        },
+        {
+            "key": "windowshop",
+            "label": "Window Shop",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Window Shop",
+                "rightLabel": null,
+                "icon": null,
+                "command": "windowshop",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_WINDOW_SHOP_BROWSE"
+                }
+            }
+        },
+        {
+            "key": "yoga",
+            "label": "Yoga",
+            "section": "Emotes",
+            "duplicateOf": null,
+            "notes": [],
+            "item": {
+                "type": "scenario",
+                "name": "Yoga",
+                "rightLabel": null,
+                "icon": null,
+                "command": "yoga",
+                "source": "rpemotes-reborn",
+                "scenario": {
+                    "name": "WORLD_HUMAN_YOGA"
+                }
+            }
+        }
+    ]
+}
