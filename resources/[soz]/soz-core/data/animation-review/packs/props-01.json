@@ -315,7 +315,9 @@
             "label": "Backpack",
             "section": "PropEmotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Tenir son sac"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Backpack",

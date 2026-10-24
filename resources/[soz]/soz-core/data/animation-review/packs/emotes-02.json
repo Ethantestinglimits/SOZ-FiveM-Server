@@ -257,7 +257,9 @@
             "label": "Earpiece",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Lire Livre Debout"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Earpiece",
@@ -391,7 +393,9 @@
             "label": "Fall Asleep 2",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Baisser la tête"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Fall Asleep 2",
@@ -440,7 +444,9 @@
             "label": "Fall Over 3",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Filmer"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Fall Over 3",
@@ -631,7 +637,9 @@
             "label": "Flip Off",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #1, #2"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Flip Off",
@@ -658,7 +666,9 @@
             "label": "Flip Off 2",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #1, #2"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Flip Off 2",
@@ -685,7 +695,9 @@
             "label": "Fold Arms",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Assis parterre #3"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Fold Arms",
@@ -820,7 +832,9 @@
             "label": "Grieve The Dead",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Attendre #6"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Grieve The Dead",
@@ -847,7 +861,9 @@
             "label": "Handshake 2",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Enlacer, Câliner, Check #1, Check #2 +2"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Handshake 2",

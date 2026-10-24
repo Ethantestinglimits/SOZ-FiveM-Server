@@ -8,7 +8,9 @@
             "label": "Boxing Dance Solo",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : C, L, R"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Boxing Dance Solo",
@@ -56,7 +58,9 @@
             "label": "Dance 4",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Bagareur, Et on accellère, Le pieeeed devant, #1 +1"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance 4",
@@ -80,7 +84,9 @@
             "label": "Dance 5",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : FUCK YEAAAH"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance 5",
@@ -128,7 +134,9 @@
             "label": "Dance 9",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #3, #4"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance 9",
@@ -152,7 +160,9 @@
             "label": "Dance Club 5",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Raising #1, Raising #2, Raising #3, Détente +8"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Club 5",
@@ -176,7 +186,9 @@
             "label": "Dance Club 6",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Raising #1, Raising #2, Raising #3, Détente +8"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Club 6",
@@ -200,7 +212,9 @@
             "label": "Dance Club 8",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Air Fist, Simple, Anguille #2, Cats #1 +78"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Club 8",
@@ -248,7 +262,9 @@
             "label": "Dance Club 10",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #3, #7, #8, Flirting +7"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Club 10",
@@ -272,7 +288,9 @@
             "label": "Dance Club 11",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Air Fist, Simple, Anguille #2, Cats #1 +78"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Club 11",
@@ -296,7 +314,9 @@
             "label": "Dance Club 12",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #3, #4"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Club 12",
@@ -320,7 +340,9 @@
             "label": "Dance Club 13",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ même danse que SOZ (autre variante) : Air #1, #1, Yeah Yeah"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Club 13",
@@ -344,7 +366,9 @@
             "label": "Dance Club 16",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : C, L, R"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Club 16",
@@ -392,7 +416,9 @@
             "label": "Dance Crank Dat",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : C, L, R"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Crank Dat",
@@ -416,7 +442,9 @@
             "label": "Dance Crank Dat 2",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : C, L, R"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Crank Dat 2",
@@ -760,7 +788,9 @@
             "label": "Dance Drink 9 (Beer)",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : C, L, R"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Drink 9 (Beer)",
@@ -824,7 +854,9 @@
             "label": "Dance F2",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #3, #4"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance F2",
@@ -848,7 +880,9 @@
             "label": "Dance F3",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #3, #4"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance F3",
@@ -920,7 +954,9 @@
             "label": "Dance F6",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #3, #4"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance F6",
@@ -1250,7 +1286,9 @@
             "label": "Monkey Dance 2",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Singe C, Singe L, Singe R"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Monkey Dance 2",
@@ -1274,7 +1312,9 @@
             "label": "Monkey Dance 3",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Singe C, Singe L, Singe R"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Monkey Dance 3",
@@ -1370,7 +1410,9 @@
             "label": "Dance Silly 12",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Spiderman, Bourré, Crampe, Hula Hoop +5"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Silly 12",
@@ -1442,7 +1484,9 @@
             "label": "Dance Silly 4",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Spiderman, Bourré, Crampe, Hula Hoop +5"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Silly 4",
@@ -1514,7 +1558,9 @@
             "label": "Dance Silly 7",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #1, #2, #3, #4 +1"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Silly 7",
@@ -1538,7 +1584,9 @@
             "label": "Dance Silly 8",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #1, #2, #3, #4 +1"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Silly 8",
@@ -1562,7 +1610,9 @@
             "label": "Dance Slow 2",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #3, #4"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Slow 2",
@@ -1586,7 +1636,9 @@
             "label": "Dance Slow 4",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #1"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Slow 4",
@@ -1610,7 +1662,9 @@
             "label": "Dance Upper",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #1"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dance Upper",
