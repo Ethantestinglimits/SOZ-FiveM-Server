@@ -276,7 +276,9 @@
             "label": "Techno Dance",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : C, L, R"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Techno Dance",
@@ -300,7 +302,9 @@
             "label": "Techno Dance 2",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : C, L, R"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Techno Dance 2",
@@ -324,7 +328,9 @@
             "label": "Techno Dance 4",
             "section": "Dances",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : C, L, R"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Techno Dance 4",

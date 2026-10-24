@@ -738,7 +738,8 @@
             "duplicateOf": null,
             "notes": [
                 "exit rpemotes: getup",
-                "startDelay: 700"
+                "startDelay: 700",
+                "⚠ proche de SOZ (même dict) : À genoux 3"
             ],
             "item": {
                 "type": "animation",
@@ -913,7 +914,9 @@
             "label": "Lean Flirt",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Départ de course"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Lean Flirt",
@@ -1171,7 +1174,9 @@
             "label": "LOL",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Check #3, Check #4, High Five #2, High Five #3 +2"
+            ],
             "item": {
                 "type": "animation",
                 "name": "LOL",
@@ -1195,7 +1200,9 @@
             "label": "LOL 2",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : « Shhht » bourré, Rire #1, Backflip, Capoeira +5"
+            ],
             "item": {
                 "type": "animation",
                 "name": "LOL 2",
@@ -1219,7 +1226,9 @@
             "label": "Lost & Confused",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #6"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Lost & Confused",
@@ -1241,7 +1250,9 @@
             "label": "Mechanic",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Réparer"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Mechanic",
@@ -1401,7 +1412,9 @@
             "label": "Mind Control",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Fier"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Mind Control",
@@ -1425,7 +1438,9 @@
             "label": "Mind Control 2",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Fier"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Mind Control 2",

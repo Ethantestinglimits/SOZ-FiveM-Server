@@ -360,7 +360,8 @@
             "section": "PropEmotes",
             "duplicateOf": null,
             "notes": [
-                "variantes de texture du prop ignorées"
+                "variantes de texture du prop ignorées",
+                "⚠ proche de SOZ (même dict) : Lire Livre Debout"
             ],
             "item": {
                 "type": "animation",

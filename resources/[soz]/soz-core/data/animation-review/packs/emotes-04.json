@@ -91,7 +91,9 @@
             "label": "No Way",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Damn, Non, Oui, WTF +1"
+            ],
             "item": {
                 "type": "animation",
                 "name": "No Way",
@@ -675,7 +677,9 @@
             "label": "Point",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Moi"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Point",
@@ -702,7 +706,9 @@
             "label": "Point Down",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Moi"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Point Down",
@@ -831,7 +837,8 @@
             "duplicateOf": null,
             "notes": [
                 "exit rpemotes: getup",
-                "startDelay: 700"
+                "startDelay: 700",
+                "⚠ proche de SOZ (même dict) : HipHop"
             ],
             "item": {
                 "type": "animation",
@@ -1419,7 +1426,9 @@
             "label": "Shower Enter Male",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Prendre une douche"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Shower Enter Male",
@@ -1443,7 +1452,9 @@
             "label": "Shower Male 2",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Prendre une douche"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Shower Male 2",
@@ -1467,7 +1478,9 @@
             "label": "Shower Male 3",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Prendre une douche"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Shower Male 3",
@@ -1491,7 +1504,9 @@
             "label": "Shrug",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Moi"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Shrug",
@@ -1520,7 +1535,8 @@
             "section": "Emotes",
             "duplicateOf": null,
             "notes": [
-                "exit rpemotes: getup"
+                "exit rpemotes: getup",
+                "⚠ proche de SOZ (même dict) : Peur à genoux 3"
             ],
             "item": {
                 "type": "animation",

@@ -8,7 +8,9 @@
             "label": "T Pose 2",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Baisser la tête"
+            ],
             "item": {
                 "type": "animation",
                 "name": "T Pose 2",
@@ -379,7 +381,9 @@
             "label": "Wait 12",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Attendre"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Wait 12",
@@ -406,7 +410,9 @@
             "label": "Wait 13",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Calmes-toi"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Wait 13",
@@ -731,7 +737,9 @@
             "label": "Wave 5",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #2, #3"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Wave 5",
@@ -758,7 +766,9 @@
             "label": "Wave 6",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #2, #3"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Wave 6",
@@ -785,7 +795,9 @@
             "label": "Wave 7",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #2, #3"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Wave 7",
@@ -812,7 +824,9 @@
             "label": "Welcome Back",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : #6"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Welcome Back",
@@ -884,7 +898,9 @@
             "label": "Yoga 2",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Namaste !"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Yoga 2",

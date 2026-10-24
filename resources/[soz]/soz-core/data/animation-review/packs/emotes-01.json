@@ -405,7 +405,8 @@
             "section": "Emotes",
             "duplicateOf": null,
             "notes": [
-                "⚠ contexte suggestif possible: mini@hookers_sp idle_reject"
+                "⚠ contexte suggestif possible: mini@hookers_sp idle_reject",
+                "⚠ proche de SOZ (même dict) : Bras croisés #1, Bouder"
             ],
             "item": {
                 "type": "animation",
@@ -757,7 +758,9 @@
             "label": "Capoeira",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : C, L, R"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Capoeira",
@@ -781,7 +784,9 @@
             "label": "Capoeira 2",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : C, L, R"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Capoeira 2",
@@ -904,7 +909,9 @@
             "label": "Clap Angry",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : « Shhht » bourré, Rire #1, Backflip, Capoeira +5"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Clap Angry",
@@ -1132,7 +1139,9 @@
             "label": "Come at me bro",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Jambes #1, Bras #1, Jambes #2, Bras #2"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Come at me bro",
@@ -1289,7 +1298,9 @@
             "label": "Crossarms 4",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Départ de course"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Crossarms 4",
@@ -1448,7 +1459,9 @@
             "label": "Crossarms Side",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : De côté contre un mur"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Crossarms Side",

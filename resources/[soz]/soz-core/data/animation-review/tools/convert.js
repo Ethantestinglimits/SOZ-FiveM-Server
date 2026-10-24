@@ -32,6 +32,26 @@ for (const m of sozConfig.matchAll(/name: '([^']+)',\s*rightLabel[\s\S]*?diction
 for (const m of sozConfig.matchAll(/dictionary: '([^']+)',\s*name: '([^']+)'/g)) {
     if (!sozAnims.has(`${m[1]}|${m[2]}`)) sozAnims.set(`${m[1]}|${m[2]}`, '?');
 }
+const sozAnimsByDict = new Map();
+for (const m of sozConfig.matchAll(/name: '([^']+)',\s*rightLabel[\s\S]*?dictionary: '([^']+)',\s*name: '([^']+)'/g)) {
+    if (!sozAnimsByDict.has(m[2])) sozAnimsByDict.set(m[2], []);
+    sozAnimsByDict.get(m[2]).push({ name: m[1], clip: m[3] });
+}
+
+const variantOf = clip => clip.replace(/\^\d+$/, '').toLowerCase();
+const listNames = anims => {
+    const names = [...new Set(anims.map(a => a.name))];
+    return names.length > 4 ? `${names.slice(0, 4).join(', ')} +${names.length - 4}` : names.join(', ');
+};
+
+const closeToSoz = (dict, clip) => {
+    const sameDict = (sozAnimsByDict.get(dict) || []).filter(a => a.clip !== clip);
+    if (!sameDict.length) return null;
+    const sameVariant = sameDict.filter(a => variantOf(a.clip) === variantOf(clip));
+    if (sameVariant.length) return `⚠ même danse que SOZ (autre variante) : ${listNames(sameVariant)}`;
+    return `⚠ proche de SOZ (même dict) : ${listNames(sameDict)}`;
+};
+
 const sozAnimsWithProps = new Map();
 for (const m of sozConfig.matchAll(
     /name: '([^']+)',\s*rightLabel[\s\S]*?dictionary: '([^']+)',\s*name: '([^']+)'[\s\S]*?(?=type: '(?:animation|scenario|category)'|$)/g
@@ -141,6 +161,8 @@ function convertAnim(section, e) {
     const models = [opts.Prop, opts.SecondProp].filter(Boolean).sort().join(',');
     const duplicateWithProps = opts.Prop && sozAnimsWithProps.get(`${dict}|${clip}|${models}`);
     if (duplicateWithProps) return exclude(section, e, 'duplicate-soz', { label, soz: duplicateWithProps });
+    const close = closeToSoz(dict, clip);
+    if (close) notes.push(close);
 
     let flag = resolveFlag(opts.onFootFlag ?? opts.Flag);
     if (flag === null) flag = opts.EmoteMoving ? 51 : opts.EmoteLoop ? 1 : 0;

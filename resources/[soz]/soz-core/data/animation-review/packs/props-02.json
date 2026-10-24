@@ -912,7 +912,9 @@
             "label": "Dig",
             "section": "PropEmotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Menotté au sol"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Dig",

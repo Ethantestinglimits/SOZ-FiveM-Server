@@ -137,7 +137,9 @@
             "label": "Garbage Bag",
             "section": "PropEmotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Tenir Serpillère"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Garbage Bag",

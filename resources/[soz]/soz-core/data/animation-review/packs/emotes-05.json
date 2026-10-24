@@ -62,7 +62,8 @@
             "duplicateOf": null,
             "notes": [
                 "exit rpemotes: getup",
-                "startDelay: 900"
+                "startDelay: 900",
+                "⚠ proche de SOZ (même dict) : Triste par terre"
             ],
             "item": {
                 "type": "animation",
@@ -374,7 +375,8 @@
             "section": "Emotes",
             "duplicateOf": null,
             "notes": [
-                "exit rpemotes: getup"
+                "exit rpemotes: getup",
+                "⚠ proche de SOZ (même dict) : Assis parterre #3"
             ],
             "item": {
                 "type": "animation",
@@ -400,7 +402,8 @@
             "section": "Emotes",
             "duplicateOf": null,
             "notes": [
-                "exit rpemotes: getup"
+                "exit rpemotes: getup",
+                "⚠ proche de SOZ (même dict) : Couché sur le ventre"
             ],
             "item": {
                 "type": "animation",
@@ -581,7 +584,9 @@
             "label": "Slide 2",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : « Shhht » bourré, Rire #1, Backflip, Capoeira +5"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Slide 2",
@@ -603,7 +608,9 @@
             "label": "Slide 3",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : « Shhht » bourré, Rire #1, Backflip, Capoeira +5"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Slide 3",
@@ -706,7 +713,9 @@
             "label": "Slugger",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : « Shhht » bourré, Rire #1, Backflip, Capoeira +5"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Slugger",
@@ -1175,7 +1184,8 @@
             "section": "Emotes",
             "duplicateOf": null,
             "notes": [
-                "exit rpemotes: getup"
+                "exit rpemotes: getup",
+                "⚠ proche de SOZ (même dict) : Fier"
             ],
             "item": {
                 "type": "animation",
@@ -1201,7 +1211,8 @@
             "section": "Emotes",
             "duplicateOf": null,
             "notes": [
-                "exit rpemotes: getup"
+                "exit rpemotes: getup",
+                "⚠ proche de SOZ (même dict) : Peur à genoux"
             ],
             "item": {
                 "type": "animation",
@@ -1488,7 +1499,9 @@
             "label": "Thumbs Up 3",
             "section": "Emotes",
             "duplicateOf": null,
-            "notes": [],
+            "notes": [
+                "⚠ proche de SOZ (même dict) : Isoké"
+            ],
             "item": {
                 "type": "animation",
                 "name": "Thumbs Up 3",
