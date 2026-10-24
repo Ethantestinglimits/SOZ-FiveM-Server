@@ -8021,5 +8021,215 @@
         "key": "coyplaydeadexit",
         "label": null,
         "reason": "section-skipped"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "bongos",
+        "label": "Bongo Drums",
+        "reason": "duplicate-soz",
+        "soz": "Bongos"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "book",
+        "label": "Book",
+        "reason": "duplicate-soz",
+        "soz": "Lire Livre Debout"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "boombox",
+        "label": "Boombox",
+        "reason": "duplicate-soz",
+        "soz": "Radiocassette"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "box",
+        "label": "Box",
+        "reason": "duplicate-soz",
+        "soz": "Porter Carton"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "broom3",
+        "label": "Broom 3",
+        "reason": "duplicate-soz",
+        "soz": "Balayer"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "champagne",
+        "label": "Champagne",
+        "reason": "duplicate-soz",
+        "soz": "Coupe Champagne"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "clean",
+        "label": "Clean",
+        "reason": "duplicate-soz",
+        "soz": "Laver la table"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "clean2",
+        "label": "Clean 2",
+        "reason": "duplicate-soz",
+        "soz": "Laver les vitres"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "cop4",
+        "label": "Cop 4",
+        "reason": "duplicate-soz",
+        "soz": "Circulation"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "copbeacon",
+        "label": "Cop Beacon",
+        "reason": "duplicate-soz",
+        "soz": "Circulation"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "dufbag3",
+        "label": "Duffel Bag 3",
+        "reason": "duplicate-soz",
+        "soz": "Sac de Sport"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "guitar",
+        "label": "Guitar",
+        "reason": "duplicate-soz",
+        "soz": "Guitare  #1"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "guitar2",
+        "label": "Guitar 2",
+        "reason": "duplicate-soz",
+        "soz": "Guitare  #2"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "guitarcarry",
+        "label": "Guitar Case Carry",
+        "reason": "duplicate-soz",
+        "soz": "Guitare Transport"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "guitarelectric",
+        "label": "Guitar Electric",
+        "reason": "duplicate-soz",
+        "soz": "Guitare Electrique  #2"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "guitarelectric2",
+        "label": "Guitar Electric 2",
+        "reason": "duplicate-soz",
+        "soz": "Guitare Electrique  #1"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "medbag",
+        "label": "Medic Bag",
+        "reason": "duplicate-soz",
+        "soz": "Trousse Médicale"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "mop",
+        "label": "Mop",
+        "reason": "duplicate-soz",
+        "soz": "Tenir Serpillère"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "mop2",
+        "label": "Mop 2",
+        "reason": "duplicate-soz",
+        "soz": "Passer la Serpillère"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "newspaper",
+        "label": "Newspaper",
+        "reason": "duplicate-soz",
+        "soz": "Journal #1"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "newspaper2",
+        "label": "Newspaper 2",
+        "reason": "duplicate-soz",
+        "soz": "Journal #2"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "newspaper3",
+        "label": "Newspaper 3",
+        "reason": "duplicate-soz",
+        "soz": "Journal #3"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "notepad",
+        "label": "Notepad",
+        "reason": "duplicate-soz",
+        "soz": "Réparer 2"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "patrolf1",
+        "label": "Patrol - On Foot",
+        "reason": "duplicate-soz",
+        "soz": "Lampe torche"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "rake3",
+        "label": "Rake 3",
+        "reason": "duplicate-soz",
+        "soz": "ratisser"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "shopbag",
+        "label": "Shopping Bag",
+        "reason": "duplicate-soz",
+        "soz": "Sac Shopping  #3"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "shopbag2",
+        "label": "Shopping Bag 2",
+        "reason": "duplicate-soz",
+        "soz": "Sac Shopping  #2"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "shopbag3",
+        "label": "Shopping Bag 3",
+        "reason": "duplicate-soz",
+        "soz": "Sac Shopping  #1"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "toolbox",
+        "label": "Toolbox",
+        "reason": "duplicate-soz",
+        "soz": "Boite à Outils  #1"
+    },
+    {
+        "section": "PropEmotes",
+        "key": "toolbox2",
+        "label": "Toolbox 2",
+        "reason": "duplicate-soz",
+        "soz": "Boite à Outils  #2"
     }
 ]
