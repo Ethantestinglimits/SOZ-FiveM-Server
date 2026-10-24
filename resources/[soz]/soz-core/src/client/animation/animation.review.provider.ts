@@ -14,6 +14,7 @@ import {
 } from '../../shared/animation';
 import { Font } from '../../shared/hud';
 import { Control } from '../../shared/input';
+import { isStaff } from '../../shared/player';
 import { RpcServerEvent } from '../../shared/rpc';
 import { DrawService } from '../draw.service';
 import { Notifier } from '../notifier';
@@ -210,9 +211,14 @@ export class AnimationReviewProvider {
 
     @Command('epack', {
         description: "Trier un pack d'emotes (/epack, /epack <pack>, /epack stop)",
-        role: ['admin', 'staff'],
     })
     public async reviewPack(source: number, packId?: string) {
+        const player = this.playerService.getPlayer();
+
+        if (!player || !isStaff(player)) {
+            return;
+        }
+
         if (!packId) {
             await this.listPacks();
 
@@ -247,7 +253,6 @@ export class AnimationReviewProvider {
 
     @Command('enote', {
         description: "Ajouter une note à l'emote en cours de tri",
-        role: ['admin', 'staff'],
     })
     public async noteEntry(source: number, ...words: string[]) {
         const entry = this.currentEntry();
