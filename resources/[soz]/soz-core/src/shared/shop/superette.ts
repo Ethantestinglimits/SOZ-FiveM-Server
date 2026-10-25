@@ -28,6 +28,7 @@ const SuperetteContent: ShopContent = [
     { id: 'binoculars', type: 'item', price: 7 },
     { id: 'protestsign', type: 'item', price: 180 },
     { id: 'phone', type: 'item', price: 450 },
+    { id: 'zim_card', type: 'item', price: 100 },
     { id: 'umbrella', type: 'item', price: 900 },
     { id: 'umbrella_white', type: 'item', price: 900 },
     { id: 'umbrella_black', type: 'item', price: 900 },

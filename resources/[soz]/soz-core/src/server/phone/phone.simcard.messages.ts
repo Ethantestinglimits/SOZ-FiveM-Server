@@ -75,15 +75,14 @@ export class PhoneSimCardMessages {
             return;
         }
 
-        const conversationId = [device.simNumber, phoneNumber].sort().join('+');
-        const conversation = await this.upsertConversation(device.id, device.simNumber, phoneNumber, conversationId);
+        const conversation = await this.upsertConversation(device.id, device.simNumber, phoneNumber);
 
         await this.notifyConversationReload(source, device.id);
 
         const target = await this.phoneDeviceService.findDeviceByNumber(phoneNumber);
 
-        if (target) {
-            await this.upsertConversation(target.deviceId, phoneNumber, device.simNumber, conversationId);
+        if (target && target.deviceId !== device.id) {
+            await this.upsertConversation(target.deviceId, phoneNumber, device.simNumber);
 
             if (target.source && target.isMain) {
                 await this.notifyConversationReload(target.source, target.deviceId);
@@ -151,25 +150,41 @@ export class PhoneSimCardMessages {
             return [];
         }
 
-        const messages = await this.prismaService.phone_messages.findMany({
-            select: {
-                id: true,
-                conversation_id: true,
-                message: true,
-                author: true,
-                createdAt: true,
-            },
-            where: {
-                device_id: device.id,
-            },
-            orderBy: {
-                id: 'desc',
-            },
-        });
+        const [messages, conversations] = await Promise.all([
+            this.prismaService.phone_messages.findMany({
+                select: {
+                    id: true,
+                    conversation_id: true,
+                    message: true,
+                    author: true,
+                    createdAt: true,
+                },
+                where: {
+                    device_id: device.id,
+                },
+                orderBy: {
+                    id: 'desc',
+                },
+            }),
+            this.prismaService.phone_messages_conversations.findMany({
+                select: {
+                    conversation_id: true,
+                    participant_identifier: true,
+                },
+                where: {
+                    device_id: device.id,
+                },
+            }),
+        ]);
+
+        const participants = new Map(
+            conversations.map(conversation => [conversation.conversation_id, conversation.participant_identifier])
+        );
 
         return messages.map(message => ({
             ...message,
             createdAt: Number(message.createdAt),
+            isMine: message.author !== participants.get(message.conversation_id),
         }));
     }
 
@@ -197,35 +212,34 @@ export class PhoneSimCardMessages {
                 device_id: device.id,
                 user_identifier: '',
                 author: device.simNumber,
-                conversation_id: conversationId,
+                conversation_id: conversation.conversation_id,
                 message,
             },
         });
 
-        await this.prismaService.phone_messages_conversations.updateMany({
+        await this.prismaService.phone_messages_conversations.update({
             where: {
-                conversation_id: conversationId,
-                device_id: device.id,
+                id: conversation.id,
             },
             data: {
                 masked: false,
                 updatedAt: new Date(),
+                user_identifier: device.simNumber,
             },
         });
 
-        this.notifyNewMessage(source, device.id, createdMessage);
+        this.notifyNewMessage(source, device.id, createdMessage, true);
 
         const target = await this.phoneDeviceService.findDeviceByNumber(conversation.participant_identifier);
 
-        if (!target) {
+        if (!target || target.deviceId === device.id) {
             return;
         }
 
-        await this.upsertConversation(
+        const targetConversation = await this.upsertConversation(
             target.deviceId,
             conversation.participant_identifier,
-            device.simNumber,
-            conversationId
+            device.simNumber
         );
 
         const targetMessage = await this.prismaService.phone_messages.create({
@@ -233,19 +247,16 @@ export class PhoneSimCardMessages {
                 device_id: target.deviceId,
                 user_identifier: '',
                 author: device.simNumber,
-                conversation_id: conversationId,
+                conversation_id: targetConversation.conversation_id,
                 message,
             },
         });
 
-        await this.prismaService.phone_messages_conversations.updateMany({
+        await this.prismaService.phone_messages_conversations.update({
             where: {
-                conversation_id: conversationId,
-                device_id: target.deviceId,
+                id: targetConversation.id,
             },
             data: {
-                masked: false,
-                updatedAt: new Date(),
                 unread: {
                     increment: 1,
                 },
@@ -253,20 +264,18 @@ export class PhoneSimCardMessages {
         });
 
         if (target.source && target.isMain) {
-            this.notifyNewMessage(target.source, target.deviceId, targetMessage);
+            this.notifyNewMessage(target.source, target.deviceId, targetMessage, false);
         }
     }
 
-    private async upsertConversation(
-        deviceId: string,
-        ownNumber: string,
-        participantNumber: string,
-        conversationId: string
-    ) {
+    private async upsertConversation(deviceId: string, ownNumber: string, participantNumber: string) {
         const existing = await this.prismaService.phone_messages_conversations.findFirst({
             where: {
-                conversation_id: conversationId,
                 device_id: deviceId,
+                participant_identifier: participantNumber,
+            },
+            orderBy: {
+                updatedAt: 'desc',
             },
         });
 
@@ -278,6 +287,7 @@ export class PhoneSimCardMessages {
                 data: {
                     masked: false,
                     updatedAt: new Date(),
+                    user_identifier: ownNumber,
                 },
             });
 
@@ -287,18 +297,19 @@ export class PhoneSimCardMessages {
         return this.prismaService.phone_messages_conversations.create({
             data: {
                 device_id: deviceId,
-                conversation_id: conversationId,
+                conversation_id: [ownNumber, participantNumber].sort().join('+'),
                 user_identifier: ownNumber,
                 participant_identifier: participantNumber,
             },
         });
     }
 
-    private notifyNewMessage(source: number, deviceId: string, message: { createdAt: Date }) {
+    private notifyNewMessage(source: number, deviceId: string, message: { createdAt: Date }, isMine: boolean) {
         TriggerClientEvent(ClientEvent.PHONE_SIMCARD_MESSAGES_MESSAGE_NEW, source, {
             ...message,
             createdAt: Number(message.createdAt),
             device_id: deviceId,
+            isMine,
         });
     }
 

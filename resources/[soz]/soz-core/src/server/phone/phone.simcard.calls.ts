@@ -33,6 +33,10 @@ export class PhoneSimCardCalls {
         }
 
         const target = await this.phoneDeviceService.findDeviceByNumber(phoneNumber);
+
+        if (target?.source === source) {
+            return Err('same_inventory');
+        }
         if (!target?.source || !target.isMain || this.playerAlreadyInCall(target.source)) {
             const identifier = uuidv4();
 

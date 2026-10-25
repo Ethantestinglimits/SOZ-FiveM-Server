@@ -105,7 +105,10 @@ export const filteredConversationsAtom = atom<Array<MessageConversation & { last
 
             return {
                 ...c,
-                last_message: formatMessage(lastMessage?.message, lastMessage?.author === myNumber),
+                last_message: formatMessage(
+                    lastMessage?.message,
+                    lastMessage?.isMine ?? lastMessage?.author === myNumber
+                ),
             };
         });
 });
@@ -160,7 +163,7 @@ export const useSimCardStateHandlers = () => {
 
     useNuiEvent('phone', 'SetMessages', setMessages);
     useNuiEvent('phone', 'AddMessage', (message: Message) => {
-        if (!message.isMuted && number !== message.author) {
+        if (!message.isMuted && !(message.isMine ?? number === message.author)) {
             notificationSound.play();
             addNotification(
                 {

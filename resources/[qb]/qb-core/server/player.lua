@@ -677,6 +677,9 @@ function QBCore.Player.DeleteCharacter(source, citizenid)
     local license = QBCore.Functions.GetSozIdentifier(src)
     local result = exports.oxmysql:scalarSync("SELECT license FROM player where citizenid = ?", {citizenid})
     if license == result then
+        pcall(function()
+            exports["soz-core"]:DeletePlayerPhoneData(citizenid)
+        end)
         for k, v in pairs(playertables) do
             exports.oxmysql:execute("DELETE FROM " .. v.table .. " WHERE citizenid = ?", {citizenid})
         end
@@ -724,19 +727,22 @@ function QBCore.Player.CreateFingerId()
 end
 
 function QBCore.Player.CreatePhoneNumber()
-    local UniqueFound = false
-    local PhoneNumber = nil
-    while not UniqueFound do
-        PhoneNumber = tostring("555-" .. QBCore.Shared.RandomInt(4))
-        local query = "%" .. PhoneNumber .. "%"
-        local result = exports.oxmysql:executeSync("SELECT COUNT(*) as count FROM `player` WHERE `charinfo` LIKE ?", {
-            query,
-        })
-        if result[1].count == 0 then
-            UniqueFound = true
+    local prefix = 555
+    while prefix <= 999 do
+        for _ = 1, 50 do
+            local PhoneNumber = tostring(prefix .. "-" .. QBCore.Shared.RandomInt(4))
+            local query = "%" .. PhoneNumber .. "%"
+            local playerResult = exports.oxmysql:executeSync(
+                                     "SELECT COUNT(*) as count FROM `player` WHERE `charinfo` LIKE ?", {query})
+            local simResult = exports.oxmysql:executeSync("SELECT COUNT(*) as count FROM `phone_sim` WHERE `number` = ?",
+                                                          {PhoneNumber})
+            if playerResult[1].count == 0 and simResult[1].count == 0 then
+                return PhoneNumber
+            end
         end
+        prefix = prefix + 1
     end
-    return PhoneNumber
+    return tostring("555-" .. QBCore.Shared.RandomInt(4))
 end
 
 function QBCore.Player.CreateWalletId()

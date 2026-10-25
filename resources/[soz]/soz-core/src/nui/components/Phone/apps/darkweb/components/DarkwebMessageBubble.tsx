@@ -14,9 +14,9 @@ import { Button } from '../../../components/Button';
 import { Emoji } from '../../../components/Emoji';
 import { PictureReveal } from '../../../components/PictureReveal';
 import { useTextZoomConfig, useThemeConfig } from '../../../system/config/config.atom';
-import { useSimCard } from '../../../system/sim-card/hooks/useSimCard';
 import { isImage } from '../../messages/utils/image';
 import { getAddress, isPosition, isVec2Position, isVec3Position } from '../../messages/utils/position';
+import { useDarkWebIdentity } from '../darkweb.atom';
 
 interface DarkWebMessageBubbleProps {
     message: DarkwebMessage;
@@ -27,7 +27,7 @@ export const DarkWebMessageBubble: React.FC<DarkWebMessageBubbleProps> = ({ mess
     const theme = useThemeConfig();
     const zoom = useTextZoomConfig();
 
-    const { number } = useSimCard();
+    const number = useDarkWebIdentity();
     const copyToClipboard = useClipboard();
 
     const [address, setAddress] = useState('');

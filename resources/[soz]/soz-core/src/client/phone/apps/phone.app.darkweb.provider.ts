@@ -2,17 +2,34 @@ import { Provider } from '@public/core/decorators/provider';
 import { ClientEvent } from '@public/shared/event/client';
 import { RpcServerEvent } from '@public/shared/rpc';
 
-import { OnEvent, OnNuiEvent } from '../../../core/decorators/event';
+import { Once, OnceStep, OnEvent, OnNuiEvent } from '../../../core/decorators/event';
 import { Inject } from '../../../core/decorators/injectable';
 import { emitRpc } from '../../../core/rpc';
 import { NuiEvent } from '../../../shared/event/nui';
 import { DarkwebConversation, DarkwebMessage, PreDBDarkwebMessage } from '../../../shared/phone/apps/darkweb';
 import { NuiDispatch } from '../../nui/nui.dispatch';
+import { PlayerService } from '../../player/player.service';
 
 @Provider()
 export class PhoneAppDarkWebProvider {
     @Inject(NuiDispatch)
     private readonly nuiDispatch: NuiDispatch;
+
+    @Inject(PlayerService)
+    private readonly playerService: PlayerService;
+
+    @Once(OnceStep.NuiLoaded)
+    @Once(OnceStep.PlayerLoaded)
+    @OnEvent(ClientEvent.ADMIN_SWITCH_CHARACTER)
+    async sendDarkWebIdentity() {
+        const player = this.playerService.getPlayer();
+
+        if (!player) {
+            return;
+        }
+
+        this.nuiDispatch.dispatch('phone', 'AppDarkWebSetIdentity', player.charinfo.phone);
+    }
 
     @OnNuiEvent(NuiEvent.PhoneAppDarkWebFetchConversations)
     async fetchConversations() {

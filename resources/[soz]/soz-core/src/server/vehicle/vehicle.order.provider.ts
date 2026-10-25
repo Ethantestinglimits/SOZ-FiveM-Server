@@ -28,6 +28,7 @@ import { PrismaService } from '../database/prisma.service';
 import { FeatureProvider } from '../feature/feature.provider';
 import { Monitor } from '../monitor/monitor';
 import { Notifier } from '../notifier';
+import { PhoneDeviceService } from '../phone/phone.device.service';
 import { PlayerMoneyService } from '../player/player.money.service';
 import { PlayerService } from '../player/player.service';
 import { VehicleRepository } from '../repository/vehicle.repository';
@@ -48,6 +49,9 @@ export class VehicleOrderProvider {
 
     @Inject(BankService)
     private bankService: BankService;
+
+    @Inject(PhoneDeviceService)
+    private phoneDeviceService: PhoneDeviceService;
 
     @Inject(PlayerService)
     private playerService: PlayerService;
@@ -182,7 +186,9 @@ export class VehicleOrderProvider {
             waitTime = config.waitingTime;
             garage = Configs[player.job.id].garage;
         } else if ([VehicleOrderMode.Crimi, VehicleOrderMode.Cartel].includes(mode)) {
-            playerDst = this.playerService.getPlayerByPhone(phone);
+            const phoneTarget = await this.phoneDeviceService.findDeviceByNumber(phone);
+
+            playerDst = phoneTarget?.source ? this.playerService.getPlayer(phoneTarget.source) : null;
             if (!playerDst) {
                 this.notifier.notify(source, `Le numéro n'est pas actif.`, 'error');
                 return this.getOrders(source, mode);

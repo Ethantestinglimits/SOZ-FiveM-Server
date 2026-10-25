@@ -31,6 +31,7 @@ export interface NuiPhoneMap {
     SetDialSound: boolean;
     SetEndSound: never;
     PlayNotificationSound: never;
+    AppDarkWebSetIdentity: string;
     SetCurrentCall: ActiveCall;
     SetCallsHistory: CallHistory[];
 

@@ -58,7 +58,7 @@ export const MessageBubble: FunctionComponent<MessageBubbleProps> = ({ message }
         }
     }, [message.message]);
 
-    const isMine = message.author === number;
+    const isMine = message.isMine ?? message.author === number;
 
     return (
         <div

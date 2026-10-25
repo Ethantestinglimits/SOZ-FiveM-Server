@@ -6,11 +6,13 @@ import { DarkwebConversation, DarkwebMessage, DarkwebParticipant } from '../../.
 import { useNuiEvent } from '../../../../hook/nui';
 import { useInjectDebugData } from '../../system/debug/hooks/useInjectDebugData';
 import { useNotifications } from '../../system/notifications/hooks/useNotifications';
-import { useSimCard } from '../../system/sim-card/hooks/useSimCard';
 import { useRingtoneSound } from '../../system/sound/hooks/useRingtoneSound';
 import { useDarkWebAPI } from './hooks/useDarkwebApi';
 
 const enabledAtom = atom(false);
+const identityAtom = atom('');
+
+export const useDarkWebIdentity = () => useAtomValue(identityAtom);
 
 export const conversationsAtom = atom<DarkwebConversation[]>([]);
 export const conversationSearchQueryAtom = atom('');
@@ -31,9 +33,10 @@ export const useDarkWebParticipants = () => useAtomValue(participantsAtom);
 
 export const useAppDarkWebStateHandlers = () => {
     const setEnabled = useSetAtom(enabledAtom);
+    const setIdentity = useSetAtom(identityAtom);
 
     const navigate = useNavigate();
-    const { number } = useSimCard();
+    const number = useAtomValue(identityAtom);
     const notificationSound = useRingtoneSound('notiSound', false);
     const { addNotification } = useNotifications();
 
@@ -42,6 +45,7 @@ export const useAppDarkWebStateHandlers = () => {
     const setMessages = useSetAtom(messagesAtom);
 
     useNuiEvent('phone', 'AppDarkWebHasDongle', setEnabled);
+    useNuiEvent('phone', 'AppDarkWebSetIdentity', setIdentity);
     useNuiEvent('phone', 'AppDarkWebNewMessage', message => {
         const conversation = conversations?.find(c => c.id === message.conversation_id);
 

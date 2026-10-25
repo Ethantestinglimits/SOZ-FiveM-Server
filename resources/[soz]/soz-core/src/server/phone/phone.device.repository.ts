@@ -3,10 +3,16 @@ import { Prisma } from '@prisma/client';
 import { Inject, Injectable } from '../../core/decorators/injectable';
 import { uuidv4 } from '../../core/utils';
 import { PhoneDeviceSettings } from '../../shared/phone/device';
+import { getRandomInt } from '../../shared/random';
 import { Err, Ok, Result } from '../../shared/result';
 import { PrismaService } from '../database/prisma.service';
 
 export type InsertSimError = 'device_has_sim' | 'sim_not_found' | 'sim_in_use';
+
+const NUMBER_PREFIX_START = 555;
+const NUMBER_PREFIX_END = 999;
+
+const formatNumber = (prefix: number, suffix: number): string => `${prefix}-${String(suffix).padStart(4, '0')}`;
 
 const isUniqueViolation = (error: unknown): boolean =>
     error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
@@ -49,7 +55,7 @@ export class PhoneDeviceRepository {
 
     public async createSim(owner: string | null = null): Promise<string> {
         for (let attempt = 0; attempt < 20; attempt++) {
-            const number = `555-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
+            const number = await this.generateAvailableNumber();
 
             try {
                 await this.prismaService.phone_sim.create({ data: { number, owner } });
@@ -65,6 +71,92 @@ export class PhoneDeviceRepository {
         }
 
         throw new Error('phone: impossible de générer un numéro de Carte ZIM libre');
+    }
+
+    public async deleteDevices(deviceIds: string[]): Promise<void> {
+        if (deviceIds.length === 0) {
+            return;
+        }
+
+        const where = { device_id: { in: deviceIds } };
+
+        await this.prismaService.phone_contacts.deleteMany({ where });
+        await this.prismaService.phone_notes.deleteMany({ where });
+        await this.prismaService.phone_gallery.deleteMany({ where });
+        await this.prismaService.phone_calls.deleteMany({ where });
+        await this.prismaService.phone_messages.deleteMany({ where });
+        await this.prismaService.phone_messages_conversations.deleteMany({ where });
+        await this.prismaService.phone_device.deleteMany({ where: { id: { in: deviceIds } } });
+    }
+
+    public async releaseSim(number: string): Promise<void> {
+        await this.prismaService.phone_device.updateMany({
+            where: { sim_number: number },
+            data: { sim_number: null },
+        });
+
+        await this.prismaService.phone_profile.deleteMany({ where: { number } });
+        await this.prismaService.phone_sim.deleteMany({ where: { number } });
+    }
+
+    private async generateAvailableNumber(): Promise<string> {
+        for (let prefix = NUMBER_PREFIX_START; prefix <= NUMBER_PREFIX_END; prefix++) {
+            for (let attempt = 0; attempt < 25; attempt++) {
+                const number = formatNumber(prefix, getRandomInt(0, 9999));
+
+                if (!(await this.isNumberTaken(number))) {
+                    return number;
+                }
+            }
+
+            const number = await this.findFreeNumberInPrefix(prefix);
+
+            if (number) {
+                return number;
+            }
+        }
+
+        throw new Error('phone: plus aucun numéro de téléphone disponible');
+    }
+
+    private async isNumberTaken(number: string): Promise<boolean> {
+        const sim = await this.prismaService.phone_sim.findUnique({ where: { number }, select: { number: true } });
+
+        if (sim) {
+            return true;
+        }
+
+        const players = await this.prismaService.$queryRaw<{ count: bigint }[]>`
+            SELECT COUNT(*) AS count FROM player WHERE charinfo LIKE ${'%' + number + '%'}
+        `;
+
+        return Number(players[0]?.count ?? 0) > 0;
+    }
+
+    private async findFreeNumberInPrefix(prefix: number): Promise<string | null> {
+        const [sims, players] = await Promise.all([
+            this.prismaService.phone_sim.findMany({
+                where: { number: { startsWith: `${prefix}-` } },
+                select: { number: true },
+            }),
+            this.prismaService.$queryRaw<{ number: string }[]>`
+                SELECT JSON_UNQUOTE(JSON_EXTRACT(charinfo, '$.phone')) AS number
+                FROM player
+                WHERE JSON_VALID(charinfo)
+            `,
+        ]);
+
+        const taken = new Set([...sims.map(sim => sim.number), ...players.map(player => player.number)]);
+
+        for (let suffix = 0; suffix < 10000; suffix++) {
+            const number = formatNumber(prefix, suffix);
+
+            if (!taken.has(number)) {
+                return number;
+            }
+        }
+
+        return null;
     }
 
     public async insertSim(deviceId: string, number: string): Promise<Result<void, InsertSimError>> {
