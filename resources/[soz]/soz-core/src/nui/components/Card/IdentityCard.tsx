@@ -56,7 +56,11 @@ export const IdentityCard: FunctionComponent<IdentityCardProps> = ({ player }) =
                     </div>
                     <div>
                         <h3 className="text-xs leading-none">Numéro de téléphone</h3>
-                        <p className="uppercase leading-none">{player.charinfo.phone}</p>
+                        <p className="uppercase leading-none">
+                            {player.metadata?.mainPhoneNumber === undefined
+                                ? player.charinfo.phone
+                                : player.metadata.mainPhoneNumber || '-'}
+                        </p>
                     </div>
                     {!player.is_validated && (
                         <div>

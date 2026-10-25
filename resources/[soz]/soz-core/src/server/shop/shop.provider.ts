@@ -3,6 +3,7 @@ import { ProperTorsos, ShopBrand, UndershirtCategoryNeedingReplacementTorso } fr
 import { BankService } from '@public/server/bank/bank.service';
 import { InventoryFactory } from '@public/server/inventory/inventory.factory';
 import { InventoryProvider } from '@public/server/inventory/inventory.provider';
+import { PhoneDeviceRepository } from '@public/server/phone/phone.device.repository';
 import { PlayerPositionProvider } from '@public/server/player/player.position.provider';
 import { VehicleSpawner } from '@public/server/vehicle/vehicle.spawner';
 import { VehicleStateService } from '@public/server/vehicle/vehicle.state.service';
@@ -42,6 +43,7 @@ import { ApparelComponentToItem, ApparelPropToItem, OutfitItem } from '../../sha
 import { ClientEvent, ServerEvent } from '../../shared/event';
 import { Feature } from '../../shared/features';
 import { ADD_ERROR_MESSAGE, InventoryItemMetadata, InventoryType } from '../../shared/inventory';
+import { ZIM_CARD_ITEM } from '../../shared/phone/device';
 import { Vector3, Vector4 } from '../../shared/polyzone/vector';
 import { isErr, isOk } from '../../shared/result';
 import { RpcServerEvent } from '../../shared/rpc';
@@ -58,6 +60,9 @@ import { ClothingShopRepository } from '../repository/cloth.shop.repository';
 export class ShopProvider {
     @Inject(Notifier)
     private notifier: Notifier;
+
+    @Inject(PhoneDeviceRepository)
+    private phoneDeviceRepository: PhoneDeviceRepository;
 
     @Inject(InventoryFactory)
     private inventoryFactory: InventoryFactory;
@@ -167,15 +172,15 @@ export class ShopProvider {
             }
         }
 
-        cartContent.map(item => {
+        for (const item of cartContent) {
             if (!item.unique) {
-                inventory.add(item.name, item.amount, item.metadata);
+                inventory.add(item.name, item.amount, await this.getPurchaseMetadata(item.name, item.metadata));
             } else {
                 for (let i = 0; i < item.amount; i++) {
-                    inventory.add(item.name, 1, item.metadata);
+                    inventory.add(item.name, 1, await this.getPurchaseMetadata(item.name, item.metadata));
                 }
             }
-        });
+        }
 
         if (['money', 'marked_money'].includes(moneyType)) {
             const price = await this.priceService.getPrice(cartAmount, taxType);
@@ -603,6 +608,17 @@ export class ShopProvider {
         this.notifier.notify(source, `Vous venez de vous faire retirer tous vos tatouages`, 'success');
     }
 
+    private async getPurchaseMetadata(
+        itemName: string,
+        metadata: InventoryItemMetadata
+    ): Promise<InventoryItemMetadata> {
+        if (itemName !== ZIM_CARD_ITEM) {
+            return metadata;
+        }
+
+        return { simNumber: await this.phoneDeviceRepository.createSim() };
+    }
+
     public async shopGeneralBuy(source: number, product: ShopProduct, quantity: number, taxType: TaxType) {
         if (quantity < 1) {
             return;
@@ -625,7 +641,7 @@ export class ShopProvider {
             this.notifier.notify(source, `Ah mais t'es pauvre en fait ! Reviens quand t'auras de quoi payer.`, 'error');
             return;
         }
-        if (isOk(inventory.add(product.id, quantity, product.metadata))) {
+        if (isOk(inventory.add(product.id, quantity, await this.getPurchaseMetadata(product.id, product.metadata)))) {
             this.notifier.notify(
                 source,
                 `Vous avez acheté ~b~${quantity} ${product.item.label}~s~ pour ~g~$${await this.priceService.getPrice(

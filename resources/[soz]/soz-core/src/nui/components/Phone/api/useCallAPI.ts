@@ -28,6 +28,10 @@ export const useCallAPI = () => {
             fetchNui<string, Result<any, string>>(NuiEvent.PhoneSimCardCallsInit, number)
                 .then(resp => {
                     if (isErr(resp)) {
+                        if (resp.err === 'same_inventory') {
+                            return;
+                        }
+
                         addNotification({ title: t('CALLS.FEEDBACK.UNAVAILABLE'), app: 'dialer' });
                         return;
                     }

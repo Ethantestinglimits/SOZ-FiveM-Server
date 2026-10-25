@@ -1,12 +1,14 @@
 import { phone_device } from '@prisma/client';
 import { Provider } from '@public/core/decorators/provider';
 
+import { Command } from '../../core/decorators/command';
 import { On, Once, OnEvent } from '../../core/decorators/event';
+import { Exportable } from '../../core/decorators/exports';
 import { Inject } from '../../core/decorators/injectable';
 import { Rpc } from '../../core/decorators/rpc';
 import { ClientEvent } from '../../shared/event/client';
 import { ServerEvent } from '../../shared/event/server';
-import { ADD_ERROR_MESSAGE, InventoryItem } from '../../shared/inventory';
+import { ADD_ERROR_MESSAGE, InventoryItem, InventoryType } from '../../shared/inventory';
 import {
     isValidPinCode,
     PHONE_ITEM,
@@ -98,10 +100,13 @@ export class PhoneDeviceProvider {
         const main = await this.findMainPhone(source);
 
         if (!main) {
+            this.syncMainPhoneNumber(source, null);
+
             return null;
         }
 
         this.phoneDeviceService.setOpenedDevice(source, main.device);
+        this.syncMainPhoneNumber(source, main.device.simNumber);
 
         return main.device;
     }
@@ -216,6 +221,7 @@ export class PhoneDeviceProvider {
         }
 
         await this.phoneDeviceRepository.setMainDevice(player.citizenid, phone.device.id);
+        this.syncMainPhoneNumber(source, phone.device.simNumber);
 
         const opened = this.phoneDeviceService.getOpenedDevice(source);
 
@@ -276,6 +282,10 @@ export class PhoneDeviceProvider {
 
         const updated = this.phoneDeviceService.updateOpenedDevice(source, { ...device, simNumber: null });
 
+        if (device.isMain) {
+            this.syncMainPhoneNumber(source, null);
+        }
+
         this.notifier.notify(source, 'Vous avez retiré la ~b~Carte ZIM ' + number + '~s~.', 'success');
         TriggerClientEvent(ClientEvent.PHONE_DEVICE_UPDATE, source, updated);
     }
@@ -325,8 +335,120 @@ export class PhoneDeviceProvider {
 
         const updated = this.phoneDeviceService.updateOpenedDevice(source, { ...device, simNumber: number });
 
+        if (device.isMain) {
+            this.syncMainPhoneNumber(source, number);
+        }
+
         this.notifier.notify(source, 'Vous avez inséré la ~b~Carte ZIM ' + number + '~s~.', 'success');
         TriggerClientEvent(ClientEvent.PHONE_DEVICE_UPDATE, source, updated);
+    }
+
+    @Exportable('ReleasePlayerSimCards')
+    public async releasePlayerSimCards(citizenid: string): Promise<number> {
+        const inventory = await this.inventoryFactory.getOrCreate(`player_${citizenid}`, InventoryType.Player, {
+            owner: citizenid,
+            persistent: true,
+        });
+
+        if (!inventory) {
+            return 0;
+        }
+
+        const numbers = new Set<string>();
+
+        for (const inventoryItem of Object.values(inventory.items())) {
+            if (inventoryItem.name === ZIM_CARD_ITEM) {
+                if (inventoryItem.metadata?.simNumber) {
+                    numbers.add(inventoryItem.metadata.simNumber);
+                }
+
+                inventory.removeAtSlot(inventoryItem.slot, inventoryItem.amount);
+
+                continue;
+            }
+
+            if (inventoryItem.name !== PHONE_ITEM || !inventoryItem.metadata?.id) {
+                continue;
+            }
+
+            const device = await this.phoneDeviceRepository.getDevice(inventoryItem.metadata.id);
+
+            if (device?.sim_number) {
+                numbers.add(device.sim_number);
+            }
+
+            inventory.updateMetadataAtSlot(inventoryItem.slot, { simNumber: undefined });
+        }
+
+        await inventory.observe();
+
+        for (const number of numbers) {
+            await this.phoneDeviceRepository.releaseSim(number);
+        }
+
+        return numbers.size;
+    }
+
+    @Exportable('DeletePlayerPhoneData')
+    public async deletePlayerPhoneData(citizenid: string): Promise<number> {
+        const inventory = await this.inventoryFactory.getOrCreate(`player_${citizenid}`, InventoryType.Player, {
+            owner: citizenid,
+            persistent: true,
+        });
+
+        if (!inventory) {
+            return 0;
+        }
+
+        const deviceIds = new Set<string>();
+        const numbers = new Set<string>();
+
+        for (const inventoryItem of Object.values(inventory.items())) {
+            if (inventoryItem.name === ZIM_CARD_ITEM && inventoryItem.metadata?.simNumber) {
+                numbers.add(inventoryItem.metadata.simNumber);
+            }
+
+            if (inventoryItem.name === PHONE_ITEM && inventoryItem.metadata?.id) {
+                deviceIds.add(inventoryItem.metadata.id);
+            }
+        }
+
+        for (const deviceId of deviceIds) {
+            const device = await this.phoneDeviceRepository.getDevice(deviceId);
+
+            if (device?.sim_number) {
+                numbers.add(device.sim_number);
+            }
+        }
+
+        await this.phoneDeviceRepository.deleteDevices([...deviceIds]);
+
+        for (const number of numbers) {
+            await this.phoneDeviceRepository.releaseSim(number);
+        }
+
+        return deviceIds.size;
+    }
+
+    @Command('releasezim', {
+        description: 'Libère les Cartes ZIM que le personnage a sur lui (Admin)',
+        arguments: [{ name: 'citizenid', help: 'Citizen ID du personnage' }],
+        role: 'admin',
+    })
+    public async releaseSimCardsCommand(source: number, citizenid: string): Promise<void> {
+        if (!citizenid) {
+            this.notifier.error(source, 'Il faut préciser un citizen ID.');
+
+            return;
+        }
+
+        const released = await this.releasePlayerSimCards(citizenid);
+
+        this.notifier.notify(source, `${released} Carte(s) ZIM libérée(s) pour ~b~${citizenid}~s~.`, 'success');
+    }
+
+    private syncMainPhoneNumber(source: number, simNumber: string | null): void {
+        this.playerService.setPlayerMetadata(source, 'mainPhoneNumber', simNumber);
     }
 
     private async findMainPhone(

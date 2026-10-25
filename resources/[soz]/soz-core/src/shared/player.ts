@@ -352,6 +352,7 @@ export type PlayerInsideState = {
 };
 
 export type PlayerMetadata = PlayerHealthBook & {
+    mainPhoneNumber?: string | null;
     godmode: boolean;
     isdead: boolean;
     ishandcuffed: boolean;

@@ -5,7 +5,7 @@ import cn from 'classnames';
 import { ChangeEvent, FunctionComponent, memo, useEffect, useState } from 'react';
 
 import { InputBase } from '../../../components/Input';
-import { useSimCard } from '../../../system/sim-card/hooks/useSimCard';
+import { useDarkWebIdentity } from '../darkweb.atom';
 import { useDarkWebAPI } from '../hooks/useDarkwebApi';
 import { useParticipants } from '../hooks/useParticipants';
 
@@ -60,7 +60,7 @@ export const DarkWebConversationSettingsModal = memo(
             }
         };
 
-        const { number } = useSimCard();
+        const number = useDarkWebIdentity();
 
         const removeAdmin = (admin: DarkwebParticipant) => {
             updateParticipantRole(conversation.id, admin.phoneNumber, 'USER');
