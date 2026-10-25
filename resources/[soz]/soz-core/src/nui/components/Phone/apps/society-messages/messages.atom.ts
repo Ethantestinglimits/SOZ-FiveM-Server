@@ -66,9 +66,10 @@ export const useSocietyMessagesStateHandlers = () => {
         }
     };
 
-    useNuiEvent('phone', 'AppSocietySetData', setMessages);
+    useNuiEvent('phone', 'AppSocietySetData', (messages: SocietyMessage[]) => setMessages(messages || []));
     useNuiEvent('phone', 'AppSocietyPatchData', (data: SocietyMessage) => {
-        setMessages(prev => {
+        setMessages(current => {
+            const prev = current || [];
             const index = prev.findIndex(m => m.id === data.id);
             if (index === -1) {
                 handleNewMessageAlert(data);
