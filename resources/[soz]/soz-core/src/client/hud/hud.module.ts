@@ -3,6 +3,7 @@ import { HudCompassProvider } from './hud.compass.provider';
 import { HudCrosshairProvider } from './hud.crosshair.provider';
 import { HudGlassmorphismProvider } from './hud.glassmorphism.provider';
 import { HudMinimapProvider } from './hud.minimap.provider';
+import { HudLayoutProvider } from './hud.layout.provider';
 import { HudNewsProvider } from './hud.news.provider';
 import { HudNotificationsProvider } from './hud.notifications.provider';
 import { HudStateProvider } from './hud.state.provider';
@@ -16,6 +17,7 @@ import { HudWeatherIconProvider } from './hud.weathericon.provider';
     providers: [
         HudCompassProvider,
         HudCrosshairProvider,
+        HudLayoutProvider,
         HudMinimapProvider,
         HudNewsProvider,
         HudNotificationsProvider,

@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { useAssetPath } from '../../hook/assets';
 import { useAmmo, useHudHasStreetNames, useMinimap } from '../../hook/data';
 import { RootState } from '../../store';
+import { useHudLayout } from './hudLayoutState';
 
 export const WeaponInterface: FunctionComponent = () => {
     const minimap = useMinimap();
@@ -13,6 +14,7 @@ export const WeaponInterface: FunctionComponent = () => {
     const hasStreetNamesEnabled = useHudHasStreetNames();
     const switchPlayerStatsPosition = useSelector((state: RootState) => state.hud.settings.switchPlayerStatsPosition);
     const ammo = useAmmo();
+    const layout = useHudLayout().ammo;
 
     const [ammoStyles] = useSpring(
         () => ({
@@ -20,20 +22,21 @@ export const WeaponInterface: FunctionComponent = () => {
                 top: '150vh',
             },
             to: {
-                top: ammo.hasWeapon ? `${(minimap.bottom + 0.005) * 100}vh` : '150vh',
-                right: `${(minimap.left + 0.005) * 100}vw`,
+                top: ammo.hasWeapon ? (layout ? `${layout.y}vh` : `${(minimap.bottom + 0.005) * 100}vh`) : '150vh',
+                right: layout ? `${100 - layout.x}vw` : `${(minimap.left + 0.005) * 100}vw`,
             },
         }),
-        [ammo, minimap]
+        [ammo, minimap, layout]
     );
 
     return (
         <animated.div
             className={cn('absolute flex gap-1 items-center justify-center text-white w-fit drop-shadow-bg', {
                 '-mt-14':
-                    (!switchPlayerStatsPosition && !hasStreetNamesEnabled) ||
-                    (switchPlayerStatsPosition && hasStreetNamesEnabled),
-                '-mt-28': switchPlayerStatsPosition && !hasStreetNamesEnabled,
+                    !layout &&
+                    ((!switchPlayerStatsPosition && !hasStreetNamesEnabled) ||
+                        (switchPlayerStatsPosition && hasStreetNamesEnabled)),
+                '-mt-28': !layout && switchPlayerStatsPosition && !hasStreetNamesEnabled,
             })}
             style={ammoStyles}
         >

@@ -13,6 +13,7 @@ import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
 import { formatText } from '../../utils/gta-format';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
+import { useHudLayout } from './hudLayoutState';
 
 type NotificationProps = {
     notification: BasicNotification | AdvancedNotification;
@@ -369,6 +370,8 @@ export const Notifications: FunctionComponent = () => {
         [createNotification]
     );
 
+    const layout = useHudLayout().notifications;
+
     const styles = useSpring({
         from: {
             top: 0,
@@ -376,8 +379,8 @@ export const Notifications: FunctionComponent = () => {
         },
         to: {
             top: 0,
-            bottom: `calc(${100 - minimap.top * 100}vh + ${notificationOffset()})`,
-            left: `calc(100vw * ${minimap.left + 0.004})`,
+            bottom: layout ? `${100 - layout.y}vh` : `calc(${100 - minimap.top * 100}vh + ${notificationOffset()})`,
+            left: layout ? `${layout.x}vw` : `calc(100vw * ${minimap.left + 0.004})`,
             width: `calc(100vw * ${minimap.width})`,
         },
     });
