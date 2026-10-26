@@ -161,9 +161,20 @@ export class PauseNativeSettingsDriver {
             return false;
         }
 
-        await this.press(Control.FrontendAccept);
+        for (let attempt = 0; attempt < 3; attempt++) {
+            await wait(400);
+            await this.press(Control.FrontendAccept);
 
-        return waitUntil(async () => this.getPage() === NATIVE_SETTINGS_PAGE, PAGE_TIMEOUT);
+            const opened = await waitUntil(async () => this.getPage() === NATIVE_SETTINGS_PAGE, 1500);
+
+            this.log(`validation de la catégorie, essai ${attempt} ${this.state()}`);
+
+            if (opened) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private async goToRow(row: number): Promise<boolean> {
