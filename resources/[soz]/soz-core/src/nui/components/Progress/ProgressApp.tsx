@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import { NuiEvent } from '../../../shared/event/nui';
 import { Progress } from '../../../shared/nui/progress';
 import { fetchNui } from '../../fetch';
-import { useHudHasStreetNames, useHudMinimap, useVehicle } from '../../hook/data';
+import { useHudHasStreetNames, useMinimap, useVehicle } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
 import { useHudColor } from '../Hud/hooks/useHudColor';
@@ -67,7 +67,7 @@ export const ProgressContent: FunctionComponent<ProgressContentProps> = ({ progr
 );
 
 export const ProgressApp: FunctionComponent = () => {
-    const minimap = useHudMinimap();
+    const minimap = useMinimap();
     const layout = useHudLayout().progress;
     const vehicle = useVehicle();
     const hasStreetNamesEnabled = useHudHasStreetNames();
