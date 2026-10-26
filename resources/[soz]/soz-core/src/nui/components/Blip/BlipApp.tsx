@@ -41,7 +41,7 @@ export const BlipApp: FunctionComponent = () => {
 
     return (
         <main
-            className="absolute flex flex-col items-center inset-0 h-full w-full overflow-hidden"
+            className="absolute z-[100] flex flex-col items-center inset-0 h-full w-full overflow-hidden"
             style={{ cursor: 'none' }}
         >
             <div className="mt-[52vh]">

@@ -59,7 +59,7 @@ type MapImage = { x0: number; y0: number; x1: number; y1: number; levels: Canvas
 
 export type MinimapCallbacks = {
     onModeChange: (mode: MinimapMode) => void;
-    onClick: (point: MinimapPoint) => void;
+    onClick: (point: MinimapPoint, blip?: MinimapBlip) => void;
     onRightClick: () => void;
 };
 
@@ -890,7 +890,7 @@ export class MinimapRenderer {
         const blip = this.findBlipAt(sx, sy);
 
         if (blip) {
-            this.callbacks.onClick({ x: blip.x, y: blip.y });
+            this.callbacks.onClick({ x: blip.x, y: blip.y }, blip);
 
             return;
         }

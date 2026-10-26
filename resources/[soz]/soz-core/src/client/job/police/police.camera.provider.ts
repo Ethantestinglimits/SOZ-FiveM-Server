@@ -2,6 +2,7 @@ import { BlipAction, BlipFactory } from '@public/client/blip';
 import { HudWatchProvider } from '@public/client/hud/hud.watch.provider';
 import { Notifier } from '@public/client/notifier';
 import { NuiDispatch } from '@public/client/nui/nui.dispatch';
+import { PauseMenuProvider } from '@public/client/pause/pause.menu.provider';
 import { PlayerService } from '@public/client/player/player.service';
 import { HackedCamRepository } from '@public/client/repository/hacked.cam.repository';
 import { TargetFactory } from '@public/client/target/target.factory';
@@ -56,6 +57,9 @@ export class PoliceCameraProvider {
 
     @Inject(HackedCamRepository)
     private readonly hackedCamRepository: HackedCamRepository;
+
+    @Inject(PauseMenuProvider)
+    private readonly pauseMenuProvider: PauseMenuProvider;
 
     @Inject(Notifier)
     private readonly notifier: Notifier;
@@ -294,7 +298,7 @@ export class PoliceCameraProvider {
                             await this.cleanBlips(blips, savedBlips);
                             blips = [];
                             savedBlips = {};
-                            SetFrontendActive(false);
+                            this.pauseMenuProvider.close();
                             this.createWebcam(data);
                         },
                         data: camInfo,
@@ -324,14 +328,13 @@ export class PoliceCameraProvider {
             throw error;
         }
 
-        SetFrontendActive(true);
-        await wait(1000);
-        while (IsPauseMenuActive()) {
-            await wait(0);
+        try {
+            await this.pauseMenuProvider.openMapForScript();
+        } finally {
+            await this.cleanBlips(blips, savedBlips);
+            blips = [];
+            savedBlips = {};
         }
-        await this.cleanBlips(blips, savedBlips);
-        blips = [];
-        savedBlips = {};
     }
 
     private async cleanBlips(blips: string[], savedBlips: Record<string, Blip>) {
