@@ -1,3 +1,4 @@
+import { Command } from '../../core/decorators/command';
 import { OnNuiEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
@@ -6,6 +7,7 @@ import { NuiEvent } from '../../shared/event';
 import {
     PAUSE_NATIVE_CONVARS,
     PAUSE_NATIVE_EDITABLE,
+    PauseNativeConvar,
     PauseNativeSettingChange,
     PauseSettingChange,
     PauseSettingsData,
@@ -44,17 +46,21 @@ export class PauseSettingsProvider {
 
     @OnNuiEvent(NuiEvent.PauseMenuSetNativeSetting)
     public async onSetNativeSetting({ convar, value }: PauseNativeSettingChange): Promise<void> {
-        const range = PAUSE_NATIVE_EDITABLE[convar];
+        ExecuteCommand(`pause_native_set ${convar} ${value}`);
+        await wait(100);
+        this.nuiDispatch.dispatch('pause_menu', 'Settings', this.getSettings());
+    }
 
-        if (!range || !Number.isFinite(value)) {
+    @Command('pause_native_set')
+    public setNativeSetting(_source: number, convar?: string, value?: string): void {
+        const range = PAUSE_NATIVE_EDITABLE[convar as PauseNativeConvar];
+        const number = Number(value);
+
+        if (!range || !Number.isFinite(number)) {
             return;
         }
 
-        const clamped = Math.round(Math.min(range.max, Math.max(range.min, value)));
-
-        ExecuteCommand(`${convar} ${clamped}`);
-        await wait(100);
-        this.nuiDispatch.dispatch('pause_menu', 'Settings', this.getSettings());
+        ExecuteCommand(`${convar} ${Math.round(Math.min(range.max, Math.max(range.min, number)))}`);
     }
 
     @OnNuiEvent(NuiEvent.PauseMenuResetSettings)
