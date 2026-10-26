@@ -199,7 +199,17 @@ export const PauseMenuApp: FunctionComponent = () => {
                     { 'opacity-0': mode === 'minimap' || mode === 'closing' },
                 )}
             />
-            {showContent && (
+            {showContent && data.scriptMode && (
+                <div className="absolute right-[4vh] top-[4vh] z-[80]">
+                    <button
+                        onClick={close}
+                        className="rounded-[1vh] bg-black/70 px-[2vh] py-[1vh] text-[1.5vh] font-semibold uppercase text-white transition-colors hover:bg-black/90"
+                    >
+                        Fermer
+                    </button>
+                </div>
+            )}
+            {showContent && !data.scriptMode && (
                 <FadeIn as="aside" className="relative w-[17vw] shrink-0">
                     <Glass className="flex h-full flex-col gap-[2vh] p-[2.5vh]">
                         <img src="assets/pause/soz_logo.webp" alt="SoZ" className="h-[4vh] w-auto self-start" />
@@ -260,7 +270,7 @@ export const PauseMenuApp: FunctionComponent = () => {
                     </Glass>
                 </FadeIn>
             )}
-            {showContent && (
+            {showContent && !data.scriptMode && (
                 <FadeIn as="main" className="relative min-h-0 min-w-0 flex-1">
                     {tab === 'settings' && (
                         <Glass className="h-full">
