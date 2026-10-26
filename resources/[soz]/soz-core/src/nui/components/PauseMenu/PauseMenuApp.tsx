@@ -199,10 +199,11 @@ export const PauseMenuApp: FunctionComponent = () => {
     return (
         <div className="absolute inset-0 z-[60] flex select-none gap-[2vh] p-[3vh] font-prompt text-white">
             <div
-                className={classNames(
-                    'absolute inset-0 bg-gradient-to-b from-black/50 via-black/25 to-black/50 transition-opacity duration-300',
-                    { 'opacity-0': mode === 'minimap' || mode === 'closing' },
-                )}
+                className={classNames('absolute inset-0 transition-opacity duration-300', {
+                    'bg-gradient-to-b from-black/50 via-black/25 to-black/50': !data.settings.server.potato,
+                    'bg-black': data.settings.server.potato,
+                    'opacity-0': mode === 'minimap' || mode === 'closing',
+                })}
             />
             {showContent &&
                 data.scriptMode &&
