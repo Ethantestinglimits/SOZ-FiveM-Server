@@ -1,3 +1,5 @@
+import { PauseSettingsData } from './pause_settings';
+
 export type PauseMapLayer = 'postals' | 'regions' | 'blips';
 
 export type PauseMapPlace = {
@@ -26,9 +28,11 @@ export type PauseMenuData = {
     places: PauseMapPlace[];
     regions: PauseMapRegion[];
     layers: PauseMapLayer[];
+    settings: PauseSettingsData;
 };
 
 export interface NuiPauseMenuMethodMap {
     Open: PauseMenuData;
     Close: never;
+    Settings: PauseSettingsData;
 }

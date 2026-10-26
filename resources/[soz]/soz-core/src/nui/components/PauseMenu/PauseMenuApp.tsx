@@ -10,6 +10,7 @@ import { useNuiEvent, useNuiFocus } from '../../hook/nui';
 import { minimapController, setMapTabActive, useMinimapMode } from '../Minimap/minimapState';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
 import { MapSidebar } from './MapSidebar';
+import { SettingsMain, SettingsSidebar } from './settings/SettingsView';
 
 type PauseMenuTab = 'map' | 'settings';
 
@@ -110,6 +111,7 @@ export const PauseMenuApp: FunctionComponent = () => {
     const [tab, setTab] = useState<PauseMenuTab>('map');
     const [confirmQuit, setConfirmQuit] = useState(false);
     const [layers, setLayers] = useState<PauseMapLayer[]>([]);
+    const [settingsCategory, setSettingsCategory] = useState('map');
     const mode = useMinimapMode();
     const showContent = mode === 'open';
 
@@ -122,6 +124,7 @@ export const PauseMenuApp: FunctionComponent = () => {
         setData(menuData);
     });
     useNuiEvent('pause_menu', 'Close', () => setData(null));
+    useNuiEvent('pause_menu', 'Settings', settings => setData(current => current && { ...current, settings }));
 
     useEffect(() => {
         setMapTabActive(tab === 'map');
@@ -216,7 +219,7 @@ export const PauseMenuApp: FunctionComponent = () => {
                         {tab === 'map' ? (
                             <MapSidebar data={data} layers={layers} onLayersChange={setLayers} />
                         ) : (
-                            <div className="min-h-0 flex-1" />
+                            <SettingsSidebar category={settingsCategory} onCategoryChange={setSettingsCategory} />
                         )}
 
                         <div className="flex flex-col gap-[0.8vh]">
@@ -239,8 +242,8 @@ export const PauseMenuApp: FunctionComponent = () => {
             {showContent && (
                 <main className="relative min-h-0 min-w-0 flex-1">
                     {tab === 'settings' && (
-                        <Glass className="flex h-full items-center justify-center p-[3vh]">
-                            <span className="text-[1.8vh] text-white/50">Paramètres</span>
+                        <Glass className="h-full">
+                            <SettingsMain category={settingsCategory} settings={data.settings} />
                         </Glass>
                     )}
                 </main>
