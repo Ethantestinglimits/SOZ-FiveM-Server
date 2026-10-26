@@ -1,9 +1,9 @@
 import { RefreshIcon, SearchIcon } from '@heroicons/react/outline';
 import classNames from 'classnames';
-import { FunctionComponent, useMemo, useState } from 'react';
+import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 
 import { NuiEvent } from '../../../../shared/event';
-import { PauseSettingsData } from '../../../../shared/nui/pause_settings';
+import { PAUSE_NATIVE_EDITABLE, PauseNativeConvar, PauseSettingsData } from '../../../../shared/nui/pause_settings';
 import { fetchNui } from '../../../fetch';
 import { SETTING_CATEGORIES, SettingCategory, SettingItem } from './definitions';
 
@@ -48,6 +48,38 @@ export const SettingsSidebar: FunctionComponent<SettingsSidebarProps> = ({ categ
     </div>
 );
 
+const NativeSlider: FunctionComponent<{ convar: PauseNativeConvar; min: number; max: number; value: number }> = ({
+    convar,
+    min,
+    max,
+    value,
+}) => {
+    const [local, setLocal] = useState(value);
+
+    useEffect(() => {
+        setLocal(value);
+    }, [value]);
+
+    const commit = () => fetchNui(NuiEvent.PauseMenuSetNativeSetting, { convar, value: local });
+
+    return (
+        <div className="flex items-center gap-[1.2vh]">
+            <input
+                type="range"
+                min={min}
+                max={max}
+                step={1}
+                value={local}
+                onChange={event => setLocal(Number(event.target.value))}
+                onPointerUp={commit}
+                onKeyUp={commit}
+                className="h-[0.6vh] w-[16vh] cursor-pointer accent-white"
+            />
+            <span className="w-[3vh] text-right text-[1.4vh] font-semibold tabular-nums">{local}</span>
+        </div>
+    );
+};
+
 type SettingRowProps = {
     item: SettingItem;
     settings: PauseSettingsData;
@@ -73,12 +105,29 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
         );
     } else {
         const raw = settings.native[item.convar];
+        const range = PAUSE_NATIVE_EDITABLE[item.convar];
+        const label = raw === undefined || raw < 0 ? '—' : item.format(raw);
 
-        control = (
-            <span className="rounded-[0.8vh] bg-white/10 px-[1.4vh] py-[0.4vh] text-[1.4vh] font-semibold text-white/80">
-                {raw === undefined || raw < 0 ? '—' : item.format(raw)}
-            </span>
-        );
+        if (range && range.max === 1 && raw !== undefined && raw >= 0) {
+            control = (
+                <button
+                    onClick={() =>
+                        fetchNui(NuiEvent.PauseMenuSetNativeSetting, { convar: item.convar, value: raw > 0 ? 0 : 1 })
+                    }
+                    className="rounded-[0.8vh] bg-white/15 px-[1.4vh] py-[0.4vh] text-[1.4vh] font-semibold text-white transition-colors hover:bg-white/30"
+                >
+                    {label}
+                </button>
+            );
+        } else if (range && raw !== undefined && raw >= 0) {
+            control = <NativeSlider convar={item.convar} min={range.min} max={range.max} value={raw} />;
+        } else {
+            control = (
+                <span className="rounded-[0.8vh] bg-white/10 px-[1.4vh] py-[0.4vh] text-[1.4vh] font-semibold text-white/80">
+                    {label}
+                </span>
+            );
+        }
     }
 
     return (
@@ -140,7 +189,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                         <div className="mb-[0.8vh] flex items-center justify-between">
                             <span className="text-[1.2vh] font-semibold uppercase tracking-[0.2em] text-white/50">
                                 {section.category.label}
-                                {section.category.native && ' · lecture seule'}
+                                {section.category.native && ' · réglages GTA'}
                             </span>
                         </div>
                         <ul className="flex flex-col gap-[0.6vh]">
