@@ -2,7 +2,7 @@ import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Tick, TickInterval } from '../../core/decorators/tick';
 import { BlipType } from '../../shared/blip';
-import { MinimapBlip, MinimapZone } from '../../shared/nui/minimap';
+import { MinimapBlip, MinimapPoint, MinimapZone } from '../../shared/nui/minimap';
 import { BlipFactory } from '../blip';
 import { HudMinimapProvider } from '../hud/hud.minimap.provider';
 import { NuiDispatch } from '../nui/nui.dispatch';
@@ -14,6 +14,23 @@ const WAYPOINT_BLIP_SPRITE = 8;
 const RADIUS_BLIP_SPRITES = [9, 10];
 const HIDDEN_BLIP_DISPLAYS = [0, 5];
 const FRAME_INTERVAL = 33;
+const GPS_SLOTS = [0, 1];
+const ROUTE_BUDGET_MS = 3;
+const ROUTE_INTERVAL = 250;
+const ROUTE_NEAR_STEP = 5;
+const ROUTE_NEAR_DISTANCE = 1500;
+const ROUTE_FAR_STEP = 20;
+const ROUTE_FAR_POINTS = 300;
+const ROUTE_MAX_POINTS = ROUTE_NEAR_DISTANCE / ROUTE_NEAR_STEP + ROUTE_FAR_POINTS;
+
+type RouteJob = {
+    slot: number;
+    points: MinimapPoint[];
+    length: number;
+    farStep: number;
+    distance: number;
+    samples: number;
+};
 
 @Provider()
 export class PauseMinimapProvider {
@@ -37,6 +54,10 @@ export class PauseMinimapProvider {
     private scanExcluded = new Set<number>();
     private blipSignature = '';
     private zoneSignature = '';
+    private routeSignature = '';
+    private waypointSignature = '';
+    private routeJob: RouteJob | null = null;
+    private lastRouteStart = 0;
 
     @Tick(TickInterval.EVERY_FRAME)
     public onFrame(): void {
@@ -96,6 +117,108 @@ export class PauseMinimapProvider {
         }
 
         this.dispatchZones();
+    }
+
+    @Tick(TickInterval.EVERY_FRAME)
+    public onRouteStep(): void {
+        const now = GetGameTimer();
+
+        if (!this.routeJob) {
+            if (now - this.lastRouteStart < ROUTE_INTERVAL) {
+                return;
+            }
+
+            this.lastRouteStart = now;
+            this.dispatchWaypoint();
+            this.routeJob = this.startRouteJob(GPS_SLOTS[0]);
+        }
+
+        const start = GetGameTimer();
+
+        while (this.routeJob && GetGameTimer() - start < ROUTE_BUDGET_MS) {
+            const job = this.routeJob;
+
+            if (!this.stepRouteJob(job)) {
+                continue;
+            }
+
+            if (job.points.length > 2) {
+                this.finishRoute(job.points);
+            } else if (job.slot !== GPS_SLOTS[GPS_SLOTS.length - 1]) {
+                this.routeJob = this.startRouteJob(GPS_SLOTS[GPS_SLOTS.indexOf(job.slot) + 1]);
+            } else {
+                this.finishRoute([]);
+            }
+        }
+    }
+
+    private dispatchWaypoint(): void {
+        let waypoint: MinimapPoint | null = null;
+
+        if (IsWaypointActive()) {
+            const [x, y] = GetBlipInfoIdCoord(GetFirstBlipInfoId(WAYPOINT_BLIP_SPRITE));
+
+            waypoint = { x, y };
+        }
+
+        const signature = waypoint ? `${waypoint.x}:${waypoint.y}` : '';
+
+        if (signature !== this.waypointSignature) {
+            this.waypointSignature = signature;
+            this.nuiDispatch.dispatch('minimap', 'Waypoint', waypoint);
+        }
+    }
+
+    private startRouteJob(slot: number): RouteJob {
+        const [x, y] = GetEntityCoords(PlayerPedId(), false);
+        const length = slot === 0 && GetGpsBlipRouteFound() ? GetGpsBlipRouteLength() : 0;
+
+        return {
+            slot,
+            points: [{ x, y }],
+            length,
+            farStep: Math.max(ROUTE_FAR_STEP, (length - ROUTE_NEAR_DISTANCE) / ROUTE_FAR_POINTS),
+            distance: 0,
+            samples: 0,
+        };
+    }
+
+    private stepRouteJob(job: RouteJob): boolean {
+        job.samples++;
+        job.distance += job.distance < ROUTE_NEAR_DISTANCE ? ROUTE_NEAR_STEP : job.farStep;
+
+        const [found, position] = GetPosAlongGpsTypeRoute(true, job.distance, job.slot);
+
+        if (!found) {
+            return true;
+        }
+
+        const [x, y] = position;
+        const previous = job.points[job.points.length - 1];
+
+        if (Math.hypot(x - previous.x, y - previous.y) < 0.5) {
+            return true;
+        }
+
+        job.points.push({ x, y });
+
+        return (job.length > 0 && job.distance >= job.length) || job.samples >= ROUTE_MAX_POINTS;
+    }
+
+    private finishRoute(route: MinimapPoint[]): void {
+        this.routeJob = null;
+
+        const first = route[0];
+        const middle = route[Math.floor(route.length / 2)];
+        const last = route[route.length - 1];
+        const signature = last
+            ? `${route.length}:${Math.round(first.x / 3)}:${Math.round(first.y / 3)}:${Math.round(middle.x)}:${Math.round(middle.y)}:${Math.round(last.x)}:${Math.round(last.y)}`
+            : '';
+
+        if (signature !== this.routeSignature) {
+            this.routeSignature = signature;
+            this.nuiDispatch.dispatch('minimap', 'Route', route);
+        }
     }
 
     private dispatchZones(): void {

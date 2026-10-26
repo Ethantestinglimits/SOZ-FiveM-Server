@@ -1,4 +1,4 @@
-import { MinimapBlip, MinimapFrame, MinimapZone } from '../../../shared/nui/minimap';
+import { MinimapBlip, MinimapFrame, MinimapPoint, MinimapZone } from '../../../shared/nui/minimap';
 import { getBlipColor, UNTINTED_BLIP_COLORS } from './blipColors';
 
 const MAP_URL = 'https://cfx-nui-soz-map-tiles/map';
@@ -19,6 +19,10 @@ const BORDER_RADIUS = 12;
 const PRESENCE_RATE = 10;
 const RANGE_RATE = 2;
 const SMOOTHING_RATE = 18;
+const ROUTE_COLOR = '#b25ce8';
+const ROUTE_SEARCH_POINTS = 300;
+const WAYPOINT_SPRITE = 8;
+const WAYPOINT_SIZE = 22;
 
 export type MinimapRect = { x: number; y: number; w: number; h: number };
 
@@ -70,17 +74,21 @@ export class MinimapRenderer {
     private presence = 0;
     private lockedRect: MinimapRect | null = null;
     private lastAt = 0;
+    private routeIndex = 0;
     private handle = 0;
     private destroyed = false;
 
     public rect: MinimapRect = { x: 0, y: 0, w: 0, h: 0 };
     public blips: MinimapBlip[] = [];
     public zones: MinimapZone[] = [];
+    public route: MinimapPoint[] = [];
+    public waypoint: MinimapPoint | null = null;
 
     constructor(private readonly canvas: HTMLCanvasElement) {
         this.ctx = canvas.getContext('2d');
         this.canvas.style.borderRadius = `${BORDER_RADIUS}px`;
         this.loadMap();
+        this.loadIcon(WAYPOINT_SPRITE);
         this.handle = requestAnimationFrame(this.loop);
     }
 
@@ -153,14 +161,14 @@ export class MinimapRenderer {
             .catch(() => undefined);
     }
 
-    private getIcon(sprite: number, color: number): CanvasImageSource | null {
+    private getIcon(sprite: number, color: number, tint?: string): CanvasImageSource | null {
         const image = this.icons.get(sprite);
 
         if (!image) {
             return null;
         }
 
-        if (UNTINTED_BLIP_COLORS.includes(color)) {
+        if (!tint && UNTINTED_BLIP_COLORS.includes(color)) {
             return image;
         }
 
@@ -178,7 +186,7 @@ export class MinimapRenderer {
         canvas.height = ICON_RESOLUTION;
         ctx.drawImage(image, 0, 0, ICON_RESOLUTION, ICON_RESOLUTION);
         ctx.globalCompositeOperation = 'multiply';
-        ctx.fillStyle = getBlipColor(color);
+        ctx.fillStyle = tint ?? getBlipColor(color);
         ctx.fillRect(0, 0, ICON_RESOLUTION, ICON_RESOLUTION);
         ctx.globalCompositeOperation = 'destination-in';
         ctx.drawImage(image, 0, 0, ICON_RESOLUTION, ICON_RESOLUTION);
@@ -214,6 +222,8 @@ export class MinimapRenderer {
             heading: lerpAngle(this.displayed.heading, this.frame.heading, k),
             camHeading: lerpAngle(this.displayed.camHeading, this.frame.camHeading, k),
         };
+
+        this.routeIndex = this.findRouteIndex(this.displayed);
 
         const targetRange = Math.min(
             MAX_RANGE,
@@ -273,7 +283,9 @@ export class MinimapRenderer {
 
         this.drawMap(rect, frame, scale, rotation, dpr);
         this.drawZones(rect, scale, toScreen);
+        this.drawRoute(frame, toScreen);
         this.drawBlips(rect, toScreen);
+        this.drawWaypoint(toScreen);
         this.drawPlayer(frame, rotation, toScreen);
     }
 
@@ -332,6 +344,66 @@ export class MinimapRenderer {
             ctx.strokeStyle = color;
             ctx.stroke();
         }
+    }
+
+    private findRouteIndex(frame: MinimapFrame): number {
+        const limit = Math.min(this.route.length, ROUTE_SEARCH_POINTS);
+        let best = 0;
+        let bestDistance = Infinity;
+
+        for (let index = 0; index < limit; index++) {
+            const distance = Math.hypot(this.route[index].x - frame.x, this.route[index].y - frame.y);
+
+            if (distance < bestDistance) {
+                best = index;
+                bestDistance = distance;
+            }
+        }
+
+        return best;
+    }
+
+    private drawRoute(frame: MinimapFrame, toScreen: (x: number, y: number) => [number, number]): void {
+        if (this.route.length < 2) {
+            return;
+        }
+
+        const ctx = this.ctx;
+        const [startX, startY] = toScreen(frame.x, frame.y);
+
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+
+        for (let index = this.routeIndex + 1; index < this.route.length; index++) {
+            const [x, y] = toScreen(this.route[index].x, this.route[index].y);
+
+            ctx.lineTo(x, y);
+        }
+
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.35)';
+        ctx.lineWidth = 7;
+        ctx.stroke();
+        ctx.strokeStyle = ROUTE_COLOR;
+        ctx.lineWidth = 4;
+        ctx.stroke();
+    }
+
+    private drawWaypoint(toScreen: (x: number, y: number) => [number, number]): void {
+        if (!this.waypoint) {
+            return;
+        }
+
+        const icon = this.getIcon(WAYPOINT_SPRITE, 84, ROUTE_COLOR);
+
+        if (!icon) {
+            return;
+        }
+
+        const [x, y] = toScreen(this.waypoint.x, this.waypoint.y);
+
+        this.ctx.drawImage(icon, x - WAYPOINT_SIZE / 2, y - WAYPOINT_SIZE / 2, WAYPOINT_SIZE, WAYPOINT_SIZE);
     }
 
     private drawBlips(rect: MinimapRect, toScreen: (x: number, y: number) => [number, number]): void {
