@@ -79,8 +79,7 @@ const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t 
 
 const wrap = (value: number, min: number, size: number) => ((((value - min) % size) + size) % size) + min;
 
-const nearestCopy = (value: number, target: number, size: number) =>
-    value + Math.round((target - value) / size) * size;
+const nearestCopy = (value: number, target: number, size: number) => value + Math.round((target - value) / size) * size;
 
 const loadImage = (url: string) =>
     new Promise<HTMLImageElement>((resolve, reject) => {
@@ -135,7 +134,10 @@ export class MinimapRenderer {
     public route: MinimapPoint[] = [];
     public waypoint: MinimapPoint | null = null;
 
-    constructor(private readonly canvas: HTMLCanvasElement, private readonly callbacks: MinimapCallbacks) {
+    constructor(
+        private readonly canvas: HTMLCanvasElement,
+        private readonly callbacks: MinimapCallbacks,
+    ) {
         this.ctx = canvas.getContext('2d');
 
         canvas.addEventListener('wheel', this.onWheel, { passive: false });
@@ -173,7 +175,7 @@ export class MinimapRenderer {
         if (this.hovered) {
             const { x, y, sprite } = this.hovered;
 
-            this.hovered = blips.find(blip => blip.x === x && blip.y === y && blip.sprite === sprite) ?? null;
+            this.hovered = blips.find((blip) => blip.x === x && blip.y === y && blip.sprite === sprite) ?? null;
         }
 
         for (const blip of blips) {
@@ -232,21 +234,21 @@ export class MinimapRenderer {
 
     private loadMap(): void {
         const sources = [
-            ...[0, 1, 2].flatMap(row =>
-                [0, 1].map(col => ({
+            ...[0, 1, 2].flatMap((row) =>
+                [0, 1].map((col) => ({
                     url: `${MAP_URL}/${row}_${col}.webp?v=${ASSETS_VERSION}`,
                     x0: ORIGIN_X + col * IMAGE_UNITS,
                     y0: ORIGIN_Y - row * IMAGE_UNITS,
                     x1: ORIGIN_X + (col + 1) * IMAGE_UNITS,
                     y1: ORIGIN_Y - (row + 1) * IMAGE_UNITS,
-                }))
+                })),
             ),
             { url: `${MAP_URL}/cayo.webp?v=${ASSETS_VERSION}`, x0: 3726, y0: -4139, x1: 5733, y1: -6150 },
         ];
 
         for (const source of sources) {
             loadImage(source.url)
-                .then(image => {
+                .then((image) => {
                     const levels: CanvasImageSource[] = [image];
                     const widths = [image.naturalWidth];
 
@@ -259,7 +261,7 @@ export class MinimapRenderer {
 
                     this.images.push({ ...source, levels, widths });
                 })
-                .catch(error => console.error('[minimap]', error));
+                .catch((error) => console.error('[minimap]', error));
         }
     }
 
@@ -270,7 +272,7 @@ export class MinimapRenderer {
 
         this.icons.set(sprite, null);
         loadImage(`${BLIP_URL}/${sprite}.webp?v=${ASSETS_VERSION}`)
-            .then(image => this.icons.set(sprite, image))
+            .then((image) => this.icons.set(sprite, image))
             .catch(() => undefined);
     }
 
@@ -344,12 +346,12 @@ export class MinimapRenderer {
         this.range = lerp(
             this.range,
             Math.min(MAX_RANGE, BASE_RANGE + frame.speed * SPEED_RANGE + Math.max(0, frame.altitude) * ALTITUDE_RANGE),
-            1 - Math.exp(-dt * RANGE_RATE)
+            1 - Math.exp(-dt * RANGE_RATE),
         );
         this.presence = lerp(
             this.presence,
             wanted ? 1 : 0,
-            1 - Math.exp(-dt * (this.transitionEnabled ? PRESENCE_RATE : 60))
+            1 - Math.exp(-dt * (this.transitionEnabled ? PRESENCE_RATE : 60)),
         );
         this.routeIndex = this.findRouteIndex(frame);
 
@@ -444,8 +446,9 @@ export class MinimapRenderer {
         }
 
         const dpr = window.devicePixelRatio || 1;
-        const width = Math.round(rect.w * dpr);
-        const height = Math.round(rect.h * dpr);
+        const backing = this.mode === 'minimap' ? rect : this.panelRect;
+        const width = Math.round(backing.w * dpr);
+        const height = Math.round(backing.h * dpr);
 
         style.display = 'block';
         style.opacity = String(this.presence);
@@ -456,6 +459,8 @@ export class MinimapRenderer {
         style.zIndex = this.mode === 'minimap' ? '5' : '70';
         style.pointerEvents = this.mode === 'open' ? 'auto' : 'none';
         style.borderRadius = `${lerp(MINIMAP_RADIUS, PANEL_RADIUS, this.openness)}px`;
+        style.boxShadow =
+            this.mode === 'minimap' || this.mode === 'open' ? '0 10px 15px -3px rgba(0, 0, 0, 0.3)' : 'none';
 
         if (this.canvas.width !== width || this.canvas.height !== height) {
             this.canvas.width = width;
@@ -465,11 +470,14 @@ export class MinimapRenderer {
         const ctx = this.ctx;
         const offsets = this.getOffsets();
 
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const sx = width / rect.w;
+        const sy = height / rect.h;
+
+        ctx.setTransform(sx, 0, 0, sy, 0, 0);
         ctx.fillStyle = SEA_COLOR;
         ctx.fillRect(0, 0, rect.w, rect.h);
 
-        this.drawMap(dpr, offsets);
+        this.drawMap(sx, offsets);
 
         for (const ox of offsets) {
             for (const oy of offsets) {
@@ -496,7 +504,7 @@ export class MinimapRenderer {
         ctx.translate(this.current.w / 2, this.current.h / 2);
         ctx.rotate(rotation);
         ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
+        ctx.imageSmoothingQuality = this.mode === 'minimap' || this.mode === 'open' ? 'high' : 'medium';
 
         for (const ox of offsets) {
             for (const oy of offsets) {

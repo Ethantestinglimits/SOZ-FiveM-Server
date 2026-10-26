@@ -96,5 +96,5 @@ export const MinimapApp: FunctionComponent = () => {
     useNuiEvent('pause_menu', 'Open', () => rendererRef.current?.open());
     useNuiEvent('pause_menu', 'Close', () => rendererRef.current?.reset());
 
-    return <canvas ref={canvasRef} className="fixed shadow-lg" style={{ zIndex: 5, display: 'none' }} />;
+    return <canvas ref={canvasRef} className="fixed" style={{ zIndex: 5, display: 'none' }} />;
 };
