@@ -2,7 +2,7 @@ import { Once, OnceStep, OnNuiEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { NuiEvent } from '../../shared/event';
-import { HUD_ELEMENTS, HudLayout } from '../../shared/nui/hud_layout';
+import { HUD_ELEMENTS, HUD_SCALE_MAX, HUD_SCALE_MIN, HudLayout } from '../../shared/nui/hud_layout';
 import { NuiDispatch } from '../nui/nui.dispatch';
 import { PauseMenuProvider } from '../pause/pause.menu.provider';
 
@@ -14,6 +14,18 @@ const clampPercent = (value: unknown): number | null => {
     return Number.isFinite(number) ? Math.min(100, Math.max(0, Math.round(number * 10) / 10)) : null;
 };
 
+const clampScale = (value: unknown): number | null => {
+    const number = Number(value);
+
+    if (!Number.isFinite(number) || number <= 0) {
+        return null;
+    }
+
+    const scale = Math.round(Math.min(HUD_SCALE_MAX, Math.max(HUD_SCALE_MIN, number)) * 100) / 100;
+
+    return Math.abs(scale - 1) < 0.005 ? null : scale;
+};
+
 const sanitize = (input: HudLayout | null | undefined): HudLayout => {
     const layout: HudLayout = {};
 
@@ -22,7 +34,9 @@ const sanitize = (input: HudLayout | null | undefined): HudLayout => {
         const y = clampPercent(input?.[id]?.y);
 
         if (x !== null && y !== null) {
-            layout[id] = { x, y };
+            const scale = clampScale(input?.[id]?.scale);
+
+            layout[id] = scale === null ? { x, y } : { x, y, scale };
         }
     }
 

@@ -17,7 +17,7 @@ import { PlayerStats } from './components/PlayerStats';
 import { VoiceIcon } from './components/VoiceIcon';
 import { Weather } from './components/Weather';
 import { useHudColor } from './hooks/useHudColor';
-import { useHudLayout } from './hudLayoutState';
+import { layoutTransform, useHudLayout } from './hudLayoutState';
 
 export const WatchInterface: FunctionComponent = () => {
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
@@ -155,7 +155,10 @@ export const WatchInterface: FunctionComponent = () => {
             </animated.div>
 
             {statsLayout && (
-                <animated.div className="absolute flex gap-3 text-white h-fit" style={statsStyles}>
+                <animated.div
+                    className="absolute flex gap-3 text-white h-fit"
+                    style={{ ...statsStyles, ...layoutTransform(statsLayout, 'top left') }}
+                >
                     <PlayerStats />
                     <PetStats />
                 </animated.div>

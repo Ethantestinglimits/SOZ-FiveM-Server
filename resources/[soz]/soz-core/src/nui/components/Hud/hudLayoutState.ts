@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 
 import { HudLayout, HudPosition } from '../../../shared/nui/hud_layout';
 
@@ -10,7 +10,18 @@ export const setHudLayout = (next: HudLayout): void => {
     listeners.forEach((listener) => listener(next));
 };
 
-export const shiftMinimap = <T extends { left: number; right: number; top: number; bottom: number; X: number; Y: number }>(
+export const layoutTransform = (position: HudPosition | undefined, origin: string, prefix = ''): CSSProperties => {
+    const scale = position?.scale ? `scale(${position.scale})` : '';
+    const transform = `${prefix} ${scale}`.trim();
+
+    if (!transform) {
+        return {};
+    }
+
+    return scale ? { transform, transformOrigin: origin } : { transform };
+};
+
+export const shiftMinimap =<T extends { left: number; right: number; top: number; bottom: number; X: number; Y: number }>(
     minimap: T,
     group?: HudPosition
 ): T => {

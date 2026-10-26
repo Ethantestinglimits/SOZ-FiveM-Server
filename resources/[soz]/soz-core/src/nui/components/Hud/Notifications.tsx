@@ -14,7 +14,7 @@ import { useHudMinimap } from '../../hook/data';
 import { RootState } from '../../store';
 import { formatText } from '../../utils/gta-format';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
-import { useHudLayout } from './hudLayoutState';
+import { layoutTransform, useHudLayout } from './hudLayoutState';
 
 type NotificationProps = {
     notification: BasicNotification | AdvancedNotification;
@@ -38,7 +38,7 @@ const isPoliceNotification = (
     return (notification as TPoliceNotification).policeStyle !== undefined;
 };
 
-const Notification: FunctionComponent<NotificationProps> = ({ notification, onDelete }) => {
+export const Notification: FunctionComponent<NotificationProps> = ({ notification, onDelete }) => {
     const [isClosing, setIsClosing] = useState(false);
     const [isOpening, setIsOpening] = useState(true);
 
@@ -129,7 +129,7 @@ const Notification: FunctionComponent<NotificationProps> = ({ notification, onDe
     );
 };
 
-const PoliceNotification: FunctionComponent<PoliceNotificationProps> = ({ notification, onDelete }) => {
+export const PoliceNotification: FunctionComponent<PoliceNotificationProps> = ({ notification, onDelete }) => {
     const { getPath } = useAssetPath();
 
     const [isClosing, setIsClosing] = useState(false);
@@ -395,6 +395,7 @@ export const Notifications: FunctionComponent = () => {
                     ...styles,
                     zIndex: 20,
                     pointerEvents: `none`,
+                    ...layoutTransform(layout, 'bottom left'),
                 }}
             >
                 {notifications
@@ -414,6 +415,7 @@ export const Notifications: FunctionComponent = () => {
                     right: policeLayout ? `${100 - policeLayout.x}vw` : `1rem`,
                     height: `50vh`,
                     width: `calc(100vw * ${minimap.width * 1.5})`,
+                    ...layoutTransform(policeLayout, 'top right'),
                 }}
             >
                 {notifications.map(

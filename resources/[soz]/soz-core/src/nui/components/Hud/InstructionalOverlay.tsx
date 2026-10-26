@@ -9,7 +9,36 @@ import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
 import { formatText } from '../../utils/gta-format';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
-import { useHudLayout } from './hudLayoutState';
+import { layoutTransform, useHudLayout } from './hudLayoutState';
+
+const cleanText = (string: string) => {
+    const formatted = formatText(string);
+
+    return formatted.replace(/^~/, '').replace(/~$/, '');
+};
+
+const shouldBeDisplayAsKey = (string: string) =>
+    BindName[string] || (string.startsWith('~') && string.endsWith('~'));
+
+export const InstructionalContent = ({ text }: { text: string[] }) => (
+    <GlassMorphismContainer
+        borderClassName="rounded-full"
+        className="flex items-center gap-2 text-white px-5 py-1.5 w-full h-10"
+        disableGameClone={text.length === 0}
+    >
+        {text.map(t => (
+            <span
+                key={t}
+                className={cn({
+                    'bg-white/10 border border-slate-300/10 px-2 rounded-md': shouldBeDisplayAsKey(t),
+                })}
+                dangerouslySetInnerHTML={{
+                    __html: BindName[t] ? bindKeyToName(BindName[t]) : cleanText(t),
+                }}
+            />
+        ))}
+    </GlassMorphismContainer>
+);
 
 export function InstructionalOverlay() {
     const minimap = useHudMinimap();
@@ -35,14 +64,6 @@ export function InstructionalOverlay() {
     useNuiEvent('hud', 'SetInstructional', setText);
     useNuiEvent('hud', 'ForceDisplayInstructional', setForceDisplay);
 
-    const cleanText = string => {
-        const formatted = formatText(string);
-
-        return formatted.replace(/^~/, '').replace(/~$/, '');
-    };
-
-    const shouldBeDisplayAsKey = string => BindName[string] || (string.startsWith('~') && string.endsWith('~'));
-
     if (!forceDisplay && !showInstructionalOverlay) {
         return null;
     }
@@ -54,24 +75,8 @@ export function InstructionalOverlay() {
             })}
             style={styles}
         >
-            <div className="h-10 w-fit">
-                <GlassMorphismContainer
-                    borderClassName="rounded-full"
-                    className="flex items-center gap-2 text-white px-5 py-1.5 w-full h-10"
-                    disableGameClone={text.length === 0}
-                >
-                    {text.map(t => (
-                        <span
-                            key={t}
-                            className={cn({
-                                'bg-white/10 border border-slate-300/10 px-2 rounded-md': shouldBeDisplayAsKey(t),
-                            })}
-                            dangerouslySetInnerHTML={{
-                                __html: BindName[t] ? bindKeyToName(BindName[t]) : cleanText(t),
-                            }}
-                        />
-                    ))}
-                </GlassMorphismContainer>
+            <div className="h-10 w-fit" style={layoutTransform(layout, 'top center')}>
+                <InstructionalContent text={text} />
             </div>
         </animated.div>
     );
