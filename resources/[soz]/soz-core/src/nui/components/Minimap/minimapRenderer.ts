@@ -207,7 +207,7 @@ export class MinimapRenderer {
     }
 
     public setRegions(regions: PauseMapRegion[]): void {
-        this.regionLabels = regions.map(region => ({
+        this.regionLabels = regions.map((region) => ({
             x: region.x,
             y: region.y,
             text: region.name.toUpperCase(),
@@ -396,8 +396,8 @@ export class MinimapRenderer {
 
         const frame = this.displayed;
         const live = this.frame.visible;
-        const mapShown = this.mode !== 'open' || isMapTabActive();
-        const wanted = this.mode === 'minimap' ? live : mapShown;
+        const hiddenByTab = !isMapTabActive() && (this.mode === 'open' || (this.mode === 'opening' && this.instant));
+        const wanted = this.mode === 'minimap' ? live : !hiddenByTab;
 
         this.range = lerp(
             this.range,
@@ -409,6 +409,10 @@ export class MinimapRenderer {
             wanted ? 1 : 0,
             1 - Math.exp(-dt * (this.transitionEnabled && !this.instant ? PRESENCE_RATE : 60)),
         );
+
+        if (hiddenByTab) {
+            this.presence = 0;
+        }
         this.routeIndex = this.findRouteIndex(frame);
 
         if (live) {
@@ -700,7 +704,12 @@ export class MinimapRenderer {
 
             const width = ctx.measureText(label.text).width + padding * 2;
             const height = size + padding * 2;
-            const box: [number, number, number, number] = [x - width / 2, y - height / 2, x + width / 2, y + height / 2];
+            const box: [number, number, number, number] = [
+                x - width / 2,
+                y - height / 2,
+                x + width / 2,
+                y + height / 2,
+            ];
 
             if (boxes.some(([bx0, by0, bx1, by1]) => box[0] < bx1 && box[2] > bx0 && box[1] < by1 && box[3] > by0)) {
                 continue;
