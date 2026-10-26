@@ -848,6 +848,7 @@ export enum NuiEvent {
     PauseMenuQuit = 'soz-core:nui:pause-menu:quit',
     PauseMenuSaveMapLayers = 'soz-core:nui:pause-menu:save-map-layers',
     HudEditorOpen = 'soz-core:nui:hud-layout:open-editor',
+    HudLayoutRequest = 'soz-core:nui:hud-layout:request',
     HudLayoutSave = 'soz-core:nui:hud-layout:save',
     HudLayoutReset = 'soz-core:nui:hud-layout:reset',
     CrosshairSet = 'soz-core:nui:crosshair:set',
