@@ -59,6 +59,7 @@ export class PauseNativeSettingsDriver {
 
         this.busy = true;
         this.nuiDispatch.dispatch('pause_menu', 'NativeBusy', true);
+        this.log(`début ${key} -> ${value}`);
 
         let success = false;
 
@@ -67,6 +68,7 @@ export class PauseNativeSettingsDriver {
         } catch (error) {
             console.error(`[pause.native] ${String(error)}`);
         } finally {
+            this.log(`fin success=${success}`);
             await this.closeAll();
             this.busy = false;
             this.nuiDispatch.dispatch('pause_menu', 'NativeBusy', false);
@@ -77,16 +79,25 @@ export class PauseNativeSettingsDriver {
 
     private async applySlider(route: NativeSliderRoute, value: number): Promise<boolean> {
         if (!(await this.openLanding())) {
+            this.log(`ouverture échouée ${this.state()}`);
             return false;
         }
+
+        this.log(`menu ouvert ${this.state()}`);
 
         if (!(await this.enterCategory(route.category))) {
+            this.log(`catégorie ${route.category} échouée ${this.state()}`);
             return false;
         }
 
+        this.log(`catégorie ouverte ${this.state()}`);
+
         if (!(await this.goToRow(route.row))) {
+            this.log(`ligne ${route.row} introuvable ${this.state()}`);
             return false;
         }
+
+        this.log(`ligne atteinte ${this.state()}`);
 
         for (let index = 0; index < route.max - route.min + 1; index++) {
             await this.press(Control.FrontendLeft);
@@ -105,6 +116,14 @@ export class PauseNativeSettingsDriver {
         this.pendingControl = { control, frames: HOLD_FRAMES };
 
         await wait(STEP_DELAY);
+    }
+
+    private state(): string {
+        return `actif=${IsPauseMenuActive()} prêt=${IsFrontendReadyForControl()} data=${JSON.stringify(GetPauseMenuSelectionData())}`;
+    }
+
+    private log(message: string): void {
+        console.log(`[pause.native] ${message}`);
     }
 
     private getPage(): number {
