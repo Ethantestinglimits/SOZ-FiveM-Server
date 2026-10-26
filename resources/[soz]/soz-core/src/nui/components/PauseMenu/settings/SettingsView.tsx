@@ -160,7 +160,9 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
 
             {showNativeButton && (
                 <button
-                    onClick={() => fetchNui(NuiEvent.PauseMenuOpenNative)}
+                    onClick={() =>
+                        fetchNui(NuiEvent.PauseMenuOpenNative, { page: current.id === 'keys' ? 'keys' : 'settings' })
+                    }
                     className="self-start rounded-[1vh] bg-white/10 px-[1.8vh] py-[0.9vh] text-[1.4vh] font-semibold uppercase transition-colors hover:bg-white/25"
                 >
                     Modifier dans GTA

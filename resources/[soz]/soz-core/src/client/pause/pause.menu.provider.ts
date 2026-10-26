@@ -19,6 +19,8 @@ const BLUR_DELAY = 250;
 const NUI_FOCUS_COOLDOWN = 300;
 const FRONTEND_OPEN_TIMEOUT = 2000;
 const FRONTEND_MENU = GetHashKey('FE_MENU_VERSION_MP_PAUSE');
+const FRONTEND_SETTINGS_MENU = GetHashKey('FE_MENU_VERSION_LANDING_MENU');
+const FRONTEND_KEYS_MENU = GetHashKey('FE_MENU_VERSION_LANDING_KEYMAPPING_MENU');
 const MAP_LAYERS_KVP = 'soz_pause_map';
 const MAP_LAYERS: PauseMapLayer[] = ['postals', 'regions', 'blips'];
 const DEFAULT_MAP_LAYERS: PauseMapLayer[] = ['blips', 'regions'];
@@ -141,10 +143,18 @@ export class PauseMenuProvider {
     }
 
     @OnNuiEvent(NuiEvent.PauseMenuOpenNative)
-    public async onOpenNative(): Promise<void> {
+    public async onOpenNative(data?: { page?: 'settings' | 'keys' }): Promise<void> {
         this.close();
         this.frontendRequestedAt = GetGameTimer();
-        ActivateFrontendMenu(FRONTEND_MENU, false, -1);
+
+        const menu =
+            data?.page === 'keys'
+                ? FRONTEND_KEYS_MENU
+                : data?.page === 'settings'
+                  ? FRONTEND_SETTINGS_MENU
+                  : FRONTEND_MENU;
+
+        ActivateFrontendMenu(menu, false, -1);
     }
 
     @OnNuiEvent(NuiEvent.PauseMenuSaveMapLayers)
