@@ -179,7 +179,7 @@ export const HudEditor: FunctionComponent = () => {
                 );
             })}
 
-            <div className="absolute bottom-[3vh] left-1/2 flex -translate-x-1/2 items-center gap-[1.4vh] rounded-[1.2vh] bg-black/80 px-[2vh] py-[1.2vh]">
+            <div className="absolute bottom-[10vh] left-1/2 flex -translate-x-1/2 items-center gap-[1.4vh] rounded-[1.2vh] bg-black/80 px-[2vh] py-[1.2vh]">
                 <span className="text-[1.5vh] text-white/70">Glisse les cadres pour placer le HUD</span>
                 <button
                     onClick={reset}
