@@ -273,47 +273,55 @@ export class PoliceCameraProvider {
             this.blipFactory.remove(existingBlip.id);
         }
 
-        for (const camInfo of CameraLocations) {
-            if (camInfo.disabledReason) {
-                continue;
-            }
+        try {
+            for (const camInfo of CameraLocations) {
+                if (camInfo.disabledReason) {
+                    continue;
+                }
 
-            const hash = getLocationHash(camInfo.position);
-            const hackedCam = this.hackedCamRepository.find(hash);
-            const hacked = hackedCam && hackedCam.date >= Date.now();
+                const hash = getLocationHash(camInfo.position);
+                const hackedCam = this.hackedCamRepository.find(hash);
+                const hacked = hackedCam && hackedCam.date >= Date.now();
 
-            const id = 'policeccam_' + getLocationHash(camInfo.position);
-            blips.push(id);
+                const id = 'policeccam_' + getLocationHash(camInfo.position);
+                blips.push(id);
 
-            const actions: Omit<BlipAction<CameraDef>, 'id'>[] = [];
-            if (!hacked) {
-                actions.push({
-                    label: 'Caméra',
-                    action: async (blip: Blip, data: CameraDef) => {
-                        await this.cleanBlips(blips, savedBlips);
-                        blips = [];
-                        savedBlips = {};
-                        SetFrontendActive(false);
-                        this.createWebcam(data);
+                const actions: Omit<BlipAction<CameraDef>, 'id'>[] = [];
+                if (!hacked) {
+                    actions.push({
+                        label: 'Caméra',
+                        action: async (blip: Blip, data: CameraDef) => {
+                            await this.cleanBlips(blips, savedBlips);
+                            blips = [];
+                            savedBlips = {};
+                            SetFrontendActive(false);
+                            this.createWebcam(data);
+                        },
+                        data: camInfo,
+                    });
+                }
+
+                this.blipFactory.create(
+                    id,
+                    {
+                        position: camInfo.position,
+                        name: 'Caméra',
+                        sprite: 629,
+                        rotation: -90,
+                        color: hacked ? 1 : 39,
                     },
-                    data: camInfo,
-                });
+                    actions
+                );
+                if (i++ % 50 == 0) {
+                    await wait(0);
+                }
             }
+        } catch (error) {
+            await this.cleanBlips(blips, savedBlips);
+            blips = [];
+            savedBlips = {};
 
-            this.blipFactory.create(
-                id,
-                {
-                    position: camInfo.position,
-                    name: 'Caméra',
-                    sprite: 629,
-                    rotation: -90,
-                    color: hacked ? 1 : 39,
-                },
-                actions
-            );
-            if (i++ % 50 == 0) {
-                await wait(0);
-            }
+            throw error;
         }
 
         SetFrontendActive(true);
