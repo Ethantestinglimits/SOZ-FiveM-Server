@@ -3,12 +3,11 @@ import { useEffect, useState } from 'react';
 export type MenuStyle = {
     size: number;
     text: number;
-    potato: boolean;
 };
 
 const TEXT_SCALES = [0.85, 0.92, 1, 1.12, 1.25];
 
-let style: MenuStyle = { size: 100, text: 3, potato: false };
+let style: MenuStyle = { size: 100, text: 3 };
 const listeners = new Set<(style: MenuStyle) => void>();
 
 export const setMenuStyle = (next: MenuStyle): void => {

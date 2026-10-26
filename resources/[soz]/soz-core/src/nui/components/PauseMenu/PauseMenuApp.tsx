@@ -1,6 +1,6 @@
 import { AdjustmentsIcon, CogIcon, LogoutIcon, MapIcon, PlayIcon, XIcon } from '@heroicons/react/outline';
 import classNames from 'classnames';
-import { createContext, FunctionComponent, PropsWithChildren, ReactNode, useContext, useEffect, useState } from 'react';
+import { FunctionComponent, PropsWithChildren, ReactNode, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { NuiEvent } from '../../../shared/event';
@@ -20,35 +20,21 @@ const TABS: { id: PauseMenuTab; label: string; icon: ReactNode }[] = [
     { id: 'settings', label: 'Paramètres', icon: <AdjustmentsIcon /> },
 ];
 
-const PotatoContext = createContext(false);
-
 const Glass: FunctionComponent<PropsWithChildren<{ className?: string; backgroundColor?: string }>> = ({
     className,
     backgroundColor,
     children,
-}) => {
-    const potato = useContext(PotatoContext);
-
-    if (potato) {
-        return (
-            <div className="h-full w-full overflow-hidden rounded-2xl border border-white/20 bg-black/90">
-                <div className={className}>{children}</div>
-            </div>
-        );
-    }
-
-    return (
-        <GlassMorphismContainer
-            cantBeHidden
-            rounded={16}
-            borderClassName="rounded-2xl"
-            backgroundColor={backgroundColor}
-            className={className}
-        >
-            {children}
-        </GlassMorphismContainer>
-    );
-};
+}) => (
+    <GlassMorphismContainer
+        cantBeHidden
+        rounded={16}
+        borderClassName="rounded-2xl"
+        backgroundColor={backgroundColor}
+        className={className}
+    >
+        {children}
+    </GlassMorphismContainer>
+);
 
 type SideButtonProps = {
     label: string;
@@ -211,107 +197,100 @@ export const PauseMenuApp: FunctionComponent = () => {
     }
 
     return (
-        <PotatoContext.Provider value={Boolean(data.settings.server.potato)}>
-            <div className="absolute inset-0 z-[60] flex select-none gap-[2vh] p-[3vh] font-prompt text-white">
-                <div
-                    className={classNames('absolute inset-0 transition-opacity duration-300', {
-                        'bg-gradient-to-b from-black/50 via-black/25 to-black/50': !data.settings.server.potato,
-                        'bg-black': data.settings.server.potato,
-                        'opacity-0': mode === 'minimap' || mode === 'closing',
-                    })}
-                />
-                {showContent &&
-                    data.scriptMode &&
-                    createPortal(
-                        <button
-                            onClick={close}
-                            className="fixed right-[4vh] top-[4vh] z-[90] flex items-center gap-[0.8vh] rounded-[1vh] bg-black/75 px-[2vh] py-[1vh] font-prompt text-[1.5vh] font-semibold uppercase text-white shadow-lg transition-colors hover:bg-red-500/80"
-                        >
-                            <XIcon className="h-[1.8vh] w-[1.8vh]" />
-                            Fermer
-                        </button>,
-                        document.body,
-                    )}
-                {showContent && !data.scriptMode && (
-                    <FadeIn
-                        as="aside"
-                        className="relative w-[17vw] shrink-0"
-                        instant={!data.settings.server.mapAnimation}
-                    >
-                        <Glass className="flex h-full flex-col gap-[2vh] p-[2.5vh]">
-                            <img src="assets/pause/soz_logo.webp" alt="SoZ" className="h-[4vh] w-auto self-start" />
-
-                            <div className="flex flex-col gap-[0.4vh]">
-                                <div className="flex items-baseline justify-between gap-[1vh]">
-                                    <span className="truncate text-[2vh] font-bold leading-tight">
-                                        {data.firstname} {data.lastname}
-                                    </span>
-                                    <span className="shrink-0 text-[1.3vh] text-white/50">#{data.serverId}</span>
-                                </div>
-                                <div className="flex items-center gap-[0.8vh] text-[1.4vh] text-white/70">
-                                    <span
-                                        className={classNames('h-[0.8vh] w-[0.8vh] shrink-0 rounded-full', {
-                                            'bg-emerald-400': data.onDuty,
-                                            'bg-white/30': !data.onDuty,
-                                        })}
-                                    />
-                                    <span className="truncate">
-                                        {data.job ?? 'Sans emploi'}
-                                        {data.grade && ` · ${data.grade}`}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="flex gap-[0.8vh]">
-                                {TABS.map((item) => (
-                                    <TabButton
-                                        key={item.id}
-                                        label={item.label}
-                                        icon={item.icon}
-                                        active={tab === item.id}
-                                        onClick={() => setTab(item.id)}
-                                    />
-                                ))}
-                            </div>
-
-                            {tab === 'map' ? (
-                                <MapSidebar data={data} layers={layers} onLayersChange={setLayers} />
-                            ) : (
-                                <SettingsSidebar category={settingsCategory} onCategoryChange={setSettingsCategory} />
-                            )}
-
-                            <div className="flex flex-col gap-[0.8vh]">
-                                <SideButton label="Reprendre" icon={<PlayIcon />} onClick={close} />
-                                <SideButton
-                                    label="Menu du jeu"
-                                    icon={<CogIcon />}
-                                    onClick={() => fetchNui(NuiEvent.PauseMenuOpenNative)}
-                                />
-                                <SideButton
-                                    label="Quitter"
-                                    icon={<LogoutIcon />}
-                                    danger
-                                    onClick={() => setConfirmQuit(true)}
-                                />
-                            </div>
-                        </Glass>
-                    </FadeIn>
+        <div className="absolute inset-0 z-[60] flex select-none gap-[2vh] p-[3vh] font-prompt text-white">
+            <div
+                className={classNames(
+                    'absolute inset-0 bg-gradient-to-b from-black/50 via-black/25 to-black/50 transition-opacity duration-300',
+                    { 'opacity-0': mode === 'minimap' || mode === 'closing' },
                 )}
-                {showContent && !data.scriptMode && (
-                    <FadeIn
-                        as="main"
-                        className="relative min-h-0 min-w-0 flex-1"
-                        instant={!data.settings.server.mapAnimation}
+            />
+            {showContent &&
+                data.scriptMode &&
+                createPortal(
+                    <button
+                        onClick={close}
+                        className="fixed right-[4vh] top-[4vh] z-[90] flex items-center gap-[0.8vh] rounded-[1vh] bg-black/75 px-[2vh] py-[1vh] font-prompt text-[1.5vh] font-semibold uppercase text-white shadow-lg transition-colors hover:bg-red-500/80"
                     >
-                        {tab === 'settings' && (
-                            <Glass className="h-full">
-                                <SettingsMain category={settingsCategory} settings={data.settings} />
-                            </Glass>
+                        <XIcon className="h-[1.8vh] w-[1.8vh]" />
+                        Fermer
+                    </button>,
+                    document.body,
+                )}
+            {showContent && !data.scriptMode && (
+                <FadeIn as="aside" className="relative w-[17vw] shrink-0" instant={!data.settings.server.mapAnimation}>
+                    <Glass className="flex h-full flex-col gap-[2vh] p-[2.5vh]">
+                        <img src="assets/pause/soz_logo.webp" alt="SoZ" className="h-[4vh] w-auto self-start" />
+
+                        <div className="flex flex-col gap-[0.4vh]">
+                            <div className="flex items-baseline justify-between gap-[1vh]">
+                                <span className="truncate text-[2vh] font-bold leading-tight">
+                                    {data.firstname} {data.lastname}
+                                </span>
+                                <span className="shrink-0 text-[1.3vh] text-white/50">#{data.serverId}</span>
+                            </div>
+                            <div className="flex items-center gap-[0.8vh] text-[1.4vh] text-white/70">
+                                <span
+                                    className={classNames('h-[0.8vh] w-[0.8vh] shrink-0 rounded-full', {
+                                        'bg-emerald-400': data.onDuty,
+                                        'bg-white/30': !data.onDuty,
+                                    })}
+                                />
+                                <span className="truncate">
+                                    {data.job ?? 'Sans emploi'}
+                                    {data.grade && ` · ${data.grade}`}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-[0.8vh]">
+                            {TABS.map((item) => (
+                                <TabButton
+                                    key={item.id}
+                                    label={item.label}
+                                    icon={item.icon}
+                                    active={tab === item.id}
+                                    onClick={() => setTab(item.id)}
+                                />
+                            ))}
+                        </div>
+
+                        {tab === 'map' ? (
+                            <MapSidebar data={data} layers={layers} onLayersChange={setLayers} />
+                        ) : (
+                            <SettingsSidebar category={settingsCategory} onCategoryChange={setSettingsCategory} />
                         )}
-                    </FadeIn>
-                )}
-                {confirmQuit && createPortal(<QuitConfirm onCancel={() => setConfirmQuit(false)} />, document.body)}
-            </div>
-        </PotatoContext.Provider>
+
+                        <div className="flex flex-col gap-[0.8vh]">
+                            <SideButton label="Reprendre" icon={<PlayIcon />} onClick={close} />
+                            <SideButton
+                                label="Menu du jeu"
+                                icon={<CogIcon />}
+                                onClick={() => fetchNui(NuiEvent.PauseMenuOpenNative)}
+                            />
+                            <SideButton
+                                label="Quitter"
+                                icon={<LogoutIcon />}
+                                danger
+                                onClick={() => setConfirmQuit(true)}
+                            />
+                        </div>
+                    </Glass>
+                </FadeIn>
+            )}
+            {showContent && !data.scriptMode && (
+                <FadeIn
+                    as="main"
+                    className="relative min-h-0 min-w-0 flex-1"
+                    instant={!data.settings.server.mapAnimation}
+                >
+                    {tab === 'settings' && (
+                        <Glass className="h-full">
+                            <SettingsMain category={settingsCategory} settings={data.settings} />
+                        </Glass>
+                    )}
+                </FadeIn>
+            )}
+            {confirmQuit && createPortal(<QuitConfirm onCancel={() => setConfirmQuit(false)} />, document.body)}
+        </div>
     );
 };

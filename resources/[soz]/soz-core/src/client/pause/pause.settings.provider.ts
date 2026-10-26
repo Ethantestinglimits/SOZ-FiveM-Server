@@ -87,7 +87,6 @@ export class PauseSettingsProvider {
         this.nuiDispatch.dispatch('menu', 'SetStyle', {
             size: this.getMenuSize(),
             text: this.getMenuTextSize(),
-            potato: this.pauseMinimapProvider.isPotato(),
         });
     }
 
