@@ -16,6 +16,8 @@ const RADIUS_BLIP_SPRITES = [9, 10];
 const HIDDEN_BLIP_DISPLAYS = [0, 5];
 const FRAME_INTERVAL = 33;
 const ANIMATION_KVP = 'soz_pause_map_animation';
+const FPS_KVP = 'soz_pause_minimap_fps';
+const DEFAULT_FPS = 60;
 const GPS_SLOTS = [0, 1];
 const ROUTE_BUDGET_MS = 3;
 const ROUTE_INTERVAL = 250;
@@ -61,7 +63,23 @@ export class PauseMinimapProvider {
 
     @Once(OnceStep.NuiLoaded)
     public sendSettings(): void {
-        this.nuiDispatch.dispatch('minimap', 'Settings', { animation: this.isAnimationEnabled() });
+        this.dispatchSettings();
+    }
+
+    public getFpsLimit(): number {
+        return GetResourceKvpInt(FPS_KVP) || DEFAULT_FPS;
+    }
+
+    public setFpsLimit(fps: number): void {
+        SetResourceKvpInt(FPS_KVP, fps);
+        this.dispatchSettings();
+    }
+
+    private dispatchSettings(): void {
+        this.nuiDispatch.dispatch('minimap', 'Settings', {
+            animation: this.isAnimationEnabled(),
+            fps: this.getFpsLimit(),
+        });
     }
 
     public isAnimationEnabled(): boolean {
@@ -70,7 +88,7 @@ export class PauseMinimapProvider {
 
     public setAnimationEnabled(enabled: boolean): void {
         SetResourceKvp(ANIMATION_KVP, enabled ? 'on' : 'off');
-        this.nuiDispatch.dispatch('minimap', 'Settings', { animation: enabled });
+        this.dispatchSettings();
     }
 
     @OnNuiEvent(NuiEvent.MinimapSetWaypoint)

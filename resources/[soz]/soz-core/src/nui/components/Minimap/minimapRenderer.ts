@@ -140,6 +140,8 @@ export class MinimapRenderer {
     public minimapRect: MinimapRect = { x: 0, y: 0, w: 0, h: 0 };
     public panelRect: MinimapRect = { x: 0, y: 0, w: 0, h: 0 };
     public transitionEnabled = true;
+    public fpsLimit = 60;
+    private lastRenderedAt = 0;
     private instant = false;
     public blips: MinimapBlip[] = [];
     public zones: MinimapZone[] = [];
@@ -359,6 +361,14 @@ export class MinimapRenderer {
         if (this.destroyed) {
             return;
         }
+
+        if (this.fpsLimit > 0 && now - this.lastRenderedAt < 1000 / this.fpsLimit - 2) {
+            this.handle = requestAnimationFrame(this.loop);
+
+            return;
+        }
+
+        this.lastRenderedAt = now;
 
         const dt = this.lastAt ? Math.min(0.1, (now - this.lastAt) / 1000) : 0;
 
