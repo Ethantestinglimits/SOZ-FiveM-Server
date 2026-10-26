@@ -57,13 +57,13 @@ export const VehicleInterface: FunctionComponent = () => {
             style={styles}
         >
             <div
-                className={cn('relative flex justify-center gap-1', {
+                className={cn('relative flex justify-center gap-3', {
                     'top-12': hasStreetNamesEnabled && !layout,
                 })}
             >
                 {isPilot ? (
                     <>
-                        <div className="flex justify-end items-end gap-1 w-32 mr-3">
+                        <div className="flex flex-col justify-end items-end gap-2 w-32">
                             <SeatbeltIndicator />
                             <LockIndicator />
                         </div>
@@ -71,7 +71,7 @@ export const VehicleInterface: FunctionComponent = () => {
                             <NosGauge />
                             <SpeedGauge />
                         </div>
-                        <div className="flex flex-col justify-end gap-2 w-32">
+                        <div className="flex flex-col justify-end items-start gap-2 w-32">
                             <LightIndicator />
                             <FuelGauge />
                         </div>
