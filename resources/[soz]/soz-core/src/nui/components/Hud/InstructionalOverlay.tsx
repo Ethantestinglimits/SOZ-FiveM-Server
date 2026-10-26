@@ -9,6 +9,7 @@ import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
 import { formatText } from '../../utils/gta-format';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
+import { useHudLayout } from './hudLayoutState';
 
 export function InstructionalOverlay() {
     const minimap = useMinimap();
@@ -18,13 +19,16 @@ export function InstructionalOverlay() {
     const [text, setText] = useState<string[]>([]);
     const [forceDisplay, setForceDisplay] = useState(false);
 
+    const layout = useHudLayout().instructions;
+
     const styles = useSpring({
         from: {
             opacity: 0,
         },
         to: {
             opacity: 1,
-            top: text.length > 0 ? `${100 - minimap.bottom * 100}vh` : '-50vh',
+            top: text.length > 0 ? (layout ? `${layout.y}vh` : `${100 - minimap.bottom * 100}vh`) : '-50vh',
+            marginLeft: layout ? `${2 * (layout.x - 50)}vw` : '0vw',
         },
     });
 
@@ -46,7 +50,7 @@ export function InstructionalOverlay() {
     return (
         <animated.div
             className={cn('absolute inset-x-0 flex justify-center', {
-                '-mt-12': hasStreetNamesEnabled,
+                '-mt-12': hasStreetNamesEnabled && !layout,
             })}
             style={styles}
         >

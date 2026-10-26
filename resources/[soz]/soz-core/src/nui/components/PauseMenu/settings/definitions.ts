@@ -1,3 +1,4 @@
+import { NuiEvent } from '../../../../shared/event';
 import { PauseNativeConvar } from '../../../../shared/nui/pause_settings';
 
 type SettingBase = {
@@ -20,6 +21,7 @@ export type ServerSelectSetting = SettingBase & {
 export type ServerActionSetting = SettingBase & {
     kind: 'action';
     button: string;
+    event?: NuiEvent;
 };
 
 export type NativeSetting = SettingBase & {
@@ -99,6 +101,14 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
         label: 'HUD',
         native: false,
         items: [
+            {
+                id: 'hudEditor',
+                kind: 'action',
+                label: 'Modifier le HUD',
+                description: 'Ouvre l\x27éditeur pour déplacer les notifications, l\x27aide et les munitions.',
+                button: 'Ouvrir l\x27éditeur',
+                event: NuiEvent.HudEditorOpen,
+            },
             {
                 id: 'hudVisible',
                 kind: 'toggle',

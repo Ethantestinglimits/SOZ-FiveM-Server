@@ -49,6 +49,8 @@ import { FieldZoneHealthApp } from './Field/FieldZoneHealthApp';
 import { FlashApp } from './Flash/FlashApp';
 import { LaserGameApp } from './Games/LaserGameApp';
 import { HudApp } from './Hud/HudApp';
+import { HudEditor } from './Hud/HudEditor';
+import { HudLayoutApp } from './Hud/HudLayoutApp';
 import { InputApp } from './Input/InputApp';
 import { InventoryApp } from './Inventory/InventoryApp';
 import { KeychainApp } from './Inventory/KeychainApp';
@@ -194,6 +196,8 @@ export const App: FunctionComponent = () => {
                 <PauseMenuApp />
                 <MinimapApp />
                 <CrosshairApp />
+                <HudLayoutApp />
+                <HudEditor />
             </Provider>
         </GlassMorphismProvider>
     );

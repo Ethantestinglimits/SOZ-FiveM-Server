@@ -8,11 +8,7 @@ import { fetchNui } from '../../../fetch';
 import { CrosshairPanel } from './CrosshairPanel';
 import { SETTING_CATEGORIES, SettingCategory, SettingItem } from './definitions';
 
-const normalize = (value: string) =>
-    value
-        .normalize('NFD')
-        .replace(/[̀-ͯ]/g, '')
-        .toLowerCase();
+const normalize = (value: string) => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 type SettingsSidebarProps = {
     category: string;
@@ -22,7 +18,7 @@ type SettingsSidebarProps = {
 export const SettingsSidebar: FunctionComponent<SettingsSidebarProps> = ({ category, onCategoryChange }) => (
     <div className="flex min-h-0 flex-1 flex-col gap-[1vh]">
         <ul className="min-h-0 flex-1 overflow-y-auto pr-[0.4vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full">
-            {SETTING_CATEGORIES.map(item => (
+            {SETTING_CATEGORIES.map((item) => (
                 <li key={item.id}>
                     <button
                         onClick={() => onCategoryChange(item.id)}
@@ -31,7 +27,7 @@ export const SettingsSidebar: FunctionComponent<SettingsSidebarProps> = ({ categ
                             {
                                 'bg-white text-black': category === item.id,
                                 'text-white/80 hover:bg-white/15 hover:text-white': category !== item.id,
-                            }
+                            },
                         )}
                     >
                         {item.label}
@@ -40,7 +36,10 @@ export const SettingsSidebar: FunctionComponent<SettingsSidebarProps> = ({ categ
             ))}
         </ul>
         <button
-            onClick={() => fetchNui(NuiEvent.PauseMenuResetSettings)}
+            onClick={() => {
+                fetchNui(NuiEvent.PauseMenuResetSettings);
+                fetchNui(NuiEvent.HudLayoutReset);
+            }}
             className="flex items-center justify-center gap-[0.8vh] rounded-[1vh] bg-red-500/20 px-[1.2vh] py-[0.9vh] text-[1.4vh] font-semibold uppercase text-red-200 transition-colors hover:bg-red-500/60 hover:text-white"
         >
             <RefreshIcon className="h-[1.8vh] w-[1.8vh]" />
@@ -61,7 +60,11 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
     if (item.kind === 'action') {
         control = (
             <button
-                onClick={() => fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.id, value: true })}
+                onClick={() =>
+                    item.event
+                        ? fetchNui(item.event)
+                        : fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.id, value: true })
+                }
                 className="rounded-[0.8vh] bg-white/15 px-[1.4vh] py-[0.4vh] text-[1.4vh] font-semibold text-white transition-colors hover:bg-white/30"
             >
                 {item.button}
@@ -71,7 +74,7 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
         const current = settings.server[item.id] ?? item.default;
         const index = Math.max(
             0,
-            item.options.findIndex(option => option.value === current)
+            item.options.findIndex((option) => option.value === current),
         );
         const change = (direction: number) => {
             const next = item.options[(index + direction + item.options.length) % item.options.length];
@@ -102,10 +105,13 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
         control = (
             <button
                 onClick={() => fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.id, value: !value })}
-                className={classNames('rounded-[0.8vh] px-[1.4vh] py-[0.4vh] text-[1.4vh] font-semibold transition-colors', {
-                    'bg-emerald-500/80 text-white': value,
-                    'bg-white/15 text-white/70': !value,
-                })}
+                className={classNames(
+                    'rounded-[0.8vh] px-[1.4vh] py-[0.4vh] text-[1.4vh] font-semibold transition-colors',
+                    {
+                        'bg-emerald-500/80 text-white': value,
+                        'bg-white/15 text-white/70': !value,
+                    },
+                )}
             >
                 {value ? 'Oui' : 'Non'}
             </button>
@@ -141,7 +147,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
     const [query, setQuery] = useState('');
     const [hovered, setHovered] = useState<SettingItem | null>(null);
 
-    const current = SETTING_CATEGORIES.find(item => item.id === category) ?? SETTING_CATEGORIES[0];
+    const current = SETTING_CATEGORIES.find((item) => item.id === category) ?? SETTING_CATEGORIES[0];
 
     const sections = useMemo<{ category: SettingCategory; items: SettingItem[] }[]>(() => {
         const search = normalize(query.trim());
@@ -150,12 +156,13 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
             return [{ category: current, items: current.items }];
         }
 
-        return SETTING_CATEGORIES.map(item => ({
+        return SETTING_CATEGORIES.map((item) => ({
             category: item,
             items: item.items.filter(
-                setting => normalize(setting.label).includes(search) || normalize(setting.description).includes(search)
+                (setting) =>
+                    normalize(setting.label).includes(search) || normalize(setting.description).includes(search),
             ),
-        })).filter(section => section.items.length > 0);
+        })).filter((section) => section.items.length > 0);
     }, [query, current]);
 
     const showNativeButton = !query.trim() && current.native;
@@ -167,8 +174,8 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                 <SearchIcon className="h-[1.9vh] w-[1.9vh] shrink-0 text-white/60" />
                 <input
                     value={query}
-                    onChange={event => setQuery(event.target.value)}
-                    onKeyDown={event => event.stopPropagation()}
+                    onChange={(event) => setQuery(event.target.value)}
+                    onKeyDown={(event) => event.stopPropagation()}
                     placeholder="Rechercher un réglage…"
                     className="w-full bg-transparent text-[1.5vh] text-white outline-none placeholder:text-white/40"
                 />
@@ -179,10 +186,10 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
             <div
                 className={classNames(
                     'min-h-0 flex-1 overflow-y-auto pr-[0.6vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full',
-                    { hidden: crosshairPage }
+                    { hidden: crosshairPage },
                 )}
             >
-                {sections.map(section => (
+                {sections.map((section) => (
                     <div key={section.category.id} className="mb-[2vh]">
                         <div className="mb-[0.8vh] flex items-center justify-between">
                             <span className="text-[1.2vh] font-semibold uppercase tracking-[0.2em] text-white/50">
@@ -191,7 +198,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                             </span>
                         </div>
                         <ul className="flex flex-col gap-[0.6vh]">
-                            {section.items.map(item => (
+                            {section.items.map((item) => (
                                 <SettingRow key={item.id} item={item} settings={settings} onHover={setHovered} />
                             ))}
                         </ul>
@@ -216,7 +223,11 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                 </button>
             )}
 
-            <div className={classNames('min-h-[7vh] rounded-[1vh] bg-white/5 px-[1.6vh] py-[1.2vh]', { hidden: crosshairPage })}>
+            <div
+                className={classNames('min-h-[7vh] rounded-[1vh] bg-white/5 px-[1.6vh] py-[1.2vh]', {
+                    hidden: crosshairPage,
+                })}
+            >
                 {hovered ? (
                     <>
                         <div className="text-[1.4vh] font-semibold">{hovered.label}</div>
