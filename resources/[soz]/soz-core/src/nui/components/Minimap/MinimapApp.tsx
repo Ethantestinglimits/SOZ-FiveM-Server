@@ -5,7 +5,7 @@ import { fetchNui } from '../../fetch';
 import { useMinimap } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { MinimapRenderer } from './minimapRenderer';
-import { minimapController, setBlipAnchor } from './minimapState';
+import { isMapTabActive, minimapController, setBlipAnchor } from './minimapState';
 
 const DEFAULT_RATIO = 4 / 5.674;
 const SCREEN_WIDTH_REFERENCE = 1920;
@@ -27,7 +27,7 @@ export const MinimapApp: FunctionComponent = () => {
 
     useEffect(() => {
         const renderer = new MinimapRenderer(canvasRef.current, {
-            onModeChange: mode => {
+            onModeChange: (mode) => {
                 if (mode === 'minimap') {
                     fetchNui(NuiEvent.PauseMenuClose);
                 }
@@ -45,8 +45,8 @@ export const MinimapApp: FunctionComponent = () => {
 
         rendererRef.current = renderer;
         minimapController.requestClose = () => renderer.requestClose();
-        minimapController.focus = point => renderer.focus(point);
-        minimapController.setLayers = layers => {
+        minimapController.focus = (point) => renderer.focus(point);
+        minimapController.setLayers = (layers) => {
             renderer.layers = layers;
         };
 
@@ -97,13 +97,13 @@ export const MinimapApp: FunctionComponent = () => {
         return () => window.removeEventListener('resize', update);
     }, [minimap]);
 
-    useNuiEvent('minimap', 'Frame', frame => rendererRef.current?.setFrame(frame));
-    useNuiEvent('minimap', 'Blips', blips => rendererRef.current?.setBlips(blips));
-    useNuiEvent('minimap', 'Zones', zones => rendererRef.current?.setZones(zones));
-    useNuiEvent('minimap', 'Route', route => {
+    useNuiEvent('minimap', 'Frame', (frame) => rendererRef.current?.setFrame(frame));
+    useNuiEvent('minimap', 'Blips', (blips) => rendererRef.current?.setBlips(blips));
+    useNuiEvent('minimap', 'Zones', (zones) => rendererRef.current?.setZones(zones));
+    useNuiEvent('minimap', 'Route', (route) => {
         if (rendererRef.current) rendererRef.current.route = route;
     });
-    useNuiEvent('minimap', 'Waypoint', waypoint => {
+    useNuiEvent('minimap', 'Waypoint', (waypoint) => {
         if (rendererRef.current) rendererRef.current.waypoint = waypoint;
     });
     useNuiEvent('minimap', 'Settings', ({ animation, fps }) => {
@@ -112,14 +112,14 @@ export const MinimapApp: FunctionComponent = () => {
             rendererRef.current.fpsLimit = fps;
         }
     });
-    useNuiEvent('pause_menu', 'Open', data => {
+    useNuiEvent('pause_menu', 'Open', (data) => {
         scriptModeRef.current = Boolean(data.scriptMode);
         window.dispatchEvent(new Event('resize'));
 
         if (rendererRef.current) {
             rendererRef.current.layers = data.layers;
             rendererRef.current.setRegions(data.regions);
-            rendererRef.current.open(Boolean(data.scriptMode), data.focus);
+            rendererRef.current.open(Boolean(data.scriptMode) || !isMapTabActive(), data.focus);
         }
     });
     useNuiEvent('pause_menu', 'Close', () => rendererRef.current?.reset());

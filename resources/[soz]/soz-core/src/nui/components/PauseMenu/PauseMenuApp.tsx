@@ -145,7 +145,12 @@ export const PauseMenuApp: FunctionComponent = () => {
 
     useNuiEvent('pause_menu', 'Open', (menuData) => {
         setConfirmQuit(false);
-        setTab('map');
+
+        if (menuData.scriptMode) {
+            setMapTabActive(true);
+            setTab('map');
+        }
+
         setLayers(menuData.layers);
         setData(menuData);
     });
@@ -157,8 +162,6 @@ export const PauseMenuApp: FunctionComponent = () => {
     }, [tab]);
 
     const close = () => {
-        setTab('map');
-
         if (!minimapController.requestClose?.()) {
             fetchNui(NuiEvent.PauseMenuClose);
         }
