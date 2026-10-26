@@ -57,7 +57,45 @@ type SettingRowProps = {
 const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHover }) => {
     let control;
 
-    if (item.kind === 'toggle') {
+    if (item.kind === 'action') {
+        control = (
+            <button
+                onClick={() => fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.id, value: true })}
+                className="rounded-[0.8vh] bg-white/15 px-[1.4vh] py-[0.4vh] text-[1.4vh] font-semibold text-white transition-colors hover:bg-white/30"
+            >
+                {item.button}
+            </button>
+        );
+    } else if (item.kind === 'select') {
+        const current = settings.server[item.id] ?? item.default;
+        const index = Math.max(
+            0,
+            item.options.findIndex(option => option.value === current)
+        );
+        const change = (direction: number) => {
+            const next = item.options[(index + direction + item.options.length) % item.options.length];
+
+            fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.id, value: next.value });
+        };
+
+        control = (
+            <div className="flex items-center gap-[0.8vh]">
+                <button
+                    onClick={() => change(-1)}
+                    className="h-[2.6vh] w-[2.6vh] rounded-[0.6vh] bg-white/15 text-[1.4vh] font-bold hover:bg-white/30"
+                >
+                    ‹
+                </button>
+                <span className="min-w-[9vh] text-center text-[1.4vh] font-semibold">{item.options[index].label}</span>
+                <button
+                    onClick={() => change(1)}
+                    className="h-[2.6vh] w-[2.6vh] rounded-[0.6vh] bg-white/15 text-[1.4vh] font-bold hover:bg-white/30"
+                >
+                    ›
+                </button>
+            </div>
+        );
+    } else if (item.kind === 'toggle') {
         const value = Boolean(settings.server[item.id] ?? item.default);
 
         control = (

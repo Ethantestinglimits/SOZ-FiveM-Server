@@ -11,13 +11,24 @@ export type ServerToggleSetting = SettingBase & {
     default: boolean;
 };
 
+export type ServerSelectSetting = SettingBase & {
+    kind: 'select';
+    default: number | string;
+    options: { value: number | string; label: string }[];
+};
+
+export type ServerActionSetting = SettingBase & {
+    kind: 'action';
+    button: string;
+};
+
 export type NativeSetting = SettingBase & {
     kind: 'native';
     convar: PauseNativeConvar;
     format: (raw: number) => string;
 };
 
-export type SettingItem = ServerToggleSetting | NativeSetting;
+export type SettingItem = ServerToggleSetting | ServerSelectSetting | ServerActionSetting | NativeSetting;
 
 export type SettingCategory = {
     id: string;
@@ -26,6 +37,13 @@ export type SettingCategory = {
     note?: string;
     items: SettingItem[];
 };
+
+const FPS_OPTIONS = [30, 60, 90, 120, 144, 165, 240].map(value => ({ value, label: `${value} FPS` }));
+
+const VIDEO_VOLUME_OPTIONS = [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map(value => ({
+    value,
+    label: `${value}%`,
+}));
 
 const plain = (raw: number) => String(raw);
 
@@ -46,6 +64,98 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
                 description:
                     "Anime l'ouverture et la fermeture du menu (la Minimap grandit jusqu'à la carte). À désactiver sur un petit PC.",
                 default: true,
+            },
+            {
+                id: 'minimapFps',
+                kind: 'select',
+                label: 'Limite de FPS de la Minimap',
+                description:
+                    'Fréquence maximale de rafraîchissement de la Minimap. Une valeur basse économise des ressources.',
+                default: 60,
+                options: FPS_OPTIONS,
+            },
+        ],
+    },
+    {
+        id: 'hud',
+        label: 'HUD',
+        native: false,
+        items: [
+            {
+                id: 'hudVisible',
+                kind: 'toggle',
+                label: 'HUD : global',
+                description: 'Active ou désactive le HUD.',
+                default: true,
+            },
+            {
+                id: 'hudCinematic',
+                kind: 'toggle',
+                label: 'HUD : cinématique',
+                description: 'Active ou désactive les barres noires.',
+                default: false,
+            },
+            {
+                id: 'hudCinematicCamera',
+                kind: 'toggle',
+                label: 'Caméra : cinématique',
+                description: 'Active ou désactive la caméra cinématique.',
+                default: false,
+            },
+            {
+                id: 'scaledNui',
+                kind: 'toggle',
+                label: 'Scaling NUI',
+                description: 'Active ou désactive le scaling NUI.',
+                default: false,
+            },
+            {
+                id: 'glassmorphism',
+                kind: 'toggle',
+                label: 'Glassmorphisme',
+                description: "Active ou désactive le glassmorphisme du HUD (fond d'arrière-plan flou).",
+                default: true,
+            },
+            {
+                id: 'glassmorphismFps',
+                kind: 'select',
+                label: 'Glassmorphisme : limite de FPS',
+                description: 'Limite de FPS pour le glassmorphisme du HUD.',
+                default: 30,
+                options: FPS_OPTIONS,
+            },
+        ],
+    },
+    {
+        id: 'voip',
+        label: 'VoIP',
+        native: false,
+        items: [
+            {
+                id: 'voipReset',
+                kind: 'action',
+                label: 'Redémarrer la voip',
+                description: 'Reconnecte le chat vocal en cas de problème.',
+                button: 'Redémarrer',
+            },
+            {
+                id: 'voipIntent',
+                kind: 'select',
+                label: 'Filtre voip',
+                description: 'Permet de changer le filtre sur la voip.',
+                default: 'speech',
+                options: [
+                    { value: 'speech', label: 'Voix' },
+                    { value: 'music', label: 'Musique' },
+                ],
+            },
+            {
+                id: 'videoVolume',
+                kind: 'select',
+                label: 'Volume vidéo des écrans',
+                description: 'Permet de changer le volume des vidéos sur les écrans.',
+                default: 50,
+                options: VIDEO_VOLUME_OPTIONS,
             },
         ],
     },
