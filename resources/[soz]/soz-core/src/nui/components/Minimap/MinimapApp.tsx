@@ -5,7 +5,7 @@ import { fetchNui } from '../../fetch';
 import { useMinimap } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { MinimapRenderer } from './minimapRenderer';
-import { minimapController } from './minimapState';
+import { minimapController, setBlipAnchor } from './minimapState';
 
 const DEFAULT_RATIO = 4 / 5.674;
 const SCREEN_WIDTH_REFERENCE = 1920;
@@ -22,6 +22,7 @@ export const MinimapApp: FunctionComponent = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const rendererRef = useRef<MinimapRenderer | null>(null);
     const ratioRef = useRef(DEFAULT_RATIO);
+    const scriptModeRef = useRef(false);
     const minimap = useMinimap();
 
     useEffect(() => {
@@ -31,8 +32,9 @@ export const MinimapApp: FunctionComponent = () => {
                     fetchNui(NuiEvent.PauseMenuClose);
                 }
             },
-            onClick: (point, blip) => {
+            onClick: (point, blip, screen) => {
                 if (blip?.id && blip.actions) {
+                    setBlipAnchor(screen ?? null);
                     fetchNui(NuiEvent.MinimapBlipClick, { id: blip.id });
                 } else {
                     fetchNui(NuiEvent.MinimapSetWaypoint, point);
@@ -82,7 +84,9 @@ export const MinimapApp: FunctionComponent = () => {
             };
 
             const margin = (PANEL_MARGIN_VH * vh) / 100;
-            const x = margin + (PANEL_COLUMN_VW * vw) / 100 + (PANEL_GAP_VH * vh) / 100;
+            const x = scriptModeRef.current
+                ? margin
+                : margin + (PANEL_COLUMN_VW * vw) / 100 + (PANEL_GAP_VH * vh) / 100;
 
             renderer.panelRect = { x, y: margin, w: vw - x - margin, h: vh - margin * 2 };
         };
@@ -106,10 +110,13 @@ export const MinimapApp: FunctionComponent = () => {
         if (rendererRef.current) rendererRef.current.transitionEnabled = animation;
     });
     useNuiEvent('pause_menu', 'Open', data => {
+        scriptModeRef.current = Boolean(data.scriptMode);
+        window.dispatchEvent(new Event('resize'));
+
         if (rendererRef.current) {
             rendererRef.current.layers = data.layers;
             rendererRef.current.setRegions(data.regions);
-            rendererRef.current.open();
+            rendererRef.current.open(Boolean(data.scriptMode));
         }
     });
     useNuiEvent('pause_menu', 'Close', () => rendererRef.current?.reset());

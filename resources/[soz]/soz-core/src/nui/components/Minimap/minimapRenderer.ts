@@ -59,7 +59,7 @@ type MapImage = { x0: number; y0: number; x1: number; y1: number; levels: Canvas
 
 export type MinimapCallbacks = {
     onModeChange: (mode: MinimapMode) => void;
-    onClick: (point: MinimapPoint, blip?: MinimapBlip) => void;
+    onClick: (point: MinimapPoint, blip?: MinimapBlip, screen?: { x: number; y: number }) => void;
     onRightClick: () => void;
 };
 
@@ -139,6 +139,7 @@ export class MinimapRenderer {
     public minimapRect: MinimapRect = { x: 0, y: 0, w: 0, h: 0 };
     public panelRect: MinimapRect = { x: 0, y: 0, w: 0, h: 0 };
     public transitionEnabled = true;
+    private instant = false;
     public blips: MinimapBlip[] = [];
     public zones: MinimapZone[] = [];
     public route: MinimapPoint[] = [];
@@ -220,10 +221,12 @@ export class MinimapRenderer {
         };
     }
 
-    public open(): void {
+    public open(instant = false): void {
         if (this.mode !== 'minimap' || !this.displayed) {
             return;
         }
+
+        this.instant = instant;
 
         this.panel = { x: this.displayed.x, y: this.displayed.y, scale: PANEL_DEFAULT_SCALE };
         this.target = null;
@@ -388,7 +391,7 @@ export class MinimapRenderer {
         this.presence = lerp(
             this.presence,
             wanted ? 1 : 0,
-            1 - Math.exp(-dt * (this.transitionEnabled ? PRESENCE_RATE : 60)),
+            1 - Math.exp(-dt * (this.transitionEnabled && !this.instant ? PRESENCE_RATE : 60)),
         );
         this.routeIndex = this.findRouteIndex(frame);
 
@@ -407,7 +410,7 @@ export class MinimapRenderer {
         let t = this.mode === 'open' ? 1 : 0;
 
         if (this.mode === 'opening' || this.mode === 'closing') {
-            const duration = this.transitionEnabled ? TRANSITION_MS : 0;
+            const duration = this.transitionEnabled && !this.instant ? TRANSITION_MS : 0;
             const progress = duration === 0 ? 1 : Math.min(1, (now - this.transitionStart) / duration);
             const eased = easeInOut(progress);
 
@@ -896,7 +899,7 @@ export class MinimapRenderer {
         const blip = this.findBlipAt(sx, sy);
 
         if (blip) {
-            this.callbacks.onClick({ x: blip.x, y: blip.y }, blip);
+            this.callbacks.onClick({ x: blip.x, y: blip.y }, blip, { x: event.clientX, y: event.clientY });
 
             return;
         }

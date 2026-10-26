@@ -14,6 +14,14 @@ export const minimapController: {
     setLayers: ((layers: PauseMapLayer[]) => void) | null;
 } = { requestClose: null, focus: null, setLayers: null };
 
+let blipAnchor: { x: number; y: number } | null = null;
+
+export const setBlipAnchor = (anchor: { x: number; y: number } | null): void => {
+    blipAnchor = anchor;
+};
+
+export const getBlipAnchor = (): { x: number; y: number } | null => blipAnchor;
+
 export const setMinimapMode = (next: MinimapMode): void => {
     mode = next;
     listeners.forEach(listener => listener(next));

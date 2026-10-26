@@ -5,7 +5,7 @@ import { BlipAction } from '../../../shared/nui/blip';
 import { fetchNui } from '../../fetch';
 import { useNuiEvent, useNuiFocus } from '../../hook/nui';
 import { useOutside } from '../../hook/outside';
-import { getMinimapMode } from '../Minimap/minimapState';
+import { getBlipAnchor, getMinimapMode } from '../Minimap/minimapState';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
 
 export const BlipApp: FunctionComponent = () => {
@@ -40,12 +40,17 @@ export const BlipApp: FunctionComponent = () => {
         return null;
     }
 
+    const anchor = getMinimapMode() === 'open' ? getBlipAnchor() : null;
+
     return (
         <main
             className="absolute z-[100] flex flex-col items-center inset-0 h-full w-full overflow-hidden"
             style={{ cursor: 'none' }}
         >
-            <div className="mt-[52vh]">
+            <div
+                className={anchor ? 'absolute' : 'mt-[52vh]'}
+                style={anchor ? { left: anchor.x, top: anchor.y + 16, transform: 'translateX(-50%)' } : undefined}
+            >
                 <GlassMorphismContainer>
                     <div ref={refOutside}>
                         {actions.map((action, i) => {
