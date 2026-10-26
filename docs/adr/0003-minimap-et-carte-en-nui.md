@@ -1,10 +1,10 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # Minimap et carte du Menu pause SoZ rendues en NUI
 
-La Minimap native de GTA est remplacée par une Minimap NUI qui partage le moteur de rendu de la carte du Menu pause SoZ : à l'ouverture du menu, c'est le même élément qui s'agrandit jusqu'au panneau carte. On choisit la cohérence visuelle (mêmes tuiles, mêmes icônes, mêmes couches) et une transition sans couture plutôt que les avantages du radar natif. Statut `proposed` jusqu'à validation par le prototype.
+La Minimap native de GTA est remplacée par une Minimap NUI qui partage le moteur de rendu de la carte du Menu pause SoZ : à l'ouverture du menu, c'est le même élément qui s'agrandit jusqu'au panneau carte. On choisit la cohérence visuelle (mêmes tuiles, mêmes icônes, mêmes couches) et une transition sans couture plutôt que les avantages du radar natif. Validé en jeu par le prototype conservé sur la branche `prototype/nui-minimap` : fluidité en conduite, itinéraire GPS, blips des autres scripts, zones, transition vers le panneau, clic waypoint.
 
 ## Considered Options
 
