@@ -94,6 +94,19 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
                 default: 60,
                 options: FPS_OPTIONS,
             },
+            {
+                id: 'minimapOrientation',
+                kind: 'select',
+                label: 'Orientation de la Minimap',
+                description:
+                    'Suit la caméra : la carte tourne avec la caméra (par défaut). Icônes droites : la carte tourne, mais les icônes de véhicules et de joueurs ne montrent plus leur cap. Nord en haut : la carte ne tourne plus.',
+                default: 'camera',
+                options: [
+                    { value: 'camera', label: 'Suit la caméra' },
+                    { value: 'upright', label: 'Icônes droites' },
+                    { value: 'north', label: 'Nord en haut' },
+                ],
+            },
         ],
     },
     {
