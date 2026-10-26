@@ -4,7 +4,7 @@ import { FunctionComponent, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { VoiceMode } from '../../../shared/hud';
-import { useHudHasStreetNames } from '../../hook/data';
+import { useHudHasStreetNames, useHudMinimap } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
 import { useMinimapMode } from '../Minimap/minimapState';
@@ -21,7 +21,7 @@ import { useHudColor } from './hooks/useHudColor';
 export const WatchInterface: FunctionComponent = () => {
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
     const settings = useSelector((state: RootState) => state.hud.settings);
-    const minimap = useSelector((state: RootState) => state.hud.minimap);
+    const minimap = useHudMinimap();
 
     const hasStreetNamesEnabled = useHudHasStreetNames();
     const minimapMode = useMinimapMode();

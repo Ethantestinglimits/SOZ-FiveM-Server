@@ -105,8 +105,9 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
                 id: 'hudEditor',
                 kind: 'action',
                 label: 'Modifier le HUD',
-                description: 'Ouvre l\x27éditeur pour déplacer les notifications, l\x27aide et les munitions.',
-                button: 'Ouvrir l\x27éditeur',
+                description:
+                    "Ouvre l'éditeur pour déplacer le groupe Minimap, les notifications, les alertes police, l'aide et les munitions.",
+                button: "Ouvrir l'éditeur",
                 event: NuiEvent.HudEditorOpen,
             },
             {

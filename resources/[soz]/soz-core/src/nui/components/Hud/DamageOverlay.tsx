@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { PlayerPedHash } from '../../../shared/player';
-import { useMinimap, usePlayer } from '../../hook/data';
+import { useHudMinimap, usePlayer } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
 
@@ -16,7 +16,7 @@ export function DamageOverlay() {
     const switchInjuryTrackerPosition = useSelector(
         (state: RootState) => state.hud.settings.switchInjuryTrackerPosition
     );
-    const minimap = useMinimap();
+    const minimap = useHudMinimap();
     const player = usePlayer();
     const { getPath } = useAssetPath();
 

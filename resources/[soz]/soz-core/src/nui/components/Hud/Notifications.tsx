@@ -10,6 +10,7 @@ import { uuidv4 } from '../../../core/utils';
 import { AdvancedNotification, BasicNotification, TPoliceNotification } from '../../../shared/notification';
 import { useAssetPath } from '../../hook/assets';
 import { useNuiEvent } from '../../hook/nui';
+import { useHudMinimap } from '../../hook/data';
 import { RootState } from '../../store';
 import { formatText } from '../../utils/gta-format';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
@@ -318,7 +319,8 @@ const PoliceNotification: FunctionComponent<PoliceNotificationProps> = ({ notifi
 
 export const Notifications: FunctionComponent = () => {
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
-    const minimap = useSelector((state: RootState) => state.hud.minimap);
+    const minimap = useHudMinimap();
+    const policeLayout = useHudLayout().police;
     const settings = useSelector((state: RootState) => state.hud.settings);
     const showDateTime = useSelector((state: RootState) => state.hud.settings.showDateTime);
     const showWeather = useSelector((state: RootState) => state.hud.settings.showWeather);
@@ -408,8 +410,8 @@ export const Notifications: FunctionComponent = () => {
             <div
                 className="absolute flex flex-col-reverse gap-4"
                 style={{
-                    top: `calc(0.5rem)`,
-                    right: `1rem`,
+                    top: policeLayout ? `${policeLayout.y}vh` : `calc(0.5rem)`,
+                    right: policeLayout ? `${100 - policeLayout.x}vw` : `1rem`,
                     height: `50vh`,
                     width: `calc(100vw * ${minimap.width * 1.5})`,
                 }}

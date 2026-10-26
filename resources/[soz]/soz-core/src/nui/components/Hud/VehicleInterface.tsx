@@ -3,7 +3,7 @@ import cn from 'classnames';
 import { FunctionComponent, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { useHudHasStreetNames, useMinimap, usePlayer } from '../../hook/data';
+import { useHudHasStreetNames, useHudMinimap, usePlayer } from '../../hook/data';
 import { RootState } from '../../store';
 import { FuelGauge } from './components/FuelGauge';
 import { LightIndicator } from './components/LightIndicator';
@@ -13,7 +13,7 @@ import { SeatbeltIndicator } from './components/SeatbeltIndicator';
 import { SpeedGauge } from './components/SpeedGauge';
 
 export const VehicleInterface: FunctionComponent = () => {
-    const minimap = useMinimap();
+    const minimap = useHudMinimap();
     const hasStreetNamesEnabled = useHudHasStreetNames();
 
     const seat = useSelector((state: RootState) => state.vehicle.seat);

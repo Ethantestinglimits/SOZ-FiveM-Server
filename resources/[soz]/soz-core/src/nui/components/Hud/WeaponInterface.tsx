@@ -4,12 +4,12 @@ import { FunctionComponent } from 'react';
 import { useSelector } from 'react-redux';
 
 import { useAssetPath } from '../../hook/assets';
-import { useAmmo, useHudHasStreetNames, useMinimap } from '../../hook/data';
+import { useAmmo, useHudHasStreetNames, useHudMinimap } from '../../hook/data';
 import { RootState } from '../../store';
 import { useHudLayout } from './hudLayoutState';
 
 export const WeaponInterface: FunctionComponent = () => {
-    const minimap = useMinimap();
+    const minimap = useHudMinimap();
     const { getPath } = useAssetPath();
     const hasStreetNamesEnabled = useHudHasStreetNames();
     const switchPlayerStatsPosition = useSelector((state: RootState) => state.hud.settings.switchPlayerStatsPosition);
