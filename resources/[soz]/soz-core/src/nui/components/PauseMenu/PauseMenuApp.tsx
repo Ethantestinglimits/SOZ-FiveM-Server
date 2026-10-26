@@ -3,12 +3,13 @@ import classNames from 'classnames';
 import { FunctionComponent, PropsWithChildren, ReactNode, useEffect, useState } from 'react';
 
 import { NuiEvent } from '../../../shared/event';
-import { PauseMenuData } from '../../../shared/nui/pause_menu';
+import { PauseMapLayer, PauseMenuData } from '../../../shared/nui/pause_menu';
 import { fetchNui } from '../../fetch';
 import { useKeyPress } from '../../hook/control';
 import { useNuiEvent, useNuiFocus } from '../../hook/nui';
 import { minimapController, setMapTabActive, useMinimapMode } from '../Minimap/minimapState';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
+import { MapSidebar } from './MapSidebar';
 
 type PauseMenuTab = 'map' | 'settings';
 
@@ -108,6 +109,7 @@ export const PauseMenuApp: FunctionComponent = () => {
     const [data, setData] = useState<PauseMenuData | null>(null);
     const [tab, setTab] = useState<PauseMenuTab>('map');
     const [confirmQuit, setConfirmQuit] = useState(false);
+    const [layers, setLayers] = useState<PauseMapLayer[]>([]);
     const mode = useMinimapMode();
     const showContent = mode === 'open';
 
@@ -116,6 +118,7 @@ export const PauseMenuApp: FunctionComponent = () => {
     useNuiEvent('pause_menu', 'Open', (menuData) => {
         setConfirmQuit(false);
         setTab('map');
+        setLayers(menuData.layers);
         setData(menuData);
     });
     useNuiEvent('pause_menu', 'Close', () => setData(null));
@@ -210,7 +213,11 @@ export const PauseMenuApp: FunctionComponent = () => {
                             ))}
                         </div>
 
-                        <div className="min-h-0 flex-1" />
+                        {tab === 'map' ? (
+                            <MapSidebar data={data} layers={layers} onLayersChange={setLayers} />
+                        ) : (
+                            <div className="min-h-0 flex-1" />
+                        )}
 
                         <div className="flex flex-col gap-[0.8vh]">
                             <SideButton label="Reprendre" icon={<PlayIcon />} onClick={close} />
