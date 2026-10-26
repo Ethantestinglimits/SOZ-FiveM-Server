@@ -5,6 +5,7 @@ import { FunctionComponent, useMemo, useState } from 'react';
 import { NuiEvent } from '../../../../shared/event';
 import { PauseSettingsData } from '../../../../shared/nui/pause_settings';
 import { fetchNui } from '../../../fetch';
+import { CrosshairPanel } from './CrosshairPanel';
 import { SETTING_CATEGORIES, SettingCategory, SettingItem } from './definitions';
 
 const normalize = (value: string) =>
@@ -158,6 +159,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
     }, [query, current]);
 
     const showNativeButton = !query.trim() && current.native;
+    const crosshairPage = current.id === 'crosshair' && !query.trim();
 
     return (
         <div className="flex h-full min-h-0 flex-col gap-[1.4vh] p-[2.4vh]">
@@ -172,7 +174,14 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                 />
             </label>
 
-            <div className="min-h-0 flex-1 overflow-y-auto pr-[0.6vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full">
+            {crosshairPage && <CrosshairPanel initial={settings.crosshair} />}
+
+            <div
+                className={classNames(
+                    'min-h-0 flex-1 overflow-y-auto pr-[0.6vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full',
+                    { hidden: crosshairPage }
+                )}
+            >
                 {sections.map(section => (
                     <div key={section.category.id} className="mb-[2vh]">
                         <div className="mb-[0.8vh] flex items-center justify-between">
@@ -207,7 +216,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                 </button>
             )}
 
-            <div className="min-h-[7vh] rounded-[1vh] bg-white/5 px-[1.6vh] py-[1.2vh]">
+            <div className={classNames('min-h-[7vh] rounded-[1vh] bg-white/5 px-[1.6vh] py-[1.2vh]', { hidden: crosshairPage })}>
                 {hovered ? (
                     <>
                         <div className="text-[1.4vh] font-semibold">{hovered.label}</div>

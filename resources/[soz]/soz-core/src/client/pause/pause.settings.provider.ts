@@ -3,6 +3,7 @@ import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { NuiEvent } from '../../shared/event';
 import { PAUSE_NATIVE_CONVARS, PauseSettingChange, PauseSettingsData } from '../../shared/nui/pause_settings';
+import { HudCrosshairProvider } from '../hud/hud.crosshair.provider';
 import { HudGlassmorphismProvider } from '../hud/hud.glassmorphism.provider';
 import { HudMinimapProvider } from '../hud/hud.minimap.provider';
 import { HudStateProvider } from '../hud/hud.state.provider';
@@ -47,6 +48,9 @@ export class PauseSettingsProvider {
     @Inject(HudGlassmorphismProvider)
     private hudGlassmorphismProvider: HudGlassmorphismProvider;
 
+    @Inject(HudCrosshairProvider)
+    private hudCrosshairProvider: HudCrosshairProvider;
+
     @Inject(VoiceProvider)
     private voiceProvider: VoiceProvider;
 
@@ -79,6 +83,7 @@ export class PauseSettingsProvider {
                 videoVolume: Math.round(this.streamProvider.videoVolume * 100),
             },
             native,
+            crosshair: this.hudCrosshairProvider.getConfig(),
         };
     }
 
@@ -109,6 +114,8 @@ export class PauseSettingsProvider {
         for (const [key, value] of Object.entries(DEFAULTS)) {
             await this.apply(key, value);
         }
+
+        this.hudCrosshairProvider.reset();
 
         this.nuiDispatch.dispatch('pause_menu', 'Settings', this.getSettings());
     }
