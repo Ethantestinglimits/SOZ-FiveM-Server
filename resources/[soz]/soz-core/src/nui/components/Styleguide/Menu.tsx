@@ -16,8 +16,8 @@ import {
 import cn from 'classnames';
 import clsx from 'clsx';
 import {
-    ComponentProps,
     createContext,
+    CSSProperties,
     DetailedHTMLProps,
     forwardRef,
     FunctionComponent,
@@ -118,22 +118,6 @@ export const SubMenu: FunctionComponent<PropsWithChildren<SubMenuProps>> = ({ ch
     );
 };
 
-const MenuGlassContainer: FunctionComponent<ComponentProps<typeof GlassMorphismContainer>> = (props) => {
-    const { potato } = useMenuStyle();
-
-    if (potato) {
-        return (
-            <div className="h-full w-full overflow-hidden rounded-lg bg-black/90">
-                <div className={props.className} style={props.style}>
-                    {props.children}
-                </div>
-            </div>
-        );
-    }
-
-    return <GlassMorphismContainer {...props} />;
-};
-
 export type MainMenuProps = PropsWithChildren<{
     helpPanel?: ReactNode;
 }>;
@@ -149,6 +133,10 @@ export const MainMenu: FunctionComponent<MainMenuProps> = ({ children, helpPanel
 export const MenuContainer: FunctionComponent<MainMenuProps> = ({ children, helpPanel }) => {
     const { size, text } = useMenuStyle();
     const textScale = getTextScale(text);
+    const scaled = (origin: string): CSSProperties | undefined =>
+        size === 100 ? undefined : { transform: `scale(${size / 100})`, transformOrigin: origin };
+    const zoomed = (node: ReactNode) =>
+        textScale === 1 ? node : <div style={{ zoom: textScale, width: `${100 / textScale}%` }}>{node}</div>;
     let leftOffset = 'left-8';
     let rightOffset = 'right-8';
     if (
@@ -163,27 +151,27 @@ export const MenuContainer: FunctionComponent<MainMenuProps> = ({ children, help
         <>
             <div
                 className={clsx('absolute top-10 w-[36vh] min-w-[36vh] font-prompt select-none', leftOffset)}
-                style={{ transform: `scale(${size / 100})`, transformOrigin: 'top left' }}
+                style={scaled('top left')}
             >
-                <div style={{ zoom: textScale, width: `${100 / textScale}%` }}>{children}</div>
+                {zoomed(children)}
             </div>
             {helpPanel && (
                 <div
                     className={clsx('absolute top-10 w-[36vh] min-w-[36vh] font-prompt select-none', rightOffset)}
-                    style={{ transform: `scale(${size / 100})`, transformOrigin: 'top right' }}
+                    style={scaled('top right')}
                 >
-                    <div style={{ zoom: textScale, width: `${100 / textScale}%` }}>
+                    {zoomed(
                         <div
                             className="mt-3 max-h-[40vh] overflow-hidden"
                             style={{
                                 pointerEvents: 'none',
                             }}
                         >
-                            <MenuGlassContainer duration="duration-0" borderClassName="rounded-lg" disableBorder>
+                            <GlassMorphismContainer duration="duration-0" borderClassName="rounded-lg" disableBorder>
                                 <ul>{helpPanel}</ul>
-                            </MenuGlassContainer>
-                        </div>
-                    </div>
+                            </GlassMorphismContainer>
+                        </div>,
+                    )}
                 </div>
             )}
         </>
@@ -259,7 +247,7 @@ export const MenuContent: FunctionComponent<MenuContentProps> = ({ children, sub
             >
                 <MenuControls>
                     <div>
-                        <MenuGlassContainer duration="duration-0" borderClassName="rounded-lg" disableBorder>
+                        <GlassMorphismContainer duration="duration-0" borderClassName="rounded-lg" disableBorder>
                             {subtitle && (
                                 <div className="flex items-center gap-2 text-sm font-semibold pt-3 px-4 text-white">
                                     <ChevronLeftIcon className="size-4" />
@@ -270,12 +258,16 @@ export const MenuContent: FunctionComponent<MenuContentProps> = ({ children, sub
                             <ul className="p-2 max-h-[40vh] overflow-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-thumb-rounded-full scrollbar-track-rounded-full">
                                 {children}
                             </ul>
-                        </MenuGlassContainer>
+                        </GlassMorphismContainer>
                         {description && (
                             <div className="mt-3 w-full overflow-hidden text-white">
-                                <MenuGlassContainer duration="duration-0" borderClassName="rounded-lg" disableBorder>
+                                <GlassMorphismContainer
+                                    duration="duration-0"
+                                    borderClassName="rounded-lg"
+                                    disableBorder
+                                >
                                     <div className="px-2 py-1">{description}</div>
-                                </MenuGlassContainer>
+                                </GlassMorphismContainer>
                             </div>
                         )}
                         {helpPanel && (
@@ -285,9 +277,13 @@ export const MenuContent: FunctionComponent<MenuContentProps> = ({ children, sub
                                     pointerEvents: 'none',
                                 }}
                             >
-                                <MenuGlassContainer duration="duration-0" borderClassName="rounded-lg" disableBorder>
+                                <GlassMorphismContainer
+                                    duration="duration-0"
+                                    borderClassName="rounded-lg"
+                                    disableBorder
+                                >
                                     <ul>{helpPanel}</ul>
-                                </MenuGlassContainer>
+                                </GlassMorphismContainer>
                             </div>
                         )}
                     </div>
@@ -1171,7 +1167,7 @@ export const MenuItemSelectHelper: FunctionComponent = () => {
 
     return (
         <div className={clsx('fixed translate-x-full top-28 min-w-[24rem] max-h-[40vh]', leftOffset, width)}>
-            <MenuGlassContainer duration="duration-0" className="p-1" borderClassName="rounded-lg" disableBorder>
+            <GlassMorphismContainer duration="duration-0" className="p-1" borderClassName="rounded-lg" disableBorder>
                 <ul
                     onClick={() => setClicked(true)}
                     className="rounded-lg max-h-[40vh] overflow-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-thumb-rounded-full scrollbar-track-rounded-full"
@@ -1184,7 +1180,7 @@ export const MenuItemSelectHelper: FunctionComponent = () => {
                         );
                     })}
                 </ul>
-            </MenuGlassContainer>
+            </GlassMorphismContainer>
         </div>
     );
 };

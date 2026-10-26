@@ -72,7 +72,7 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
                 kind: 'toggle',
                 label: 'Mode économe (petit PC)',
                 description:
-                    'Fond du menu noir à la place du flou, panneaux sans effet verre, sans animation, Minimap limitée à 30 FPS, glassmorphisme du HUD désactivé. Réduit fortement les calculs de rendu.',
+                    "Désactive le glassmorphisme et l'animation de la carte, et limite la Minimap à 30 FPS. Réduit les calculs de rendu sans changer le style de l'interface.",
                 default: false,
             },
             {
