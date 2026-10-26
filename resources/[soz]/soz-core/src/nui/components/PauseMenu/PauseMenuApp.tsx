@@ -126,7 +126,7 @@ const FadeIn: FunctionComponent<PropsWithChildren<{ as: 'aside' | 'main'; classN
     }, []);
 
     return (
-        <Tag className={classNames(className, { 'transition-opacity duration-500': !instant, 'opacity-0': !shown })}>
+        <Tag className={classNames(className, { 'transition-opacity duration-300': !instant, 'opacity-0': !shown })}>
             {children}
         </Tag>
     );
