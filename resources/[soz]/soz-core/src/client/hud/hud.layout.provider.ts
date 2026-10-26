@@ -44,6 +44,11 @@ export class HudLayoutProvider {
         this.nuiDispatch.dispatch('hud_layout', 'SetLayout', this.layout);
     }
 
+    @OnNuiEvent(NuiEvent.HudLayoutRequest)
+    public async onRequest(): Promise<void> {
+        this.sendLayout();
+    }
+
     @OnNuiEvent(NuiEvent.HudEditorOpen)
     public async onOpenEditor(): Promise<void> {
         this.pauseMenuProvider.close();
