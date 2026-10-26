@@ -39,10 +39,6 @@ export class PauseNativeSettingsDriver {
 
     @Tick(TickInterval.EVERY_FRAME)
     public injectControl(): void {
-        if (this.busy) {
-            SuppressFrontendRenderingThisFrame();
-        }
-
         if (!this.pendingControl) {
             return;
         }
