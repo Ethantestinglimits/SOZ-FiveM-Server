@@ -745,7 +745,13 @@ export class MinimapRenderer {
 
             const icon = this.getIcon(blip.sprite, blip.color);
 
-            if (icon) {
+            if (icon && blip.rotation) {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(this.camera.rotation - toRadians(blip.rotation));
+                ctx.drawImage(icon, -size / 2, -size / 2, size, size);
+                ctx.restore();
+            } else if (icon) {
                 ctx.drawImage(icon, x - size / 2, y - size / 2, size, size);
             } else {
                 ctx.fillStyle = getBlipColor(blip.color);
