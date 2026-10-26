@@ -16,6 +16,7 @@ export const getBlipIconUrl = (sprite: number): string => `${BLIP_URL}/${sprite}
 const REGION_SCALE = [0.08, 1.6];
 const POSTAL_MIN_SCALE = 0.8;
 const FOCUS_SCALE = 1;
+const SCRIPT_FOCUS_SCALE = 1.2;
 const FOCUS_RATE = 8;
 const ICON_RESOLUTION = 64;
 const BLIP_SIZE = 16;
@@ -221,14 +222,18 @@ export class MinimapRenderer {
         };
     }
 
-    public open(instant = false): void {
+    public open(instant = false, center?: MinimapPoint): void {
         if (this.mode !== 'minimap' || !this.displayed) {
             return;
         }
 
         this.instant = instant;
 
-        this.panel = { x: this.displayed.x, y: this.displayed.y, scale: PANEL_DEFAULT_SCALE };
+        this.panel = {
+            x: center?.x ?? this.displayed.x,
+            y: center?.y ?? this.displayed.y,
+            scale: center ? SCRIPT_FOCUS_SCALE : PANEL_DEFAULT_SCALE,
+        };
         this.target = null;
         this.highlight = null;
         this.setMode('opening');

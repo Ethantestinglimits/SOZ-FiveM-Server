@@ -101,7 +101,7 @@ export class PauseMenuProvider {
         }
     }
 
-    public open(scriptMode = false): void {
+    public open(scriptMode = false, focus?: { x: number; y: number }): void {
         const player = this.playerService.getPlayer();
 
         if (!player || this.opened) {
@@ -126,13 +126,14 @@ export class PauseMenuProvider {
             layers: this.getMapLayers(),
             settings: this.pauseSettingsProvider.getSettings(),
             scriptMode,
+            focus,
         });
     }
 
-    public openMapForScript(): Promise<void> {
+    public openMapForScript(focus?: { x: number; y: number }): Promise<void> {
         return new Promise(resolve => {
             this.pauseMinimapProvider.scanNow();
-            this.open(true);
+            this.open(true, focus);
 
             if (!this.opened) {
                 resolve();

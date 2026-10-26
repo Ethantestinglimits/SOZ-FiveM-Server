@@ -30,6 +30,7 @@ export type PauseMenuData = {
     layers: PauseMapLayer[];
     settings: PauseSettingsData;
     scriptMode?: boolean;
+    focus?: { x: number; y: number };
 };
 
 export interface NuiPauseMenuMethodMap {

@@ -106,7 +106,7 @@ export class PoliceCameraProvider {
             const saveCoords = this.coords;
             const inter = setInterval(() => SetFakePausemapPlayerPositionThisFrame(saveCoords[0], saveCoords[1]), 0);
             this.deleteCamera();
-            await this.showCameras();
+            await this.showCameras({ x: saveCoords[0], y: saveCoords[1] });
             clearInterval(inter);
         }
 
@@ -268,7 +268,7 @@ export class PoliceCameraProvider {
         this.hudWatchProvider.disableWatch(false);
     }
 
-    public async showCameras() {
+    public async showCameras(focus?: { x: number; y: number }) {
         let blips: string[] = [];
         let i = 0;
         let savedBlips: Record<string, Blip> = {};
@@ -329,7 +329,7 @@ export class PoliceCameraProvider {
         }
 
         try {
-            await this.pauseMenuProvider.openMapForScript();
+            await this.pauseMenuProvider.openMapForScript(focus);
         } finally {
             await this.cleanBlips(blips, savedBlips);
             blips = [];
