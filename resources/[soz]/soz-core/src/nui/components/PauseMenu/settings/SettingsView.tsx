@@ -54,9 +54,11 @@ type SettingRowProps = {
     item: SettingItem;
     settings: PauseSettingsData;
     onHover: (item: SettingItem | null) => void;
+    draft?: number;
+    onDraft?: (key: string, value: number) => void;
 };
 
-const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHover }) => {
+const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHover, draft, onDraft }) => {
     let control;
 
     if (item.kind === 'action') {
@@ -123,62 +125,71 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
         const native = NATIVE_SETTINGS[item.convar];
 
         if (native && raw !== undefined && raw >= 0) {
-            const queue = (value: number) => {
-                if (value !== raw) {
-                    fetchNui(NuiEvent.PauseMenuQueueNative, { key: item.convar, value });
+            const value = draft ?? raw;
+            const changed = draft !== undefined && draft !== raw;
+            const hover = onDraft
+                ? {}
+                : { onMouseEnter: () => setNativeHover(true), onMouseLeave: () => setNativeHover(false) };
+            const queue = (next: number) => {
+                if (onDraft) {
+                    onDraft(item.convar, next);
+                } else if (next !== raw) {
+                    fetchNui(NuiEvent.PauseMenuQueueNative, { changes: [{ key: item.convar, value: next }] });
                 }
             };
 
             if (native.kind === 'toggle') {
                 control = (
                     <button
-                        onMouseEnter={() => setNativeHover(true)}
-                        onMouseLeave={() => setNativeHover(false)}
-                        onMouseDown={() => queue(raw > 0 ? 0 : 1)}
+                        {...hover}
+                        onMouseDown={() => queue(value > 0 ? 0 : 1)}
                         className={classNames(
                             'rounded-[0.8vh] px-[1.4vh] py-[0.4vh] text-[1.4vh] font-semibold transition-colors',
                             {
-                                'bg-emerald-500/80 text-white': raw > 0,
-                                'bg-white/15 text-white/70': raw <= 0,
+                                'bg-emerald-500/80 text-white': value > 0,
+                                'bg-white/15 text-white/70': value <= 0,
+                                'ring-2 ring-amber-300': changed,
                             },
                         )}
                     >
-                        {raw > 0 ? 'Oui' : 'Non'}
+                        {value > 0 ? 'Oui' : 'Non'}
                     </button>
                 );
             } else {
                 const label =
                     native.kind === 'select'
-                        ? native.options.find((option) => option.value === raw)?.label ?? item.format(raw)
-                        : item.format(raw);
+                        ? native.options.find((option) => option.value === value)?.label ?? item.format(value)
+                        : item.format(value);
                 const change = (direction: number) => {
                     if (native.kind === 'slider') {
-                        queue(Math.min(native.max, Math.max(native.min, raw + direction)));
+                        queue(Math.min(native.max, Math.max(native.min, value + direction)));
 
                         return;
                     }
 
                     const index = Math.max(
                         0,
-                        native.options.findIndex((option) => option.value === raw),
+                        native.options.findIndex((option) => option.value === value),
                     );
 
                     queue(native.options[(index + direction + native.options.length) % native.options.length].value);
                 };
 
                 control = (
-                    <div
-                        className="flex items-center gap-[0.8vh]"
-                        onMouseEnter={() => setNativeHover(true)}
-                        onMouseLeave={() => setNativeHover(false)}
-                    >
+                    <div className="flex items-center gap-[0.8vh]" {...hover}>
                         <button
                             onMouseDown={() => change(-1)}
                             className="h-[2.6vh] w-[2.6vh] rounded-[0.6vh] bg-white/15 text-[1.4vh] font-bold hover:bg-white/30"
                         >
                             ‹
                         </button>
-                        <span className="min-w-[9vh] text-center text-[1.4vh] font-semibold">{label}</span>
+                        <span
+                            className={classNames('min-w-[9vh] text-center text-[1.4vh] font-semibold', {
+                                'text-amber-300': changed,
+                            })}
+                        >
+                            {label}
+                        </span>
                         <button
                             onMouseDown={() => change(1)}
                             className="h-[2.6vh] w-[2.6vh] rounded-[0.6vh] bg-white/15 text-[1.4vh] font-bold hover:bg-white/30"
@@ -217,8 +228,34 @@ type SettingsMainProps = {
 export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, settings }) => {
     const [query, setQuery] = useState('');
     const [hovered, setHovered] = useState<SettingItem | null>(null);
+    const [draft, setDraft] = useState<Record<string, number>>({});
 
     useEffect(() => () => setNativeHover(false), [category, query]);
+
+    useEffect(() => {
+        setDraft((current) => {
+            const next = Object.fromEntries(
+                Object.entries(current).filter(([key, value]) => settings.native[key] !== value),
+            );
+
+            return Object.keys(next).length === Object.keys(current).length ? current : next;
+        });
+    }, [settings.native]);
+
+    const changeDraft = (key: string, value: number) =>
+        setDraft((current) => {
+            const next = { ...current };
+
+            if (settings.native[key] === value) {
+                delete next[key];
+            } else {
+                next[key] = value;
+            }
+
+            return next;
+        });
+
+    const pendingChanges = Object.entries(draft).map(([key, value]) => ({ key, value }));
 
     const current = SETTING_CATEGORIES.find((item) => item.id === category) ?? SETTING_CATEGORIES[0];
 
@@ -239,6 +276,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
     }, [query, current]);
 
     const showNativeButton = !query.trim() && current.native;
+    const showStagedActions = sections.some((section) => section.category.staged);
     const crosshairPage = current.id === 'crosshair' && !query.trim();
 
     return (
@@ -276,7 +314,14 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                         </div>
                         <ul className="flex flex-col gap-[0.6vh]">
                             {section.items.map((item) => (
-                                <SettingRow key={item.id} item={item} settings={settings} onHover={setHovered} />
+                                <SettingRow
+                                    key={item.id}
+                                    item={item}
+                                    settings={settings}
+                                    onHover={setHovered}
+                                    draft={item.kind === 'native' ? draft[item.convar] : undefined}
+                                    onDraft={section.category.staged ? changeDraft : undefined}
+                                />
                             ))}
                         </ul>
                         {section.category.note && !query.trim() && (
@@ -288,6 +333,31 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                     <p className="px-[0.8vh] text-[1.4vh] text-white/50">Aucun réglage ne correspond à la recherche.</p>
                 )}
             </div>
+
+            {showStagedActions && (
+                <div className="flex items-center gap-[1vh]">
+                    <button
+                        disabled={pendingChanges.length === 0}
+                        onMouseEnter={() => setNativeHover(true)}
+                        onMouseLeave={() => setNativeHover(false)}
+                        onMouseDown={() =>
+                            pendingChanges.length > 0 &&
+                            fetchNui(NuiEvent.PauseMenuQueueNative, { changes: pendingChanges })
+                        }
+                        className="rounded-[1vh] bg-emerald-500/80 px-[1.8vh] py-[0.9vh] text-[1.4vh] font-semibold uppercase transition-colors hover:bg-emerald-500 disabled:cursor-default disabled:bg-white/10 disabled:text-white/40"
+                    >
+                        Appliquer les changements
+                        {pendingChanges.length > 0 && ` (${pendingChanges.length})`}
+                    </button>
+                    <button
+                        disabled={pendingChanges.length === 0}
+                        onClick={() => setDraft({})}
+                        className="rounded-[1vh] bg-white/10 px-[1.8vh] py-[0.9vh] text-[1.4vh] font-semibold uppercase transition-colors hover:bg-white/25 disabled:cursor-default disabled:text-white/40 disabled:hover:bg-white/10"
+                    >
+                        Annuler les changements
+                    </button>
+                </div>
+            )}
 
             {showNativeButton && (
                 <button

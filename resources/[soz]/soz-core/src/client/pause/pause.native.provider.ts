@@ -13,28 +13,37 @@ export class PauseNativeSettingsProvider {
     @Inject(NuiDispatch)
     private nuiDispatch: NuiDispatch;
 
-    private pending: { key: string; value: number; at: number } | null = null;
+    private pending: { changes: { key: string; value: number }[]; at: number } | null = null;
 
     @Once(OnceStep.Start)
     public registerApplyCommand(): void {
         RegisterCommand(`+${APPLY_COMMAND}`, () => this.apply(), false);
         RegisterCommand(`-${APPLY_COMMAND}`, () => this.apply(), false);
-        RegisterKeyMapping(`+${APPLY_COMMAND}`, 'Paramètres : appliquer un réglage du jeu', 'MOUSE_BUTTON', 'MOUSE_LEFT');
+        RegisterKeyMapping(
+            `+${APPLY_COMMAND}`,
+            'Paramètres : appliquer un réglage du jeu',
+            'MOUSE_BUTTON',
+            'MOUSE_LEFT',
+        );
     }
 
     @OnNuiEvent(NuiEvent.PauseMenuQueueNative)
-    public async onQueue({ key, value }: { key: string; value: number }): Promise<void> {
-        if (!isNativeSetting(key)) {
-            return;
+    public async onQueue({ changes }: { changes: { key: string; value: number }[] }): Promise<void> {
+        const valid: { key: string; value: number }[] = [];
+
+        for (const { key, value } of changes ?? []) {
+            if (!isNativeSetting(key)) {
+                continue;
+            }
+
+            const sanitized = sanitizeNativeValue(NATIVE_SETTINGS[key], value);
+
+            if (sanitized !== null) {
+                valid.push({ key, value: sanitized });
+            }
         }
 
-        const sanitized = sanitizeNativeValue(NATIVE_SETTINGS[key], value);
-
-        if (sanitized === null) {
-            return;
-        }
-
-        this.pending = { key, value: sanitized, at: GetGameTimer() };
+        this.pending = valid.length > 0 ? { changes: valid, at: GetGameTimer() } : null;
     }
 
     private apply(): void {
@@ -45,10 +54,10 @@ export class PauseNativeSettingsProvider {
         }
 
         this.pending = null;
-        ExecuteCommand(`${pending.key} ${pending.value}`);
-        this.nuiDispatch.dispatch('pause_menu', 'NativeValue', {
-            key: pending.key,
-            value: GetConvarInt(pending.key, -1),
-        });
+
+        for (const { key, value } of pending.changes) {
+            ExecuteCommand(`${key} ${value}`);
+            this.nuiDispatch.dispatch('pause_menu', 'NativeValue', { key, value: GetConvarInt(key, -1) });
+        }
     }
 }
