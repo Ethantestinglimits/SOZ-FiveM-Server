@@ -558,6 +558,18 @@ export class MinimapRenderer {
             }
         }
 
+        for (const ox of offsets) {
+            for (const oy of offsets) {
+                if (showBlips) {
+                    this.drawBlips(ox, oy);
+                }
+
+                this.drawWaypoint(ox, oy);
+                this.drawHighlight(ox, oy);
+                this.drawPlayer(frame, ox, oy);
+            }
+        }
+
         if (this.mode === 'open') {
             const zoom = this.camera.scale;
 
@@ -575,18 +587,6 @@ export class MinimapRenderer {
                         this.drawLabels(this.postalLabels, size, 'postal', ox, oy);
                     }
                 }
-            }
-        }
-
-        for (const ox of offsets) {
-            for (const oy of offsets) {
-                if (showBlips) {
-                    this.drawBlips(ox, oy);
-                }
-
-                this.drawWaypoint(ox, oy);
-                this.drawHighlight(ox, oy);
-                this.drawPlayer(frame, ox, oy);
             }
         }
     }
