@@ -2,7 +2,7 @@ import { Once, OnceStep, OnNuiEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { NuiEvent } from '../../shared/event';
-import { isNativeSlider, NATIVE_SLIDERS } from '../../shared/nui/native_settings';
+import { isNativeSetting, NATIVE_SETTINGS, sanitizeNativeValue } from '../../shared/nui/native_settings';
 import { NuiDispatch } from '../nui/nui.dispatch';
 
 const APPLY_COMMAND = 'soz_native_setting';
@@ -24,17 +24,17 @@ export class PauseNativeSettingsProvider {
 
     @OnNuiEvent(NuiEvent.PauseMenuQueueNative)
     public async onQueue({ key, value }: { key: string; value: number }): Promise<void> {
-        if (!isNativeSlider(key)) {
+        if (!isNativeSetting(key)) {
             return;
         }
 
-        const range = NATIVE_SLIDERS[key];
+        const sanitized = sanitizeNativeValue(NATIVE_SETTINGS[key], value);
 
-        this.pending = {
-            key,
-            value: Math.min(range.max, Math.max(range.min, Math.round(Number(value)))),
-            at: GetGameTimer(),
-        };
+        if (sanitized === null) {
+            return;
+        }
+
+        this.pending = { key, value: sanitized, at: GetGameTimer() };
     }
 
     private apply(): void {
