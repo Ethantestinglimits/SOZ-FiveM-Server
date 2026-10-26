@@ -12,7 +12,7 @@ import {
 import { Minimap } from '../../../shared/hud';
 import { fetchNui } from '../../fetch';
 import { useKeyPress } from '../../hook/control';
-import { useMinimap } from '../../hook/data';
+import { useHudHasStreetNames, useMinimap } from '../../hook/data';
 import { useNuiEvent, useNuiFocus } from '../../hook/nui';
 import { setHudLayout, shiftMinimap } from './hudLayoutState';
 
@@ -20,7 +20,7 @@ const SNAP = 1;
 
 const snap = (value: number) => Math.round(value / SNAP) * SNAP;
 
-const defaultPosition = (id: HudElementId, minimap: Minimap): HudPosition => {
+const defaultPosition = (id: HudElementId, minimap: Minimap, hasStreetNames: boolean): HudPosition => {
     switch (id) {
         case 'minimap':
             return { x: minimap.left * 100, y: minimap.bottom * 100 };
@@ -32,6 +32,12 @@ const defaultPosition = (id: HudElementId, minimap: Minimap): HudPosition => {
             return { x: 50, y: 100 - minimap.bottom * 100 };
         case 'ammo':
             return { x: 100 - (minimap.left + 0.005) * 100, y: minimap.bottom * 100 - 5 };
+        case 'stats':
+            return { x: (minimap.left + minimap.width + 0.012) * 100, y: (minimap.bottom + 0.005) * 100 };
+        case 'vehicle':
+            return { x: 50, y: minimap.bottom * 100 + (hasStreetNames ? 5.5 : 0) };
+        case 'progress':
+            return { x: 50, y: (minimap.bottom + 0.005) * 100 - (hasStreetNames ? 0 : 6) };
     }
 };
 
@@ -39,8 +45,12 @@ const boxFor = (element: HudElementDefinition, position: HudPosition) => {
     switch (element.anchor) {
         case 'bottom-left':
             return { left: position.x, top: position.y - element.height };
+        case 'top-left':
+            return { left: position.x, top: position.y };
         case 'top-center':
             return { left: position.x - element.width / 2, top: position.y };
+        case 'bottom-center':
+            return { left: position.x - element.width / 2, top: position.y - element.height };
         case 'top-right':
             return { left: position.x - element.width, top: position.y };
     }
@@ -58,6 +68,7 @@ type DragState = { id: HudElementId; startX: number; startY: number; origin: Hud
 
 export const HudEditor: FunctionComponent = () => {
     const rawMinimap = useMinimap();
+    const hasStreetNames = useHudHasStreetNames();
     const [open, setOpen] = useState(false);
     const [draft, setDraft] = useState<HudLayout>({});
     const minimap = shiftMinimap(rawMinimap, draft.minimap);
@@ -102,7 +113,7 @@ export const HudEditor: FunctionComponent = () => {
         draft[element.id] ??
         clampPosition(
             element,
-            defaultPosition(element.id, element.id === 'minimap' ? rawMinimap : minimap)
+            defaultPosition(element.id, element.id === 'minimap' ? rawMinimap : minimap, hasStreetNames)
         );
 
     const onPointerDown = (item: HudElementDefinition) => (event: ReactPointerEvent) => {

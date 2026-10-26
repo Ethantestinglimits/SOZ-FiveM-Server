@@ -17,11 +17,13 @@ import { PlayerStats } from './components/PlayerStats';
 import { VoiceIcon } from './components/VoiceIcon';
 import { Weather } from './components/Weather';
 import { useHudColor } from './hooks/useHudColor';
+import { useHudLayout } from './hudLayoutState';
 
 export const WatchInterface: FunctionComponent = () => {
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
     const settings = useSelector((state: RootState) => state.hud.settings);
     const minimap = useHudMinimap();
+    const statsLayout = useHudLayout().stats;
 
     const hasStreetNamesEnabled = useHudHasStreetNames();
     const minimapMode = useMinimapMode();
@@ -74,6 +76,16 @@ export const WatchInterface: FunctionComponent = () => {
             top: `${(minimap.bottom + 0.005) * 100}vh`,
             left: !settings.switchPlayerStatsPosition ? `${(minimap.left + 0.005) * 100}vw` : '0vw',
             right: settings.switchPlayerStatsPosition ? `${(minimap.left + 0.005) * 100}vw` : '0vw',
+        },
+    });
+
+    const statsStyles = useSpring({
+        from: {
+            top: '150vh',
+        },
+        to: {
+            top: `${statsLayout?.y ?? 0}vh`,
+            left: `${statsLayout?.x ?? 0}vw`,
         },
     });
 
@@ -134,9 +146,20 @@ export const WatchInterface: FunctionComponent = () => {
             >
                 <Location />
                 <Compass />
-                <PlayerStats />
-                <PetStats />
+                {!statsLayout && (
+                    <>
+                        <PlayerStats />
+                        <PetStats />
+                    </>
+                )}
             </animated.div>
+
+            {statsLayout && (
+                <animated.div className="absolute flex gap-3 text-white h-fit" style={statsStyles}>
+                    <PlayerStats />
+                    <PetStats />
+                </animated.div>
+            )}
         </>
     );
 };

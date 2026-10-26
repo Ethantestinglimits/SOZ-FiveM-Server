@@ -1,4 +1,12 @@
-export type HudElementId = 'minimap' | 'notifications' | 'police' | 'instructions' | 'ammo';
+export type HudElementId =
+    | 'minimap'
+    | 'notifications'
+    | 'police'
+    | 'instructions'
+    | 'ammo'
+    | 'stats'
+    | 'vehicle'
+    | 'progress';
 
 export type HudPosition = {
     x: number;
@@ -7,7 +15,7 @@ export type HudPosition = {
 
 export type HudLayout = Partial<Record<HudElementId, HudPosition>>;
 
-export type HudElementAnchor = 'bottom-left' | 'top-center' | 'top-right';
+export type HudElementAnchor = 'bottom-left' | 'top-left' | 'top-center' | 'top-right' | 'bottom-center';
 
 export type HudElementDefinition = {
     id: HudElementId;
@@ -23,6 +31,9 @@ export const HUD_ELEMENTS: HudElementDefinition[] = [
     { id: 'police', label: 'Alertes police', width: 21, height: 30, anchor: 'top-right' },
     { id: 'instructions', label: 'Aide', width: 26, height: 4.5, anchor: 'top-center' },
     { id: 'ammo', label: 'Munitions', width: 7, height: 6, anchor: 'top-right' },
+    { id: 'stats', label: 'Statuts du joueur', width: 14, height: 5, anchor: 'top-left' },
+    { id: 'vehicle', label: 'Compteur véhicule', width: 30, height: 12, anchor: 'bottom-center' },
+    { id: 'progress', label: 'Barre de progression', width: 28, height: 7, anchor: 'top-center' },
 ];
 
 export interface NuiHudLayoutMethodMap {
