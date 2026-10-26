@@ -12,6 +12,7 @@ import { VoiceProvider } from '../voip/voice/voice.provider';
 import { PauseMinimapProvider } from './minimap.provider';
 
 const DEFAULTS: Record<string, boolean | number | string> = {
+    potato: false,
     mapAnimation: true,
     minimapFps: 60,
     hudVisible: true,
@@ -58,6 +59,7 @@ export class PauseSettingsProvider {
 
         return {
             server: {
+                potato: this.pauseMinimapProvider.isPotato(),
                 mapAnimation: this.pauseMinimapProvider.isAnimationEnabled(),
                 minimapFps: this.pauseMinimapProvider.getFpsLimit(),
                 hudVisible: hud.isHudVisible,
@@ -90,6 +92,17 @@ export class PauseSettingsProvider {
 
     private async apply(key: string, value: PauseSettingChange['value']): Promise<void> {
         switch (key) {
+            case 'potato':
+                this.pauseMinimapProvider.setPotato(Boolean(value));
+
+                if (value) {
+                    this.pauseMinimapProvider.setAnimationEnabled(false);
+                    this.pauseMinimapProvider.setFpsLimit(30);
+                    this.hudGlassmorphismProvider.glassmorphism = false;
+                    this.hudGlassmorphismProvider.glassmorphismFpsLimit = 30;
+                }
+
+                break;
             case 'mapAnimation':
                 this.pauseMinimapProvider.setAnimationEnabled(Boolean(value));
                 break;

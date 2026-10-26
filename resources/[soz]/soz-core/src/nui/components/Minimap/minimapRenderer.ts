@@ -26,6 +26,7 @@ const SPEED_RANGE = 9;
 const ALTITUDE_RANGE = 2.5;
 const MAX_RANGE = 2600;
 const SEA_COLOR = '#4f86a8';
+const POTATO_COLOR = '#0b0b0b';
 const MINIMAP_RADIUS = 12;
 const PANEL_RADIUS = 16;
 const PRESENCE_RATE = 10;
@@ -141,6 +142,8 @@ export class MinimapRenderer {
     public panelRect: MinimapRect = { x: 0, y: 0, w: 0, h: 0 };
     public transitionEnabled = true;
     public fpsLimit = 60;
+    public potato = false;
+    private mapRequested = false;
     private lastRenderedAt = 0;
     private instant = false;
     public blips: MinimapBlip[] = [];
@@ -165,7 +168,6 @@ export class MinimapRenderer {
         canvas.addEventListener('pointerup', this.onPointerUp);
         canvas.addEventListener('contextmenu', this.onContextMenu);
 
-        this.loadMap();
         this.loadIcon(WAYPOINT_SPRITE);
         this.handle = requestAnimationFrame(this.loop);
     }
@@ -512,7 +514,12 @@ export class MinimapRenderer {
             return;
         }
 
-        const dpr = window.devicePixelRatio || 1;
+        if (!this.potato && !this.mapRequested) {
+            this.mapRequested = true;
+            this.loadMap();
+        }
+
+        const dpr = this.potato ? 1 : window.devicePixelRatio || 1;
         const backing = this.mode === 'minimap' ? rect : this.panelRect;
         const width = Math.round(backing.w * dpr);
         const height = Math.round(backing.h * dpr);
@@ -541,10 +548,12 @@ export class MinimapRenderer {
         const sy = height / rect.h;
 
         ctx.setTransform(sx, 0, 0, sy, 0, 0);
-        ctx.fillStyle = SEA_COLOR;
+        ctx.fillStyle = this.potato ? POTATO_COLOR : SEA_COLOR;
         ctx.fillRect(0, 0, rect.w, rect.h);
 
-        this.drawMap(sx, offsets);
+        if (!this.potato) {
+            this.drawMap(sx, offsets);
+        }
 
         const showBlips = this.mode === 'minimap' || this.layers.includes('blips');
 
