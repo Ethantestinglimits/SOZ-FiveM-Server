@@ -43,6 +43,7 @@ import { BlipApp } from './Blip/BlipApp';
 import { BookApp } from './Book/BookApp';
 import { CardApp } from './Card/CardApp';
 import { CraftApp } from './Craft/CraftApp';
+import { CrosshairApp } from './Crosshair/CrosshairApp';
 import { FieldHealthApp } from './Field/FieldHealthApp';
 import { FieldZoneHealthApp } from './Field/FieldZoneHealthApp';
 import { FlashApp } from './Flash/FlashApp';
@@ -192,6 +193,7 @@ export const App: FunctionComponent = () => {
                 <BlipApp />
                 <PauseMenuApp />
                 <MinimapApp />
+                <CrosshairApp />
             </Provider>
         </GlassMorphismProvider>
     );

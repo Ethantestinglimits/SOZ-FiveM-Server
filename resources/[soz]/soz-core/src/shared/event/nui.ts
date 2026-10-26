@@ -847,6 +847,8 @@ export enum NuiEvent {
     PauseMenuOpenNative = 'soz-core:nui:pause-menu:open-native',
     PauseMenuQuit = 'soz-core:nui:pause-menu:quit',
     PauseMenuSaveMapLayers = 'soz-core:nui:pause-menu:save-map-layers',
+    CrosshairSet = 'soz-core:nui:crosshair:set',
+    CrosshairReset = 'soz-core:nui:crosshair:reset',
     PauseMenuSetSetting = 'soz-core:nui:pause-menu:set-setting',
     PauseMenuResetSettings = 'soz-core:nui:pause-menu:reset-settings',
     MinimapSetWaypoint = 'soz-core:nui:minimap:set-waypoint',
