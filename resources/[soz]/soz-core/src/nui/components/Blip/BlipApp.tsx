@@ -5,6 +5,7 @@ import { BlipAction } from '../../../shared/nui/blip';
 import { fetchNui } from '../../fetch';
 import { useNuiEvent, useNuiFocus } from '../../hook/nui';
 import { useOutside } from '../../hook/outside';
+import { getMinimapMode } from '../Minimap/minimapState';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
 
 export const BlipApp: FunctionComponent = () => {
@@ -14,7 +15,7 @@ export const BlipApp: FunctionComponent = () => {
 
     useNuiEvent('blip', 'SetActions', setActions);
     useNuiEvent('global', 'PauseMenuActive', active => {
-        if (actions.length > 0 && !active) {
+        if (actions.length > 0 && !active && getMinimapMode() === 'minimap') {
             setActions([]);
         }
 
