@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import { FunctionComponent, useMemo, useState } from 'react';
 
 import { NuiEvent } from '../../../../shared/event';
+import { isNativeSlider, NATIVE_SLIDERS } from '../../../../shared/nui/native_settings';
 import { PauseSettingsData } from '../../../../shared/nui/pause_settings';
 import { fetchNui } from '../../../fetch';
 import { CrosshairPanel } from './CrosshairPanel';
@@ -118,12 +119,41 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
         );
     } else {
         const raw = settings.native[item.convar];
+        const route = NATIVE_SLIDERS[item.convar];
 
-        control = (
-            <span className="rounded-[0.8vh] bg-white/10 px-[1.4vh] py-[0.4vh] text-[1.4vh] font-semibold text-white/80">
-                {raw === undefined || raw < 0 ? '—' : item.format(raw)}
-            </span>
-        );
+        if (route && raw !== undefined && raw >= 0) {
+            const change = (direction: number) => {
+                const next = Math.min(route.max, Math.max(route.min, raw + direction));
+
+                if (next !== raw) {
+                    fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.convar, value: next });
+                }
+            };
+
+            control = (
+                <div className="flex items-center gap-[0.8vh]">
+                    <button
+                        onClick={() => change(-1)}
+                        className="h-[2.6vh] w-[2.6vh] rounded-[0.6vh] bg-white/15 text-[1.4vh] font-bold hover:bg-white/30"
+                    >
+                        ‹
+                    </button>
+                    <span className="min-w-[5vh] text-center text-[1.4vh] font-semibold">{item.format(raw)}</span>
+                    <button
+                        onClick={() => change(1)}
+                        className="h-[2.6vh] w-[2.6vh] rounded-[0.6vh] bg-white/15 text-[1.4vh] font-bold hover:bg-white/30"
+                    >
+                        ›
+                    </button>
+                </div>
+            );
+        } else {
+            control = (
+                <span className="rounded-[0.8vh] bg-white/10 px-[1.4vh] py-[0.4vh] text-[1.4vh] font-semibold text-white/80">
+                    {raw === undefined || raw < 0 ? '—' : item.format(raw)}
+                </span>
+            );
+        }
     }
 
     return (
@@ -194,7 +224,11 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                         <div className="mb-[0.8vh] flex items-center justify-between">
                             <span className="text-[1.2vh] font-semibold uppercase tracking-[0.2em] text-white/50">
                                 {section.category.label}
-                                {section.category.native && ' · lecture seule'}
+                                {section.category.native &&
+                                    section.category.items.some(
+                                        (setting) => setting.kind === 'native' && !isNativeSlider(setting.convar),
+                                    ) &&
+                                    ' · lecture seule'}
                             </span>
                         </div>
                         <ul className="flex flex-col gap-[0.6vh]">
