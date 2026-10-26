@@ -849,6 +849,7 @@ export enum NuiEvent {
     PauseMenuSaveMapLayers = 'soz-core:nui:pause-menu:save-map-layers',
     PauseMenuSetSetting = 'soz-core:nui:pause-menu:set-setting',
     PauseMenuResetSettings = 'soz-core:nui:pause-menu:reset-settings',
+    PauseMenuSetNativeSetting = 'soz-core:nui:pause-menu:set-native-setting',
     MinimapSetWaypoint = 'soz-core:nui:minimap:set-waypoint',
     MinimapRemoveWaypoint = 'soz-core:nui:minimap:remove-waypoint',
 }
