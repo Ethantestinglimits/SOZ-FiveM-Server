@@ -106,6 +106,26 @@ const QuitConfirm: FunctionComponent<{ onCancel: () => void }> = ({ onCancel }) 
     </div>
 );
 
+const FadeIn: FunctionComponent<PropsWithChildren<{ as: 'aside' | 'main'; className: string }>> = ({
+    as: Tag,
+    className,
+    children,
+}) => {
+    const [shown, setShown] = useState(false);
+
+    useEffect(() => {
+        const handle = requestAnimationFrame(() => requestAnimationFrame(() => setShown(true)));
+
+        return () => cancelAnimationFrame(handle);
+    }, []);
+
+    return (
+        <Tag className={classNames(className, 'transition-opacity duration-500', { 'opacity-0': !shown })}>
+            {children}
+        </Tag>
+    );
+};
+
 export const PauseMenuApp: FunctionComponent = () => {
     const [data, setData] = useState<PauseMenuData | null>(null);
     const [tab, setTab] = useState<PauseMenuTab>('map');
@@ -179,7 +199,7 @@ export const PauseMenuApp: FunctionComponent = () => {
                 )}
             />
             {showContent && (
-                <aside className="relative w-[17vw] shrink-0">
+                <FadeIn as="aside" className="relative w-[17vw] shrink-0">
                     <Glass className="flex h-full flex-col gap-[2vh] p-[2.5vh]">
                         <img src="assets/pause/soz_logo.webp" alt="SoZ" className="h-[4vh] w-auto self-start" />
 
@@ -237,16 +257,16 @@ export const PauseMenuApp: FunctionComponent = () => {
                             />
                         </div>
                     </Glass>
-                </aside>
+                </FadeIn>
             )}
             {showContent && (
-                <main className="relative min-h-0 min-w-0 flex-1">
+                <FadeIn as="main" className="relative min-h-0 min-w-0 flex-1">
                     {tab === 'settings' && (
                         <Glass className="h-full">
                             <SettingsMain category={settingsCategory} settings={data.settings} />
                         </Glass>
                     )}
-                </main>
+                </FadeIn>
             )}
             {confirmQuit && <QuitConfirm onCancel={() => setConfirmQuit(false)} />}
         </div>
