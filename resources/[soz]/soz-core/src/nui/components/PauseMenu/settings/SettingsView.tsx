@@ -1,12 +1,13 @@
 import { RefreshIcon, SearchIcon } from '@heroicons/react/outline';
 import classNames from 'classnames';
-import { FunctionComponent, useMemo, useState } from 'react';
+import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 
 import { NuiEvent } from '../../../../shared/event';
 import { isNativeSlider, NATIVE_SLIDERS } from '../../../../shared/nui/native_settings';
 import { PauseSettingsData } from '../../../../shared/nui/pause_settings';
 import { fetchNui } from '../../../fetch';
 import { CrosshairPanel } from './CrosshairPanel';
+import { setNativeHover } from './nativeInputState';
 import { SETTING_CATEGORIES, SettingCategory, SettingItem } from './definitions';
 
 const normalize = (value: string) => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -126,21 +127,25 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
                 const next = Math.min(route.max, Math.max(route.min, raw + direction));
 
                 if (next !== raw) {
-                    fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.convar, value: next });
+                    fetchNui(NuiEvent.PauseMenuQueueNative, { key: item.convar, value: next });
                 }
             };
 
             control = (
-                <div className="flex items-center gap-[0.8vh]">
+                <div
+                    className="flex items-center gap-[0.8vh]"
+                    onMouseEnter={() => setNativeHover(true)}
+                    onMouseLeave={() => setNativeHover(false)}
+                >
                     <button
-                        onClick={() => change(-1)}
+                        onMouseDown={() => change(-1)}
                         className="h-[2.6vh] w-[2.6vh] rounded-[0.6vh] bg-white/15 text-[1.4vh] font-bold hover:bg-white/30"
                     >
                         ‹
                     </button>
                     <span className="min-w-[5vh] text-center text-[1.4vh] font-semibold">{item.format(raw)}</span>
                     <button
-                        onClick={() => change(1)}
+                        onMouseDown={() => change(1)}
                         className="h-[2.6vh] w-[2.6vh] rounded-[0.6vh] bg-white/15 text-[1.4vh] font-bold hover:bg-white/30"
                     >
                         ›
@@ -176,6 +181,8 @@ type SettingsMainProps = {
 export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, settings }) => {
     const [query, setQuery] = useState('');
     const [hovered, setHovered] = useState<SettingItem | null>(null);
+
+    useEffect(() => () => setNativeHover(false), [category, query]);
 
     const current = SETTING_CATEGORIES.find((item) => item.id === category) ?? SETTING_CATEGORIES[0];
 
