@@ -18,6 +18,7 @@ const FRAME_INTERVAL = 33;
 const ANIMATION_KVP = 'soz_pause_map_animation';
 const FPS_KVP = 'soz_pause_minimap_fps';
 const DEFAULT_FPS = 60;
+const POTATO_KVP = 'soz_pause_potato';
 const GPS_SLOTS = [0, 1];
 const ROUTE_BUDGET_MS = 3;
 const ROUTE_INTERVAL = 250;
@@ -79,7 +80,17 @@ export class PauseMinimapProvider {
         this.nuiDispatch.dispatch('minimap', 'Settings', {
             animation: this.isAnimationEnabled(),
             fps: this.getFpsLimit(),
+            potato: this.isPotato(),
         });
+    }
+
+    public isPotato(): boolean {
+        return GetResourceKvpString(POTATO_KVP) === 'on';
+    }
+
+    public setPotato(enabled: boolean): void {
+        SetResourceKvp(POTATO_KVP, enabled ? 'on' : 'off');
+        this.dispatchSettings();
     }
 
     public isAnimationEnabled(): boolean {

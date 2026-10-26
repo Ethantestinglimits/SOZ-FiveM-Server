@@ -106,10 +106,11 @@ export const MinimapApp: FunctionComponent = () => {
     useNuiEvent('minimap', 'Waypoint', waypoint => {
         if (rendererRef.current) rendererRef.current.waypoint = waypoint;
     });
-    useNuiEvent('minimap', 'Settings', ({ animation, fps }) => {
+    useNuiEvent('minimap', 'Settings', ({ animation, fps, potato }) => {
         if (rendererRef.current) {
             rendererRef.current.transitionEnabled = animation;
             rendererRef.current.fpsLimit = fps;
+            rendererRef.current.potato = potato;
         }
     });
     useNuiEvent('pause_menu', 'Open', data => {

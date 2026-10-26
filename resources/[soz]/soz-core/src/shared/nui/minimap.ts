@@ -31,5 +31,5 @@ export interface NuiMinimapMethodMap {
     Zones: MinimapZone[];
     Route: MinimapPoint[];
     Waypoint: MinimapPoint | null;
-    Settings: { animation: boolean; fps: number };
+    Settings: { animation: boolean; fps: number; potato: boolean };
 }

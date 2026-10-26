@@ -58,6 +58,14 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
         native: false,
         items: [
             {
+                id: 'potato',
+                kind: 'toggle',
+                label: 'Mode économe (petit PC)',
+                description:
+                    'Fond noir à la place de la carte, sans animation, Minimap limitée à 30 FPS, glassmorphisme désactivé. Réduit fortement les calculs de rendu.',
+                default: false,
+            },
+            {
                 id: 'mapAnimation',
                 kind: 'toggle',
                 label: 'Animation de la carte',
