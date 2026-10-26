@@ -57,14 +57,20 @@ export class PauseNativeSettingsDriver {
         const route = NATIVE_SLIDERS[key];
         const value = Math.min(route.max, Math.max(route.min, Math.round(target)));
 
+        const current = GetConvarInt(key, -1);
+
+        if (current === value) {
+            return true;
+        }
+
         this.busy = true;
         this.nuiDispatch.dispatch('pause_menu', 'NativeBusy', true);
-        this.log(`début ${key} -> ${value}`);
+        this.log(`début ${key} : ${current} -> ${value}`);
 
         let success = false;
 
         try {
-            success = await this.applySlider(route, value);
+            success = await this.applySlider(route, value, current);
         } catch (error) {
             console.error(`[pause.native] ${String(error)}`);
         } finally {
@@ -78,7 +84,7 @@ export class PauseNativeSettingsDriver {
         return success;
     }
 
-    private async applySlider(route: NativeSliderRoute, value: number): Promise<boolean> {
+    private async applySlider(route: NativeSliderRoute, value: number, current: number): Promise<boolean> {
         if (!(await this.openLanding())) {
             this.log(`ouverture échouée ${this.state()}`);
             return false;
@@ -100,22 +106,25 @@ export class PauseNativeSettingsDriver {
 
         this.log(`ligne atteinte ${this.state()}`);
 
-        const before = GetProfileSetting(300);
+        const known = current >= route.min && current <= route.max;
 
-        for (let index = 0; index < route.max - route.min + 1; index++) {
-            await this.press(Control.FrontendLeft);
+        await wait(300);
 
-            if (index < 2) {
-                this.log(`gauche ${index} : ${this.state()}`);
+        if (!known) {
+            for (let index = 0; index < route.max - route.min + 1; index++) {
+                await this.press(Control.FrontendLeft);
             }
         }
 
-        for (let index = 0; index < value - route.min; index++) {
-            await this.press(Control.FrontendRight);
-            this.log(`droite ${index} : ${this.state()}`);
+        const base = known ? current : route.min;
+        const control = value > base ? Control.FrontendRight : Control.FrontendLeft;
+
+        for (let index = 0; index < Math.abs(value - base); index++) {
+            await this.press(control);
+            this.log(`${control === Control.FrontendRight ? 'droite' : 'gauche'} ${index} : ${this.state()}`);
         }
 
-        this.log(`profil 300 avant=${before} pendant=${GetProfileSetting(300)}`);
+        await wait(300);
 
         await this.press(Control.FrontendCancel);
 
