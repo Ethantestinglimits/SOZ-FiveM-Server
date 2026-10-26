@@ -7,6 +7,7 @@ import { VoiceMode } from '../../../shared/hud';
 import { useHudHasStreetNames } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
+import { useMinimapMode } from '../Minimap/minimapState';
 import { GlassMorphismBox } from '../Styleguide/GlassMorphismBox';
 import { Compass } from './components/Compass';
 import { DateTime } from './components/DateTime';
@@ -23,6 +24,7 @@ export const WatchInterface: FunctionComponent = () => {
     const minimap = useSelector((state: RootState) => state.hud.minimap);
 
     const hasStreetNamesEnabled = useHudHasStreetNames();
+    const minimapMode = useMinimapMode();
 
     const [voiceMode, setVoiceMode] = useState(VoiceMode.Normal);
     const [voiceActive, setVoiceActive] = useState(true);
@@ -102,7 +104,7 @@ export const WatchInterface: FunctionComponent = () => {
                 <Weather />
             </animated.div>
 
-            {hasWatch && !minimap.isHidden && (
+            {hasWatch && !minimap.isHidden && minimapMode === 'minimap' && (
                 <GlassMorphismBox
                     className="rounded-lg"
                     style={{

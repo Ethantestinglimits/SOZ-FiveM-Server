@@ -846,4 +846,6 @@ export enum NuiEvent {
     PauseMenuClose = 'soz-core:nui:pause-menu:close',
     PauseMenuOpenNative = 'soz-core:nui:pause-menu:open-native',
     PauseMenuQuit = 'soz-core:nui:pause-menu:quit',
+    MinimapSetWaypoint = 'soz-core:nui:minimap:set-waypoint',
+    MinimapRemoveWaypoint = 'soz-core:nui:minimap:remove-waypoint',
 }
