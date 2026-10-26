@@ -2,7 +2,7 @@ import { FunctionComponent, useEffect, useRef } from 'react';
 
 import { NuiEvent } from '../../../shared/event';
 import { fetchNui } from '../../fetch';
-import { useMinimap } from '../../hook/data';
+import { useHudMinimap } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { MinimapRenderer } from './minimapRenderer';
 import { isMapTabActive, minimapController, setBlipAnchor } from './minimapState';
@@ -23,7 +23,7 @@ export const MinimapApp: FunctionComponent = () => {
     const rendererRef = useRef<MinimapRenderer | null>(null);
     const ratioRef = useRef(DEFAULT_RATIO);
     const scriptModeRef = useRef(false);
-    const minimap = useMinimap();
+    const minimap = useHudMinimap();
 
     useEffect(() => {
         const renderer = new MinimapRenderer(canvasRef.current, {

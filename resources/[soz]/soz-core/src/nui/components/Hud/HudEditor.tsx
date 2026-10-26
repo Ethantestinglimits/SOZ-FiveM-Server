@@ -14,7 +14,7 @@ import { fetchNui } from '../../fetch';
 import { useKeyPress } from '../../hook/control';
 import { useMinimap } from '../../hook/data';
 import { useNuiEvent, useNuiFocus } from '../../hook/nui';
-import { setHudLayout } from './hudLayoutState';
+import { setHudLayout, shiftMinimap } from './hudLayoutState';
 
 const SNAP = 1;
 
@@ -22,6 +22,10 @@ const snap = (value: number) => Math.round(value / SNAP) * SNAP;
 
 const defaultPosition = (id: HudElementId, minimap: Minimap): HudPosition => {
     switch (id) {
+        case 'minimap':
+            return { x: minimap.left * 100, y: minimap.bottom * 100 };
+        case 'police':
+            return { x: 99.2, y: 0.8 };
         case 'notifications':
             return { x: (minimap.left + 0.004) * 100, y: minimap.top * 100 };
         case 'instructions':
@@ -53,9 +57,19 @@ const clampPosition = (element: HudElementDefinition, position: HudPosition): Hu
 type DragState = { id: HudElementId; startX: number; startY: number; origin: HudPosition };
 
 export const HudEditor: FunctionComponent = () => {
-    const minimap = useMinimap();
+    const rawMinimap = useMinimap();
     const [open, setOpen] = useState(false);
     const [draft, setDraft] = useState<HudLayout>({});
+    const minimap = shiftMinimap(rawMinimap, draft.minimap);
+
+    const resolve = (element: HudElementDefinition): HudElementDefinition =>
+        element.id === 'minimap'
+            ? {
+                  ...element,
+                  width: rawMinimap.width * 100 || element.width,
+                  height: rawMinimap.height * 100 || element.height,
+              }
+            : element;
     const drag = useRef<DragState | null>(null);
 
     useNuiFocus(open, open, false);
@@ -85,9 +99,15 @@ export const HudEditor: FunctionComponent = () => {
     });
 
     const positionOf = (element: HudElementDefinition): HudPosition =>
-        draft[element.id] ?? clampPosition(element, defaultPosition(element.id, minimap));
+        draft[element.id] ??
+        clampPosition(
+            element,
+            defaultPosition(element.id, element.id === 'minimap' ? rawMinimap : minimap)
+        );
 
-    const onPointerDown = (element: HudElementDefinition) => (event: ReactPointerEvent) => {
+    const onPointerDown = (item: HudElementDefinition) => (event: ReactPointerEvent) => {
+        const element = resolve(item);
+
         event.currentTarget.setPointerCapture(event.pointerId);
         drag.current = {
             id: element.id,
@@ -97,7 +117,8 @@ export const HudEditor: FunctionComponent = () => {
         };
     };
 
-    const onPointerMove = (element: HudElementDefinition) => (event: ReactPointerEvent) => {
+    const onPointerMove = (item: HudElementDefinition) => (event: ReactPointerEvent) => {
+        const element = resolve(item);
         const state = drag.current;
 
         if (!state || state.id !== element.id) {
@@ -132,7 +153,8 @@ export const HudEditor: FunctionComponent = () => {
                 }}
             />
 
-            {HUD_ELEMENTS.map((element) => {
+            {HUD_ELEMENTS.map((item) => {
+                const element = resolve(item);
                 const box = boxFor(element, positionOf(element));
 
                 return (

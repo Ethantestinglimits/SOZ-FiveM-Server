@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { bindKeyToName, BindName } from '../../../shared/utils/bind';
-import { useHudHasStreetNames, useMinimap } from '../../hook/data';
+import { useHudHasStreetNames, useHudMinimap } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
 import { formatText } from '../../utils/gta-format';
@@ -12,7 +12,7 @@ import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
 import { useHudLayout } from './hudLayoutState';
 
 export function InstructionalOverlay() {
-    const minimap = useMinimap();
+    const minimap = useHudMinimap();
     const showInstructionalOverlay = useSelector((state: RootState) => state.hud.settings.showInstructionalOverlay);
     const hasStreetNamesEnabled = useHudHasStreetNames();
 

@@ -3,7 +3,7 @@ import cn from 'classnames';
 import { FunctionComponent } from 'react';
 import { useSelector } from 'react-redux';
 
-import { useHudHasStreetNames } from '../../../hook/data';
+import { useHudHasStreetNames, useHudMinimap } from '../../../hook/data';
 import PinIcon from '../../../icons/hud/pin.svg';
 import { RootState } from '../../../store';
 import { GlassMorphismContainer } from '../../Styleguide/GlassMorphismContainer';
@@ -13,7 +13,7 @@ export const Location: FunctionComponent = () => {
     const settings = useSelector((state: RootState) => state.hud.settings);
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
     const streetName = useSelector((state: RootState) => state.hud.streetName);
-    const minimap = useSelector((state: RootState) => state.hud.minimap);
+    const minimap = useHudMinimap();
 
     const { height, smallIconSize } = useZoom();
     const hasStreetNamesEnabled = useHudHasStreetNames();
