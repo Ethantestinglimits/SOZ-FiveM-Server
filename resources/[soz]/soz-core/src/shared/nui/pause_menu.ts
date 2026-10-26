@@ -37,5 +37,5 @@ export interface NuiPauseMenuMethodMap {
     Open: PauseMenuData;
     Close: never;
     Settings: PauseSettingsData;
-    NativeBusy: boolean;
+    NativeValue: { key: string; value: number };
 }

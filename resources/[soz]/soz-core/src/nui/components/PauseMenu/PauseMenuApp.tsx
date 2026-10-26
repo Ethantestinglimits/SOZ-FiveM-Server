@@ -11,6 +11,7 @@ import { useNuiEvent, useNuiFocus } from '../../hook/nui';
 import { minimapController, setMapTabActive, useMinimapMode } from '../Minimap/minimapState';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
 import { MapSidebar } from './MapSidebar';
+import { setNativeHover, useNativeHover } from './settings/nativeInputState';
 import { SettingsMain, SettingsSidebar } from './settings/SettingsView';
 
 type PauseMenuTab = 'map' | 'settings';
@@ -138,11 +139,12 @@ export const PauseMenuApp: FunctionComponent = () => {
     const [confirmQuit, setConfirmQuit] = useState(false);
     const [layers, setLayers] = useState<PauseMapLayer[]>([]);
     const [settingsCategory, setSettingsCategory] = useState('map');
-    const [nativeBusy, setNativeBusy] = useState(false);
     const mode = useMinimapMode();
     const showContent = mode === 'open';
 
-    useNuiFocus(data !== null, data !== null, false);
+    const nativeHover = useNativeHover();
+
+    useNuiFocus(data !== null, data !== null, data !== null && nativeHover, [], data !== null && nativeHover);
 
     useNuiEvent('pause_menu', 'Open', (menuData) => {
         setConfirmQuit(false);
@@ -157,9 +159,17 @@ export const PauseMenuApp: FunctionComponent = () => {
     });
     useNuiEvent('pause_menu', 'Close', () => {
         setData(null);
-        setNativeBusy(false);
+        setNativeHover(false);
     });
-    useNuiEvent('pause_menu', 'NativeBusy', setNativeBusy);
+    useNuiEvent('pause_menu', 'NativeValue', ({ key, value }) =>
+        setData(
+            (current) =>
+                current && {
+                    ...current,
+                    settings: { ...current.settings, native: { ...current.settings.native, [key]: value } },
+                },
+        ),
+    );
     useNuiEvent('pause_menu', 'Settings', (settings) => setData((current) => current && { ...current, settings }));
 
     useEffect(() => {
@@ -300,13 +310,6 @@ export const PauseMenuApp: FunctionComponent = () => {
                 </FadeIn>
             )}
             {confirmQuit && createPortal(<QuitConfirm onCancel={() => setConfirmQuit(false)} />, document.body)}
-            {nativeBusy &&
-                createPortal(
-                    <div className="fixed inset-0 z-[300] flex cursor-wait items-end justify-center pb-[6vh] font-prompt text-[1.6vh] text-white/80">
-                        <span className="rounded-[1vh] bg-black/70 px-[1.6vh] py-[0.8vh]">Application du réglage…</span>
-                    </div>,
-                    document.body,
-                )}
         </div>
     );
 };
