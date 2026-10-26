@@ -1,3 +1,7 @@
+export type MinimapOrientation = 'camera' | 'upright' | 'north';
+
+export const MINIMAP_ORIENTATIONS: MinimapOrientation[] = ['camera', 'upright', 'north'];
+
 export type MinimapPoint = {
     x: number;
     y: number;
@@ -31,5 +35,5 @@ export interface NuiMinimapMethodMap {
     Zones: MinimapZone[];
     Route: MinimapPoint[];
     Waypoint: MinimapPoint | null;
-    Settings: { animation: boolean; fps: number; potato: boolean };
+    Settings: { animation: boolean; fps: number; potato: boolean; orientation: MinimapOrientation };
 }

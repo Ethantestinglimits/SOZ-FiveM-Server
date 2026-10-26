@@ -1,5 +1,11 @@
 import { Postals } from '../../../config/postals';
-import { MinimapBlip, MinimapFrame, MinimapPoint, MinimapZone } from '../../../shared/nui/minimap';
+import {
+    MinimapBlip,
+    MinimapFrame,
+    MinimapOrientation,
+    MinimapPoint,
+    MinimapZone,
+} from '../../../shared/nui/minimap';
 import { PauseMapLayer, PauseMapRegion } from '../../../shared/nui/pause_menu';
 import { getBlipColor, UNTINTED_BLIP_COLORS } from './blipColors';
 import { isMapTabActive, MinimapMode, setMinimapMode } from './minimapState';
@@ -141,6 +147,7 @@ export class MinimapRenderer {
     public panelRect: MinimapRect = { x: 0, y: 0, w: 0, h: 0 };
     public transitionEnabled = true;
     public fpsLimit = 60;
+    public orientation: MinimapOrientation = 'camera';
     private lastRenderedAt = 0;
     private instant = false;
     public blips: MinimapBlip[] = [];
@@ -424,7 +431,7 @@ export class MinimapRenderer {
             x: frame.x,
             y: frame.y,
             scale: base.w / this.range,
-            rotation: toRadians(frame.camHeading),
+            rotation: this.orientation === 'north' ? 0 : toRadians(frame.camHeading),
         };
 
         let t = this.mode === 'open' ? 1 : 0;
@@ -773,7 +780,7 @@ export class MinimapRenderer {
 
             const icon = this.getIcon(blip.sprite, blip.color);
 
-            if (icon && blip.rotation) {
+            if (icon && blip.rotation && this.orientation !== 'upright') {
                 ctx.save();
                 ctx.translate(x, y);
                 ctx.rotate(this.camera.rotation - toRadians(blip.rotation));

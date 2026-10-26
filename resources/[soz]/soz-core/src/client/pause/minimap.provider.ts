@@ -4,7 +4,13 @@ import { Provider } from '../../core/decorators/provider';
 import { Tick, TickInterval } from '../../core/decorators/tick';
 import { BlipType } from '../../shared/blip';
 import { NuiEvent } from '../../shared/event';
-import { MinimapBlip, MinimapPoint, MinimapZone } from '../../shared/nui/minimap';
+import {
+    MINIMAP_ORIENTATIONS,
+    MinimapBlip,
+    MinimapOrientation,
+    MinimapPoint,
+    MinimapZone,
+} from '../../shared/nui/minimap';
 import { BlipFactory } from '../blip';
 import { HudMinimapProvider } from '../hud/hud.minimap.provider';
 import { NuiDispatch } from '../nui/nui.dispatch';
@@ -19,6 +25,8 @@ const ANIMATION_KVP = 'soz_pause_map_animation';
 const FPS_KVP = 'soz_pause_minimap_fps';
 const DEFAULT_FPS = 60;
 const POTATO_KVP = 'soz_pause_potato';
+const ORIENTATION_KVP = 'soz_pause_minimap_orientation';
+const DEFAULT_ORIENTATION: MinimapOrientation = 'camera';
 const GPS_SLOTS = [0, 1];
 const ROUTE_BUDGET_MS = 3;
 const ROUTE_INTERVAL = 250;
@@ -81,7 +89,19 @@ export class PauseMinimapProvider {
             animation: this.isAnimationEnabled(),
             fps: this.getFpsLimit(),
             potato: this.isPotato(),
+            orientation: this.getOrientation(),
         });
+    }
+
+    public getOrientation(): MinimapOrientation {
+        const saved = GetResourceKvpString(ORIENTATION_KVP) as MinimapOrientation;
+
+        return MINIMAP_ORIENTATIONS.includes(saved) ? saved : DEFAULT_ORIENTATION;
+    }
+
+    public setOrientation(orientation: MinimapOrientation): void {
+        SetResourceKvp(ORIENTATION_KVP, MINIMAP_ORIENTATIONS.includes(orientation) ? orientation : DEFAULT_ORIENTATION);
+        this.dispatchSettings();
     }
 
     public isPotato(): boolean {

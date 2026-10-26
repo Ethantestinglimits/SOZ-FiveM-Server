@@ -2,6 +2,7 @@ import { Once, OnceStep, OnNuiEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { NuiEvent } from '../../shared/event';
+import { MinimapOrientation } from '../../shared/nui/minimap';
 import { PAUSE_NATIVE_CONVARS, PauseSettingChange, PauseSettingsData } from '../../shared/nui/pause_settings';
 import { HudCrosshairProvider } from '../hud/hud.crosshair.provider';
 import { HudGlassmorphismProvider } from '../hud/hud.glassmorphism.provider';
@@ -19,6 +20,7 @@ const DEFAULTS: Record<string, boolean | number | string> = {
     potato: false,
     mapAnimation: true,
     minimapFps: 60,
+    minimapOrientation: 'camera',
     menuSize: 100,
     menuTextSize: 3,
     hudVisible: true,
@@ -71,6 +73,7 @@ export class PauseSettingsProvider {
                 potato: this.pauseMinimapProvider.isPotato(),
                 mapAnimation: this.pauseMinimapProvider.isAnimationEnabled(),
                 minimapFps: this.pauseMinimapProvider.getFpsLimit(),
+                minimapOrientation: this.pauseMinimapProvider.getOrientation(),
                 menuSize: this.getMenuSize(),
                 menuTextSize: this.getMenuTextSize(),
                 hudVisible: hud.isHudVisible,
@@ -148,6 +151,9 @@ export class PauseSettingsProvider {
                 break;
             case 'minimapFps':
                 this.pauseMinimapProvider.setFpsLimit(Number(value));
+                break;
+            case 'minimapOrientation':
+                this.pauseMinimapProvider.setOrientation(String(value) as MinimapOrientation);
                 break;
             case 'hudVisible':
                 this.hudStateProvider.setHudVisible(Boolean(value));
