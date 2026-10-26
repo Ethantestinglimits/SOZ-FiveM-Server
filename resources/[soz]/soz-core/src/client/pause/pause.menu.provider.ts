@@ -12,6 +12,7 @@ import { NuiDispatch } from '../nui/nui.dispatch';
 import { PlayerService } from '../player/player.service';
 import { JobGradeRepository } from '../repository/job.grade.repository';
 import { BlurService } from '../utils/blur.service';
+import { PauseSettingsProvider } from './pause.settings.provider';
 
 const BLUR_REASON = 'pause_menu';
 const BLUR_DELAY = 250;
@@ -44,6 +45,9 @@ export class PauseMenuProvider {
 
     @Inject(BlipFactory)
     private blipFactory: BlipFactory;
+
+    @Inject(PauseSettingsProvider)
+    private pauseSettingsProvider: PauseSettingsProvider;
 
     private opened = false;
     private lastNuiFocusAt = 0;
@@ -113,6 +117,7 @@ export class PauseMenuProvider {
             places: this.getPlaces(),
             regions: this.getRegions(),
             layers: this.getMapLayers(),
+            settings: this.pauseSettingsProvider.getSettings(),
         });
     }
 
