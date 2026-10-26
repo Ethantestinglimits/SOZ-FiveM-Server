@@ -302,8 +302,8 @@ export const PauseMenuApp: FunctionComponent = () => {
             {confirmQuit && createPortal(<QuitConfirm onCancel={() => setConfirmQuit(false)} />, document.body)}
             {nativeBusy &&
                 createPortal(
-                    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black font-prompt text-[2vh] text-white/80">
-                        Application du réglage…
+                    <div className="fixed inset-0 z-[300] flex cursor-wait items-end justify-center pb-[6vh] font-prompt text-[1.6vh] text-white/80">
+                        <span className="rounded-[1vh] bg-black/70 px-[1.6vh] py-[0.8vh]">Application du réglage…</span>
                     </div>,
                     document.body,
                 )}

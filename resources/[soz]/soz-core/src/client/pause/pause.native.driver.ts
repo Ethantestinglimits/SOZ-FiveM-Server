@@ -15,6 +15,8 @@ import { NuiDispatch } from '../nui/nui.dispatch';
 const SETTINGS_MENU = GetHashKey('FE_MENU_VERSION_LANDING_MENU');
 const HOLD_FRAMES = 3;
 const STEP_DELAY = 120;
+const SLIDER_HOLD_FRAMES = 1;
+const SLIDER_DELAY = 200;
 const PAGE_TIMEOUT = 4000;
 const MAX_LIST_PRESSES = 60;
 const MAX_CLOSE_PRESSES = 8;
@@ -37,6 +39,10 @@ export class PauseNativeSettingsDriver {
 
     @Tick(TickInterval.EVERY_FRAME)
     public injectControl(): void {
+        if (this.busy) {
+            SuppressFrontendRenderingThisFrame();
+        }
+
         if (!this.pendingControl) {
             return;
         }
@@ -112,7 +118,7 @@ export class PauseNativeSettingsDriver {
 
         if (!known) {
             for (let index = 0; index < route.max - route.min + 1; index++) {
-                await this.press(Control.FrontendLeft);
+                await this.press(Control.FrontendLeft, SLIDER_HOLD_FRAMES, SLIDER_DELAY);
             }
         }
 
@@ -120,7 +126,7 @@ export class PauseNativeSettingsDriver {
         const control = value > base ? Control.FrontendRight : Control.FrontendLeft;
 
         for (let index = 0; index < Math.abs(value - base); index++) {
-            await this.press(control);
+            await this.press(control, SLIDER_HOLD_FRAMES, SLIDER_DELAY);
             this.log(`${control === Control.FrontendRight ? 'droite' : 'gauche'} ${index} : ${this.state()}`);
         }
 
@@ -131,10 +137,10 @@ export class PauseNativeSettingsDriver {
         return true;
     }
 
-    private async press(control: Control): Promise<void> {
-        this.pendingControl = { control, frames: HOLD_FRAMES };
+    private async press(control: Control, frames = HOLD_FRAMES, delay = STEP_DELAY): Promise<void> {
+        this.pendingControl = { control, frames };
 
-        await wait(STEP_DELAY);
+        await wait(delay);
     }
 
     private state(): string {
