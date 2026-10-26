@@ -36,6 +36,7 @@ export type SettingCategory = {
     id: string;
     label: string;
     native: boolean;
+    staged?: boolean;
     note?: string;
     items: SettingItem[];
 };
@@ -294,6 +295,7 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
         id: 'graphicsAdvanced',
         label: 'Graphismes avancés',
         native: true,
+        staged: true,
         items: [
             native(
                 'profile_advGfxLongShadows',
