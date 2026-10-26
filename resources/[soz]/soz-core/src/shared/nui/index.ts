@@ -40,6 +40,7 @@ import { NuiLaserGameMethodMap } from './laser_games';
 import { NuiMedicalDiagMethodMap } from './medical_diag';
 import { NuiMenuMethodMap } from './menu';
 import { NuiMeteorMap } from './meteor';
+import { NuiPauseMenuMethodMap } from './pause_menu';
 import { NuiPanelMethodMap } from './panel';
 import { NuiPetManagerMethodMap } from './pet_manager';
 import { NuiPLayerMethodMap } from './player';
@@ -123,6 +124,7 @@ export interface NuiMethodMap {
     whatif: WhatIfMap;
     pet_manager: NuiPetManagerMethodMap;
     texture: NuiImageLoaderMethodMap;
+    pause_menu: NuiPauseMenuMethodMap;
 }
 
 export const eventNameFactory = <App extends keyof NuiMethodMap, Method extends keyof NuiMethodMap[App]>(

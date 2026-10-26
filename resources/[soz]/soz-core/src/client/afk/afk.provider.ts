@@ -10,6 +10,7 @@ import { Vector3 } from '../../shared/polyzone/vector';
 import { ItemCameraProvider } from '../item/item.camera.provider';
 import { Notifier } from '../notifier';
 import { InputService } from '../nui/input.service';
+import { PauseMenuProvider } from '../pause/pause.menu.provider';
 import { PhoneService } from '../phone/phone.service';
 import { PlayerService } from '../player/player.service';
 import { ProgressService } from '../progress.service';
@@ -35,6 +36,9 @@ export class AfkProvider {
 
     @Inject(ProgressService)
     private progressService: ProgressService;
+
+    @Inject(PauseMenuProvider)
+    private pauseMenuProvider: PauseMenuProvider;
 
     @Inject(PhoneService)
     private phoneService: PhoneService;
@@ -80,6 +84,8 @@ export class AfkProvider {
             if (this.voipRadioProvider.isRadioOpen()) {
                 this.voipRadioProvider.closeRadioInterface();
             }
+
+            this.pauseMenuProvider.close();
 
             if (GetPauseMenuState() != 0) {
                 ActivateFrontendMenu(MP_PAUSE_MENU_HASH, false, -1);

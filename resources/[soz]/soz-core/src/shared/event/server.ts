@@ -896,4 +896,6 @@ export enum ServerEvent {
     PET_ADMIN_JOB_SET_DATA = 'soz-core:server:pet:admin-job-set-data',
     PET_ADMIN_JOB_SET_PER_DAYS = 'soz-core:server:pet:admin-job-set-per-days',
     PET_ADMIN_JOB_RESET_PER_DAYS = 'soz-core:server:pet:admin-job-reset-per-days',
+
+    PAUSE_MENU_QUIT = 'soz-core:server:pause-menu:quit',
 }

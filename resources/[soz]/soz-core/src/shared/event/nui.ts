@@ -842,4 +842,8 @@ export enum NuiEvent {
     WhatIfHammerChoosePropToCreate = 'soz-core:nui:what-if:hammer-choose-prop-to-create',
 
     TextureReplacerChunk = 'soz-core:nui:texture:replacer-chunk',
+
+    PauseMenuClose = 'soz-core:nui:pause-menu:close',
+    PauseMenuOpenNative = 'soz-core:nui:pause-menu:open-native',
+    PauseMenuQuit = 'soz-core:nui:pause-menu:quit',
 }
