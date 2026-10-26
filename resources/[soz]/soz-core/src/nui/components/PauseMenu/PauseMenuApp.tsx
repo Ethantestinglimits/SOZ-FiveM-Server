@@ -142,8 +142,8 @@ export const PauseMenuApp: FunctionComponent = () => {
     });
     useKeyPress('p', () => data && !confirmQuit && close());
     useKeyPress('P', () => data && !confirmQuit && close());
-    useKeyPress('q', () => changeTab(-1));
-    useKeyPress('Q', () => changeTab(-1));
+    useKeyPress('a', () => changeTab(-1));
+    useKeyPress('A', () => changeTab(-1));
     useKeyPress('e', () => changeTab(1));
     useKeyPress('E', () => changeTab(1));
 
