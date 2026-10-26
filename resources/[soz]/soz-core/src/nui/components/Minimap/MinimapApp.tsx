@@ -116,7 +116,7 @@ export const MinimapApp: FunctionComponent = () => {
         if (rendererRef.current) {
             rendererRef.current.layers = data.layers;
             rendererRef.current.setRegions(data.regions);
-            rendererRef.current.open(Boolean(data.scriptMode));
+            rendererRef.current.open(Boolean(data.scriptMode), data.focus);
         }
     });
     useNuiEvent('pause_menu', 'Close', () => rendererRef.current?.reset());
