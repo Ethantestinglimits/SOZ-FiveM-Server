@@ -107,21 +107,23 @@ const QuitConfirm: FunctionComponent<{ onCancel: () => void }> = ({ onCancel }) 
     </div>
 );
 
-const FadeIn: FunctionComponent<PropsWithChildren<{ as: 'aside' | 'main'; className: string }>> = ({
-    as: Tag,
-    className,
-    children,
-}) => {
-    const [shown, setShown] = useState(false);
+const FadeIn: FunctionComponent<
+    PropsWithChildren<{ as: 'aside' | 'main'; className: string; instant?: boolean }>
+> = ({ as: Tag, className, instant = false, children }) => {
+    const [shown, setShown] = useState(instant);
 
     useEffect(() => {
+        if (instant) {
+            return;
+        }
+
         const handle = requestAnimationFrame(() => requestAnimationFrame(() => setShown(true)));
 
         return () => cancelAnimationFrame(handle);
     }, []);
 
     return (
-        <Tag className={classNames(className, 'transition-opacity duration-500', { 'opacity-0': !shown })}>
+        <Tag className={classNames(className, { 'transition-opacity duration-500': !instant, 'opacity-0': !shown })}>
             {children}
         </Tag>
     );
@@ -212,7 +214,7 @@ export const PauseMenuApp: FunctionComponent = () => {
                     document.body
                 )}
             {showContent && !data.scriptMode && (
-                <FadeIn as="aside" className="relative w-[17vw] shrink-0">
+                <FadeIn as="aside" className="relative w-[17vw] shrink-0" instant={!data.settings.server.mapAnimation}>
                     <Glass className="flex h-full flex-col gap-[2vh] p-[2.5vh]">
                         <img src="assets/pause/soz_logo.webp" alt="SoZ" className="h-[4vh] w-auto self-start" />
 
@@ -273,7 +275,7 @@ export const PauseMenuApp: FunctionComponent = () => {
                 </FadeIn>
             )}
             {showContent && !data.scriptMode && (
-                <FadeIn as="main" className="relative min-h-0 min-w-0 flex-1">
+                <FadeIn as="main" className="relative min-h-0 min-w-0 flex-1" instant={!data.settings.server.mapAnimation}>
                     {tab === 'settings' && (
                         <Glass className="h-full">
                             <SettingsMain category={settingsCategory} settings={data.settings} />
