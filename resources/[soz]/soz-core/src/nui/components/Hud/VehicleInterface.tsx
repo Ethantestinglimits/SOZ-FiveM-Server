@@ -11,10 +11,12 @@ import { LockIndicator } from './components/LockIndicator';
 import { NosGauge } from './components/NosGauge';
 import { SeatbeltIndicator } from './components/SeatbeltIndicator';
 import { SpeedGauge } from './components/SpeedGauge';
+import { useHudLayout } from './hudLayoutState';
 
 export const VehicleInterface: FunctionComponent = () => {
     const minimap = useHudMinimap();
     const hasStreetNamesEnabled = useHudHasStreetNames();
+    const layout = useHudLayout().vehicle;
 
     const seat = useSelector((state: RootState) => state.vehicle.seat);
 
@@ -44,15 +46,19 @@ export const VehicleInterface: FunctionComponent = () => {
         },
         to: {
             opacity: 1,
-            bottom: hudShouldBeDisplayed ? `${100 - minimap.bottom * 100}vh` : '-50vh',
+            bottom: hudShouldBeDisplayed ? (layout ? `${100 - layout.y}vh` : `${100 - minimap.bottom * 100}vh`) : '-50vh',
+            left: layout ? `${layout.x}vw` : '0vw',
         },
     });
 
     return (
-        <animated.div className="absolute inset-x-0 w-full" style={styles}>
+        <animated.div
+            className={cn('absolute', layout ? 'w-fit -translate-x-1/2' : 'inset-x-0 w-full')}
+            style={styles}
+        >
             <div
                 className={cn('relative flex justify-center gap-1', {
-                    'top-12': hasStreetNamesEnabled,
+                    'top-12': hasStreetNamesEnabled && !layout,
                 })}
             >
                 {isPilot ? (

@@ -6,17 +6,19 @@ import { useSelector } from 'react-redux';
 import { NuiEvent } from '../../../shared/event/nui';
 import { Progress } from '../../../shared/nui/progress';
 import { fetchNui } from '../../fetch';
-import { useHudHasStreetNames, useMinimap, useVehicle } from '../../hook/data';
+import { useHudHasStreetNames, useHudMinimap, useVehicle } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
 import { useHudColor } from '../Hud/hooks/useHudColor';
+import { useHudLayout } from '../Hud/hudLayoutState';
 import { GameCanvasBox } from '../Styleguide/GameCanvasBox';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
 
 const PROGRESS_BAR_SEGMENTS = 10;
 
 export const ProgressApp: FunctionComponent = () => {
-    const minimap = useMinimap();
+    const minimap = useHudMinimap();
+    const layout = useHudLayout().progress;
     const vehicle = useVehicle();
     const hasStreetNamesEnabled = useHudHasStreetNames();
 
@@ -30,8 +32,8 @@ export const ProgressApp: FunctionComponent = () => {
         },
         to: {
             opacity: progress ? 1 : 0,
-            top: progress ? `${(minimap.bottom + 0.005) * 100}vh` : '150vh',
-            right: `${(minimap.left + 0.005) * 100}vw`,
+            top: progress ? (layout ? `${layout.y}vh` : `${(minimap.bottom + 0.005) * 100}vh`) : '150vh',
+            ...(layout ? { left: `${layout.x}vw` } : { right: `${(minimap.left + 0.005) * 100}vw` }),
         },
     });
 
@@ -82,12 +84,13 @@ export const ProgressApp: FunctionComponent = () => {
         <animated.div
             style={styles}
             className={cn(
-                `absolute w-full inset-x-0 flex flex-col justify-center items-center gap-3 text-white text-xl`,
+                `absolute flex flex-col justify-center items-center gap-3 text-white text-xl`,
+                layout ? 'w-fit -translate-x-1/2' : 'w-full inset-x-0',
                 {
-                    'bottom-10': hasStreetNamesEnabled && vehicle.seat === null,
-                    '-bottom-10': hasStreetNamesEnabled && vehicle.seat !== null,
-                    '-mt-16': !hasStreetNamesEnabled && vehicle.seat === null,
-                    '-mt-0': !hasStreetNamesEnabled && vehicle.seat !== null,
+                    'bottom-10': !layout && hasStreetNamesEnabled && vehicle.seat === null,
+                    '-bottom-10': !layout && hasStreetNamesEnabled && vehicle.seat !== null,
+                    '-mt-16': !layout && !hasStreetNamesEnabled && vehicle.seat === null,
+                    '-mt-0': !layout && !hasStreetNamesEnabled && vehicle.seat !== null,
                 }
             )}
         >
