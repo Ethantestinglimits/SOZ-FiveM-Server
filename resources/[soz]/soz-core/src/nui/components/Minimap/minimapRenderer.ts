@@ -258,6 +258,7 @@ export class MinimapRenderer {
         this.hovered = null;
         this.target = null;
         this.highlight = null;
+        this.instant = this.instant || !isMapTabActive();
         this.setMode('closing');
 
         return true;
