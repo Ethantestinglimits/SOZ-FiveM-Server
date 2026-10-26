@@ -16,6 +16,7 @@ import {
 import cn from 'classnames';
 import clsx from 'clsx';
 import {
+    ComponentProps,
     createContext,
     DetailedHTMLProps,
     forwardRef,
@@ -42,6 +43,7 @@ import {
     useEnter,
     useReset,
 } from '../../hook/control';
+import { getTextScale, useMenuStyle } from './menuStyleState';
 
 type MenuDescendant = Descendant & {
     selectable: boolean;
@@ -54,7 +56,7 @@ type MenuSelectDescendant = Descendant & {
 
 const MenuDescendantContext = createDescendantContext<MenuDescendant>('MenuDescendantContext');
 const MenuItemSelectDescendantContext = createDescendantContext<MenuSelectDescendant>(
-    'MenuItemSelectDescendantContext'
+    'MenuItemSelectDescendantContext',
 );
 const MenuContext = createContext<{
     activeIndex: number;
@@ -116,6 +118,22 @@ export const SubMenu: FunctionComponent<PropsWithChildren<SubMenuProps>> = ({ ch
     );
 };
 
+const MenuGlassContainer: FunctionComponent<ComponentProps<typeof GlassMorphismContainer>> = (props) => {
+    const { potato } = useMenuStyle();
+
+    if (potato) {
+        return (
+            <div className="h-full w-full overflow-hidden rounded-lg bg-black/90">
+                <div className={props.className} style={props.style}>
+                    {props.children}
+                </div>
+            </div>
+        );
+    }
+
+    return <GlassMorphismContainer {...props} />;
+};
+
 export type MainMenuProps = PropsWithChildren<{
     helpPanel?: ReactNode;
 }>;
@@ -129,6 +147,8 @@ export const MainMenu: FunctionComponent<MainMenuProps> = ({ children, helpPanel
 };
 
 export const MenuContainer: FunctionComponent<MainMenuProps> = ({ children, helpPanel }) => {
+    const { size, text } = useMenuStyle();
+    const textScale = getTextScale(text);
     let leftOffset = 'left-8';
     let rightOffset = 'right-8';
     if (
@@ -141,21 +161,27 @@ export const MenuContainer: FunctionComponent<MainMenuProps> = ({ children, help
 
     return (
         <>
-            <div className={clsx('absolute top-10 w-[36vh] min-w-[36vh] font-prompt select-none', leftOffset)}>
-                {children}
+            <div
+                className={clsx('absolute top-10 w-[36vh] min-w-[36vh] font-prompt select-none', leftOffset)}
+                style={{ transform: `scale(${size / 100})`, transformOrigin: 'top left' }}
+            >
+                <div style={{ zoom: textScale, width: `${100 / textScale}%` }}>{children}</div>
             </div>
             {helpPanel && (
-                <div className={clsx('absolute top-10 w-[36vh] min-w-[36vh] font-prompt select-none', rightOffset)}>
-                    <div>
+                <div
+                    className={clsx('absolute top-10 w-[36vh] min-w-[36vh] font-prompt select-none', rightOffset)}
+                    style={{ transform: `scale(${size / 100})`, transformOrigin: 'top right' }}
+                >
+                    <div style={{ zoom: textScale, width: `${100 / textScale}%` }}>
                         <div
                             className="mt-3 max-h-[40vh] overflow-hidden"
                             style={{
                                 pointerEvents: 'none',
                             }}
                         >
-                            <GlassMorphismContainer duration="duration-0" borderClassName="rounded-lg" disableBorder>
+                            <MenuGlassContainer duration="duration-0" borderClassName="rounded-lg" disableBorder>
                                 <ul>{helpPanel}</ul>
-                            </GlassMorphismContainer>
+                            </MenuGlassContainer>
                         </div>
                     </div>
                 </div>
@@ -233,7 +259,7 @@ export const MenuContent: FunctionComponent<MenuContentProps> = ({ children, sub
             >
                 <MenuControls>
                     <div>
-                        <GlassMorphismContainer duration="duration-0" borderClassName="rounded-lg" disableBorder>
+                        <MenuGlassContainer duration="duration-0" borderClassName="rounded-lg" disableBorder>
                             {subtitle && (
                                 <div className="flex items-center gap-2 text-sm font-semibold pt-3 px-4 text-white">
                                     <ChevronLeftIcon className="size-4" />
@@ -244,16 +270,12 @@ export const MenuContent: FunctionComponent<MenuContentProps> = ({ children, sub
                             <ul className="p-2 max-h-[40vh] overflow-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-thumb-rounded-full scrollbar-track-rounded-full">
                                 {children}
                             </ul>
-                        </GlassMorphismContainer>
+                        </MenuGlassContainer>
                         {description && (
                             <div className="mt-3 w-full overflow-hidden text-white">
-                                <GlassMorphismContainer
-                                    duration="duration-0"
-                                    borderClassName="rounded-lg"
-                                    disableBorder
-                                >
+                                <MenuGlassContainer duration="duration-0" borderClassName="rounded-lg" disableBorder>
                                     <div className="px-2 py-1">{description}</div>
-                                </GlassMorphismContainer>
+                                </MenuGlassContainer>
                             </div>
                         )}
                         {helpPanel && (
@@ -263,13 +285,9 @@ export const MenuContent: FunctionComponent<MenuContentProps> = ({ children, sub
                                     pointerEvents: 'none',
                                 }}
                             >
-                                <GlassMorphismContainer
-                                    duration="duration-0"
-                                    borderClassName="rounded-lg"
-                                    disableBorder
-                                >
+                                <MenuGlassContainer duration="duration-0" borderClassName="rounded-lg" disableBorder>
                                     <ul>{helpPanel}</ul>
-                                </GlassMorphismContainer>
+                                </MenuGlassContainer>
                             </div>
                         )}
                     </div>
@@ -381,7 +399,7 @@ const MenuItemContainer: FunctionComponent<MenuItemProps> = ({
     const { activeIndex, setDescription, setActiveIndex, visibility } = useContext(MenuContext);
     const ref = useRef(null);
     const [element, setElement] = useState(null);
-    const handleRefSet = useCallback(refValue => {
+    const handleRefSet = useCallback((refValue) => {
         ref.current = refValue;
         setElement(refValue);
     }, []);
@@ -616,7 +634,7 @@ export const MenuItemNumberInput: FunctionComponent<MenuItemNumberInputProps> = 
     onChange,
     onBlur,
 }) => {
-    const handleOnChange: React.ChangeEventHandler<HTMLInputElement> = e => {
+    const handleOnChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         onChange(e.currentTarget.name, e.currentTarget.value);
     };
 
@@ -646,7 +664,7 @@ export const MenuItemStringInput: FunctionComponent<MenuItemStringInputProps> = 
     value,
     onChange,
 }) => {
-    const handleOnChange: React.ChangeEventHandler<HTMLInputElement> = e => {
+    const handleOnChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         const text =
             e.currentTarget.value && e.currentTarget.value.length ? e.currentTarget.value.toLocaleLowerCase() : null;
         onChange(text);
@@ -748,7 +766,7 @@ export const useIsInSubMenu = (id: string | string[]): boolean => {
     const [, subPath] = useCurrentMenu();
 
     if (Array.isArray(id)) {
-        return id.some(subId => subPath === subId);
+        return id.some((subId) => subPath === subId);
     }
 
     return subPath === id;
@@ -898,7 +916,7 @@ const MenuSelectControls: FunctionComponent<MenuSelectControlsProps> = ({ onChan
         <div className="flex items-center w-full justify-between">
             {!showAllOptions && (
                 <ChevronLeftIcon
-                    onClick={event => {
+                    onClick={(event) => {
                         goLeft();
 
                         event.stopPropagation();
@@ -909,7 +927,7 @@ const MenuSelectControls: FunctionComponent<MenuSelectControlsProps> = ({ onChan
             <div className="overflow-hidden">{children}</div>
             {!showAllOptions && (
                 <ChevronRightIcon
-                    onClick={event => {
+                    onClick={(event) => {
                         goRight();
 
                         event.stopPropagation();
@@ -1124,8 +1142,8 @@ export const MenuItemSelectHelperItem: FunctionComponent<MenuItemSelectHelperIte
 export const MenuItemSelectHelper: FunctionComponent = () => {
     const isItemSelected = useContext(MenuSelectedContext);
     const menuItems = useDescendants(MenuItemSelectDescendantContext);
-    const helperCount = menuItems.filter(item => item.helper !== null).length;
-    const helpers = menuItems.map(item => item.helper);
+    const helperCount = menuItems.filter((item) => item.helper !== null).length;
+    const helpers = menuItems.map((item) => item.helper);
     const [clicked, setClicked] = useState(false);
 
     useEffect(() => {
@@ -1153,7 +1171,7 @@ export const MenuItemSelectHelper: FunctionComponent = () => {
 
     return (
         <div className={clsx('fixed translate-x-full top-28 min-w-[24rem] max-h-[40vh]', leftOffset, width)}>
-            <GlassMorphismContainer duration="duration-0" className="p-1" borderClassName="rounded-lg" disableBorder>
+            <MenuGlassContainer duration="duration-0" className="p-1" borderClassName="rounded-lg" disableBorder>
                 <ul
                     onClick={() => setClicked(true)}
                     className="rounded-lg max-h-[40vh] overflow-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-thumb-rounded-full scrollbar-track-rounded-full"
@@ -1166,7 +1184,7 @@ export const MenuItemSelectHelper: FunctionComponent = () => {
                         );
                     })}
                 </ul>
-            </GlassMorphismContainer>
+            </MenuGlassContainer>
         </div>
     );
 };
@@ -1176,14 +1194,14 @@ const useSelectOption = (
     onSelected?: () => void,
     description?: string,
     helper?: ReactNode,
-    helperRef?: any
+    helperRef?: any,
 ): [(value) => void, boolean, boolean, (value) => void, boolean] => {
     const isItemSelected = useContext(MenuSelectedContext);
     const { activeOptionIndex, distance, setDescription, setActiveOptionIndex, showAllOptions, activeValue } =
         useContext(MenuItemSelectContext);
     const ref = useRef(null);
     const [element, setElement] = useState(null);
-    const handleRefSet = useCallback(refValue => {
+    const handleRefSet = useCallback((refValue) => {
         ref.current = refValue;
         setElement(refValue);
     }, []);
@@ -1265,7 +1283,7 @@ export const MenuItemSelectOptionBox: FunctionComponent<MenuItemSelectOptionProp
         value,
         onSelected,
         description,
-        helper
+        helper,
     );
 
     return (

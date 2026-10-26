@@ -52,6 +52,7 @@ export interface NuiMenuMethodMap {
     SetMenuType: SetMenuType;
     ToggleFocus: never;
     SetMenuVisibility: boolean;
+    SetStyle: { size: number; text: number; potato: boolean };
     Shift: never;
 }
 

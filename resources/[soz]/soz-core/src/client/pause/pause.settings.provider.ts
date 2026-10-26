@@ -1,4 +1,4 @@
-import { OnNuiEvent } from '../../core/decorators/event';
+import { Once, OnceStep, OnNuiEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { NuiEvent } from '../../shared/event';
@@ -11,10 +11,15 @@ import { StreamProvider } from '../stream/stream.provider';
 import { VoiceProvider } from '../voip/voice/voice.provider';
 import { PauseMinimapProvider } from './minimap.provider';
 
+const MENU_SIZE_KVP = 'soz_menu_size';
+const MENU_TEXT_KVP = 'soz_menu_text';
+
 const DEFAULTS: Record<string, boolean | number | string> = {
     potato: false,
     mapAnimation: true,
     minimapFps: 60,
+    menuSize: 100,
+    menuTextSize: 3,
     hudVisible: true,
     hudCinematic: false,
     hudCinematicCamera: false,
@@ -62,6 +67,8 @@ export class PauseSettingsProvider {
                 potato: this.pauseMinimapProvider.isPotato(),
                 mapAnimation: this.pauseMinimapProvider.isAnimationEnabled(),
                 minimapFps: this.pauseMinimapProvider.getFpsLimit(),
+                menuSize: this.getMenuSize(),
+                menuTextSize: this.getMenuTextSize(),
                 hudVisible: hud.isHudVisible,
                 hudCinematic: hud.isCinematicMode,
                 hudCinematicCamera: hud.isCinematicCameraActive,
@@ -73,6 +80,23 @@ export class PauseSettingsProvider {
             },
             native,
         };
+    }
+
+    @Once(OnceStep.NuiLoaded)
+    public sendMenuStyle(): void {
+        this.nuiDispatch.dispatch('menu', 'SetStyle', {
+            size: this.getMenuSize(),
+            text: this.getMenuTextSize(),
+            potato: this.pauseMinimapProvider.isPotato(),
+        });
+    }
+
+    private getMenuSize(): number {
+        return GetResourceKvpInt(MENU_SIZE_KVP) || 100;
+    }
+
+    private getMenuTextSize(): number {
+        return GetResourceKvpInt(MENU_TEXT_KVP) || 3;
     }
 
     @OnNuiEvent(NuiEvent.PauseMenuSetSetting)
@@ -102,6 +126,16 @@ export class PauseSettingsProvider {
                     this.hudGlassmorphismProvider.glassmorphismFpsLimit = 30;
                 }
 
+                this.sendMenuStyle();
+
+                break;
+            case 'menuSize':
+                SetResourceKvpInt(MENU_SIZE_KVP, Number(value));
+                this.sendMenuStyle();
+                break;
+            case 'menuTextSize':
+                SetResourceKvpInt(MENU_TEXT_KVP, Number(value));
+                this.sendMenuStyle();
                 break;
             case 'mapAnimation':
                 this.pauseMinimapProvider.setAnimationEnabled(Boolean(value));

@@ -72,6 +72,7 @@ import { SceneSearchPropApp } from './Scene/SceneSearchPropApp';
 import { ScreenshotApp } from './Screenshot/ScreenshotApp';
 import { ClothShopMenu } from './Shop/ClothShopMenu';
 import { StateApp } from './StateApp';
+import { MenuStyleApp } from './Styleguide/MenuStyleApp';
 import { GlassMorphism } from './Styleguide/GlassMorphism';
 import { TargetOverlay } from './Target/TargetOverlay';
 import { TaserDazeApp } from './Taser/TaserDazeApp';
@@ -115,6 +116,7 @@ export const App: FunctionComponent = () => {
         <GlassMorphismProvider>
             <Provider store={store}>
                 <StateApp />
+                <MenuStyleApp />
                 <StatePrivateApp />
                 <AudioApp />
                 <GlassMorphism globalHide={menuHidden || hideHud} />

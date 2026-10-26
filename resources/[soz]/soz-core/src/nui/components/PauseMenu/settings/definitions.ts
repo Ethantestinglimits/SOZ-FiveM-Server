@@ -45,6 +45,16 @@ const VIDEO_VOLUME_OPTIONS = [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map
     label: `${value}%`,
 }));
 
+const MENU_SIZE_OPTIONS = [70, 80, 90, 100, 110, 120, 130].map((value) => ({ value, label: `${value}%` }));
+
+const MENU_TEXT_OPTIONS = [
+    { value: 1, label: 'Très petit' },
+    { value: 2, label: 'Petit' },
+    { value: 3, label: 'Normal' },
+    { value: 4, label: 'Grand' },
+    { value: 5, label: 'Très grand' },
+];
+
 const plain = (raw: number) => String(raw);
 
 const onOff = (raw: number) => (raw > 0 ? 'Avec' : 'Sans');
@@ -131,6 +141,30 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
                 description: 'Limite de FPS pour le glassmorphisme du HUD.',
                 default: 30,
                 options: FPS_OPTIONS,
+            },
+        ],
+    },
+    {
+        id: 'menus',
+        label: 'Menus',
+        native: false,
+        items: [
+            {
+                id: 'menuSize',
+                kind: 'select',
+                label: 'Taille du menu',
+                description:
+                    "Redimensionne les menus SoZ (F1, garages, boutiques…). Pris en compte à la prochaine ouverture d'un menu.",
+                default: 100,
+                options: MENU_SIZE_OPTIONS,
+            },
+            {
+                id: 'menuTextSize',
+                kind: 'select',
+                label: 'Taille du texte',
+                description: 'Agrandit ou réduit le texte des menus SoZ sans changer leur largeur.',
+                default: 3,
+                options: MENU_TEXT_OPTIONS,
             },
         ],
     },
