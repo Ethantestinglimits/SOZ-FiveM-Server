@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react';
 
+import { PauseMapLayer } from '../../../shared/nui/pause_menu';
+
 export type MinimapMode = 'minimap' | 'opening' | 'open' | 'closing';
 
 let mode: MinimapMode = 'minimap';
 let mapTabActive = true;
 const listeners = new Set<(mode: MinimapMode) => void>();
 
-export const minimapController: { requestClose: (() => boolean) | null } = { requestClose: null };
+export const minimapController: {
+    requestClose: (() => boolean) | null;
+    focus: ((point: { x: number; y: number }) => void) | null;
+    setLayers: ((layers: PauseMapLayer[]) => void) | null;
+} = { requestClose: null, focus: null, setLayers: null };
 
 export const setMinimapMode = (next: MinimapMode): void => {
     mode = next;

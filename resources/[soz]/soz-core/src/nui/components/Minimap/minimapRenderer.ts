@@ -1,4 +1,6 @@
+import { Postals } from '../../../config/postals';
 import { MinimapBlip, MinimapFrame, MinimapPoint, MinimapZone } from '../../../shared/nui/minimap';
+import { PauseMapLayer, PauseMapRegion } from '../../../shared/nui/pause_menu';
 import { getBlipColor, UNTINTED_BLIP_COLORS } from './blipColors';
 import { isMapTabActive, MinimapMode, setMinimapMode } from './minimapState';
 
@@ -9,6 +11,12 @@ const ORIGIN_X = -4140;
 const ORIGIN_Y = 8400;
 const IMAGE_UNITS = 4500;
 const MIP_LEVELS = [1, 0.5, 0.25, 0.125];
+export const getBlipIconUrl = (sprite: number): string => `${BLIP_URL}/${sprite}.webp?v=${ASSETS_VERSION}`;
+
+const REGION_SCALE = [0.08, 1.6];
+const POSTAL_MIN_SCALE = 0.8;
+const FOCUS_SCALE = 1;
+const FOCUS_RATE = 8;
 const ICON_RESOLUTION = 64;
 const BLIP_SIZE = 16;
 const PANEL_BLIP_SIZE = 22;
@@ -44,6 +52,8 @@ const WRAP_OFFSETS = [-1, 0, 1];
 export type MinimapRect = { x: number; y: number; w: number; h: number };
 
 type Camera = { x: number; y: number; scale: number; rotation: number };
+
+type Label = { x: number; y: number; text: string; priority: number };
 
 type MapImage = { x0: number; y0: number; x1: number; y1: number; levels: CanvasImageSource[]; widths: number[] };
 
@@ -133,6 +143,11 @@ export class MinimapRenderer {
     public zones: MinimapZone[] = [];
     public route: MinimapPoint[] = [];
     public waypoint: MinimapPoint | null = null;
+    public layers: PauseMapLayer[] = ['blips', 'regions'];
+    public highlight: MinimapPoint | null = null;
+    private target: { x: number; y: number; scale: number } | null = null;
+    private regionLabels: Label[] = [];
+    private readonly postalLabels: Label[] = Postals.map(([text, x, y]) => ({ text, x, y, priority: 0 }));
 
     constructor(
         private readonly canvas: HTMLCanvasElement,
@@ -187,12 +202,32 @@ export class MinimapRenderer {
         this.zones = zones;
     }
 
+    public setRegions(regions: PauseMapRegion[]): void {
+        this.regionLabels = regions.map(region => ({
+            x: region.x,
+            y: region.y,
+            text: region.name.toUpperCase(),
+            priority: region.weight,
+        }));
+    }
+
+    public focus(point: MinimapPoint): void {
+        this.highlight = { ...point };
+        this.target = {
+            x: nearestCopy(point.x, this.panel.x, WORLD_WIDTH),
+            y: nearestCopy(point.y, this.panel.y, WORLD_HEIGHT),
+            scale: Math.max(this.panel.scale, FOCUS_SCALE),
+        };
+    }
+
     public open(): void {
         if (this.mode !== 'minimap' || !this.displayed) {
             return;
         }
 
         this.panel = { x: this.displayed.x, y: this.displayed.y, scale: PANEL_DEFAULT_SCALE };
+        this.target = null;
+        this.highlight = null;
         this.setMode('opening');
     }
 
@@ -211,6 +246,8 @@ export class MinimapRenderer {
         }
 
         this.hovered = null;
+        this.target = null;
+        this.highlight = null;
         this.setMode('closing');
 
         return true;
@@ -381,6 +418,18 @@ export class MinimapRenderer {
             }
         }
 
+        if (this.target && this.mode === 'open') {
+            const follow = 1 - Math.exp(-dt * FOCUS_RATE);
+
+            this.panel.x = lerp(this.panel.x, this.target.x, follow);
+            this.panel.y = lerp(this.panel.y, this.target.y, follow);
+            this.panel.scale = Math.exp(lerp(Math.log(this.panel.scale), Math.log(this.target.scale), follow));
+
+            if (Math.hypot(this.target.x - this.panel.x, this.target.y - this.panel.y) < 1) {
+                this.target = null;
+            }
+        }
+
         this.openness = t;
         this.current = {
             x: lerp(base.x, this.panelRect.x, t),
@@ -479,17 +528,46 @@ export class MinimapRenderer {
 
         this.drawMap(sx, offsets);
 
+        const showBlips = this.mode === 'minimap' || this.layers.includes('blips');
+
         for (const ox of offsets) {
             for (const oy of offsets) {
-                this.drawZones(ox, oy);
+                if (showBlips) {
+                    this.drawZones(ox, oy);
+                }
+
                 this.drawRoute(frame, ox, oy);
+            }
+        }
+
+        if (this.mode === 'open') {
+            const zoom = this.camera.scale;
+
+            for (const ox of offsets) {
+                for (const oy of offsets) {
+                    if (this.layers.includes('regions') && zoom >= REGION_SCALE[0] && zoom < REGION_SCALE[1]) {
+                        const size = Math.min(20, Math.max(10, 10 + Math.log2(zoom / 0.1) * 3));
+
+                        this.drawLabels(this.regionLabels, size, 'region', ox, oy);
+                    }
+
+                    if (this.layers.includes('postals') && zoom >= POSTAL_MIN_SCALE) {
+                        const size = Math.min(14, 11 + Math.log2(zoom / POSTAL_MIN_SCALE) * 1.5);
+
+                        this.drawLabels(this.postalLabels, size, 'postal', ox, oy);
+                    }
+                }
             }
         }
 
         for (const ox of offsets) {
             for (const oy of offsets) {
-                this.drawBlips(ox, oy);
+                if (showBlips) {
+                    this.drawBlips(ox, oy);
+                }
+
                 this.drawWaypoint(ox, oy);
+                this.drawHighlight(ox, oy);
                 this.drawPlayer(frame, ox, oy);
             }
         }
@@ -581,6 +659,67 @@ export class MinimapRenderer {
         ctx.stroke();
         ctx.strokeStyle = ROUTE_COLOR;
         ctx.lineWidth = 4;
+        ctx.stroke();
+    }
+
+    private drawLabels(labels: Label[], size: number, kind: 'region' | 'postal', ox: number, oy: number): void {
+        const ctx = this.ctx;
+        const padding = kind === 'postal' ? 4 : 3;
+        const boxes: [number, number, number, number][] = [];
+        const sorted = kind === 'region' ? [...labels].sort((a, b) => b.priority - a.priority) : labels;
+
+        ctx.font = `${kind === 'region' ? 700 : 600} ${size}px Prompt, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        for (const label of sorted) {
+            const [x, y] = this.toScreen(label.x, label.y, ox, oy);
+
+            if (x < -100 || y < -50 || x > this.current.w + 100 || y > this.current.h + 50) {
+                continue;
+            }
+
+            const width = ctx.measureText(label.text).width + padding * 2;
+            const height = size + padding * 2;
+            const box: [number, number, number, number] = [x - width / 2, y - height / 2, x + width / 2, y + height / 2];
+
+            if (boxes.some(([bx0, by0, bx1, by1]) => box[0] < bx1 && box[2] > bx0 && box[1] < by1 && box[3] > by0)) {
+                continue;
+            }
+
+            boxes.push(box);
+
+            if (kind === 'postal') {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                ctx.fillRect(box[0], box[1], width, height);
+                ctx.fillStyle = '#fde68a';
+                ctx.fillText(label.text, x, y + 1);
+            } else {
+                ctx.lineJoin = 'round';
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.75)';
+                ctx.strokeText(label.text, x, y);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(label.text, x, y);
+            }
+        }
+    }
+
+    private drawHighlight(ox: number, oy: number): void {
+        if (!this.highlight || this.mode !== 'open') {
+            return;
+        }
+
+        const ctx = this.ctx;
+        const [x, y] = this.toScreen(this.highlight.x, this.highlight.y, ox, oy);
+
+        ctx.beginPath();
+        ctx.arc(x, y, 18, 0, Math.PI * 2);
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.stroke();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#ffffff';
         ctx.stroke();
     }
 
@@ -728,6 +867,8 @@ export class MinimapRenderer {
         if (Math.hypot(dx, dy) > DRAG_THRESHOLD) {
             this.drag.moved = true;
             this.hovered = null;
+            this.target = null;
+            this.highlight = null;
         }
 
         this.panel.x = wrap(this.drag.x - dx / this.panel.scale, WORLD_MIN_X, WORLD_WIDTH);

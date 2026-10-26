@@ -37,9 +37,15 @@ export const MinimapApp: FunctionComponent = () => {
 
         rendererRef.current = renderer;
         minimapController.requestClose = () => renderer.requestClose();
+        minimapController.focus = point => renderer.focus(point);
+        minimapController.setLayers = layers => {
+            renderer.layers = layers;
+        };
 
         return () => {
             minimapController.requestClose = null;
+            minimapController.focus = null;
+            minimapController.setLayers = null;
             renderer.destroy();
         };
     }, []);
@@ -93,7 +99,13 @@ export const MinimapApp: FunctionComponent = () => {
     useNuiEvent('minimap', 'Settings', ({ animation }) => {
         if (rendererRef.current) rendererRef.current.transitionEnabled = animation;
     });
-    useNuiEvent('pause_menu', 'Open', () => rendererRef.current?.open());
+    useNuiEvent('pause_menu', 'Open', data => {
+        if (rendererRef.current) {
+            rendererRef.current.layers = data.layers;
+            rendererRef.current.setRegions(data.regions);
+            rendererRef.current.open();
+        }
+    });
     useNuiEvent('pause_menu', 'Close', () => rendererRef.current?.reset());
 
     return <canvas ref={canvasRef} className="fixed" style={{ zIndex: 5, display: 'none' }} />;

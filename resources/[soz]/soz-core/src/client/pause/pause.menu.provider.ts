@@ -2,8 +2,11 @@ import { OnNuiEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Tick, TickInterval } from '../../core/decorators/tick';
+import { BlipType } from '../../shared/blip';
 import { NuiEvent, ServerEvent } from '../../shared/event';
 import { Control } from '../../shared/input';
+import { PauseMapLayer, PauseMapPlace, PauseMapRegion } from '../../shared/nui/pause_menu';
+import { BlipFactory } from '../blip';
 import { JobService } from '../job/job.service';
 import { NuiDispatch } from '../nui/nui.dispatch';
 import { PlayerService } from '../player/player.service';
@@ -15,6 +18,12 @@ const BLUR_DELAY = 250;
 const NUI_FOCUS_COOLDOWN = 300;
 const FRONTEND_OPEN_TIMEOUT = 2000;
 const FRONTEND_MENU = GetHashKey('FE_MENU_VERSION_MP_PAUSE');
+const MAP_LAYERS_KVP = 'soz_pause_map';
+const MAP_LAYERS: PauseMapLayer[] = ['postals', 'regions', 'blips'];
+const DEFAULT_MAP_LAYERS: PauseMapLayer[] = ['blips', 'regions'];
+const REGION_STEP = 125;
+const REGION_BOUNDS = { minX: -3800, maxX: 4400, minY: -4000, maxY: 8000 };
+const REGION_EXCLUDED_ZONES = ['OCEANA'];
 
 @Provider()
 export class PauseMenuProvider {
@@ -33,10 +42,14 @@ export class PauseMenuProvider {
     @Inject(BlurService)
     private blurService: BlurService;
 
+    @Inject(BlipFactory)
+    private blipFactory: BlipFactory;
+
     private opened = false;
     private lastNuiFocusAt = 0;
     private frontendRequestedAt: number | null = null;
     private frontendOpened = false;
+    private regions: PauseMapRegion[] | null = null;
 
     public isOpen(): boolean {
         return this.opened;
@@ -97,6 +110,9 @@ export class PauseMenuProvider {
             grade: grade && grade.jobId === player.job.id ? grade.name : null,
             onDuty: player.job.onduty,
             serverId: GetPlayerServerId(PlayerId()),
+            places: this.getPlaces(),
+            regions: this.getRegions(),
+            layers: this.getMapLayers(),
         });
     }
 
@@ -126,10 +142,85 @@ export class PauseMenuProvider {
         ActivateFrontendMenu(FRONTEND_MENU, false, -1);
     }
 
+    @OnNuiEvent(NuiEvent.PauseMenuSaveMapLayers)
+    public async onSaveMapLayers(layers: PauseMapLayer[]): Promise<void> {
+        SetResourceKvp(MAP_LAYERS_KVP, JSON.stringify({ layers }));
+    }
+
     @OnNuiEvent(NuiEvent.PauseMenuQuit)
     public async onQuit(): Promise<void> {
         this.close();
         TriggerServerEvent(ServerEvent.PAUSE_MENU_QUIT);
+    }
+
+    private getPlaces(): PauseMapPlace[] {
+        const places: PauseMapPlace[] = [];
+
+        for (const { id, blip } of this.blipFactory.getAll().values()) {
+            if (!blip.name || blip.hidden || blip.type === BlipType.Radius || !blip.position) {
+                continue;
+            }
+
+            places.push({
+                id,
+                name: blip.name,
+                sprite: blip.sprite ?? 1,
+                color: blip.color ?? 0,
+                x: blip.position[0],
+                y: blip.position[1],
+            });
+        }
+
+        return places;
+    }
+
+    private getRegions(): PauseMapRegion[] {
+        if (this.regions) {
+            return this.regions;
+        }
+
+        const zones = new Map<string, { x: number; y: number; count: number }>();
+
+        for (let x = REGION_BOUNDS.minX; x <= REGION_BOUNDS.maxX; x += REGION_STEP) {
+            for (let y = REGION_BOUNDS.minY; y <= REGION_BOUNDS.maxY; y += REGION_STEP) {
+                const zone = GetNameOfZone(x, y, 100);
+
+                if (!zone || REGION_EXCLUDED_ZONES.includes(zone)) {
+                    continue;
+                }
+
+                const sum = zones.get(zone) ?? { x: 0, y: 0, count: 0 };
+
+                zones.set(zone, { x: sum.x + x, y: sum.y + y, count: sum.count + 1 });
+            }
+        }
+
+        this.regions = [...zones.entries()]
+            .map(([zone, sum]) => ({
+                name: GetLabelText(zone),
+                x: sum.x / sum.count,
+                y: sum.y / sum.count,
+                weight: sum.count,
+            }))
+            .filter(region => region.name && region.name !== 'NULL');
+
+        return this.regions;
+    }
+
+    private getMapLayers(): PauseMapLayer[] {
+        const saved = GetResourceKvpString(MAP_LAYERS_KVP);
+
+        if (!saved) {
+            return DEFAULT_MAP_LAYERS;
+        }
+
+        try {
+            const { layers } = JSON.parse(saved) as { layers?: PauseMapLayer[] };
+
+            return Array.isArray(layers) ? layers.filter(layer => MAP_LAYERS.includes(layer)) : DEFAULT_MAP_LAYERS;
+        } catch {
+            return DEFAULT_MAP_LAYERS;
+        }
     }
 
     private checkFrontendReturn(): boolean {
