@@ -48,7 +48,7 @@ const SideButton: FunctionComponent<SideButtonProps> = ({ label, icon, danger, o
             {
                 'bg-white/10 text-white hover:bg-white/25': !danger,
                 'bg-red-500/20 text-red-200 hover:bg-red-500/60 hover:text-white': danger,
-            }
+            },
         )}
     >
         <span className="h-[2vh] w-[2vh] shrink-0">{icon}</span>
@@ -69,7 +69,7 @@ const TabButton: FunctionComponent<{ label: string; icon: ReactNode; active: boo
             {
                 'bg-white text-black': active,
                 'bg-white/10 text-white/80 hover:bg-white/25 hover:text-white': !active,
-            }
+            },
         )}
     >
         <span className="h-[1.8vh] w-[1.8vh] shrink-0">{icon}</span>
@@ -113,7 +113,7 @@ export const PauseMenuApp: FunctionComponent = () => {
 
     useNuiFocus(data !== null, data !== null, false);
 
-    useNuiEvent('pause_menu', 'Open', menuData => {
+    useNuiEvent('pause_menu', 'Open', (menuData) => {
         setConfirmQuit(false);
         setTab('map');
         setData(menuData);
@@ -137,7 +137,7 @@ export const PauseMenuApp: FunctionComponent = () => {
             return;
         }
 
-        const index = TABS.findIndex(item => item.id === tab);
+        const index = TABS.findIndex((item) => item.id === tab);
 
         setTab(TABS[(index + direction + TABS.length) % TABS.length].id);
     };
@@ -169,74 +169,75 @@ export const PauseMenuApp: FunctionComponent = () => {
             <div
                 className={classNames(
                     'absolute inset-0 bg-gradient-to-b from-black/50 via-black/25 to-black/50 transition-opacity duration-300',
-                    { 'opacity-0': mode === 'minimap' || mode === 'closing' }
+                    { 'opacity-0': mode === 'minimap' || mode === 'closing' },
                 )}
             />
-            <aside
-                className={classNames('relative w-[17vw] shrink-0 transition-opacity duration-300', {
-                    'opacity-0 pointer-events-none': !showContent,
-                })}
-            >
-                <Glass className="flex h-full flex-col gap-[2vh] p-[2.5vh]">
-                    <img src="assets/pause/soz_logo.webp" alt="SoZ" className="h-[4vh] w-auto self-start" />
+            {showContent && (
+                <aside className="relative w-[17vw] shrink-0">
+                    <Glass className="flex h-full flex-col gap-[2vh] p-[2.5vh]">
+                        <img src="assets/pause/soz_logo.webp" alt="SoZ" className="h-[4vh] w-auto self-start" />
 
-                    <div className="flex flex-col gap-[0.4vh]">
-                        <div className="flex items-baseline justify-between gap-[1vh]">
-                            <span className="truncate text-[2vh] font-bold leading-tight">
-                                {data.firstname} {data.lastname}
-                            </span>
-                            <span className="shrink-0 text-[1.3vh] text-white/50">#{data.serverId}</span>
+                        <div className="flex flex-col gap-[0.4vh]">
+                            <div className="flex items-baseline justify-between gap-[1vh]">
+                                <span className="truncate text-[2vh] font-bold leading-tight">
+                                    {data.firstname} {data.lastname}
+                                </span>
+                                <span className="shrink-0 text-[1.3vh] text-white/50">#{data.serverId}</span>
+                            </div>
+                            <div className="flex items-center gap-[0.8vh] text-[1.4vh] text-white/70">
+                                <span
+                                    className={classNames('h-[0.8vh] w-[0.8vh] shrink-0 rounded-full', {
+                                        'bg-emerald-400': data.onDuty,
+                                        'bg-white/30': !data.onDuty,
+                                    })}
+                                />
+                                <span className="truncate">
+                                    {data.job ?? 'Sans emploi'}
+                                    {data.grade && ` · ${data.grade}`}
+                                </span>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-[0.8vh] text-[1.4vh] text-white/70">
-                            <span
-                                className={classNames('h-[0.8vh] w-[0.8vh] shrink-0 rounded-full', {
-                                    'bg-emerald-400': data.onDuty,
-                                    'bg-white/30': !data.onDuty,
-                                })}
-                            />
-                            <span className="truncate">
-                                {data.job ?? 'Sans emploi'}
-                                {data.grade && ` · ${data.grade}`}
-                            </span>
+
+                        <div className="flex gap-[0.8vh]">
+                            {TABS.map((item) => (
+                                <TabButton
+                                    key={item.id}
+                                    label={item.label}
+                                    icon={item.icon}
+                                    active={tab === item.id}
+                                    onClick={() => setTab(item.id)}
+                                />
+                            ))}
                         </div>
-                    </div>
 
-                    <div className="flex gap-[0.8vh]">
-                        {TABS.map(item => (
-                            <TabButton
-                                key={item.id}
-                                label={item.label}
-                                icon={item.icon}
-                                active={tab === item.id}
-                                onClick={() => setTab(item.id)}
+                        <div className="min-h-0 flex-1" />
+
+                        <div className="flex flex-col gap-[0.8vh]">
+                            <SideButton label="Reprendre" icon={<PlayIcon />} onClick={close} />
+                            <SideButton
+                                label="Menu du jeu"
+                                icon={<CogIcon />}
+                                onClick={() => fetchNui(NuiEvent.PauseMenuOpenNative)}
                             />
-                        ))}
-                    </div>
-
-                    <div className="min-h-0 flex-1" />
-
-                    <div className="flex flex-col gap-[0.8vh]">
-                        <SideButton label="Reprendre" icon={<PlayIcon />} onClick={close} />
-                        <SideButton
-                            label="Menu du jeu"
-                            icon={<CogIcon />}
-                            onClick={() => fetchNui(NuiEvent.PauseMenuOpenNative)}
-                        />
-                        <SideButton label="Quitter" icon={<LogoutIcon />} danger onClick={() => setConfirmQuit(true)} />
-                    </div>
-                </Glass>
-            </aside>
-            <main
-                className={classNames('relative min-h-0 min-w-0 flex-1 transition-opacity duration-300', {
-                    'opacity-0 pointer-events-none': !showContent,
-                })}
-            >
-                {tab === 'settings' && (
-                    <Glass className="flex h-full items-center justify-center p-[3vh]">
-                        <span className="text-[1.8vh] text-white/50">Paramètres</span>
+                            <SideButton
+                                label="Quitter"
+                                icon={<LogoutIcon />}
+                                danger
+                                onClick={() => setConfirmQuit(true)}
+                            />
+                        </div>
                     </Glass>
-                )}
-            </main>
+                </aside>
+            )}
+            {showContent && (
+                <main className="relative min-h-0 min-w-0 flex-1">
+                    {tab === 'settings' && (
+                        <Glass className="flex h-full items-center justify-center p-[3vh]">
+                            <span className="text-[1.8vh] text-white/50">Paramètres</span>
+                        </Glass>
+                    )}
+                </main>
+            )}
             {confirmQuit && <QuitConfirm onCancel={() => setConfirmQuit(false)} />}
         </div>
     );
