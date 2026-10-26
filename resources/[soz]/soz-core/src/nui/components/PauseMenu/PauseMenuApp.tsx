@@ -138,6 +138,7 @@ export const PauseMenuApp: FunctionComponent = () => {
     const [confirmQuit, setConfirmQuit] = useState(false);
     const [layers, setLayers] = useState<PauseMapLayer[]>([]);
     const [settingsCategory, setSettingsCategory] = useState('map');
+    const [nativeBusy, setNativeBusy] = useState(false);
     const mode = useMinimapMode();
     const showContent = mode === 'open';
 
@@ -154,7 +155,11 @@ export const PauseMenuApp: FunctionComponent = () => {
         setLayers(menuData.layers);
         setData(menuData);
     });
-    useNuiEvent('pause_menu', 'Close', () => setData(null));
+    useNuiEvent('pause_menu', 'Close', () => {
+        setData(null);
+        setNativeBusy(false);
+    });
+    useNuiEvent('pause_menu', 'NativeBusy', setNativeBusy);
     useNuiEvent('pause_menu', 'Settings', (settings) => setData((current) => current && { ...current, settings }));
 
     useEffect(() => {
@@ -295,6 +300,13 @@ export const PauseMenuApp: FunctionComponent = () => {
                 </FadeIn>
             )}
             {confirmQuit && createPortal(<QuitConfirm onCancel={() => setConfirmQuit(false)} />, document.body)}
+            {nativeBusy &&
+                createPortal(
+                    <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black font-prompt text-[2vh] text-white/80">
+                        Application du réglage…
+                    </div>,
+                    document.body,
+                )}
         </div>
     );
 };

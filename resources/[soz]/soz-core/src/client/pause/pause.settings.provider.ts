@@ -3,6 +3,7 @@ import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { NuiEvent } from '../../shared/event';
 import { MinimapOrientation } from '../../shared/nui/minimap';
+import { isNativeSlider } from '../../shared/nui/native_settings';
 import { PAUSE_NATIVE_CONVARS, PauseSettingChange, PauseSettingsData } from '../../shared/nui/pause_settings';
 import { HudCrosshairProvider } from '../hud/hud.crosshair.provider';
 import { HudGlassmorphismProvider } from '../hud/hud.glassmorphism.provider';
@@ -12,6 +13,7 @@ import { NuiDispatch } from '../nui/nui.dispatch';
 import { StreamProvider } from '../stream/stream.provider';
 import { VoiceProvider } from '../voip/voice/voice.provider';
 import { PauseMinimapProvider } from './minimap.provider';
+import { PauseNativeSettingsDriver } from './pause.native.driver';
 
 const MENU_SIZE_KVP = 'soz_menu_size';
 const MENU_TEXT_KVP = 'soz_menu_text';
@@ -40,6 +42,9 @@ export class PauseSettingsProvider {
 
     @Inject(PauseMinimapProvider)
     private pauseMinimapProvider: PauseMinimapProvider;
+
+    @Inject(PauseNativeSettingsDriver)
+    private pauseNativeSettingsDriver: PauseNativeSettingsDriver;
 
     @Inject(HudStateProvider)
     private hudStateProvider: HudStateProvider;
@@ -124,6 +129,12 @@ export class PauseSettingsProvider {
     }
 
     private async apply(key: string, value: PauseSettingChange['value']): Promise<void> {
+        if (isNativeSlider(key)) {
+            await this.pauseNativeSettingsDriver.setSlider(key, Number(value));
+
+            return;
+        }
+
         switch (key) {
             case 'potato':
                 this.pauseMinimapProvider.setPotato(Boolean(value));
