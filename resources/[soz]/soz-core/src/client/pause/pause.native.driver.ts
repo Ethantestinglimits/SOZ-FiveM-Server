@@ -101,7 +101,7 @@ export class PauseNativeSettingsDriver {
 
         this.log(`catégorie ouverte ${this.state()}`);
 
-        if (!(await this.goToRow(route.row))) {
+        if (!(await this.goToRow(route.row, route.upFirst))) {
             this.log(`ligne ${route.row} introuvable ${this.state()}`);
             return false;
         }
@@ -198,7 +198,16 @@ export class PauseNativeSettingsDriver {
         return this.getPage() === NATIVE_SETTINGS_PAGE;
     }
 
-    private async goToRow(row: number): Promise<boolean> {
+    private async goToRow(row: number, upFirst: number): Promise<boolean> {
+        for (let presses = 0; presses < upFirst; presses++) {
+            if (this.getRow() === row) {
+                return true;
+            }
+
+            await this.press(Control.FrontendUp);
+            this.log(`vers la ligne ${row} (haut) : ${this.state()}`);
+        }
+
         return this.moveToRow(row);
     }
 
