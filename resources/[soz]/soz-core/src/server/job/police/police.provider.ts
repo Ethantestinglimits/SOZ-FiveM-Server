@@ -16,6 +16,7 @@ import { RpcServerEvent } from '@public/shared/rpc';
 import { InventoryItem } from '../../../shared/inventory';
 import { Inventory } from '../../inventory/inventory';
 import { PlayerStateService } from '../../player/player.state.service';
+import { HackedCamRepository } from '../../repository/hacked.cam.repository';
 
 @Provider()
 export class PoliceProvider {
@@ -36,6 +37,9 @@ export class PoliceProvider {
 
     @Inject(Notifier)
     private notifier: Notifier;
+
+    @Inject(HackedCamRepository)
+    private hackedCamRepository: HackedCamRepository;
 
     @Once(OnceStep.Start)
     public init() {
