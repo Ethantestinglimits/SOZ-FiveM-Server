@@ -56,6 +56,7 @@ import { ShopCartApp } from './Inventory/ShopCartApp';
 import { WalletApp } from './Inventory/WalletApp';
 import { MedicalApp } from './LSMC/DiagnosticPad/MedicalApp';
 import { MenuApp } from './Menu/MenuApp';
+import { MinimapApp } from './Minimap/MinimapApp';
 import { PanelApp } from './Panel/PanelApp';
 import { PauseMenuApp } from './PauseMenu/PauseMenuApp';
 import { PhoneApp } from './Phone/PhoneApp';
@@ -188,6 +189,7 @@ export const App: FunctionComponent = () => {
                 <Election />
                 <BlipApp />
                 <PauseMenuApp />
+                <MinimapApp />
             </Provider>
         </GlassMorphismProvider>
     );

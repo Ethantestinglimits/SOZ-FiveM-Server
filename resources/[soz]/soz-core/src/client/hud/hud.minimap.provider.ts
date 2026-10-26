@@ -137,6 +137,10 @@ export class HudMinimapProvider {
         EndScaleformMovieMethod();
     }
 
+    public get radarWanted(): boolean {
+        return this.shouldDisplayRadar;
+    }
+
     private get shouldDisplayRadar(): boolean {
         if (this._hasAdminGps) return true;
         if (this.featureProvider.isFeatureEnabled(Feature.WhatIfSecondEpisode)) return false;
@@ -152,7 +156,7 @@ export class HudMinimapProvider {
     }
 
     private async updateShowRadar(): Promise<void> {
-        DisplayRadar(this.shouldDisplayRadar);
+        DisplayRadar(false);
         await this.updateMinimapPosition();
     }
 
@@ -200,7 +204,7 @@ export class HudMinimapProvider {
         const aspectRatio = GetAspectRatio(false);
         const scaleX = 1.0 / x;
         const scaleY = 1.0 / y;
-        const isRadarHidden = IsRadarHidden() || !this.shouldDisplayRadar;
+        const isRadarHidden = !this.shouldDisplayRadar;
 
         let rawX;
         let rawY;
