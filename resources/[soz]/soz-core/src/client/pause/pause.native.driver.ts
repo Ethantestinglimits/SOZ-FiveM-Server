@@ -139,10 +139,21 @@ export class PauseNativeSettingsDriver {
             ActivateFrontendMenu(SETTINGS_MENU, false, -1);
         }
 
-        return waitUntil(
-            async () => IsPauseMenuActive() && IsFrontendReadyForControl() && this.getPage() === NATIVE_LANDING_PAGE,
-            PAGE_TIMEOUT
-        );
+        const ready = await waitUntil(async () => IsPauseMenuActive() && IsFrontendReadyForControl(), PAGE_TIMEOUT);
+
+        if (!ready) {
+            return false;
+        }
+
+        await wait(500);
+
+        for (let attempt = 0; attempt < 4 && this.getPage() !== NATIVE_LANDING_PAGE; attempt++) {
+            this.log(`entrée dans la liste, essai ${attempt} ${this.state()}`);
+            await this.press(Control.FrontendDown);
+            await wait(300);
+        }
+
+        return this.getPage() === NATIVE_LANDING_PAGE;
     }
 
     private async enterCategory(category: number): Promise<boolean> {
