@@ -27,4 +27,6 @@ export interface NuiMinimapMethodMap {
     Frame: MinimapFrame;
     Blips: MinimapBlip[];
     Zones: MinimapZone[];
+    Route: MinimapPoint[];
+    Waypoint: MinimapPoint | null;
 }

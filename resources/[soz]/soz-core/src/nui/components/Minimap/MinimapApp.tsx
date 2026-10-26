@@ -61,6 +61,12 @@ export const MinimapApp: FunctionComponent = () => {
     useNuiEvent('minimap', 'Frame', frame => rendererRef.current?.setFrame(frame));
     useNuiEvent('minimap', 'Blips', blips => rendererRef.current?.setBlips(blips));
     useNuiEvent('minimap', 'Zones', zones => rendererRef.current?.setZones(zones));
+    useNuiEvent('minimap', 'Route', route => {
+        if (rendererRef.current) rendererRef.current.route = route;
+    });
+    useNuiEvent('minimap', 'Waypoint', waypoint => {
+        if (rendererRef.current) rendererRef.current.waypoint = waypoint;
+    });
 
     return <canvas ref={canvasRef} className="fixed shadow-lg" style={{ zIndex: 5, display: 'none' }} />;
 };
