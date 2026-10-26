@@ -10,11 +10,61 @@ import { useHudHasStreetNames, useHudMinimap, useVehicle } from '../../hook/data
 import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
 import { useHudColor } from '../Hud/hooks/useHudColor';
-import { useHudLayout } from '../Hud/hudLayoutState';
+import { layoutTransform, useHudLayout } from '../Hud/hudLayoutState';
 import { GameCanvasBox } from '../Styleguide/GameCanvasBox';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
 
 const PROGRESS_BAR_SEGMENTS = 10;
+
+type ProgressContentProps = {
+    progress: Progress;
+    currentProgress: number;
+    inVehicle: boolean;
+};
+
+export const ProgressContent: FunctionComponent<ProgressContentProps> = ({ progress, currentProgress, inVehicle }) => (
+    <>
+        {!progress?.hideBar && (
+            <div className="flex justify-center items-center">
+                <GameCanvasBox borderClassName="flex items-center gap-2" blur={false}>
+                    {Array.from({ length: PROGRESS_BAR_SEGMENTS }, (_, index) => (
+                        <ProgressSegment
+                            key={index}
+                            currentSegment={index}
+                            maxSegment={PROGRESS_BAR_SEGMENTS}
+                            progress={progress}
+                            currentProgress={currentProgress}
+                        />
+                    ))}
+                </GameCanvasBox>
+            </div>
+        )}
+
+        {!inVehicle && (progress?.label || progress?.units?.length > 0) && (
+            <div className="flex justify-center items-center gap-2">
+                <GlassMorphismContainer
+                    className="flex gap-10 px-5 py-1 w-fit"
+                    borderClassName="rounded-full"
+                    borderColor={progress?.color}
+                    disableGameClone={!progress}
+                >
+                    <span>{progress?.label}</span>
+
+                    {progress?.units?.length > 0 && (
+                        <div className="flex gap-2">
+                            {progress?.units.map((unit, index) => (
+                                <div key={index} className="font-mono font-sm w-18">
+                                    {((unit.end - unit.start) * currentProgress + unit.start).toFixed(2)}
+                                    {unit.unit}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </GlassMorphismContainer>
+            </div>
+        )}
+    </>
+);
 
 export const ProgressApp: FunctionComponent = () => {
     const minimap = useHudMinimap();
@@ -82,10 +132,13 @@ export const ProgressApp: FunctionComponent = () => {
 
     return (
         <animated.div
-            style={styles}
+            style={{
+                ...styles,
+                ...(layout ? layoutTransform(layout, 'top center', 'translateX(-50%)') : {}),
+            }}
             className={cn(
                 `absolute flex flex-col justify-center items-center gap-3 text-white text-xl`,
-                layout ? 'w-fit -translate-x-1/2' : 'w-full inset-x-0',
+                layout ? 'w-fit' : 'w-full inset-x-0',
                 {
                     'bottom-10': !layout && hasStreetNamesEnabled && vehicle.seat === null,
                     '-bottom-10': !layout && hasStreetNamesEnabled && vehicle.seat !== null,
@@ -94,45 +147,7 @@ export const ProgressApp: FunctionComponent = () => {
                 }
             )}
         >
-            {!progress?.hideBar && (
-                <div className="flex justify-center items-center">
-                    <GameCanvasBox borderClassName="flex items-center gap-2" blur={false}>
-                        {Array.from({ length: PROGRESS_BAR_SEGMENTS }, (_, index) => (
-                            <ProgressSegment
-                                key={index}
-                                currentSegment={index}
-                                maxSegment={PROGRESS_BAR_SEGMENTS}
-                                progress={progress}
-                                currentProgress={currentProgress}
-                            />
-                        ))}
-                    </GameCanvasBox>
-                </div>
-            )}
-
-            {vehicle.seat === null && (progress?.label || progress?.units?.length > 0) && (
-                <div className="flex justify-center items-center gap-2">
-                    <GlassMorphismContainer
-                        className="flex gap-10 px-5 py-1 w-fit"
-                        borderClassName="rounded-full"
-                        borderColor={progress?.color}
-                        disableGameClone={!progress}
-                    >
-                        <span>{progress?.label}</span>
-
-                        {progress?.units?.length > 0 && (
-                            <div className="flex gap-2">
-                                {progress?.units.map((unit, index) => (
-                                    <div key={index} className="font-mono font-sm w-18">
-                                        {((unit.end - unit.start) * currentProgress + unit.start).toFixed(2)}
-                                        {unit.unit}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </GlassMorphismContainer>
-                </div>
-            )}
+            <ProgressContent progress={progress} currentProgress={currentProgress} inVehicle={vehicle.seat !== null} />
         </animated.div>
     );
 };

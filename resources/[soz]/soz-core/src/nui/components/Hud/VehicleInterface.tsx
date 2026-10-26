@@ -11,7 +11,29 @@ import { LockIndicator } from './components/LockIndicator';
 import { NosGauge } from './components/NosGauge';
 import { SeatbeltIndicator } from './components/SeatbeltIndicator';
 import { SpeedGauge } from './components/SpeedGauge';
-import { useHudLayout } from './hudLayoutState';
+import { layoutTransform, useHudLayout } from './hudLayoutState';
+
+export const VehicleContent: FunctionComponent<{ isPilot: boolean }> = ({ isPilot }) =>
+    isPilot ? (
+        <>
+            <div className="flex flex-col justify-end items-end gap-2 w-32">
+                <SeatbeltIndicator />
+                <LockIndicator />
+            </div>
+            <div className="flex justify-center">
+                <NosGauge />
+                <SpeedGauge />
+            </div>
+            <div className="flex flex-col justify-end items-start gap-2 w-32">
+                <LightIndicator />
+                <FuelGauge />
+            </div>
+        </>
+    ) : (
+        <div className="flex justify-end items-end pb-[1.25rem]">
+            <SeatbeltIndicator />
+        </div>
+    );
 
 export const VehicleInterface: FunctionComponent = () => {
     const minimap = useHudMinimap();
@@ -53,34 +75,18 @@ export const VehicleInterface: FunctionComponent = () => {
 
     return (
         <animated.div
-            className={cn('absolute', layout ? 'w-fit -translate-x-1/2' : 'inset-x-0 w-full')}
-            style={styles}
+            className={cn('absolute', layout ? 'w-fit' : 'inset-x-0 w-full')}
+            style={{
+                ...styles,
+                ...(layout ? layoutTransform(layout, 'bottom center', 'translateX(-50%)') : {}),
+            }}
         >
             <div
                 className={cn('relative flex justify-center gap-3', {
                     'top-12': hasStreetNamesEnabled && !layout,
                 })}
             >
-                {isPilot ? (
-                    <>
-                        <div className="flex flex-col justify-end items-end gap-2 w-32">
-                            <SeatbeltIndicator />
-                            <LockIndicator />
-                        </div>
-                        <div className="flex justify-center">
-                            <NosGauge />
-                            <SpeedGauge />
-                        </div>
-                        <div className="flex flex-col justify-end items-start gap-2 w-32">
-                            <LightIndicator />
-                            <FuelGauge />
-                        </div>
-                    </>
-                ) : (
-                    <div className="flex justify-end items-end pb-[1.25rem]">
-                        <SeatbeltIndicator />
-                    </div>
-                )}
+                <VehicleContent isPilot={isPilot} />
             </div>
         </animated.div>
     );

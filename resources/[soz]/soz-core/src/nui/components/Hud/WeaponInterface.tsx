@@ -6,11 +6,24 @@ import { useSelector } from 'react-redux';
 import { useAssetPath } from '../../hook/assets';
 import { useAmmo, useHudHasStreetNames, useHudMinimap } from '../../hook/data';
 import { RootState } from '../../store';
-import { useHudLayout } from './hudLayoutState';
+import { layoutTransform, useHudLayout } from './hudLayoutState';
+
+export const AmmoContent: FunctionComponent<{ ammo: number; maxAmmo: number }> = ({ ammo, maxAmmo }) => {
+    const { getPath } = useAssetPath();
+
+    return (
+        <>
+            <div className="flex flex-col justify-center items-center tabular-nums h-11">
+                <span className="text-3xl leading-7">{ammo}</span>
+                <span className="text-xl leading-5 text-white/80 font-light">{maxAmmo}</span>
+            </div>
+            <img className="size-12 mb-1" src={getPath('images/hud/ammo.webp')} alt="ammo" />
+        </>
+    );
+};
 
 export const WeaponInterface: FunctionComponent = () => {
     const minimap = useHudMinimap();
-    const { getPath } = useAssetPath();
     const hasStreetNamesEnabled = useHudHasStreetNames();
     const switchPlayerStatsPosition = useSelector((state: RootState) => state.hud.settings.switchPlayerStatsPosition);
     const ammo = useAmmo();
@@ -38,13 +51,9 @@ export const WeaponInterface: FunctionComponent = () => {
                         (switchPlayerStatsPosition && hasStreetNamesEnabled)),
                 '-mt-28': !layout && switchPlayerStatsPosition && !hasStreetNamesEnabled,
             })}
-            style={ammoStyles}
+            style={{ ...ammoStyles, ...layoutTransform(layout, 'top right') }}
         >
-            <div className="flex flex-col justify-center items-center tabular-nums h-11">
-                <span className="text-3xl leading-7">{ammo?.ammo}</span>
-                <span className="text-xl leading-5 text-white/80 font-light">{ammo?.maxAmmo}</span>
-            </div>
-            <img className="size-12 mb-1" src={getPath('images/hud/ammo.webp')} alt="ammo" />
+            <AmmoContent ammo={ammo?.ammo} maxAmmo={ammo?.maxAmmo} />
         </animated.div>
     );
 };

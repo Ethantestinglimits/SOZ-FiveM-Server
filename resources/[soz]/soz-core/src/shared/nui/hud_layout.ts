@@ -8,9 +8,13 @@ export type HudElementId =
     | 'vehicle'
     | 'progress';
 
+export const HUD_SCALE_MIN = 0.5;
+export const HUD_SCALE_MAX = 2;
+
 export type HudPosition = {
     x: number;
     y: number;
+    scale?: number;
 };
 
 export type HudLayout = Partial<Record<HudElementId, HudPosition>>;
