@@ -1,12 +1,13 @@
 import { AdjustmentsIcon, CogIcon, LogoutIcon, MapIcon, PlayIcon } from '@heroicons/react/outline';
 import classNames from 'classnames';
-import { FunctionComponent, PropsWithChildren, ReactNode, useState } from 'react';
+import { FunctionComponent, PropsWithChildren, ReactNode, useEffect, useState } from 'react';
 
 import { NuiEvent } from '../../../shared/event';
 import { PauseMenuData } from '../../../shared/nui/pause_menu';
 import { fetchNui } from '../../fetch';
 import { useKeyPress } from '../../hook/control';
 import { useNuiEvent, useNuiFocus } from '../../hook/nui';
+import { minimapController, setMapTabActive, useMinimapMode } from '../Minimap/minimapState';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
 
 type PauseMenuTab = 'map' | 'settings';
@@ -107,6 +108,8 @@ export const PauseMenuApp: FunctionComponent = () => {
     const [data, setData] = useState<PauseMenuData | null>(null);
     const [tab, setTab] = useState<PauseMenuTab>('map');
     const [confirmQuit, setConfirmQuit] = useState(false);
+    const mode = useMinimapMode();
+    const showContent = mode === 'open';
 
     useNuiFocus(data !== null, data !== null, false);
 
@@ -117,7 +120,17 @@ export const PauseMenuApp: FunctionComponent = () => {
     });
     useNuiEvent('pause_menu', 'Close', () => setData(null));
 
-    const close = () => fetchNui(NuiEvent.PauseMenuClose);
+    useEffect(() => {
+        setMapTabActive(tab === 'map');
+    }, [tab]);
+
+    const close = () => {
+        setTab('map');
+
+        if (!minimapController.requestClose?.()) {
+            fetchNui(NuiEvent.PauseMenuClose);
+        }
+    };
 
     const changeTab = (direction: number) => {
         if (!data || confirmQuit) {
@@ -152,8 +165,18 @@ export const PauseMenuApp: FunctionComponent = () => {
     }
 
     return (
-        <div className="absolute inset-0 z-[60] flex select-none gap-[2vh] bg-gradient-to-b from-black/50 via-black/25 to-black/50 p-[3vh] font-prompt text-white">
-            <aside className="w-[17vw] shrink-0">
+        <div className="absolute inset-0 z-[60] flex select-none gap-[2vh] p-[3vh] font-prompt text-white">
+            <div
+                className={classNames(
+                    'absolute inset-0 bg-gradient-to-b from-black/50 via-black/25 to-black/50 transition-opacity duration-300',
+                    { 'opacity-0': mode === 'minimap' || mode === 'closing' }
+                )}
+            />
+            <aside
+                className={classNames('relative w-[17vw] shrink-0 transition-opacity duration-300', {
+                    'opacity-0 pointer-events-none': !showContent,
+                })}
+            >
                 <Glass className="flex h-full flex-col gap-[2vh] p-[2.5vh]">
                     <img src="assets/pause/soz_logo.webp" alt="SoZ" className="h-[4vh] w-auto self-start" />
 
@@ -203,12 +226,16 @@ export const PauseMenuApp: FunctionComponent = () => {
                     </div>
                 </Glass>
             </aside>
-            <main className="min-h-0 min-w-0 flex-1">
-                <Glass className="flex h-full items-center justify-center p-[3vh]">
-                    <span className="text-[1.8vh] text-white/50">
-                        {tab === 'map' ? 'Carte' : 'Paramètres'}
-                    </span>
-                </Glass>
+            <main
+                className={classNames('relative min-h-0 min-w-0 flex-1 transition-opacity duration-300', {
+                    'opacity-0 pointer-events-none': !showContent,
+                })}
+            >
+                {tab === 'settings' && (
+                    <Glass className="flex h-full items-center justify-center p-[3vh]">
+                        <span className="text-[1.8vh] text-white/50">Paramètres</span>
+                    </Glass>
+                )}
             </main>
             {confirmQuit && <QuitConfirm onCancel={() => setConfirmQuit(false)} />}
         </div>

@@ -1,12 +1,13 @@
+import { Once, OnceStep, OnNuiEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Tick, TickInterval } from '../../core/decorators/tick';
 import { BlipType } from '../../shared/blip';
+import { NuiEvent } from '../../shared/event';
 import { MinimapBlip, MinimapPoint, MinimapZone } from '../../shared/nui/minimap';
 import { BlipFactory } from '../blip';
 import { HudMinimapProvider } from '../hud/hud.minimap.provider';
 import { NuiDispatch } from '../nui/nui.dispatch';
-import { PauseMenuProvider } from './pause.menu.provider';
 
 const MAX_BLIP_SPRITE = 1000;
 const BLIP_SPRITES_PER_TICK = 100;
@@ -14,6 +15,7 @@ const WAYPOINT_BLIP_SPRITE = 8;
 const RADIUS_BLIP_SPRITES = [9, 10];
 const HIDDEN_BLIP_DISPLAYS = [0, 5];
 const FRAME_INTERVAL = 33;
+const ANIMATION_KVP = 'soz_pause_map_animation';
 const GPS_SLOTS = [0, 1];
 const ROUTE_BUDGET_MS = 3;
 const ROUTE_INTERVAL = 250;
@@ -43,9 +45,6 @@ export class PauseMinimapProvider {
     @Inject(BlipFactory)
     private blipFactory: BlipFactory;
 
-    @Inject(PauseMenuProvider)
-    private pauseMenuProvider: PauseMenuProvider;
-
     public frameInterval = FRAME_INTERVAL;
 
     private lastFrameAt = 0;
@@ -58,6 +57,34 @@ export class PauseMinimapProvider {
     private waypointSignature = '';
     private routeJob: RouteJob | null = null;
     private lastRouteStart = 0;
+
+    @Once(OnceStep.NuiLoaded)
+    public sendSettings(): void {
+        this.nuiDispatch.dispatch('minimap', 'Settings', { animation: this.isAnimationEnabled() });
+    }
+
+    public isAnimationEnabled(): boolean {
+        return GetResourceKvpString(ANIMATION_KVP) !== 'off';
+    }
+
+    public setAnimationEnabled(enabled: boolean): void {
+        SetResourceKvp(ANIMATION_KVP, enabled ? 'on' : 'off');
+        this.nuiDispatch.dispatch('minimap', 'Settings', { animation: enabled });
+    }
+
+    @OnNuiEvent(NuiEvent.MinimapSetWaypoint)
+    public async onSetWaypoint({ x, y }: MinimapPoint): Promise<void> {
+        SetNewWaypoint(x, y);
+        this.waypointSignature = '';
+        this.dispatchWaypoint();
+    }
+
+    @OnNuiEvent(NuiEvent.MinimapRemoveWaypoint)
+    public async onRemoveWaypoint(): Promise<void> {
+        SetWaypointOff();
+        this.waypointSignature = '';
+        this.dispatchWaypoint();
+    }
 
     @Tick(TickInterval.EVERY_FRAME)
     public onFrame(): void {
@@ -82,11 +109,7 @@ export class PauseMinimapProvider {
             camHeading,
             speed: GetEntitySpeed(entity),
             altitude: GetEntityHeightAboveGround(entity),
-            visible:
-                this.hudMinimapProvider.radarWanted &&
-                IsGameplayCamRendering() &&
-                !IsPauseMenuActive() &&
-                !this.pauseMenuProvider.isOpen(),
+            visible: this.hudMinimapProvider.radarWanted && IsGameplayCamRendering() && !IsPauseMenuActive(),
         });
     }
 
