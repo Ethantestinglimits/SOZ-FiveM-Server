@@ -1,6 +1,7 @@
 import { AdjustmentsIcon, CogIcon, LogoutIcon, MapIcon, PlayIcon } from '@heroicons/react/outline';
 import classNames from 'classnames';
 import { FunctionComponent, PropsWithChildren, ReactNode, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { NuiEvent } from '../../../shared/event';
 import { PauseMapLayer, PauseMenuData } from '../../../shared/nui/pause_menu';
@@ -80,7 +81,7 @@ const TabButton: FunctionComponent<{ label: string; icon: ReactNode; active: boo
 );
 
 const QuitConfirm: FunctionComponent<{ onCancel: () => void }> = ({ onCancel }) => (
-    <div className="absolute inset-0 z-[2000] flex items-center justify-center bg-black/50">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 font-prompt text-white">
         <div className="w-[26vw]">
             <Glass backgroundColor="#000000cc">
                 <div className="p-[3vh] text-center">
@@ -268,7 +269,7 @@ export const PauseMenuApp: FunctionComponent = () => {
                     )}
                 </FadeIn>
             )}
-            {confirmQuit && <QuitConfirm onCancel={() => setConfirmQuit(false)} />}
+            {confirmQuit && createPortal(<QuitConfirm onCancel={() => setConfirmQuit(false)} />, document.body)}
         </div>
     );
 };
