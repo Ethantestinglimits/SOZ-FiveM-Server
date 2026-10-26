@@ -1,4 +1,4 @@
-import { AdjustmentsIcon, CogIcon, LogoutIcon, MapIcon, PlayIcon } from '@heroicons/react/outline';
+import { AdjustmentsIcon, CogIcon, LogoutIcon, MapIcon, PlayIcon, XIcon } from '@heroicons/react/outline';
 import classNames from 'classnames';
 import { FunctionComponent, PropsWithChildren, ReactNode, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -199,16 +199,18 @@ export const PauseMenuApp: FunctionComponent = () => {
                     { 'opacity-0': mode === 'minimap' || mode === 'closing' },
                 )}
             />
-            {showContent && data.scriptMode && (
-                <div className="absolute right-[4vh] top-[4vh] z-[80]">
+            {showContent &&
+                data.scriptMode &&
+                createPortal(
                     <button
                         onClick={close}
-                        className="rounded-[1vh] bg-black/70 px-[2vh] py-[1vh] text-[1.5vh] font-semibold uppercase text-white transition-colors hover:bg-black/90"
+                        className="fixed right-[4vh] top-[4vh] z-[90] flex items-center gap-[0.8vh] rounded-[1vh] bg-black/75 px-[2vh] py-[1vh] font-prompt text-[1.5vh] font-semibold uppercase text-white shadow-lg transition-colors hover:bg-red-500/80"
                     >
+                        <XIcon className="h-[1.8vh] w-[1.8vh]" />
                         Fermer
-                    </button>
-                </div>
-            )}
+                    </button>,
+                    document.body
+                )}
             {showContent && !data.scriptMode && (
                 <FadeIn as="aside" className="relative w-[17vw] shrink-0">
                     <Glass className="flex h-full flex-col gap-[2vh] p-[2.5vh]">
