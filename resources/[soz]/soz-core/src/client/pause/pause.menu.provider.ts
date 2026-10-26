@@ -109,7 +109,10 @@ export class PauseMenuProvider {
         }
 
         this.opened = true;
-        this.blurService.add(BLUR_REASON, BLUR_DELAY);
+
+        if (!this.pauseMinimapProvider.isPotato()) {
+            this.blurService.add(BLUR_REASON, BLUR_DELAY);
+        }
 
         const job = this.jobService.getJob(player.job.id);
         const grade = this.jobGradeRepository.find(Number(player.job.grade));

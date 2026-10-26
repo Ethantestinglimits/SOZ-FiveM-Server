@@ -38,9 +38,9 @@ export type SettingCategory = {
     items: SettingItem[];
 };
 
-const FPS_OPTIONS = [30, 60, 90, 120, 144, 165, 240].map(value => ({ value, label: `${value} FPS` }));
+const FPS_OPTIONS = [30, 60, 90, 120, 144, 165, 240].map((value) => ({ value, label: `${value} FPS` }));
 
-const VIDEO_VOLUME_OPTIONS = [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map(value => ({
+const VIDEO_VOLUME_OPTIONS = [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((value) => ({
     value,
     label: `${value}%`,
 }));
@@ -62,7 +62,7 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
                 kind: 'toggle',
                 label: 'Mode économe (petit PC)',
                 description:
-                    'Fond noir à la place de la carte, sans animation, Minimap limitée à 30 FPS, glassmorphisme désactivé. Réduit fortement les calculs de rendu.',
+                    'Fond du menu noir à la place du flou, panneaux sans effet verre, sans animation, Minimap limitée à 30 FPS, glassmorphisme du HUD désactivé. Réduit fortement les calculs de rendu.',
                 default: false,
             },
             {
@@ -254,7 +254,7 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
                 kind: 'native',
                 convar: 'profile_invertMouse',
                 label: 'Inverser vue souris',
-                description: 'Inverse l\'axe vertical de la souris.',
+                description: "Inverse l'axe vertical de la souris.",
                 format: onOff,
             },
             {
