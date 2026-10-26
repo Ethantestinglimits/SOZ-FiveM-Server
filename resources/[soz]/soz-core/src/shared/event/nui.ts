@@ -851,4 +851,5 @@ export enum NuiEvent {
     PauseMenuResetSettings = 'soz-core:nui:pause-menu:reset-settings',
     MinimapSetWaypoint = 'soz-core:nui:minimap:set-waypoint',
     MinimapRemoveWaypoint = 'soz-core:nui:minimap:remove-waypoint',
+    MinimapBlipClick = 'soz-core:nui:minimap:blip-click',
 }

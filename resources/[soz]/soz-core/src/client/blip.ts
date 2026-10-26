@@ -77,6 +77,20 @@ export class BlipFactory {
         this.nuiDispatch.dispatch('blip', 'SetActions', nuiActions);
     }
 
+    public showActions(id: string): void {
+        const blip = this.blips.get(id);
+
+        if (!blip || !blip.actions) {
+            return;
+        }
+
+        this.nuiDispatch.dispatch(
+            'blip',
+            'SetActions',
+            blip.actions.map(action => ({ id: action.id, blipId: blip.id, label: action.label }))
+        );
+    }
+
     @OnNuiEvent(NuiEvent.BlipAction)
     public async onBlipAction({ blipId, id }: { blipId: string; id: string }) {
         const blip = this.blips.get(blipId);

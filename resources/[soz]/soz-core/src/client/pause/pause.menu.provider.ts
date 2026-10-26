@@ -12,6 +12,7 @@ import { NuiDispatch } from '../nui/nui.dispatch';
 import { PlayerService } from '../player/player.service';
 import { JobGradeRepository } from '../repository/job.grade.repository';
 import { BlurService } from '../utils/blur.service';
+import { PauseMinimapProvider } from './minimap.provider';
 import { PauseSettingsProvider } from './pause.settings.provider';
 
 const BLUR_REASON = 'pause_menu';
@@ -51,11 +52,15 @@ export class PauseMenuProvider {
     @Inject(PauseSettingsProvider)
     private pauseSettingsProvider: PauseSettingsProvider;
 
+    @Inject(PauseMinimapProvider)
+    private pauseMinimapProvider: PauseMinimapProvider;
+
     private opened = false;
     private lastNuiFocusAt = 0;
     private frontendRequestedAt: number | null = null;
     private frontendOpened = false;
     private regions: PauseMapRegion[] | null = null;
+    private closeWaiters: (() => void)[] = [];
 
     public isOpen(): boolean {
         return this.opened;
@@ -123,6 +128,21 @@ export class PauseMenuProvider {
         });
     }
 
+    public openMapForScript(): Promise<void> {
+        return new Promise(resolve => {
+            this.pauseMinimapProvider.scanNow();
+            this.open();
+
+            if (!this.opened) {
+                resolve();
+
+                return;
+            }
+
+            this.closeWaiters.push(resolve);
+        });
+    }
+
     public close(): void {
         this.frontendRequestedAt = null;
         this.frontendOpened = false;
@@ -130,6 +150,11 @@ export class PauseMenuProvider {
         if (!this.opened) {
             return;
         }
+
+        const waiters = this.closeWaiters;
+
+        this.closeWaiters = [];
+        waiters.forEach(resolve => resolve());
 
         this.opened = false;
         this.lastNuiFocusAt = GetGameTimer();

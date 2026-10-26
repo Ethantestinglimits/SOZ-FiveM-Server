@@ -31,7 +31,13 @@ export const MinimapApp: FunctionComponent = () => {
                     fetchNui(NuiEvent.PauseMenuClose);
                 }
             },
-            onClick: point => fetchNui(NuiEvent.MinimapSetWaypoint, point),
+            onClick: (point, blip) => {
+                if (blip?.id && blip.actions) {
+                    fetchNui(NuiEvent.MinimapBlipClick, { id: blip.id });
+                } else {
+                    fetchNui(NuiEvent.MinimapSetWaypoint, point);
+                }
+            },
             onRightClick: () => fetchNui(NuiEvent.MinimapRemoveWaypoint),
         });
 

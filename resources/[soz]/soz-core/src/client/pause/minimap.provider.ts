@@ -51,6 +51,7 @@ export class PauseMinimapProvider {
     private scanSprite = 0;
     private scanBlips: MinimapBlip[] = [];
     private scanExcluded = new Set<number>();
+    private knownBlips = new Map<number, { id: string; actions: boolean }>();
     private blipSignature = '';
     private zoneSignature = '';
     private routeSignature = '';
@@ -116,8 +117,7 @@ export class PauseMinimapProvider {
     @Tick(100)
     public onBlips(): void {
         if (this.scanSprite === 0) {
-            this.scanBlips = [];
-            this.scanExcluded = new Set([GetMainPlayerBlipId(), GetNorthRadarBlip()]);
+            this.startScan();
         }
 
         const end = Math.min(MAX_BLIP_SPRITE, this.scanSprite + BLIP_SPRITES_PER_TICK - 1);
@@ -131,15 +131,42 @@ export class PauseMinimapProvider {
         }
 
         this.scanSprite = 0;
+        this.publishBlips();
+        this.dispatchZones();
+    }
 
-        const signature = this.scanBlips.map(blip => `${blip.sprite}:${blip.color}:${blip.x}:${blip.y}`).join('|');
+    public scanNow(): void {
+        this.startScan();
+        this.scanBlipRange(0, MAX_BLIP_SPRITE);
+        this.scanSprite = 0;
+        this.publishBlips();
+        this.dispatchZones();
+    }
+
+    @OnNuiEvent(NuiEvent.MinimapBlipClick)
+    public async onBlipClick({ id }: { id: string }): Promise<void> {
+        this.blipFactory.showActions(id);
+    }
+
+    private startScan(): void {
+        this.scanBlips = [];
+        this.scanExcluded = new Set([GetMainPlayerBlipId(), GetNorthRadarBlip()]);
+        this.knownBlips = new Map();
+
+        for (const { id, gameId, actions } of this.blipFactory.getAll().values()) {
+            this.knownBlips.set(gameId, { id, actions: Boolean(actions?.length) });
+        }
+    }
+
+    private publishBlips(): void {
+        const signature = this.scanBlips
+            .map(blip => `${blip.id ?? ''}:${blip.sprite}:${blip.color}:${blip.x}:${blip.y}`)
+            .join('|');
 
         if (signature !== this.blipSignature) {
             this.blipSignature = signature;
             this.nuiDispatch.dispatch('minimap', 'Blips', this.scanBlips);
         }
-
-        this.dispatchZones();
     }
 
     @Tick(TickInterval.EVERY_FRAME)
@@ -281,8 +308,11 @@ export class PauseMinimapProvider {
                 }
 
                 const [x, y] = GetBlipCoords(handle);
+                const known = this.knownBlips.get(handle);
 
                 this.scanBlips.push({
+                    id: known?.id,
+                    actions: known?.actions,
                     x,
                     y,
                     sprite: GetBlipSprite(handle),
