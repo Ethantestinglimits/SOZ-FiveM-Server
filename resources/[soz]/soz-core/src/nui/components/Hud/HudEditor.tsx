@@ -220,7 +220,7 @@ export const HudEditor: FunctionComponent = () => {
         return clampPosition(
             element.anchor,
             measuredSize(element),
-            defaultPosition(element.id, element.id === 'minimap' ? rawMinimap : minimap, hasStreetNames)
+            defaultPosition(element.id, element.id === 'stats' ? minimap : rawMinimap, hasStreetNames)
         );
     };
 

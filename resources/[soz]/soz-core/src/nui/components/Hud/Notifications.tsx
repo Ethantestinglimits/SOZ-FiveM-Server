@@ -10,7 +10,7 @@ import { uuidv4 } from '../../../core/utils';
 import { AdvancedNotification, BasicNotification, TPoliceNotification } from '../../../shared/notification';
 import { useAssetPath } from '../../hook/assets';
 import { useNuiEvent } from '../../hook/nui';
-import { useHudMinimap } from '../../hook/data';
+import { useMinimap } from '../../hook/data';
 import { RootState } from '../../store';
 import { formatText } from '../../utils/gta-format';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
@@ -319,7 +319,7 @@ export const PoliceNotification: FunctionComponent<PoliceNotificationProps> = ({
 
 export const Notifications: FunctionComponent = () => {
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
-    const minimap = useHudMinimap();
+    const minimap = useMinimap();
     const policeLayout = useHudLayout().police;
     const settings = useSelector((state: RootState) => state.hud.settings);
     const showDateTime = useSelector((state: RootState) => state.hud.settings.showDateTime);

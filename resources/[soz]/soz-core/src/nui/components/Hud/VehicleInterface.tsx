@@ -3,7 +3,7 @@ import cn from 'classnames';
 import { FunctionComponent, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { useHudHasStreetNames, useHudMinimap, usePlayer } from '../../hook/data';
+import { useHudHasStreetNames, useMinimap, usePlayer } from '../../hook/data';
 import { RootState } from '../../store';
 import { FuelGauge } from './components/FuelGauge';
 import { LightIndicator } from './components/LightIndicator';
@@ -36,7 +36,7 @@ export const VehicleContent: FunctionComponent<{ isPilot: boolean }> = ({ isPilo
     );
 
 export const VehicleInterface: FunctionComponent = () => {
-    const minimap = useHudMinimap();
+    const minimap = useMinimap();
     const hasStreetNamesEnabled = useHudHasStreetNames();
     const layout = useHudLayout().vehicle;
 
