@@ -70,6 +70,7 @@ export class PauseNativeSettingsDriver {
         } finally {
             this.log(`fin success=${success}`);
             await this.closeAll();
+            this.log(`après fermeture : profil 300=${GetProfileSetting(300)} convar=${GetConvarInt(key, -1)}`);
             this.busy = false;
             this.nuiDispatch.dispatch('pause_menu', 'NativeBusy', false);
         }
@@ -99,13 +100,22 @@ export class PauseNativeSettingsDriver {
 
         this.log(`ligne atteinte ${this.state()}`);
 
+        const before = GetProfileSetting(300);
+
         for (let index = 0; index < route.max - route.min + 1; index++) {
             await this.press(Control.FrontendLeft);
+
+            if (index < 2) {
+                this.log(`gauche ${index} : ${this.state()}`);
+            }
         }
 
         for (let index = 0; index < value - route.min; index++) {
             await this.press(Control.FrontendRight);
+            this.log(`droite ${index} : ${this.state()}`);
         }
+
+        this.log(`profil 300 avant=${before} pendant=${GetProfileSetting(300)}`);
 
         await this.press(Control.FrontendCancel);
 
@@ -188,6 +198,7 @@ export class PauseNativeSettingsDriver {
             }
 
             await this.press(Control.FrontendDown);
+            this.log(`vers la ligne ${row} : ${this.state()}`);
         }
 
         return this.getRow() === row;
