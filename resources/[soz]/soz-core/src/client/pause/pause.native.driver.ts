@@ -161,20 +161,20 @@ export class PauseNativeSettingsDriver {
             return false;
         }
 
-        for (let attempt = 0; attempt < 3; attempt++) {
-            await wait(400);
-            await this.press(Control.FrontendAccept);
+        await wait(400);
+        await this.press(Control.FrontendAccept);
+        await wait(500);
 
-            const opened = await waitUntil(async () => this.getPage() === NATIVE_SETTINGS_PAGE, 1500);
+        this.log(`catégorie validée ${this.state()}`);
 
-            this.log(`validation de la catégorie, essai ${attempt} ${this.state()}`);
+        for (let attempt = 0; attempt < 3 && this.getPage() !== NATIVE_SETTINGS_PAGE; attempt++) {
+            await this.press(Control.FrontendDown);
+            await wait(300);
 
-            if (opened) {
-                return true;
-            }
+            this.log(`descente dans la page, essai ${attempt} ${this.state()}`);
         }
 
-        return false;
+        return this.getPage() === NATIVE_SETTINGS_PAGE;
     }
 
     private async goToRow(row: number): Promise<boolean> {
