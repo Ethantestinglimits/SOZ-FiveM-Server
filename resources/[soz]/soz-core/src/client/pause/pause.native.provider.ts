@@ -4,6 +4,7 @@ import { Provider } from '../../core/decorators/provider';
 import { NuiEvent } from '../../shared/event';
 import { isNativeSetting, NATIVE_SETTINGS, sanitizeNativeValue } from '../../shared/nui/native_settings';
 import { NuiDispatch } from '../nui/nui.dispatch';
+import { PauseMenuProvider } from './pause.menu.provider';
 
 const APPLY_COMMAND = 'soz_native_setting';
 const PENDING_TIMEOUT = 2000;
@@ -12,6 +13,9 @@ const PENDING_TIMEOUT = 2000;
 export class PauseNativeSettingsProvider {
     @Inject(NuiDispatch)
     private nuiDispatch: NuiDispatch;
+
+    @Inject(PauseMenuProvider)
+    private pauseMenuProvider: PauseMenuProvider;
 
     private pending: { changes: { key: string; value: number }[]; at: number } | null = null;
 
@@ -29,6 +33,10 @@ export class PauseNativeSettingsProvider {
 
     @OnNuiEvent(NuiEvent.PauseMenuQueueNative)
     public async onQueue({ changes }: { changes: { key: string; value: number }[] }): Promise<void> {
+        if (!this.pauseMenuProvider.isOpen()) {
+            return;
+        }
+
         const valid: { key: string; value: number }[] = [];
 
         for (const { key, value } of changes ?? []) {
@@ -49,11 +57,11 @@ export class PauseNativeSettingsProvider {
     private apply(): void {
         const pending = this.pending;
 
-        if (!pending || GetGameTimer() - pending.at > PENDING_TIMEOUT) {
+        this.pending = null;
+
+        if (!pending || !this.pauseMenuProvider.isOpen() || GetGameTimer() - pending.at > PENDING_TIMEOUT) {
             return;
         }
-
-        this.pending = null;
 
         for (const { key, value } of pending.changes) {
             ExecuteCommand(`${key} ${value}`);
