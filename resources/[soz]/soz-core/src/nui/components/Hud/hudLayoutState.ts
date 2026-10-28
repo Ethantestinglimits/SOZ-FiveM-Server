@@ -1,6 +1,6 @@
 import { CSSProperties, useEffect, useState } from 'react';
 
-import { HudLayout, HudPosition } from '../../../shared/nui/hud_layout';
+import { HudLayout, HudPosition, MinimapStyle } from '../../../shared/nui/hud_layout';
 
 let layout: HudLayout = {};
 const listeners = new Set<(layout: HudLayout) => void>();
@@ -21,25 +21,58 @@ export const layoutTransform = (position: HudPosition | undefined, origin: strin
     return scale ? { transform, transformOrigin: origin } : { transform };
 };
 
-export const shiftMinimap =<T extends { left: number; right: number; top: number; bottom: number; X: number; Y: number }>(
+type MinimapBox = {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+    width: number;
+    height: number;
+    X: number;
+    Y: number;
+};
+
+export const applyMinimapLayout = <T extends MinimapBox>(
     minimap: T,
-    group?: HudPosition
+    group?: HudPosition,
+    style?: MinimapStyle
 ): T => {
-    if (!group) {
+    const shape = style?.shape ?? 'rectangle';
+
+    if (!group && shape === 'rectangle') {
         return minimap;
     }
 
-    const dx = group.x / 100 - minimap.left;
-    const dy = group.y / 100 - minimap.bottom;
+    let width = minimap.width;
+    let height = minimap.height;
+
+    if (shape !== 'rectangle' && width > 0 && height > 0) {
+        const side = Math.min(width * window.innerWidth, height * window.innerHeight);
+
+        width = side / window.innerWidth;
+        height = side / window.innerHeight;
+    }
+
+    const scale = group?.scale ?? 1;
+
+    width *= scale;
+    height *= scale;
+
+    const left = group ? group.x / 100 : minimap.left;
+    const bottom = group ? group.y / 100 : minimap.bottom;
+    const widthRatio = minimap.width > 0 ? width / minimap.width : 1;
+    const heightRatio = minimap.height > 0 ? height / minimap.height : 1;
 
     return {
         ...minimap,
-        left: minimap.left + dx,
-        right: minimap.right + dx,
-        X: minimap.X + dx,
-        top: minimap.top + dy,
-        bottom: minimap.bottom + dy,
-        Y: minimap.Y + dy,
+        left,
+        right: left + width,
+        top: bottom - height,
+        bottom,
+        width,
+        height,
+        X: left + (minimap.X - minimap.left) * widthRatio,
+        Y: bottom + (minimap.Y - minimap.bottom) * heightRatio,
     };
 };
 

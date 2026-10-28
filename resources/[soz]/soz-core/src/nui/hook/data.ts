@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { PlayerData, PlayerMetadata } from '../../shared/player';
-import { shiftMinimap, useHudLayout } from '../components/Hud/hudLayoutState';
+import { applyMinimapLayout, useHudLayout } from '../components/Hud/hudLayoutState';
 import { RootState } from '../store';
 
 export const usePlayer = (): PlayerData | null => {
@@ -74,7 +74,10 @@ export const useHudMinimap = (): HudState['minimap'] => {
     const minimap = useMinimap();
     const layout = useHudLayout();
 
-    return shiftMinimap(minimap, layout.minimap);
+    return useMemo(
+        () => applyMinimapLayout(minimap, layout.minimap, layout.minimapStyle),
+        [minimap, layout.minimap, layout.minimapStyle]
+    );
 };
 
 export const useAmmo = (): HudState['ammo'] => {

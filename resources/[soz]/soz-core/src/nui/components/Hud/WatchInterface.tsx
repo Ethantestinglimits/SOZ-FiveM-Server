@@ -4,6 +4,7 @@ import { FunctionComponent, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { VoiceMode } from '../../../shared/hud';
+import { DEFAULT_MINIMAP_STYLE } from '../../../shared/nui/hud_layout';
 import { useHudHasStreetNames, useHudMinimap } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
@@ -26,6 +27,9 @@ export const WatchInterface: FunctionComponent = () => {
     const minimap = useHudMinimap();
     const layout = useHudLayout();
     const statsLayout = layout.stats;
+    const minimapStyle = layout.minimapStyle ?? DEFAULT_MINIMAP_STYLE;
+    const frameVisible =
+        minimapStyle.frame === 'visible' || (minimapStyle.frame === 'auto' && minimapStyle.shape === 'rectangle');
 
     const hasStreetNamesEnabled = useHudHasStreetNames();
     const minimapMode = useMinimapMode();
@@ -132,7 +136,7 @@ export const WatchInterface: FunctionComponent = () => {
                 </LayoutBlock>
             )}
 
-            {hasWatch && !minimap.isHidden && minimapMode === 'minimap' && (
+            {hasWatch && !minimap.isHidden && minimapMode === 'minimap' && frameVisible && (
                 <GlassMorphismBox
                     className="rounded-lg"
                     style={{
