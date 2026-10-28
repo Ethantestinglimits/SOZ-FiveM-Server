@@ -2,8 +2,10 @@ import { FunctionComponent, useEffect, useRef } from 'react';
 
 import { NuiEvent } from '../../../shared/event';
 import { fetchNui } from '../../fetch';
+import { DEFAULT_MINIMAP_STYLE } from '../../../shared/nui/hud_layout';
 import { useHudMinimap } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
+import { useHudLayout } from '../Hud/hudLayoutState';
 import { MinimapRenderer } from './minimapRenderer';
 import { isMapTabActive, minimapController, setBlipAnchor } from './minimapState';
 
@@ -24,6 +26,7 @@ export const MinimapApp: FunctionComponent = () => {
     const ratioRef = useRef(DEFAULT_RATIO);
     const scriptModeRef = useRef(false);
     const minimap = useHudMinimap();
+    const style = useHudLayout().minimapStyle ?? DEFAULT_MINIMAP_STYLE;
 
     useEffect(() => {
         const renderer = new MinimapRenderer(canvasRef.current, {
@@ -76,12 +79,23 @@ export const MinimapApp: FunctionComponent = () => {
 
             const height = minimap.isHidden ? width * ratioRef.current : minimap.height * vh;
 
-            renderer.minimapRect = {
+            const rect = {
                 x: (minimap.left + OFFSET_X) * vw,
                 y: minimap.bottom * vh - height + OFFSET_Y * vh,
                 w: width + OFFSET_WIDTH * vw,
                 h: height + OFFSET_HEIGHT * vh,
             };
+
+            if (style.shape !== 'rectangle') {
+                const side = Math.min(rect.w, rect.h);
+
+                rect.y += rect.h - side;
+                rect.w = side;
+                rect.h = side;
+            }
+
+            renderer.style = style;
+            renderer.minimapRect = rect;
 
             const margin = (PANEL_MARGIN_VH * vh) / 100;
             const x = scriptModeRef.current
@@ -95,7 +109,7 @@ export const MinimapApp: FunctionComponent = () => {
         window.addEventListener('resize', update);
 
         return () => window.removeEventListener('resize', update);
-    }, [minimap]);
+    }, [minimap, style]);
 
     useNuiEvent('minimap', 'Frame', (frame) => rendererRef.current?.setFrame(frame));
     useNuiEvent('minimap', 'Blips', (blips) => rendererRef.current?.setBlips(blips));

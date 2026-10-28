@@ -29,6 +29,14 @@ export const setMinimapMode = (next: MinimapMode): void => {
 
 export const getMinimapMode = (): MinimapMode => mode;
 
+let editing = false;
+
+export const setMinimapEditing = (value: boolean): void => {
+    editing = value;
+};
+
+export const isMinimapEditing = (): boolean => editing;
+
 export const setMapTabActive = (value: boolean): void => {
     mapTabActive = value;
 };

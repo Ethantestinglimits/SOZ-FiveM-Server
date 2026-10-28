@@ -1,9 +1,18 @@
 import classNames from 'classnames';
-import { CSSProperties, FunctionComponent, PointerEvent as ReactPointerEvent, useRef, useState } from 'react';
+import {
+    CSSProperties,
+    FunctionComponent,
+    PointerEvent as ReactPointerEvent,
+    useEffect,
+    useRef,
+    useState,
+} from 'react';
+import { useSelector } from 'react-redux';
 
 import { NuiEvent } from '../../../shared/event';
 import { HudSettings, Minimap } from '../../../shared/hud';
 import {
+    DEFAULT_MINIMAP_STYLE,
     HUD_ELEMENTS,
     HUD_SCALE_MAX,
     HUD_SCALE_MIN,
@@ -12,16 +21,18 @@ import {
     HudElementId,
     HudLayout,
     HudPosition,
+    MinimapStyle,
 } from '../../../shared/nui/hud_layout';
 import { fetchNui } from '../../fetch';
 import { useKeyPress } from '../../hook/control';
-import { useSelector } from 'react-redux';
-
 import { useHudHasStreetNames, useMinimap } from '../../hook/data';
 import { useNuiEvent, useNuiFocus } from '../../hook/nui';
 import { RootState } from '../../store';
+import { MINIMAP_RADIUS } from '../Minimap/minimapRenderer';
+import { setMinimapEditing } from '../Minimap/minimapState';
 import { HudPreview } from './HudPreview';
-import { setHudLayout, shiftMinimap } from './hudLayoutState';
+import { applyMinimapLayout, setHudLayout } from './hudLayoutState';
+import { MinimapStylePanel } from './MinimapStylePanel';
 
 const SNAP = 1;
 const FOLLOWERS: HudElementId[] = ['stats', 'datetime', 'weather', 'street', 'compass', 'voice', 'injuries'];
@@ -195,20 +206,38 @@ export const HudEditor: FunctionComponent = () => {
     const [draft, setDraft] = useState<HudLayout>({});
     const [selected, setSelected] = useState<HudElementId | null>(null);
     const [hovered, setHovered] = useState<HudElementId | null>(null);
-    const minimap = shiftMinimap(rawMinimap, draft.minimap);
+    const minimapStyle = draft.minimapStyle ?? DEFAULT_MINIMAP_STYLE;
+    const minimap = applyMinimapLayout(rawMinimap, draft.minimap, draft.minimapStyle);
+    const savedLayout = useRef<HudLayout>({});
 
     const blocks = useRef<Partial<Record<HudElementId, HTMLDivElement | null>>>({});
     const drag = useRef<DragState | null>(null);
 
     useNuiFocus(open, open, false);
 
+    useEffect(() => {
+        setMinimapEditing(open);
+
+        return () => setMinimapEditing(false);
+    }, [open]);
+
+    useEffect(() => {
+        if (open) {
+            setHudLayout(draft);
+        }
+    }, [draft, open]);
+
     useNuiEvent('hud_layout', 'OpenEditor', (layout) => {
+        savedLayout.current = layout;
         setDraft(layout);
         setSelected(null);
         setOpen(true);
     });
 
-    const cancel = () => setOpen(false);
+    const cancel = () => {
+        setHudLayout(savedLayout.current);
+        setOpen(false);
+    };
 
     const save = () => {
         fetchNui(NuiEvent.HudLayoutSave, draft);
@@ -228,10 +257,23 @@ export const HudEditor: FunctionComponent = () => {
         }
     });
 
+    const shapedMinimap = applyMinimapLayout(rawMinimap, undefined, draft.minimapStyle);
+
     const fixedSize = (element: HudElementDefinition): Size =>
         element.id === 'minimap'
-            ? { width: rawMinimap.width * 100 || element.width, height: rawMinimap.height * 100 || element.height }
+            ? {
+                  width: shapedMinimap.width * 100 || element.width,
+                  height: shapedMinimap.height * 100 || element.height,
+              }
             : { width: element.width, height: element.height };
+
+    const minSidePx = Math.min(shapedMinimap.width * window.innerWidth, shapedMinimap.height * window.innerHeight);
+    const ghostRadius =
+        minimapStyle.shape === 'circle'
+            ? minSidePx / 2
+            : minimapStyle.radius === undefined
+              ? MINIMAP_RADIUS
+              : (minSidePx * minimapStyle.radius) / 100;
 
     const measuredSize = (element: HudElementDefinition): Size => {
         const node = blocks.current[element.id];
@@ -359,32 +401,6 @@ export const HudEditor: FunctionComponent = () => {
                 const moved = Boolean(draft[element.id]);
                 const active = selected === element.id || hovered === element.id;
 
-                if (element.id === 'minimap') {
-                    const box = boxFor(element.anchor, fixedSize(element), position);
-                    const size = fixedSize(element);
-
-                    return (
-                        <div
-                            key={element.id}
-                            onPointerDown={onMoveStart(element)}
-                            onPointerMove={onPointerMove(element)}
-                            onPointerUp={onPointerUp}
-                            className={classNames(
-                                'absolute flex cursor-move items-center justify-center rounded-[1vh] border-2 border-dashed text-[1.6vh] font-semibold',
-                                moved ? 'border-emerald-400 bg-emerald-400/20' : 'border-white/60 bg-white/10',
-                            )}
-                            style={{
-                                left: `${box.left}vw`,
-                                top: `${box.top}vh`,
-                                width: `${size.width}vw`,
-                                height: `${size.height}vh`,
-                            }}
-                        >
-                            {element.label}
-                        </div>
-                    );
-                }
-
                 return (
                     <div
                         key={element.id}
@@ -400,7 +416,17 @@ export const HudEditor: FunctionComponent = () => {
                         style={blockStyle(element.anchor, position)}
                     >
                         <div className="pointer-events-none">
-                            <HudPreview id={element.id} />
+                            {element.id === 'minimap' ? (
+                                <div
+                                    style={{
+                                        width: `${fixedSize(element).width}vw`,
+                                        height: `${fixedSize(element).height}vh`,
+                                        borderRadius: `${ghostRadius}px`,
+                                    }}
+                                />
+                            ) : (
+                                <HudPreview id={element.id} />
+                            )}
                         </div>
 
                         {active && (
@@ -410,7 +436,10 @@ export const HudEditor: FunctionComponent = () => {
                                         'border-emerald-400': moved,
                                         'border-white/80': !moved,
                                     })}
-                                    style={{ borderWidth: `${OUTLINE_WIDTH / scale}px` }}
+                                    style={{
+                                        borderWidth: `${OUTLINE_WIDTH / scale}px`,
+                                        borderRadius: element.id === 'minimap' ? `${ghostRadius}px` : undefined,
+                                    }}
                                 />
                                 <div
                                     className="pointer-events-none absolute left-0 top-0 whitespace-nowrap rounded-br bg-black/80 px-[0.8vh] py-[0.3vh] text-[1.4vh] font-semibold"
@@ -444,6 +473,21 @@ export const HudEditor: FunctionComponent = () => {
                     </div>
                 );
             })}
+
+            {selected === 'minimap' && (
+                <MinimapStylePanel
+                    style={minimapStyle}
+                    defaultRadius={Math.round((MINIMAP_RADIUS / Math.max(1, minSidePx)) * 100)}
+                    onChange={(next: MinimapStyle) => setDraft((current) => ({ ...current, minimapStyle: next }))}
+                    onReset={() =>
+                        setDraft((current) => {
+                            const { minimapStyle: _removed, ...rest } = current;
+
+                            return rest;
+                        })
+                    }
+                />
+            )}
 
             <div className="absolute bottom-[10vh] left-1/2 flex -translate-x-1/2 items-center gap-[1.4vh] rounded-[1.2vh] bg-black/80 px-[2vh] py-[1.2vh]">
                 <span className="text-[1.5vh] text-white/70">

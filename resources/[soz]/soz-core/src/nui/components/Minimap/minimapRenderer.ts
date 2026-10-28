@@ -6,9 +6,10 @@ import {
     MinimapPoint,
     MinimapZone,
 } from '../../../shared/nui/minimap';
+import { DEFAULT_MINIMAP_STYLE, MinimapStyle } from '../../../shared/nui/hud_layout';
 import { PauseMapLayer, PauseMapRegion } from '../../../shared/nui/pause_menu';
 import { getBlipColor, UNTINTED_BLIP_COLORS } from './blipColors';
-import { isMapTabActive, MinimapMode, setMinimapMode } from './minimapState';
+import { isMapTabActive, isMinimapEditing, MinimapMode, setMinimapMode } from './minimapState';
 
 const MAP_URL = 'https://cfx-nui-soz-map-tiles/map';
 const BLIP_URL = 'https://cfx-nui-soz-map-tiles/blips';
@@ -32,7 +33,7 @@ const SPEED_RANGE = 9;
 const ALTITUDE_RANGE = 2.5;
 const MAX_RANGE = 2600;
 const SEA_COLOR = '#4f86a8';
-const MINIMAP_RADIUS = 12;
+export const MINIMAP_RADIUS = 12;
 const PANEL_RADIUS = 16;
 const PRESENCE_RATE = 10;
 const RANGE_RATE = 2;
@@ -148,6 +149,7 @@ export class MinimapRenderer {
     public transitionEnabled = true;
     public fpsLimit = 60;
     public orientation: MinimapOrientation = 'camera';
+    public style: MinimapStyle = DEFAULT_MINIMAP_STYLE;
     private lastRenderedAt = 0;
     private instant = false;
     public blips: MinimapBlip[] = [];
@@ -535,11 +537,16 @@ export class MinimapRenderer {
         style.top = `${rect.y}px`;
         style.width = `${rect.w}px`;
         style.height = `${rect.h}px`;
-        style.zIndex = this.mode === 'minimap' ? '5' : '70';
+        style.zIndex = isMinimapEditing() ? '210' : this.mode === 'minimap' ? '5' : '70';
         style.pointerEvents = this.mode === 'open' ? 'auto' : 'none';
-        style.borderRadius = `${lerp(MINIMAP_RADIUS, PANEL_RADIUS, this.openness)}px`;
-        style.boxShadow =
+        style.borderRadius = `${lerp(this.getMinimapRadius(), PANEL_RADIUS, this.openness)}px`;
+
+        const shadow =
             this.mode === 'minimap' || this.mode === 'open' ? '0 10px 15px -3px rgba(0, 0, 0, 0.3)' : 'none';
+        const border = this.style.borderWidth * (1 - this.openness);
+
+        style.boxShadow =
+            border > 0.05 ? `0 0 0 ${border}px ${this.style.borderColor}${shadow === 'none' ? '' : `, ${shadow}`}` : shadow;
 
         if (this.canvas.width !== width || this.canvas.height !== height) {
             this.canvas.width = width;
@@ -553,10 +560,13 @@ export class MinimapRenderer {
         const sy = height / rect.h;
 
         ctx.setTransform(sx, 0, 0, sy, 0, 0);
+        ctx.clearRect(0, 0, rect.w, rect.h);
+        ctx.globalAlpha = lerp(this.style.opacity / 100, 1, this.openness);
         ctx.fillStyle = SEA_COLOR;
         ctx.fillRect(0, 0, rect.w, rect.h);
 
         this.drawMap(sx, offsets);
+        ctx.globalAlpha = 1;
 
         const showBlips = this.mode === 'minimap' || this.layers.includes('blips');
 
@@ -601,6 +611,16 @@ export class MinimapRenderer {
                 }
             }
         }
+    }
+
+    private getMinimapRadius(): number {
+        const side = Math.min(this.minimapRect.w, this.minimapRect.h);
+
+        if (this.style.shape === 'circle') {
+            return side / 2;
+        }
+
+        return this.style.radius === undefined ? MINIMAP_RADIUS : (side * this.style.radius) / 100;
     }
 
     private drawMap(dpr: number, offsets: number[]): void {
