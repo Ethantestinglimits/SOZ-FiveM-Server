@@ -54,6 +54,18 @@ const CORNERS = [
     { id: 'bottom-right', left: '100%', top: '100%' },
 ];
 
+const MINIMAP_RATIO = 4 / 5.674;
+
+const visibleMinimap = (minimap: Minimap): Minimap => {
+    if (!minimap.isHidden) {
+        return minimap;
+    }
+
+    const height = (minimap.width * window.innerWidth * MINIMAP_RATIO) / window.innerHeight;
+
+    return { ...minimap, height, top: minimap.bottom - height, Y: minimap.bottom - height / 2 };
+};
+
 const snap = (value: number) => Math.round(value / SNAP) * SNAP;
 
 const clampScale = (value: number) => Math.round(Math.min(HUD_SCALE_MAX, Math.max(HUD_SCALE_MIN, value)) * 100) / 100;
@@ -198,7 +210,7 @@ type DragState =
       };
 
 export const HudEditor: FunctionComponent = () => {
-    const rawMinimap = useMinimap();
+    const rawMinimap = visibleMinimap(useMinimap());
     const hasStreetNames = useHudHasStreetNames();
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
     const watchSettings = useSelector((state: RootState) => state.hud.settings);
