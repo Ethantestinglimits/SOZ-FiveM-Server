@@ -1005,7 +1005,6 @@ export class MinimapRenderer {
             this.target = null;
             this.highlight = null;
             this.highlightLabel = null;
-            this.highlightLabel = null;
         }
 
         this.panel.x = wrap(this.drag.x - dx / this.panel.scale, WORLD_MIN_X, WORLD_WIDTH);
