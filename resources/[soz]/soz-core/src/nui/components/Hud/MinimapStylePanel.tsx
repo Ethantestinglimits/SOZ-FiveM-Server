@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import { FunctionComponent, ReactNode } from 'react';
+import { FunctionComponent, PointerEvent as ReactPointerEvent, ReactNode, useRef, useState } from 'react';
 
 import {
     DEFAULT_MINIMAP_STYLE,
@@ -22,6 +22,8 @@ const FRAMES: { id: MinimapFrameMode; label: string }[] = [
     { id: 'visible', label: 'Visible' },
     { id: 'hidden', label: 'Masqué' },
 ];
+
+let lastPosition: { x: number; y: number } | null = null;
 
 const COLORS = ['#ffffff', '#3b82f6', '#22c55e', '#ef4444', '#f59e0b', '#a855f7'];
 
@@ -90,15 +92,54 @@ export const MinimapStylePanel: FunctionComponent<MinimapStylePanelProps> = ({
     onChange,
     onReset,
 }) => {
+    const [position, setPosition] = useState(
+        () => lastPosition ?? { x: window.innerHeight * 0.02, y: window.innerHeight * 0.03 },
+    );
+    const panel = useRef<HTMLDivElement>(null);
+    const drag = useRef<{ startX: number; startY: number; x: number; y: number } | null>(null);
+
+    const startDrag = (event: ReactPointerEvent) => {
+        event.currentTarget.setPointerCapture(event.pointerId);
+        drag.current = { startX: event.clientX, startY: event.clientY, x: position.x, y: position.y };
+    };
+
+    const moveDrag = (event: ReactPointerEvent) => {
+        const state = drag.current;
+        const box = panel.current?.getBoundingClientRect();
+
+        if (!state || !box) {
+            return;
+        }
+
+        const next = {
+            x: Math.min(window.innerWidth - box.width, Math.max(0, state.x + event.clientX - state.startX)),
+            y: Math.min(window.innerHeight - box.height, Math.max(0, state.y + event.clientY - state.startY)),
+        };
+
+        lastPosition = next;
+        setPosition(next);
+    };
+
     const change = (patch: Partial<MinimapStyle>) => onChange({ ...style, ...patch });
     const radius = style.radius ?? defaultRadius;
 
     return (
         <div
+            ref={panel}
             onPointerDown={(event) => event.stopPropagation()}
-            className="absolute left-[2vh] top-[3vh] flex w-[34vh] flex-col gap-[1.2vh] rounded-[1.2vh] bg-black/85 p-[1.6vh]"
+            className="absolute flex w-[34vh] flex-col gap-[1.2vh] rounded-[1.2vh] bg-black/85 p-[1.6vh]"
+            style={{ left: `${position.x}px`, top: `${position.y}px` }}
         >
-            <div className="text-[1.3vh] font-semibold uppercase tracking-[0.2em] text-white/50">Minimap</div>
+            <div
+                onPointerDown={startDrag}
+                onPointerMove={moveDrag}
+                onPointerUp={() => {
+                    drag.current = null;
+                }}
+                className="-m-[0.4vh] cursor-move rounded-[0.8vh] p-[0.4vh] text-[1.3vh] font-semibold uppercase tracking-[0.2em] text-white/50 hover:bg-white/10"
+            >
+                Minimap · glisser pour déplacer
+            </div>
 
             <Row label="Forme">
                 <Segmented
