@@ -348,7 +348,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                             pendingChanges.length > 0 &&
                             fetchNui(NuiEvent.PauseMenuQueueNative, { changes: pendingChanges })
                         }
-                        className="rounded-[1vh] bg-emerald-500/80 px-[1.8vh] py-[0.9vh] text-[1.4vh] font-semibold uppercase transition-colors hover:bg-emerald-500 disabled:cursor-default disabled:bg-white/10 disabled:text-white/40"
+                        className="rounded-[1vh] bg-white px-[1.8vh] py-[0.9vh] text-[1.4vh] font-semibold uppercase text-black transition-colors hover:bg-white/80 disabled:cursor-default disabled:bg-white/10 disabled:text-white/40 disabled:hover:bg-white/10"
                     >
                         Appliquer les changements
                         {pendingChanges.length > 0 && ` (${pendingChanges.length})`}

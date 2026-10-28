@@ -507,7 +507,7 @@ export const HudEditor: FunctionComponent = () => {
                 </button>
                 <button
                     onClick={save}
-                    className="rounded-[0.8vh] bg-lime-500 px-[1.6vh] py-[0.6vh] text-[1.4vh] font-semibold text-black hover:bg-lime-400"
+                    className="rounded-[0.8vh] bg-white px-[1.6vh] py-[0.6vh] text-[1.4vh] font-semibold text-black hover:bg-white/80"
                 >
                     Valider
                 </button>
