@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 
 import { useMinimap } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
+import { screenWidthToPx } from '../../utils/screenFrame';
 import { MinimapRenderer } from './minimapRenderer';
 import { minimapController } from './minimapState';
 import { useMinimapStyle } from './minimapStyleState';
@@ -16,7 +17,7 @@ export const MinimapPreview: FunctionComponent = () => {
     const minimap = useMinimap();
     const style = useMinimapStyle();
 
-    const width = minimap.width * window.innerWidth;
+    const width = screenWidthToPx(minimap.width);
     const height = minimap.isHidden || minimap.height <= 0 ? width * DEFAULT_RATIO : minimap.height * window.innerHeight;
     const side = Math.min(width, height);
     const size = style.shape === 'rectangle' ? { width, height } : { width: side, height: side };

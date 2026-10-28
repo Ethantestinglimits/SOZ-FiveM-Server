@@ -83,7 +83,7 @@ const TabButton: FunctionComponent<{ label: string; icon: ReactNode; active: boo
 
 const QuitConfirm: FunctionComponent<{ onCancel: () => void }> = ({ onCancel }) => (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 font-prompt text-white">
-        <div className="w-[26vw]">
+        <div className="w-[46vh]">
             <Glass backgroundColor="#000000cc">
                 <div className="p-[3vh] text-center">
                     <div className="text-[2.6vh] font-semibold uppercase">Quitter SoZ ?</div>
@@ -215,7 +215,7 @@ export const PauseMenuApp: FunctionComponent = () => {
     }
 
     return (
-        <div className="absolute inset-0 z-[60] flex select-none gap-[2vh] p-[3vh] font-prompt text-white">
+        <div className="absolute inset-0 z-[60] select-none font-prompt text-white">
             <div
                 className={classNames('absolute inset-0 transition-opacity duration-300', {
                     'bg-gradient-to-b from-black/50 via-black/25 to-black/50': !data.settings.server.potato,
@@ -228,87 +228,94 @@ export const PauseMenuApp: FunctionComponent = () => {
                 createPortal(
                     <button
                         onClick={close}
-                        className="fixed right-[4vh] top-[4vh] z-[90] flex items-center gap-[0.8vh] rounded-[1vh] bg-black/75 px-[2vh] py-[1vh] font-prompt text-[1.5vh] font-semibold uppercase text-white shadow-lg transition-colors hover:bg-red-500/80"
+                        style={{ right: 'max(4vh, calc(50% - 88.89vh + 4vh))' }}
+                        className="fixed top-[4vh] z-[90] flex items-center gap-[0.8vh] rounded-[1vh] bg-black/75 px-[2vh] py-[1vh] font-prompt text-[1.5vh] font-semibold uppercase text-white shadow-lg transition-colors hover:bg-red-500/80"
                     >
                         <XIcon className="h-[1.8vh] w-[1.8vh]" />
                         Fermer
                     </button>,
                     document.body,
                 )}
-            {showContent && !data.scriptMode && (
-                <FadeIn as="aside" className="relative w-[17vw] shrink-0" instant={!data.settings.server.mapAnimation}>
-                    <Glass className="flex h-full flex-col gap-[2vh] p-[2.5vh]">
-                        <img src="assets/pause/soz_logo.webp" alt="SoZ" className="h-[4vh] w-auto self-start" />
+            <div className="absolute inset-0 mx-auto flex max-w-[177.78vh] gap-[2vh] p-[3vh]">
+                {showContent && !data.scriptMode && (
+                    <FadeIn
+                        as="aside"
+                        className="relative w-[30vh] shrink-0"
+                        instant={!data.settings.server.mapAnimation}
+                    >
+                        <Glass className="flex h-full flex-col gap-[2vh] p-[2.5vh]">
+                            <img src="assets/pause/soz_logo.webp" alt="SoZ" className="h-[4vh] w-auto self-start" />
 
-                        <div className="flex flex-col gap-[0.4vh]">
-                            <div className="flex items-baseline justify-between gap-[1vh]">
-                                <span className="truncate text-[2vh] font-bold leading-tight">
-                                    {data.firstname} {data.lastname}
-                                </span>
-                                <span className="shrink-0 text-[1.3vh] text-white/50">#{data.serverId}</span>
+                            <div className="flex flex-col gap-[0.4vh]">
+                                <div className="flex items-baseline justify-between gap-[1vh]">
+                                    <span className="truncate text-[2vh] font-bold leading-tight">
+                                        {data.firstname} {data.lastname}
+                                    </span>
+                                    <span className="shrink-0 text-[1.3vh] text-white/50">#{data.serverId}</span>
+                                </div>
+                                <div className="flex items-center gap-[0.8vh] text-[1.4vh] text-white/70">
+                                    <span
+                                        className={classNames('h-[0.8vh] w-[0.8vh] shrink-0 rounded-full', {
+                                            'bg-emerald-400': data.onDuty,
+                                            'bg-white/30': !data.onDuty,
+                                        })}
+                                    />
+                                    <span className="truncate">
+                                        {data.job ?? 'Sans emploi'}
+                                        {data.grade && ` · ${data.grade}`}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-[0.8vh] text-[1.4vh] text-white/70">
-                                <span
-                                    className={classNames('h-[0.8vh] w-[0.8vh] shrink-0 rounded-full', {
-                                        'bg-emerald-400': data.onDuty,
-                                        'bg-white/30': !data.onDuty,
-                                    })}
-                                />
-                                <span className="truncate">
-                                    {data.job ?? 'Sans emploi'}
-                                    {data.grade && ` · ${data.grade}`}
-                                </span>
+
+                            <div className="flex gap-[0.8vh]">
+                                {TABS.map((item) => (
+                                    <TabButton
+                                        key={item.id}
+                                        label={item.label}
+                                        icon={item.icon}
+                                        active={tab === item.id}
+                                        onClick={() => setTab(item.id)}
+                                    />
+                                ))}
                             </div>
-                        </div>
 
-                        <div className="flex gap-[0.8vh]">
-                            {TABS.map((item) => (
-                                <TabButton
-                                    key={item.id}
-                                    label={item.label}
-                                    icon={item.icon}
-                                    active={tab === item.id}
-                                    onClick={() => setTab(item.id)}
+                            {tab === 'map' ? (
+                                <MapSidebar data={data} layers={layers} onLayersChange={setLayers} />
+                            ) : (
+                                <SettingsSidebar category={settingsCategory} onCategoryChange={setSettingsCategory} />
+                            )}
+
+                            <div className="flex flex-col gap-[0.8vh]">
+                                <SideButton label="Reprendre" icon={<PlayIcon />} onClick={close} />
+                                <SideButton
+                                    label="Menu du jeu"
+                                    icon={<CogIcon />}
+                                    onClick={() => fetchNui(NuiEvent.PauseMenuOpenNative)}
                                 />
-                            ))}
-                        </div>
-
-                        {tab === 'map' ? (
-                            <MapSidebar data={data} layers={layers} onLayersChange={setLayers} />
-                        ) : (
-                            <SettingsSidebar category={settingsCategory} onCategoryChange={setSettingsCategory} />
-                        )}
-
-                        <div className="flex flex-col gap-[0.8vh]">
-                            <SideButton label="Reprendre" icon={<PlayIcon />} onClick={close} />
-                            <SideButton
-                                label="Menu du jeu"
-                                icon={<CogIcon />}
-                                onClick={() => fetchNui(NuiEvent.PauseMenuOpenNative)}
-                            />
-                            <SideButton
-                                label="Quitter"
-                                icon={<LogoutIcon />}
-                                danger
-                                onClick={() => setConfirmQuit(true)}
-                            />
-                        </div>
-                    </Glass>
-                </FadeIn>
-            )}
-            {showContent && !data.scriptMode && (
-                <FadeIn
-                    as="main"
-                    className="relative min-h-0 min-w-0 flex-1"
-                    instant={!data.settings.server.mapAnimation}
-                >
-                    {tab === 'settings' && (
-                        <Glass className="h-full">
-                            <SettingsMain category={settingsCategory} settings={data.settings} />
+                                <SideButton
+                                    label="Quitter"
+                                    icon={<LogoutIcon />}
+                                    danger
+                                    onClick={() => setConfirmQuit(true)}
+                                />
+                            </div>
                         </Glass>
-                    )}
-                </FadeIn>
-            )}
+                    </FadeIn>
+                )}
+                {showContent && !data.scriptMode && (
+                    <FadeIn
+                        as="main"
+                        className="relative min-h-0 min-w-0 flex-1"
+                        instant={!data.settings.server.mapAnimation}
+                    >
+                        {tab === 'settings' && (
+                            <Glass className="h-full">
+                                <SettingsMain category={settingsCategory} settings={data.settings} />
+                            </Glass>
+                        )}
+                    </FadeIn>
+                )}
+            </div>
             {confirmQuit && createPortal(<QuitConfirm onCancel={() => setConfirmQuit(false)} />, document.body)}
         </div>
     );

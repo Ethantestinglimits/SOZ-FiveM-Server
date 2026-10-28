@@ -13,6 +13,7 @@ import {
 } from '../../../../shared/nui/minimap';
 import { fetchNui } from '../../../fetch';
 import { useMinimap } from '../../../hook/data';
+import { screenWidthToPx } from '../../../utils/screenFrame';
 import { MinimapPreview } from '../../Minimap/MinimapPreview';
 import { MINIMAP_RADIUS } from '../../Minimap/minimapRenderer';
 import { setMinimapStyle, useMinimapStyle } from '../../Minimap/minimapStyleState';
@@ -122,7 +123,7 @@ export const MinimapPanel: FunctionComponent = () => {
 
     const change = (patch: Partial<MinimapStyle>) => apply({ ...style, ...patch });
 
-    const width = minimap.width * window.innerWidth;
+    const width = screenWidthToPx(minimap.width);
     const height = minimap.height > 0 ? minimap.height * window.innerHeight : width * MINIMAP_RATIO;
     const minSide = Math.max(1, Math.min(width, height));
     const radius = style.radius ?? Math.round((MINIMAP_RADIUS / minSide) * 100);

@@ -4,6 +4,7 @@ import { NuiEvent } from '../../../shared/event';
 import { fetchNui } from '../../fetch';
 import { useHudMinimap } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
+import { getScreenFrame, screenWidthToPx } from '../../utils/screenFrame';
 import { MinimapRenderer } from './minimapRenderer';
 import { isMapTabActive, minimapController, setBlipAnchor } from './minimapState';
 import { setMinimapStyle, useMinimapStyle } from './minimapStyleState';
@@ -16,7 +17,7 @@ const OFFSET_Y = 11 / SCREEN_HEIGHT_REFERENCE;
 const OFFSET_WIDTH = -2 / SCREEN_WIDTH_REFERENCE;
 const OFFSET_HEIGHT = -16 / SCREEN_HEIGHT_REFERENCE;
 const PANEL_MARGIN_VH = 3;
-const PANEL_COLUMN_VW = 17;
+const PANEL_COLUMN_VH = 30;
 const PANEL_GAP_VH = 2;
 
 export const MinimapApp: FunctionComponent = () => {
@@ -70,9 +71,8 @@ export const MinimapApp: FunctionComponent = () => {
                 return;
             }
 
-            const vw = window.innerWidth;
             const vh = window.innerHeight;
-            const width = minimap.width * vw;
+            const width = screenWidthToPx(minimap.width);
 
             if (!minimap.isHidden && minimap.height > 0) {
                 ratioRef.current = (minimap.height * vh) / width;
@@ -81,9 +81,9 @@ export const MinimapApp: FunctionComponent = () => {
             const height = minimap.isHidden ? width * ratioRef.current : minimap.height * vh;
 
             const rect = {
-                x: (minimap.left + OFFSET_X) * vw,
+                x: screenWidthToPx(minimap.left + OFFSET_X),
                 y: minimap.bottom * vh - height + OFFSET_Y * vh,
-                w: width + OFFSET_WIDTH * vw,
+                w: width + screenWidthToPx(OFFSET_WIDTH),
                 h: height + OFFSET_HEIGHT * vh,
             };
 
@@ -98,12 +98,13 @@ export const MinimapApp: FunctionComponent = () => {
             renderer.style = style;
             renderer.minimapRect = rect;
 
+            const frame = getScreenFrame();
             const margin = (PANEL_MARGIN_VH * vh) / 100;
             const x = scriptModeRef.current
-                ? margin
-                : margin + (PANEL_COLUMN_VW * vw) / 100 + (PANEL_GAP_VH * vh) / 100;
+                ? frame.x + margin
+                : frame.x + margin + (PANEL_COLUMN_VH * vh) / 100 + (PANEL_GAP_VH * vh) / 100;
 
-            renderer.panelRect = { x, y: margin, w: vw - x - margin, h: vh - margin * 2 };
+            renderer.panelRect = { x, y: margin, w: frame.x + frame.w - x - margin, h: vh - margin * 2 };
         };
 
         update();

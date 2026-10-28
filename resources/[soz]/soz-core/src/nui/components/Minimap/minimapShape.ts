@@ -1,4 +1,5 @@
 import { MinimapStyle } from '../../../shared/nui/minimap';
+import { pxToScreenWidth, screenWidthToPx } from '../../utils/screenFrame';
 
 type MinimapBox = {
     left: number;
@@ -16,8 +17,8 @@ export const applyMinimapShape = <T extends MinimapBox>(minimap: T, style?: Mini
         return minimap;
     }
 
-    const side = Math.min(minimap.width * window.innerWidth, minimap.height * window.innerHeight);
-    const width = side / window.innerWidth;
+    const side = Math.min(screenWidthToPx(minimap.width), minimap.height * window.innerHeight);
+    const width = pxToScreenWidth(side);
     const height = side / window.innerHeight;
 
     return {
