@@ -832,19 +832,8 @@ export class MinimapRenderer {
         ctx.strokeStyle = ROUTE_COLOR;
         ctx.stroke();
 
-        ctx.beginPath();
-        ctx.moveTo(x, y - 25);
-        ctx.lineTo(x - 9, y - 40);
-        ctx.lineTo(x + 9, y - 40);
-        ctx.closePath();
-        ctx.fillStyle = ROUTE_COLOR;
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.lineWidth = 2;
-        ctx.fill();
-        ctx.stroke();
-
         if (this.highlightLabel && !this.tooltip) {
-            this.tooltip = { x, y: y - 40, text: this.highlightLabel };
+            this.tooltip = { x, y: y - 24, text: this.highlightLabel };
         }
     }
 
