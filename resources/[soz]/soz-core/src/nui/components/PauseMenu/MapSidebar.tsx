@@ -16,7 +16,7 @@ import { fetchNui } from '../../fetch';
 import { getBlipColor, UNTINTED_BLIP_COLORS } from '../Minimap/blipColors';
 import { getBlipIconUrl } from '../Minimap/minimapRenderer';
 import { minimapController } from '../Minimap/minimapState';
-import { inputNavKeyDown } from './keyboardNav';
+import { inputNavKeyDown, NAV_SKIP_ATTRIBUTE } from './keyboardNav';
 
 const MAX_RESULTS = 8;
 
@@ -222,6 +222,18 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
                             key={group.name}
                             onMouseEnter={() => setHoveredGroup(group.name)}
                             onMouseLeave={() => setHoveredGroup((current) => (current === group.name ? null : current))}
+                            onFocus={() => setHoveredGroup(group.name)}
+                            onBlur={(event) => {
+                                if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                                    setHoveredGroup((current) => (current === group.name ? null : current));
+                                }
+                            }}
+                            onKeyDown={(event) => {
+                                if (group.points.length > 1 && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+                                    event.preventDefault();
+                                    focusStep(group, event.key === 'ArrowRight' ? 1 : -1);
+                                }
+                            }}
                             className="flex items-center rounded-[0.8vh] transition-colors hover:bg-white/15"
                         >
                             <button
@@ -240,12 +252,14 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
                             {group.points.length > 1 && hoveredGroup === group.name && (
                                 <div className="mr-[0.4vh] flex shrink-0 gap-[0.2vh]">
                                     <button
+                                        {...{ [NAV_SKIP_ATTRIBUTE]: true }}
                                         onClick={() => focusStep(group, -1)}
                                         className="flex h-[2.4vh] w-[2.4vh] items-center justify-center rounded-[0.6vh] hover:bg-white/25"
                                     >
                                         <ChevronLeftIcon className="h-[1.6vh] w-[1.6vh]" />
                                     </button>
                                     <button
+                                        {...{ [NAV_SKIP_ATTRIBUTE]: true }}
                                         onClick={() => focusStep(group, 1)}
                                         className="flex h-[2.4vh] w-[2.4vh] items-center justify-center rounded-[0.6vh] hover:bg-white/25"
                                     >

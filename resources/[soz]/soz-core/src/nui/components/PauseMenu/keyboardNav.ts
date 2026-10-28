@@ -4,7 +4,7 @@ export const NAV_ZONE_ATTRIBUTE = 'data-nav-zone';
 export const NAV_SKIP_ATTRIBUTE = 'data-nav-skip';
 
 export const FOCUS_RING_CLASSES =
-    '[&_*:focus-visible]:outline-none [&_*:focus-visible]:ring-2 [&_*:focus-visible]:ring-white [&_*:focus-visible]:ring-offset-0';
+    '[&_*:focus-visible]:outline-none [&_*:focus-visible]:ring-2 [&_*:focus-visible]:ring-inset [&_*:focus-visible]:ring-white';
 
 const ZONES = ['side', 'main'];
 
