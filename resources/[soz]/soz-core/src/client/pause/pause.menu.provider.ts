@@ -149,12 +149,12 @@ export class PauseMenuProvider {
     }
 
     public close(): void {
-        this.frontendRequestedAt = null;
-        this.frontendOpened = false;
-
         if (!this.opened) {
             return;
         }
+
+        this.frontendRequestedAt = null;
+        this.frontendOpened = false;
 
         const waiters = this.closeWaiters;
 

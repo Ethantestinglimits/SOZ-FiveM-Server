@@ -105,11 +105,21 @@ export const CrosshairPanel: FunctionComponent<CrosshairPanelProps> = ({ initial
     const [config, setConfig] = useState<CrosshairConfig>(initial);
     const [background, setBackground] = useState('dark');
     const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const pending = useRef<CrosshairConfig | null>(null);
+    const initialKey = JSON.stringify(initial);
+
+    useEffect(() => {
+        setConfig(initial);
+    }, [initialKey]);
 
     useEffect(
         () => () => {
             if (timer.current) {
                 clearTimeout(timer.current);
+
+                if (pending.current) {
+                    fetchNui(NuiEvent.CrosshairSet, pending.current);
+                }
             }
         },
         []
@@ -124,12 +134,17 @@ export const CrosshairPanel: FunctionComponent<CrosshairPanelProps> = ({ initial
             clearTimeout(timer.current);
         }
 
-        timer.current = setTimeout(() => fetchNui(NuiEvent.CrosshairSet, value), COMMIT_DELAY);
+        pending.current = value;
+        timer.current = setTimeout(() => {
+            timer.current = null;
+            fetchNui(NuiEvent.CrosshairSet, value);
+        }, COMMIT_DELAY);
     };
 
     const reset = () => {
         if (timer.current) {
             clearTimeout(timer.current);
+            timer.current = null;
         }
 
         setConfig({ ...DEFAULT_CROSSHAIR });
