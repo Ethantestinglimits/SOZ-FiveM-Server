@@ -44,7 +44,6 @@ export const SettingsSidebar: FunctionComponent<SettingsSidebarProps> = ({ categ
         <button
             onClick={() => {
                 fetchNui(NuiEvent.PauseMenuResetSettings);
-                fetchNui(NuiEvent.HudLayoutReset);
             }}
             className="flex items-center justify-center gap-[0.8vh] rounded-[1vh] bg-red-500/20 px-[1.2vh] py-[0.9vh] text-[1.4vh] font-semibold uppercase text-red-200 transition-colors hover:bg-red-500/60 hover:text-white"
         >

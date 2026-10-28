@@ -10,11 +10,9 @@ import { uuidv4 } from '../../../core/utils';
 import { AdvancedNotification, BasicNotification, TPoliceNotification } from '../../../shared/notification';
 import { useAssetPath } from '../../hook/assets';
 import { useNuiEvent } from '../../hook/nui';
-import { useMinimap } from '../../hook/data';
 import { RootState } from '../../store';
 import { formatText } from '../../utils/gta-format';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
-import { layoutTransform, useHudLayout } from './hudLayoutState';
 
 type NotificationProps = {
     notification: BasicNotification | AdvancedNotification;
@@ -38,7 +36,7 @@ const isPoliceNotification = (
     return (notification as TPoliceNotification).policeStyle !== undefined;
 };
 
-export const Notification: FunctionComponent<NotificationProps> = ({ notification, onDelete }) => {
+const Notification: FunctionComponent<NotificationProps> = ({ notification, onDelete }) => {
     const [isClosing, setIsClosing] = useState(false);
     const [isOpening, setIsOpening] = useState(true);
 
@@ -129,7 +127,7 @@ export const Notification: FunctionComponent<NotificationProps> = ({ notificatio
     );
 };
 
-export const PoliceNotification: FunctionComponent<PoliceNotificationProps> = ({ notification, onDelete }) => {
+const PoliceNotification: FunctionComponent<PoliceNotificationProps> = ({ notification, onDelete }) => {
     const { getPath } = useAssetPath();
 
     const [isClosing, setIsClosing] = useState(false);
@@ -319,8 +317,7 @@ export const PoliceNotification: FunctionComponent<PoliceNotificationProps> = ({
 
 export const Notifications: FunctionComponent = () => {
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
-    const minimap = useMinimap();
-    const policeLayout = useHudLayout().police;
+    const minimap = useSelector((state: RootState) => state.hud.minimap);
     const settings = useSelector((state: RootState) => state.hud.settings);
     const showDateTime = useSelector((state: RootState) => state.hud.settings.showDateTime);
     const showWeather = useSelector((state: RootState) => state.hud.settings.showWeather);
@@ -372,8 +369,6 @@ export const Notifications: FunctionComponent = () => {
         [createNotification]
     );
 
-    const layout = useHudLayout().notifications;
-
     const styles = useSpring({
         from: {
             top: 0,
@@ -381,8 +376,8 @@ export const Notifications: FunctionComponent = () => {
         },
         to: {
             top: 0,
-            bottom: layout ? `${100 - layout.y}vh` : `calc(${100 - minimap.top * 100}vh + ${notificationOffset()})`,
-            left: layout ? `${layout.x}vw` : `calc(100vw * ${minimap.left + 0.004})`,
+            bottom: `calc(${100 - minimap.top * 100}vh + ${notificationOffset()})`,
+            left: `calc(100vw * ${minimap.left + 0.004})`,
             width: `calc(100vw * ${minimap.width})`,
         },
     });
@@ -395,7 +390,6 @@ export const Notifications: FunctionComponent = () => {
                     ...styles,
                     zIndex: 20,
                     pointerEvents: `none`,
-                    ...layoutTransform(layout, 'bottom left'),
                 }}
             >
                 {notifications
@@ -411,11 +405,10 @@ export const Notifications: FunctionComponent = () => {
             <div
                 className="absolute flex flex-col-reverse gap-4"
                 style={{
-                    top: policeLayout ? `${policeLayout.y}vh` : `calc(0.5rem)`,
-                    right: policeLayout ? `${100 - policeLayout.x}vw` : `1rem`,
+                    top: `calc(0.5rem)`,
+                    right: `1rem`,
                     height: `50vh`,
                     width: `calc(100vw * ${minimap.width * 1.5})`,
-                    ...layoutTransform(policeLayout, 'top right'),
                 }}
             >
                 {notifications.map(
