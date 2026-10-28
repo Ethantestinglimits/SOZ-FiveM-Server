@@ -10,7 +10,7 @@ const listeners = new Set<(mode: MinimapMode) => void>();
 
 export const minimapController: {
     requestClose: (() => boolean) | null;
-    focus: ((point: { x: number; y: number }) => void) | null;
+    focus: ((point: { x: number; y: number }, label?: string) => void) | null;
     setLayers: ((layers: PauseMapLayer[]) => void) | null;
 } = { requestClose: null, focus: null, setLayers: null };
 

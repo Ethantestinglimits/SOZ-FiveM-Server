@@ -135,7 +135,7 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
 
     const select = (result: SearchResult) => {
         setQuery('');
-        minimapController.focus?.({ x: result.x, y: result.y });
+        minimapController.focus?.({ x: result.x, y: result.y }, result.label);
     };
 
     const focusStep = (group: LegendGroup, direction: number) => {
@@ -144,7 +144,7 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
         const next = (current + direction + count) % count;
 
         setCycle((state) => ({ ...state, [group.name]: next }));
-        minimapController.focus?.(group.points[next]);
+        minimapController.focus?.(group.points[next], count > 1 ? `${group.name} ${next + 1}/${count}` : group.name);
     };
 
     const toggleLayer = (layer: PauseMapLayer) => {

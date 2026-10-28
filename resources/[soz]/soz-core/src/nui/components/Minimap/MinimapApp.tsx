@@ -48,7 +48,7 @@ export const MinimapApp: FunctionComponent = () => {
 
         rendererRef.current = renderer;
         minimapController.requestClose = () => renderer.requestClose();
-        minimapController.focus = (point) => renderer.focus(point);
+        minimapController.focus = (point, label) => renderer.focus(point, label);
         minimapController.setLayers = (layers) => {
             renderer.layers = layers;
         };

@@ -1,11 +1,5 @@
 import { Postals } from '../../../config/postals';
-import {
-    MinimapBlip,
-    MinimapFrame,
-    MinimapOrientation,
-    MinimapPoint,
-    MinimapZone,
-} from '../../../shared/nui/minimap';
+import { MinimapBlip, MinimapFrame, MinimapOrientation, MinimapPoint, MinimapZone } from '../../../shared/nui/minimap';
 import { DEFAULT_MINIMAP_STYLE, MinimapStyle } from '../../../shared/nui/hud_layout';
 import { PauseMapLayer, PauseMapRegion } from '../../../shared/nui/pause_menu';
 import { getBlipColor, UNTINTED_BLIP_COLORS } from './blipColors';
@@ -159,6 +153,7 @@ export class MinimapRenderer {
     public waypoint: MinimapPoint | null = null;
     public layers: PauseMapLayer[] = ['blips', 'regions'];
     public highlight: MinimapPoint | null = null;
+    private highlightLabel: string | null = null;
     private target: { x: number; y: number; scale: number } | null = null;
     private regionLabels: Label[] = [];
     private readonly postalLabels: Label[] = Postals.map(([text, x, y]) => ({ text, x, y, priority: 0 }));
@@ -225,8 +220,9 @@ export class MinimapRenderer {
         }));
     }
 
-    public focus(point: MinimapPoint): void {
+    public focus(point: MinimapPoint, label?: string): void {
         this.highlight = { ...point };
+        this.highlightLabel = label ?? null;
         this.target = {
             x: nearestCopy(point.x, this.panel.x, WORLD_WIDTH),
             y: nearestCopy(point.y, this.panel.y, WORLD_HEIGHT),
@@ -248,6 +244,7 @@ export class MinimapRenderer {
         };
         this.target = null;
         this.highlight = null;
+        this.highlightLabel = null;
         this.setMode('opening');
     }
 
@@ -268,6 +265,7 @@ export class MinimapRenderer {
         this.hovered = null;
         this.target = null;
         this.highlight = null;
+        this.highlightLabel = null;
         this.instant = this.instant || !isMapTabActive();
         this.setMode('closing');
 
@@ -542,12 +540,13 @@ export class MinimapRenderer {
         style.pointerEvents = this.mode === 'open' ? 'auto' : 'none';
         style.borderRadius = `${lerp(this.getMinimapRadius(), PANEL_RADIUS, this.openness)}px`;
 
-        const shadow =
-            this.mode === 'minimap' || this.mode === 'open' ? '0 10px 15px -3px rgba(0, 0, 0, 0.3)' : 'none';
+        const shadow = this.mode === 'minimap' || this.mode === 'open' ? '0 10px 15px -3px rgba(0, 0, 0, 0.3)' : 'none';
         const border = this.style.borderWidth * (1 - this.openness);
 
         style.boxShadow =
-            border > 0.05 ? `0 0 0 ${border}px ${this.style.borderColor}${shadow === 'none' ? '' : `, ${shadow}`}` : shadow;
+            border > 0.05
+                ? `0 0 0 ${border}px ${this.style.borderColor}${shadow === 'none' ? '' : `, ${shadow}`}`
+                : shadow;
 
         if (this.canvas.width !== width || this.canvas.height !== height) {
             this.canvas.width = width;
@@ -627,8 +626,7 @@ export class MinimapRenderer {
         }
 
         const origin = this.displayed ?? this.frame;
-        const distance = (other: MinimapBlip) =>
-            origin ? Math.hypot(other.x - origin.x, other.y - origin.y) : 0;
+        const distance = (other: MinimapBlip) => (origin ? Math.hypot(other.x - origin.x, other.y - origin.y) : 0);
 
         same.sort((a, b) => distance(a) - distance(b));
 
@@ -817,14 +815,37 @@ export class MinimapRenderer {
         const ctx = this.ctx;
         const [x, y] = this.toScreen(this.highlight.x, this.highlight.y, ox, oy);
 
+        const phase = (performance.now() % 1400) / 1400;
+
         ctx.beginPath();
-        ctx.arc(x, y, 18, 0, Math.PI * 2);
-        ctx.lineWidth = 5;
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.arc(x, y, 16 + 28 * phase, 0, Math.PI * 2);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = `rgba(251, 191, 36, ${0.75 * (1 - phase)})`;
         ctx.stroke();
-        ctx.lineWidth = 2.5;
-        ctx.strokeStyle = '#ffffff';
+
+        ctx.beginPath();
+        ctx.arc(x, y, 20, 0, Math.PI * 2);
+        ctx.lineWidth = 7;
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
         ctx.stroke();
+        ctx.lineWidth = 3.5;
+        ctx.strokeStyle = '#fbbf24';
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x, y - 25);
+        ctx.lineTo(x - 9, y - 40);
+        ctx.lineTo(x + 9, y - 40);
+        ctx.closePath();
+        ctx.fillStyle = '#fbbf24';
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.lineWidth = 2;
+        ctx.fill();
+        ctx.stroke();
+
+        if (this.highlightLabel && !this.tooltip) {
+            this.tooltip = { x, y: y - 40, text: this.highlightLabel };
+        }
     }
 
     private drawBlips(ox: number, oy: number): void {
@@ -983,6 +1004,8 @@ export class MinimapRenderer {
             this.hovered = null;
             this.target = null;
             this.highlight = null;
+            this.highlightLabel = null;
+            this.highlightLabel = null;
         }
 
         this.panel.x = wrap(this.drag.x - dx / this.panel.scale, WORLD_MIN_X, WORLD_WIDTH);
