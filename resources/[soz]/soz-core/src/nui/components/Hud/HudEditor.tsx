@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import { CSSProperties, FunctionComponent, PointerEvent as ReactPointerEvent, useRef, useState } from 'react';
 
 import { NuiEvent } from '../../../shared/event';
-import { Minimap } from '../../../shared/hud';
+import { HudSettings, Minimap } from '../../../shared/hud';
 import {
     HUD_ELEMENTS,
     HUD_SCALE_MAX,
@@ -15,12 +15,23 @@ import {
 } from '../../../shared/nui/hud_layout';
 import { fetchNui } from '../../fetch';
 import { useKeyPress } from '../../hook/control';
+import { useSelector } from 'react-redux';
+
 import { useHudHasStreetNames, useMinimap } from '../../hook/data';
 import { useNuiEvent, useNuiFocus } from '../../hook/nui';
+import { RootState } from '../../store';
 import { HudPreview } from './HudPreview';
 import { setHudLayout, shiftMinimap } from './hudLayoutState';
 
 const SNAP = 1;
+const FOLLOWERS: HudElementId[] = ['stats', 'datetime', 'weather', 'street', 'compass', 'voice', 'injuries'];
+const WATCH_FLAGS: Partial<Record<HudElementId, keyof HudSettings>> = {
+    datetime: 'showDateTime',
+    weather: 'showWeather',
+    street: 'showStreetName',
+    compass: 'showCompass',
+    injuries: 'showInjuryTracker',
+};
 const HANDLE_SIZE = 14;
 const OUTLINE_WIDTH = 2;
 const MIN_RESIZE_DISTANCE = 24;
@@ -34,8 +45,7 @@ const CORNERS = [
 
 const snap = (value: number) => Math.round(value / SNAP) * SNAP;
 
-const clampScale = (value: number) =>
-    Math.round(Math.min(HUD_SCALE_MAX, Math.max(HUD_SCALE_MIN, value)) * 100) / 100;
+const clampScale = (value: number) => Math.round(Math.min(HUD_SCALE_MAX, Math.max(HUD_SCALE_MIN, value)) * 100) / 100;
 
 const defaultPosition = (id: HudElementId, minimap: Minimap, hasStreetNames: boolean): HudPosition => {
     switch (id) {
@@ -55,6 +65,18 @@ const defaultPosition = (id: HudElementId, minimap: Minimap, hasStreetNames: boo
             return { x: 50, y: minimap.bottom * 100 + (hasStreetNames ? 5.5 : 0) };
         case 'progress':
             return { x: 50, y: (minimap.bottom + 0.005) * 100 - (hasStreetNames ? 0 : 6) };
+        case 'datetime':
+            return { x: (minimap.left + 0.005) * 100, y: (minimap.top + 0.005) * 100 };
+        case 'weather':
+            return { x: (minimap.left + 0.005 + minimap.width) * 100, y: (minimap.top + 0.005) * 100 };
+        case 'street':
+            return { x: (minimap.left + 0.005) * 100, y: (minimap.bottom + 0.005) * 100 };
+        case 'compass':
+            return { x: (minimap.left + 0.005 + minimap.width) * 100 + 0.7, y: (minimap.bottom + 0.005) * 100 };
+        case 'voice':
+            return { x: (minimap.right + 0.005) * 100, y: minimap.bottom * 100 };
+        case 'injuries':
+            return { x: 100 - minimap.left * 100, y: 0 };
     }
 };
 
@@ -64,6 +86,8 @@ const boxFor = (anchor: HudElementAnchor, size: Size, position: HudPosition) => 
     switch (anchor) {
         case 'bottom-left':
             return { left: position.x, top: position.y - size.height };
+        case 'bottom-right':
+            return { left: position.x - size.width, top: position.y - size.height };
         case 'top-left':
             return { left: position.x, top: position.y };
         case 'top-center':
@@ -93,6 +117,13 @@ const blockStyle = (anchor: HudElementAnchor, position: HudPosition): CSSPropert
                 left: `${position.x}vw`,
                 bottom: `${100 - position.y}vh`,
                 transformOrigin: 'bottom left',
+                transform: scaled.trim() || undefined,
+            };
+        case 'bottom-right':
+            return {
+                right: `${100 - position.x}vw`,
+                bottom: `${100 - position.y}vh`,
+                transformOrigin: 'bottom right',
                 transform: scaled.trim() || undefined,
             };
         case 'top-left':
@@ -130,6 +161,8 @@ const anchorPoint = (anchor: HudElementAnchor, rect: DOMRect): [number, number] 
     switch (anchor) {
         case 'bottom-left':
             return [rect.left, rect.bottom];
+        case 'bottom-right':
+            return [rect.right, rect.bottom];
         case 'top-left':
             return [rect.left, rect.top];
         case 'top-center':
@@ -156,6 +189,8 @@ type DragState =
 export const HudEditor: FunctionComponent = () => {
     const rawMinimap = useMinimap();
     const hasStreetNames = useHudHasStreetNames();
+    const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
+    const watchSettings = useSelector((state: RootState) => state.hud.settings);
     const [open, setOpen] = useState(false);
     const [draft, setDraft] = useState<HudLayout>({});
     const [selected, setSelected] = useState<HudElementId | null>(null);
@@ -220,7 +255,7 @@ export const HudEditor: FunctionComponent = () => {
         return clampPosition(
             element.anchor,
             measuredSize(element),
-            defaultPosition(element.id, element.id === 'stats' ? minimap : rawMinimap, hasStreetNames)
+            defaultPosition(element.id, FOLLOWERS.includes(element.id) ? minimap : rawMinimap, hasStreetNames),
         );
     };
 
@@ -294,7 +329,7 @@ export const HudEditor: FunctionComponent = () => {
             [element.id]: clampPosition(
                 element.anchor,
                 { width: state.size.width * ratio, height: state.size.height * ratio },
-                { ...state.origin, scale }
+                { ...state.origin, scale },
             ),
         }));
     };
@@ -318,7 +353,11 @@ export const HudEditor: FunctionComponent = () => {
                 }}
             />
 
-            {HUD_ELEMENTS.map((element) => {
+            {HUD_ELEMENTS.filter(
+                (element) =>
+                    !element.watch ||
+                    (hasWatch && (!WATCH_FLAGS[element.id] || watchSettings[WATCH_FLAGS[element.id]])),
+            ).map((element) => {
                 const position = positionOf(element);
                 const scale = position.scale ?? 1;
                 const moved = Boolean(draft[element.id]);
@@ -336,7 +375,7 @@ export const HudEditor: FunctionComponent = () => {
                             onPointerUp={onPointerUp}
                             className={classNames(
                                 'absolute flex cursor-move items-center justify-center rounded-[1vh] border-2 border-dashed text-[1.6vh] font-semibold',
-                                moved ? 'border-emerald-400 bg-emerald-400/20' : 'border-white/60 bg-white/10'
+                                moved ? 'border-emerald-400 bg-emerald-400/20' : 'border-white/60 bg-white/10',
                             )}
                             style={{
                                 left: `${box.left}vw`,

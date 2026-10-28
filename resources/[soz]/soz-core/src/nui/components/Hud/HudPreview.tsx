@@ -7,12 +7,19 @@ import { HudElementId } from '../../../shared/nui/hud_layout';
 import { Progress } from '../../../shared/nui/progress';
 import { AdvancedNotification, BasicNotification, TPoliceNotification } from '../../../shared/notification';
 import { VehicleLightState, VehicleLockStatus } from '../../../shared/vehicle/vehicle';
+import { ForecastWithTemperature } from '../../../shared/weather';
 import { useMinimap } from '../../hook/data';
 import { models } from '../../models';
 import { store } from '../../store';
 import { ProgressContent } from '../Progress/ProgressApp';
+import { Compass } from './components/Compass';
+import { DateTime } from './components/DateTime';
+import { Location } from './components/Location';
 import { PetStats } from './components/PetStats';
 import { PlayerStats } from './components/PlayerStats';
+import { VoiceIcon } from './components/VoiceIcon';
+import { WeatherView } from './components/Weather';
+import { InjuryContent } from './DamageOverlay';
 import { InstructionalContent } from './InstructionalOverlay';
 import { Notification, PoliceNotification } from './Notifications';
 import { VehicleContent } from './VehicleInterface';
@@ -37,6 +44,10 @@ const POLICE_NOTIFICATION: TPoliceNotification = {
     notificationId: 1234,
 };
 
+const FORECAST: ForecastWithTemperature = { weather: 'CLEAR', temperature: 21, duration: 0 };
+
+const INJURED_BONES = ['45509', '63931'];
+
 const INSTRUCTIONS = ['b_2000', 'Valider', 'b_1074', 'Annuler'];
 
 const PROGRESS: Progress = {
@@ -56,6 +67,20 @@ const createPreviewStore = () => {
         redux: {
             initialState: {
                 ...state,
+                hud: {
+                    ...state.hud,
+                    hasWatch: true,
+                    streetName: ['Vinewood Boulevard', 'Hawick Avenue'],
+                    compass: { degree: 45, cardinal: 'NE' },
+                    dateTime: { dayOfWeek: 1, hour: 14, minute: 32, isNight: false },
+                    settings: {
+                        ...state.hud.settings,
+                        showDateTime: true,
+                        showWeather: true,
+                        showStreetName: true,
+                        showCompass: true,
+                    },
+                },
                 player: {
                     ...player,
                     metadata: {
@@ -152,6 +177,38 @@ const HudPreviewContent: FunctionComponent<{ id: HudElementId; width: number }> 
                     <ProgressContent progress={PROGRESS} currentProgress={0.6} inVehicle={false} />
                 </div>
             );
+        case 'datetime':
+            return (
+                <div className="flex items-end text-white">
+                    <DateTime />
+                </div>
+            );
+        case 'weather':
+            return (
+                <div className="flex items-end text-white">
+                    <WeatherView forecast={FORECAST} />
+                </div>
+            );
+        case 'street':
+            return (
+                <div className="text-white">
+                    <Location />
+                </div>
+            );
+        case 'compass':
+            return (
+                <div className="text-white">
+                    <Compass />
+                </div>
+            );
+        case 'voice':
+            return (
+                <div className="size-12 drop-shadow-bg">
+                    <VoiceIcon icon="normal" disableAutoHide />
+                </div>
+            );
+        case 'injuries':
+            return <InjuryContent bones={INJURED_BONES} />;
         default:
             return null;
     }

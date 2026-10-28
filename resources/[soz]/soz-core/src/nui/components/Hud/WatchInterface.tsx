@@ -18,12 +18,14 @@ import { VoiceIcon } from './components/VoiceIcon';
 import { Weather } from './components/Weather';
 import { useHudColor } from './hooks/useHudColor';
 import { layoutTransform, useHudLayout } from './hudLayoutState';
+import { LayoutBlock } from './LayoutBlock';
 
 export const WatchInterface: FunctionComponent = () => {
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
     const settings = useSelector((state: RootState) => state.hud.settings);
     const minimap = useHudMinimap();
-    const statsLayout = useHudLayout().stats;
+    const layout = useHudLayout();
+    const statsLayout = layout.stats;
 
     const hasStreetNamesEnabled = useHudHasStreetNames();
     const minimapMode = useMinimapMode();
@@ -106,15 +108,29 @@ export const WatchInterface: FunctionComponent = () => {
 
     return (
         <>
-            <animated.div
-                className={cn('absolute flex justify-between items-end text-white', {
-                    'px-5': minimap.isHidden,
-                })}
-                style={headerStyles}
-            >
-                <DateTime />
-                <Weather />
-            </animated.div>
+            {(!layout.datetime || !layout.weather) && (
+                <animated.div
+                    className={cn('absolute flex justify-between items-end text-white', {
+                        'px-5': minimap.isHidden,
+                    })}
+                    style={headerStyles}
+                >
+                    {layout.datetime ? <span /> : <DateTime />}
+                    {!layout.weather && <Weather />}
+                </animated.div>
+            )}
+
+            {layout.datetime && (
+                <LayoutBlock position={layout.datetime} anchor="bottom-left" className="flex items-end text-white">
+                    <DateTime />
+                </LayoutBlock>
+            )}
+
+            {layout.weather && (
+                <LayoutBlock position={layout.weather} anchor="bottom-right" className="flex items-end text-white">
+                    <Weather />
+                </LayoutBlock>
+            )}
 
             {hasWatch && !minimap.isHidden && minimapMode === 'minimap' && (
                 <GlassMorphismBox
@@ -128,14 +144,20 @@ export const WatchInterface: FunctionComponent = () => {
                 />
             )}
 
-            <animated.div
-                className={cn('absolute size-12 drop-shadow-bg ml-3', {
-                    'mb-14': !hasStreetNamesEnabled,
-                })}
-                style={voiceStyles}
-            >
-                <VoiceIcon icon={voiceIcon} disableAutoHide={disableAutoHide} />
-            </animated.div>
+            {layout.voice ? (
+                <LayoutBlock position={layout.voice} anchor="bottom-left" className="size-12 drop-shadow-bg">
+                    <VoiceIcon icon={voiceIcon} disableAutoHide={disableAutoHide} />
+                </LayoutBlock>
+            ) : (
+                <animated.div
+                    className={cn('absolute size-12 drop-shadow-bg ml-3', {
+                        'mb-14': !hasStreetNamesEnabled,
+                    })}
+                    style={voiceStyles}
+                >
+                    <VoiceIcon icon={voiceIcon} disableAutoHide={disableAutoHide} />
+                </animated.div>
+            )}
 
             <animated.div
                 className={cn('absolute flex gap-3 text-white h-fit', {
@@ -144,8 +166,8 @@ export const WatchInterface: FunctionComponent = () => {
                 })}
                 style={footerStyles}
             >
-                <Location />
-                <Compass />
+                {!layout.street && <Location />}
+                {!layout.compass && <Compass />}
                 {!statsLayout && (
                     <>
                         <PlayerStats />
@@ -153,6 +175,18 @@ export const WatchInterface: FunctionComponent = () => {
                     </>
                 )}
             </animated.div>
+
+            {layout.street && (
+                <LayoutBlock position={layout.street} anchor="top-left" className="text-white">
+                    <Location />
+                </LayoutBlock>
+            )}
+
+            {layout.compass && (
+                <LayoutBlock position={layout.compass} anchor="top-left" className="text-white">
+                    <Compass />
+                </LayoutBlock>
+            )}
 
             {statsLayout && (
                 <animated.div
