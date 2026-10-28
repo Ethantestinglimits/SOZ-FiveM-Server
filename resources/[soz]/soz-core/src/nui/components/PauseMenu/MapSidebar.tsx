@@ -40,11 +40,7 @@ type LegendGroup = {
     points: { x: number; y: number }[];
 };
 
-const normalize = (value: string) =>
-    value
-        .normalize('NFD')
-        .replace(/[̀-ͯ]/g, '')
-        .toLowerCase();
+const normalize = (value: string) => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 const BlipIcon: FunctionComponent<{ sprite: number; color: number }> = ({ sprite, color }) => {
     const url = getBlipIconUrl(sprite);
@@ -75,6 +71,7 @@ type MapSidebarProps = {
 export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, onLayersChange }) => {
     const [query, setQuery] = useState('');
     const [cycle, setCycle] = useState<Record<string, number>>({});
+    const [hoveredGroup, setHoveredGroup] = useState<string | null>(null);
 
     const items = useMemo<SearchResult[]>(
         () => [
@@ -86,7 +83,7 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
                 x: region.x,
                 y: region.y,
             })),
-            ...data.places.map(place => ({
+            ...data.places.map((place) => ({
                 id: `place-${place.id}`,
                 label: place.name,
                 type: 'Lieu',
@@ -94,7 +91,7 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
                 y: place.y,
             })),
         ],
-        [data.regions, data.places]
+        [data.regions, data.places],
     );
 
     const results = useMemo(() => {
@@ -104,7 +101,7 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
             return [];
         }
 
-        return items.filter(item => normalize(item.label).startsWith(search)).slice(0, MAX_RESULTS);
+        return items.filter((item) => normalize(item.label).startsWith(search)).slice(0, MAX_RESULTS);
     }, [items, query]);
 
     const groups = useMemo<LegendGroup[]>(() => {
@@ -113,8 +110,7 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
         const player = data.player;
         const places = player
             ? [...data.places].sort(
-                  (a, b) =>
-                      Math.hypot(a.x - player.x, a.y - player.y) - Math.hypot(b.x - player.x, b.y - player.y)
+                  (a, b) => Math.hypot(a.x - player.x, a.y - player.y) - Math.hypot(b.x - player.x, b.y - player.y),
               )
             : data.places;
 
@@ -148,7 +144,7 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
     };
 
     const toggleLayer = (layer: PauseMapLayer) => {
-        const next = layers.includes(layer) ? layers.filter(id => id !== layer) : [...layers, layer];
+        const next = layers.includes(layer) ? layers.filter((id) => id !== layer) : [...layers, layer];
 
         onLayersChange(next);
         minimapController.setLayers?.(next);
@@ -162,8 +158,8 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
                     <SearchIcon className="h-[1.9vh] w-[1.9vh] shrink-0 text-white/60" />
                     <input
                         value={query}
-                        onChange={event => setQuery(event.target.value)}
-                        onKeyDown={event => {
+                        onChange={(event) => setQuery(event.target.value)}
+                        onKeyDown={(event) => {
                             event.stopPropagation();
 
                             if (event.key === 'Enter' && results.length > 0) {
@@ -176,7 +172,7 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
                 </label>
                 {results.length > 0 && (
                     <ul className="absolute left-0 right-0 top-full z-20 mt-[0.6vh] overflow-hidden rounded-[1vh] border border-white/20 bg-black/85">
-                        {results.map(result => (
+                        {results.map((result) => (
                             <li key={result.id}>
                                 <button
                                     onClick={() => select(result)}
@@ -194,7 +190,7 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
             </div>
 
             <div className="flex gap-[0.6vh]">
-                {LAYERS.map(layer => (
+                {LAYERS.map((layer) => (
                     <button
                         key={layer.id}
                         onClick={() => toggleLayer(layer.id)}
@@ -203,8 +199,10 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
                             'flex flex-1 items-center justify-center rounded-[0.9vh] py-[0.8vh] transition-colors duration-150',
                             {
                                 'bg-white text-black': layers.includes(layer.id),
-                                'bg-white/10 text-white/70 hover:bg-white/25 hover:text-white': !layers.includes(layer.id),
-                            }
+                                'bg-white/10 text-white/70 hover:bg-white/25 hover:text-white': !layers.includes(
+                                    layer.id,
+                                ),
+                            },
                         )}
                     >
                         <span className="h-[2vh] w-[2vh]">{layer.icon}</span>
@@ -220,7 +218,9 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
                     {groups.map((group) => (
                         <li
                             key={group.name}
-                            className="group flex items-center rounded-[0.8vh] transition-colors hover:bg-white/15"
+                            onMouseEnter={() => setHoveredGroup(group.name)}
+                            onMouseLeave={() => setHoveredGroup((current) => (current === group.name ? null : current))}
+                            className="flex items-center rounded-[0.8vh] transition-colors hover:bg-white/15"
                         >
                             <button
                                 onClick={() => focusStep(group, 1)}
@@ -235,8 +235,8 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
                                     </span>
                                 )}
                             </button>
-                            {group.points.length > 1 && (
-                                <div className="mr-[0.4vh] hidden shrink-0 gap-[0.2vh] group-hover:flex">
+                            {group.points.length > 1 && hoveredGroup === group.name && (
+                                <div className="mr-[0.4vh] flex shrink-0 gap-[0.2vh]">
                                     <button
                                         onClick={() => focusStep(group, -1)}
                                         className="flex h-[2.4vh] w-[2.4vh] items-center justify-center rounded-[0.6vh] hover:bg-white/25"
