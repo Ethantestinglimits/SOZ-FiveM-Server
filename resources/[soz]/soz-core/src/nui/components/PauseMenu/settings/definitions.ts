@@ -144,9 +144,10 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
                 kind: 'action',
                 label: 'Modifier le HUD',
                 description:
-                    "Ouvre l'éditeur pour déplacer la Minimap, les éléments de la montre, l'état corporel, les notifications, les alertes police, l'aide, les munitions, les statuts du joueur, le compteur véhicule et la barre de progression.",
+                    "Ouvre l'éditeur pour déplacer la Minimap, les éléments de la montre, l'état corporel, les notifications, les alertes police, l'aide, les munitions, les statuts du joueur, le compteur véhicule et la barre de progression. Nécessite une montre connectée.",
                 button: "Ouvrir l'éditeur",
                 event: NuiEvent.HudEditorOpen,
+                requiresWatch: true,
             },
             watch('watchDateTime', 'Date et heure', "Affiche la date et l'heure de la montre.", true),
             watch('watchWeather', 'Météo', 'Affiche la météo de la montre.', true),

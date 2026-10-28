@@ -353,11 +353,7 @@ export const HudEditor: FunctionComponent = () => {
                 }}
             />
 
-            {HUD_ELEMENTS.filter(
-                (element) =>
-                    !element.watch ||
-                    (hasWatch && (!WATCH_FLAGS[element.id] || watchSettings[WATCH_FLAGS[element.id]])),
-            ).map((element) => {
+            {HUD_ELEMENTS.filter((element) => !element.watch || hasWatch).map((element) => {
                 const position = positionOf(element);
                 const scale = position.scale ?? 1;
                 const moved = Boolean(draft[element.id]);
@@ -421,6 +417,9 @@ export const HudEditor: FunctionComponent = () => {
                                     style={{ transform: `scale(${1 / scale})`, transformOrigin: 'top left' }}
                                 >
                                     {element.label} · {Math.round(scale * 100)} %
+                                    {WATCH_FLAGS[element.id] &&
+                                        !watchSettings[WATCH_FLAGS[element.id]] &&
+                                        ` · désactivé`}
                                 </div>
                                 {CORNERS.map((corner) => (
                                     <div

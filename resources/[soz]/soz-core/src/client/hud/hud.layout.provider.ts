@@ -5,6 +5,7 @@ import { NuiEvent } from '../../shared/event';
 import { HUD_ELEMENTS, HUD_SCALE_MAX, HUD_SCALE_MIN, HudLayout } from '../../shared/nui/hud_layout';
 import { NuiDispatch } from '../nui/nui.dispatch';
 import { PauseMenuProvider } from '../pause/pause.menu.provider';
+import { HudWatchProvider } from './hud.watch.provider';
 
 const LAYOUT_KVP = 'soz_hud_layout';
 
@@ -51,6 +52,9 @@ export class HudLayoutProvider {
     @Inject(PauseMenuProvider)
     private pauseMenuProvider: PauseMenuProvider;
 
+    @Inject(HudWatchProvider)
+    private hudWatchProvider: HudWatchProvider;
+
     private layout: HudLayout = this.load();
 
     @Once(OnceStep.NuiLoaded)
@@ -65,6 +69,10 @@ export class HudLayoutProvider {
 
     @OnNuiEvent(NuiEvent.HudEditorOpen)
     public async onOpenEditor(): Promise<void> {
+        if (!this.hudWatchProvider.haveWatch) {
+            return;
+        }
+
         this.pauseMenuProvider.close();
         this.nuiDispatch.dispatch('hud_layout', 'OpenEditor', this.layout);
     }
