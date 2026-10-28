@@ -1,11 +1,12 @@
 import { RefreshIcon, SearchIcon } from '@heroicons/react/outline';
 import classNames from 'classnames';
-import { FunctionComponent, useEffect, useMemo, useState } from 'react';
+import { FunctionComponent, KeyboardEvent as ReactKeyboardEvent, useEffect, useMemo, useState } from 'react';
 
 import { NuiEvent } from '../../../../shared/event';
 import { isNativeSetting, NATIVE_SETTINGS } from '../../../../shared/nui/native_settings';
 import { PauseSettingsData } from '../../../../shared/nui/pause_settings';
 import { fetchNui } from '../../../fetch';
+import { inputNavKeyDown, NAV_SKIP_ATTRIBUTE } from '../keyboardNav';
 import { CrosshairPanel } from './CrosshairPanel';
 import { MinimapPanel } from './MinimapPanel';
 import { setNativeHover } from './nativeInputState';
@@ -63,15 +64,22 @@ type SettingRowProps = {
 
 const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHover, draft, onDraft }) => {
     let control;
+    let adjust: ((direction: number) => void) | undefined;
+    let activate: (() => void) | undefined;
+    let keepsInput = false;
+    const rawNative = item.kind === 'native' ? settings.native[item.convar] : undefined;
+    const [typed, setTyped] = useState<number | undefined>(undefined);
+
+    useEffect(() => setTyped(undefined), [rawNative]);
 
     if (item.kind === 'action') {
+        const run = () =>
+            item.event ? fetchNui(item.event) : fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.id, value: true });
+
+        activate = run;
         control = (
             <button
-                onClick={() =>
-                    item.event
-                        ? fetchNui(item.event)
-                        : fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.id, value: true })
-                }
+                onClick={run}
                 className="rounded-[0.8vh] bg-white/15 px-[1.4vh] py-[0.4vh] text-[1.4vh] font-semibold text-white transition-colors hover:bg-white/30"
             >
                 {item.button}
@@ -88,6 +96,8 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
 
             fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.id, value: next.value });
         };
+
+        adjust = change;
 
         control = (
             <div className="flex items-center gap-[0.8vh]">
@@ -108,7 +118,10 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
         );
     } else if (item.kind === 'toggle') {
         const value = Boolean(settings.server[item.id] ?? item.default);
+        const flip = () => fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.id, value: !value });
 
+        adjust = flip;
+        activate = flip;
         control = (
             <button
                 onClick={() => fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.id, value: !value })}
@@ -128,8 +141,8 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
         const native = NATIVE_SETTINGS[item.convar];
 
         if (native && raw !== undefined && raw >= 0) {
-            const value = draft ?? raw;
-            const changed = draft !== undefined && draft !== raw;
+            const value = draft ?? typed ?? raw;
+            const changed = value !== raw;
             const hover = onDraft
                 ? {}
                 : { onMouseEnter: () => setNativeHover(true), onMouseLeave: () => setNativeHover(false) };
@@ -140,8 +153,23 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
                     fetchNui(NuiEvent.PauseMenuQueueNative, { changes: [{ key: item.convar, value: next }] });
                 }
             };
+            const queueByKey = (next: number) => {
+                if (onDraft) {
+                    onDraft(item.convar, next);
+                } else {
+                    setTyped(next === raw ? undefined : next);
+                }
+            };
+
+            keepsInput = !onDraft;
+            activate = () => {
+                if (!onDraft && typed !== undefined && typed !== raw) {
+                    fetchNui(NuiEvent.PauseMenuQueueNative, { changes: [{ key: item.convar, value: typed }] });
+                }
+            };
 
             if (native.kind === 'toggle') {
+                adjust = () => queueByKey(value > 0 ? 0 : 1);
                 control = (
                     <button
                         {...hover}
@@ -163,9 +191,9 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
                     native.kind === 'select'
                         ? native.options.find((option) => option.value === value)?.label ?? item.format(value)
                         : item.format(value);
-                const change = (direction: number) => {
+                const step = (direction: number, apply: (next: number) => void) => {
                     if (native.kind === 'slider') {
-                        queue(Math.min(native.max, Math.max(native.min, value + direction)));
+                        apply(Math.min(native.max, Math.max(native.min, value + direction)));
 
                         return;
                     }
@@ -175,8 +203,11 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
                         native.options.findIndex((option) => option.value === value),
                     );
 
-                    queue(native.options[(index + direction + native.options.length) % native.options.length].value);
+                    apply(native.options[(index + direction + native.options.length) % native.options.length].value);
                 };
+                const change = (direction: number) => step(direction, queue);
+
+                adjust = (direction) => step(direction, queueByKey);
 
                 control = (
                     <div className="flex items-center gap-[0.8vh]" {...hover}>
@@ -211,14 +242,47 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
         }
     }
 
+    const onKeyDown = (event: ReactKeyboardEvent<HTMLLIElement>) => {
+        if (event.target !== event.currentTarget) {
+            return;
+        }
+
+        if (event.key === 'ArrowLeft' && adjust) {
+            event.preventDefault();
+            adjust(-1);
+        } else if (event.key === 'ArrowRight' && adjust) {
+            event.preventDefault();
+            adjust(1);
+        } else if ((event.key === 'Enter' || event.key === ' ') && activate) {
+            event.preventDefault();
+            activate();
+        }
+    };
+
     return (
         <li
+            tabIndex={0}
             onMouseEnter={() => onHover(item)}
             onMouseLeave={() => onHover(null)}
+            onFocus={() => {
+                onHover(item);
+
+                if (keepsInput) {
+                    setNativeHover(true);
+                }
+            }}
+            onBlur={() => {
+                onHover(null);
+
+                if (keepsInput) {
+                    setNativeHover(false);
+                }
+            }}
+            onKeyDown={onKeyDown}
             className="flex items-center justify-between gap-[2vh] rounded-[1vh] bg-white/5 px-[1.6vh] py-[1.1vh] hover:bg-white/10"
         >
             <span className="text-[1.5vh] font-semibold">{item.label}</span>
-            {control}
+            <div {...{ [NAV_SKIP_ATTRIBUTE]: true }}>{control}</div>
         </li>
     );
 };
@@ -294,7 +358,10 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                 <input
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
-                    onKeyDown={(event) => event.stopPropagation()}
+                    onKeyDown={(event) => {
+                        event.stopPropagation();
+                        inputNavKeyDown(event);
+                    }}
                     placeholder="Rechercher un réglage…"
                     className="w-full bg-transparent text-[1.5vh] text-white outline-none placeholder:text-white/40"
                 />
@@ -349,7 +416,14 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                         disabled={pendingChanges.length === 0}
                         onMouseEnter={() => setNativeHover(true)}
                         onMouseLeave={() => setNativeHover(false)}
+                        onFocus={() => setNativeHover(true)}
+                        onBlur={() => setNativeHover(false)}
                         onMouseDown={() =>
+                            pendingChanges.length > 0 &&
+                            fetchNui(NuiEvent.PauseMenuQueueNative, { changes: pendingChanges })
+                        }
+                        onKeyDown={(event) =>
+                            event.key === 'Enter' &&
                             pendingChanges.length > 0 &&
                             fetchNui(NuiEvent.PauseMenuQueueNative, { changes: pendingChanges })
                         }

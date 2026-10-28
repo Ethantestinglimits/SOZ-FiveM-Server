@@ -10,6 +10,7 @@ import { useKeyPress } from '../../hook/control';
 import { useNuiEvent, useNuiFocus } from '../../hook/nui';
 import { minimapController, setMapTabActive, useMinimapMode } from '../Minimap/minimapState';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
+import { FOCUS_RING_CLASSES, NAV_ZONE_ATTRIBUTE, useKeyboardNav } from './keyboardNav';
 import { MapSidebar } from './MapSidebar';
 import { setNativeHover, useNativeHover } from './settings/nativeInputState';
 import { SettingsMain, SettingsSidebar } from './settings/SettingsView';
@@ -83,13 +84,14 @@ const TabButton: FunctionComponent<{ label: string; icon: ReactNode; active: boo
 
 const QuitConfirm: FunctionComponent<{ onCancel: () => void }> = ({ onCancel }) => (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 font-prompt text-white">
-        <div className="w-[46vh]">
+        <div className={classNames('w-[46vh]', FOCUS_RING_CLASSES)}>
             <Glass backgroundColor="#000000cc">
                 <div className="p-[3vh] text-center">
                     <div className="text-[2.6vh] font-semibold uppercase">Quitter SoZ ?</div>
                     <div className="mt-[1vh] text-[1.6vh] text-white/70">Tu seras déconnecté du serveur.</div>
                     <div className="mt-[3vh] flex justify-center gap-[1.5vh]">
                         <button
+                            autoFocus
                             onClick={onCancel}
                             className="rounded-[1vh] bg-white/10 px-[2.5vh] py-[1vh] text-[1.6vh] hover:bg-white/25"
                         >
@@ -127,7 +129,13 @@ const FadeIn: FunctionComponent<PropsWithChildren<{ as: 'aside' | 'main'; classN
     }, []);
 
     return (
-        <Tag className={classNames(className, { 'transition-opacity duration-300': !instant, 'opacity-0': !shown })}>
+        <Tag
+            {...{ [NAV_ZONE_ATTRIBUTE]: Tag === 'aside' ? 'side' : 'main' }}
+            className={classNames(className, FOCUS_RING_CLASSES, {
+                'transition-opacity duration-300': !instant,
+                'opacity-0': !shown,
+            })}
+        >
             {children}
         </Tag>
     );
@@ -209,6 +217,7 @@ export const PauseMenuApp: FunctionComponent = () => {
     useKeyPress('A', () => changeTab(-1));
     useKeyPress('e', () => changeTab(1));
     useKeyPress('E', () => changeTab(1));
+    useKeyboardNav(data !== null && !confirmQuit);
 
     if (!data) {
         return null;

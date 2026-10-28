@@ -7,6 +7,7 @@ import { NuiDispatch } from '../nui/nui.dispatch';
 import { PauseMenuProvider } from './pause.menu.provider';
 
 const APPLY_COMMAND = 'soz_native_setting';
+const APPLY_KEY_COMMAND = 'soz_native_setting_key';
 const PENDING_TIMEOUT = 2000;
 
 @Provider()
@@ -28,6 +29,15 @@ export class PauseNativeSettingsProvider {
             'Paramètres : appliquer un réglage du jeu',
             'MOUSE_BUTTON',
             'MOUSE_LEFT',
+        );
+
+        RegisterCommand(`+${APPLY_KEY_COMMAND}`, () => this.apply(), false);
+        RegisterCommand(`-${APPLY_KEY_COMMAND}`, () => this.apply(), false);
+        RegisterKeyMapping(
+            `+${APPLY_KEY_COMMAND}`,
+            'Paramètres : appliquer un réglage du jeu (clavier)',
+            'keyboard',
+            'RETURN',
         );
     }
 

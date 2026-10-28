@@ -16,6 +16,7 @@ import { fetchNui } from '../../fetch';
 import { getBlipColor, UNTINTED_BLIP_COLORS } from '../Minimap/blipColors';
 import { getBlipIconUrl } from '../Minimap/minimapRenderer';
 import { minimapController } from '../Minimap/minimapState';
+import { inputNavKeyDown } from './keyboardNav';
 
 const MAX_RESULTS = 8;
 
@@ -161,6 +162,7 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
                         onChange={(event) => setQuery(event.target.value)}
                         onKeyDown={(event) => {
                             event.stopPropagation();
+                            inputNavKeyDown(event);
 
                             if (event.key === 'Enter' && results.length > 0) {
                                 select(results[0]);
