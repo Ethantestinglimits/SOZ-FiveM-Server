@@ -5,6 +5,7 @@ type SettingBase = {
     id: string;
     label: string;
     description: string;
+    requiresWatch?: boolean;
 };
 
 export type ServerToggleSetting = SettingBase & {
@@ -57,6 +58,15 @@ const MENU_TEXT_OPTIONS = [
     { value: 4, label: 'Grand' },
     { value: 5, label: 'Très grand' },
 ];
+
+const watch = (id: string, label: string, description: string, defaultValue: boolean): ServerToggleSetting => ({
+    id,
+    kind: 'toggle',
+    label,
+    description,
+    default: defaultValue,
+    requiresWatch: true,
+});
 
 const plain = (raw: number) => String(raw);
 
@@ -134,10 +144,18 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
                 kind: 'action',
                 label: 'Modifier le HUD',
                 description:
-                    "Ouvre l'éditeur pour déplacer le groupe Minimap, les notifications, les alertes police, l'aide, les munitions, les statuts du joueur, le compteur véhicule et la barre de progression.",
+                    "Ouvre l'éditeur pour déplacer la Minimap, les éléments de la montre, l'état corporel, les notifications, les alertes police, l'aide, les munitions, les statuts du joueur, le compteur véhicule et la barre de progression.",
                 button: "Ouvrir l'éditeur",
                 event: NuiEvent.HudEditorOpen,
             },
+            watch('watchDateTime', 'Date et heure', "Affiche la date et l'heure de la montre.", true),
+            watch('watchWeather', 'Météo', 'Affiche la météo de la montre.', true),
+            watch('watchStreetName', 'Noms de rue', 'Affiche le nom de la rue sous la Minimap.', true),
+            watch('watchCompass', 'Boussole', 'Affiche la boussole.', true),
+            watch('watchStress', 'Stress', 'Affiche la jauge de stress.', true),
+            watch('watchStamina', 'Endurance', "Affiche la jauge d'endurance.", true),
+            watch('watchAnimalStats', "État de l'animal", "Affiche l'état de ton animal.", true),
+            watch('watchInjuryTracker', 'État corporel', 'Affiche le schéma des blessures.', false),
             {
                 id: 'hudVisible',
                 kind: 'toggle',
