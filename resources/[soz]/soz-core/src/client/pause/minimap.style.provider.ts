@@ -14,7 +14,6 @@ import {
 import { NuiDispatch } from '../nui/nui.dispatch';
 
 const STYLE_KVP = 'soz_minimap_style';
-const LEGACY_LAYOUT_KVP = 'soz_hud_layout';
 
 const clampRange = (value: unknown, min: number, max: number, fallback: number): number => {
     const number = Number(value);
@@ -92,22 +91,6 @@ export class PauseMinimapStyleProvider {
     }
 
     private load(): MinimapStyle {
-        const saved = parse(GetResourceKvpString(STYLE_KVP)) as Partial<MinimapStyle> | null;
-
-        if (saved) {
-            return sanitize(saved);
-        }
-
-        const legacy = parse(GetResourceKvpString(LEGACY_LAYOUT_KVP)) as { minimapStyle?: Partial<MinimapStyle> } | null;
-
-        if (!legacy?.minimapStyle) {
-            return DEFAULT_MINIMAP_STYLE;
-        }
-
-        const style = sanitize(legacy.minimapStyle);
-
-        SetResourceKvp(STYLE_KVP, JSON.stringify(style));
-
-        return style;
+        return sanitize(parse(GetResourceKvpString(STYLE_KVP)) as Partial<MinimapStyle> | null);
     }
 }
