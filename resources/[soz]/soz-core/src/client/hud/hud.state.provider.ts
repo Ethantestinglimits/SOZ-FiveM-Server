@@ -146,7 +146,7 @@ export class HudStateProvider {
                 !this.isCinematicMode &&
                 IsGameplayCamRendering() &&
                 !IsEntityDead(ped) &&
-                IsPlayerFreeAiming(PlayerId())
+                (IsPlayerFreeAiming(PlayerId()) || IsAimCamActive())
         );
     }
 

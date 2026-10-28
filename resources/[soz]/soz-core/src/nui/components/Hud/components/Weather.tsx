@@ -9,12 +9,18 @@ import { useNuiEvent } from '../../../hook/nui';
 import { RootState } from '../../../store';
 import { useZoom } from '../hooks/useZoom';
 
+let lastForecast: ForecastWithTemperature | undefined;
+
 export const Weather: FunctionComponent = () => {
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
     const showWeather = useSelector((state: RootState) => state.hud.settings.showWeather);
 
-    const [forecast, setForecast] = useState<ForecastWithTemperature>();
-    useNuiEvent('weather', 'forecast', setForecast);
+    const [forecast, setForecast] = useState<ForecastWithTemperature | undefined>(lastForecast);
+
+    useNuiEvent('weather', 'forecast', (value) => {
+        lastForecast = value;
+        setForecast(value);
+    });
 
     if (!hasWatch || !forecast || !showWeather) {
         return null;

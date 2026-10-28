@@ -248,7 +248,6 @@ export const HudEditor: FunctionComponent = () => {
         setDraft({});
         setSelected(null);
         setHudLayout({});
-        fetchNui(NuiEvent.HudLayoutReset);
     };
 
     useKeyPress('Escape', () => {
