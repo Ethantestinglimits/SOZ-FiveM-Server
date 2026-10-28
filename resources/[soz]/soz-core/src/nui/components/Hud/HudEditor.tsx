@@ -17,6 +17,7 @@ import {
     HUD_ELEMENTS,
     HUD_SCALE_MAX,
     HUD_SCALE_MIN,
+    MINIMAP_WELDED,
     HudElementAnchor,
     HudElementDefinition,
     HudElementId,
@@ -26,7 +27,7 @@ import {
 } from '../../../shared/nui/hud_layout';
 import { fetchNui } from '../../fetch';
 import { useKeyPress } from '../../hook/control';
-import { useMinimap } from '../../hook/data';
+import { useHudHasStreetNames, useMinimap } from '../../hook/data';
 import { useNuiEvent, useNuiFocus } from '../../hook/nui';
 import { RootState } from '../../store';
 import { MINIMAP_RADIUS } from '../Minimap/minimapRenderer';
@@ -36,7 +37,7 @@ import { applyMinimapLayout, setHudLayout } from './hudLayoutState';
 import { MinimapStylePanel } from './MinimapStylePanel';
 
 const SNAP = 1;
-const FOLLOWERS: HudElementId[] = ['stats', 'datetime', 'weather', 'street', 'compass', 'voice', 'injuries'];
+const FOLLOWERS: HudElementId[] = ['stats', 'injuries', ...MINIMAP_WELDED];
 const WATCH_FLAGS: Partial<Record<HudElementId, keyof HudSettings>> = {
     datetime: 'showDateTime',
     weather: 'showWeather',
@@ -74,10 +75,20 @@ const snap = (value: number) => Math.round(value / SNAP) * SNAP;
 
 const clampScale = (value: number) => Math.round(Math.min(HUD_SCALE_MAX, Math.max(HUD_SCALE_MIN, value)) * 100) / 100;
 
-const defaultPosition = (id: HudElementId, minimap: Minimap): HudPosition => {
+const withoutWelded = (layout: HudLayout): HudLayout => {
+    const next = { ...layout };
+
+    MINIMAP_WELDED.forEach((id) => delete next[id]);
+
+    return next;
+};
+
+const defaultPosition = (id: HudElementId, minimap: Minimap, hasStreetNames: boolean): HudPosition => {
     switch (id) {
         case 'minimap':
             return { x: minimap.left * 100, y: minimap.bottom * 100 };
+        case 'progress':
+            return { x: 50, y: (minimap.bottom + 0.005) * 100 - (hasStreetNames ? 0 : 6) };
         case 'stats':
             return { x: (minimap.left + minimap.width + 0.012) * 100, y: (minimap.bottom + 0.005) * 100 };
         case 'datetime':
@@ -88,8 +99,6 @@ const defaultPosition = (id: HudElementId, minimap: Minimap): HudPosition => {
             return { x: (minimap.left + 0.005) * 100, y: (minimap.bottom + 0.005) * 100 };
         case 'compass':
             return { x: (minimap.left + 0.005 + minimap.width) * 100 + 0.7, y: (minimap.bottom + 0.005) * 100 };
-        case 'voice':
-            return { x: (minimap.right + 0.005) * 100, y: minimap.bottom * 100 };
         case 'injuries':
             return { x: 100 - minimap.left * 100, y: 0 };
         default:
@@ -205,6 +214,7 @@ type DragState =
 
 export const HudEditor: FunctionComponent = () => {
     const rawMinimap = visibleMinimap(useMinimap());
+    const hasStreetNames = useHudHasStreetNames();
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
     const watchSettings = useSelector((state: RootState) => state.hud.settings);
     const [open, setOpen] = useState(false);
@@ -238,7 +248,7 @@ export const HudEditor: FunctionComponent = () => {
 
     useNuiEvent('hud_layout', 'OpenEditor', (layout) => {
         savedLayout.current = layout;
-        setDraft(layout);
+        setDraft(withoutWelded(layout));
         setSelected(null);
         setOpen(true);
     });
@@ -305,7 +315,7 @@ export const HudEditor: FunctionComponent = () => {
         return clampPosition(
             element.anchor,
             measuredSize(element),
-            defaultPosition(element.id, FOLLOWERS.includes(element.id) ? minimap : rawMinimap),
+            defaultPosition(element.id, FOLLOWERS.includes(element.id) ? minimap : rawMinimap, hasStreetNames),
         );
     };
 
@@ -440,6 +450,26 @@ export const HudEditor: FunctionComponent = () => {
                 const moved = Boolean(draft[element.id]);
                 const active = selected === element.id || hovered === element.id;
                 const labelBelow = boxFor(element.anchor, measuredSize(element), position).top < LABEL_SPACE;
+
+                if (MINIMAP_WELDED.includes(element.id)) {
+                    const flag = WATCH_FLAGS[element.id];
+
+                    if (flag && !watchSettings[flag]) {
+                        return null;
+                    }
+
+                    return (
+                        <div
+                            key={element.id}
+                            className={classNames('pointer-events-none absolute transition-opacity', {
+                                'opacity-40': selected !== 'minimap' && hovered !== 'minimap',
+                            })}
+                            style={blockStyle(element.anchor, position)}
+                        >
+                            <HudPreview id={element.id} />
+                        </div>
+                    );
+                }
 
                 return (
                     <div

@@ -95,46 +95,17 @@ export const WatchInterface: FunctionComponent = () => {
         },
     });
 
-    const voiceStyles = useSpring({
-        from: {
-            bottom: '-50vh',
-        },
-        to: {
-            bottom: `${100 - minimap.bottom * 100}vh`,
-            left: settings.switchPlayerStatsPosition
-                ? `${100 - (minimap.right + 0.04) * 100}vw`
-                : (!hasWatch && minimap.isHidden) ||
-                    (!hasStreetNamesEnabled && !settings.showWeather && !settings.showDateTime && minimap.isHidden)
-                  ? `${(minimap.left + 0.005) * 100}vw`
-                  : `${(minimap.right + 0.005) * 100}vw`,
-        },
-    });
-
     return (
         <>
-            {(!layout.datetime || !layout.weather) && (
-                <animated.div
-                    className={cn('absolute flex justify-between items-end text-white', {
-                        'px-5': minimap.isHidden,
-                    })}
-                    style={headerStyles}
-                >
-                    {layout.datetime ? <span /> : <DateTime />}
-                    {!layout.weather && <Weather />}
-                </animated.div>
-            )}
-
-            {layout.datetime && (
-                <LayoutBlock position={layout.datetime} anchor="bottom-left" className="flex items-end text-white">
-                    <DateTime />
-                </LayoutBlock>
-            )}
-
-            {layout.weather && (
-                <LayoutBlock position={layout.weather} anchor="bottom-right" className="flex items-end text-white">
-                    <Weather />
-                </LayoutBlock>
-            )}
+            <animated.div
+                className={cn('absolute flex justify-between items-end text-white', {
+                    'px-5': minimap.isHidden,
+                })}
+                style={headerStyles}
+            >
+                <DateTime />
+                <Weather />
+            </animated.div>
 
             {hasWatch && !minimap.isHidden && minimapMode === 'minimap' && frameVisible && (
                 <GlassMorphismBox
@@ -148,19 +119,10 @@ export const WatchInterface: FunctionComponent = () => {
                 />
             )}
 
-            {layout.voice ? (
+            {layout.voice && (
                 <LayoutBlock position={layout.voice} anchor="bottom-left" className="size-12 drop-shadow-bg">
                     <VoiceIcon icon={voiceIcon} disableAutoHide={disableAutoHide} />
                 </LayoutBlock>
-            ) : (
-                <animated.div
-                    className={cn('absolute size-12 drop-shadow-bg ml-3', {
-                        'mb-14': !hasStreetNamesEnabled,
-                    })}
-                    style={voiceStyles}
-                >
-                    <VoiceIcon icon={voiceIcon} disableAutoHide={disableAutoHide} />
-                </animated.div>
             )}
 
             <animated.div
@@ -170,8 +132,8 @@ export const WatchInterface: FunctionComponent = () => {
                 })}
                 style={footerStyles}
             >
-                {!layout.street && <Location />}
-                {!layout.compass && <Compass />}
+                <Location />
+                <Compass />
                 {!statsLayout && (
                     <>
                         <PlayerStats />
@@ -179,18 +141,6 @@ export const WatchInterface: FunctionComponent = () => {
                     </>
                 )}
             </animated.div>
-
-            {layout.street && (
-                <LayoutBlock position={layout.street} anchor="top-left" className="text-white">
-                    <Location />
-                </LayoutBlock>
-            )}
-
-            {layout.compass && (
-                <LayoutBlock position={layout.compass} anchor="top-left" className="text-white">
-                    <Compass />
-                </LayoutBlock>
-            )}
 
             {statsLayout && (
                 <animated.div

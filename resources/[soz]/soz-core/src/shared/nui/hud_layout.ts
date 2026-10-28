@@ -94,8 +94,10 @@ export const DEFAULT_HUD_POSITIONS: Partial<Record<HudElementId, HudPosition>> =
     instructions: { x: 50, y: 2 },
     ammo: { x: 98.5, y: 90 },
     vehicle: { x: 50, y: 97 },
-    progress: { x: 50, y: 76 },
+    voice: { x: 16, y: 96 },
 };
+
+export const MINIMAP_WELDED: HudElementId[] = ['datetime', 'weather', 'street', 'compass'];
 
 export interface NuiHudLayoutMethodMap {
     SetLayout: HudLayout;
