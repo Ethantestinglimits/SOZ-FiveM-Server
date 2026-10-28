@@ -1,7 +1,7 @@
 import { FunctionComponent, useEffect, useState } from 'react';
 
 import { NuiEvent } from '../../../shared/event/nui';
-import { BlipAction } from '../../../shared/nui/blip';
+import { BlipAction, BlipInfo } from '../../../shared/nui/blip';
 import { fetchNui } from '../../fetch';
 import { useNuiEvent, useNuiFocus } from '../../hook/nui';
 import { useOutside } from '../../hook/outside';
@@ -10,10 +10,12 @@ import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
 
 export const BlipApp: FunctionComponent = () => {
     const [actions, setActions] = useState<BlipAction[]>([]);
+    const [info, setInfo] = useState<BlipInfo | null>(null);
     const [isPauseMenuActive, setIsPauseMenuActive] = useState(false);
     const [isOver, setIsOver] = useState(false);
 
     useNuiEvent('blip', 'SetActions', setActions);
+    useNuiEvent('blip', 'SetInfo', setInfo);
     useNuiEvent('global', 'PauseMenuActive', active => {
         if (actions.length > 0 && !active && getMinimapMode() === 'minimap') {
             setActions([]);
@@ -53,6 +55,16 @@ export const BlipApp: FunctionComponent = () => {
             >
                 <GlassMorphismContainer>
                     <div ref={refOutside}>
+                        {info && (
+                            <div className="flex items-center justify-between gap-4 border-b border-white/20 p-2 text-white">
+                                <span className="font-semibold">{info.name}</span>
+                                {info.total > 1 && (
+                                    <span className="tabular-nums text-white/60">
+                                        {info.index}/{info.total}
+                                    </span>
+                                )}
+                            </div>
+                        )}
                         {actions.map((action, i) => {
                             return (
                                 <div key={i}>

@@ -13,6 +13,7 @@ import { Vector3 } from '@public/shared/polyzone/vector';
 import { WhatIfRadiationZone } from '@public/shared/whatif';
 
 import { Blip, BlipType } from '../shared/blip';
+import { BlipInfo } from '../shared/nui/blip';
 
 type GameBlip = {
     blip: Blip;
@@ -77,6 +78,23 @@ export class BlipFactory {
         this.nuiDispatch.dispatch('blip', 'SetActions', nuiActions);
     }
 
+    private getInfo(target: GameBlip): BlipInfo | null {
+        const name = target.blip.name;
+
+        if (!name) {
+            return null;
+        }
+
+        const [x, y] = GetEntityCoords(PlayerPedId(), false);
+        const distance = (blip: GameBlip) =>
+            blip.blip.position ? Math.hypot(blip.blip.position[0] - x, blip.blip.position[1] - y) : Infinity;
+        const same = Array.from(this.blips.values())
+            .filter(blip => blip.blip.name === name && blip.blip.group !== 'admin' && !blip.blip.hidden)
+            .sort((a, b) => distance(a) - distance(b));
+
+        return { name, index: Math.max(1, same.indexOf(target) + 1), total: Math.max(1, same.length) };
+    }
+
     public showActions(id: string): void {
         const blip = this.blips.get(id);
 
@@ -84,6 +102,7 @@ export class BlipFactory {
             return;
         }
 
+        this.nuiDispatch.dispatch('blip', 'SetInfo', this.getInfo(blip));
         this.nuiDispatch.dispatch(
             'blip',
             'SetActions',

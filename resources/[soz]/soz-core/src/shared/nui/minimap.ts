@@ -17,6 +17,7 @@ export type MinimapFrame = MinimapPoint & {
 
 export type MinimapBlip = MinimapPoint & {
     id?: string;
+    name?: string;
     actions?: boolean;
     sprite: number;
     color: number;

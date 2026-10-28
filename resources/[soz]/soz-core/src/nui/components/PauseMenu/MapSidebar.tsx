@@ -1,6 +1,13 @@
-import { HashtagIcon, LocationMarkerIcon, SearchIcon, TagIcon } from '@heroicons/react/outline';
+import {
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    HashtagIcon,
+    LocationMarkerIcon,
+    SearchIcon,
+    TagIcon,
+} from '@heroicons/react/outline';
 import classNames from 'classnames';
-import { FunctionComponent, ReactNode, useMemo, useRef, useState } from 'react';
+import { FunctionComponent, ReactNode, useMemo, useState } from 'react';
 
 import { Postals } from '../../../config/postals';
 import { NuiEvent } from '../../../shared/event';
@@ -67,7 +74,7 @@ type MapSidebarProps = {
 
 export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, onLayersChange }) => {
     const [query, setQuery] = useState('');
-    const cycle = useRef(new Map<string, number>());
+    const [cycle, setCycle] = useState<Record<string, number>>({});
 
     const items = useMemo<SearchResult[]>(
         () => [
@@ -103,7 +110,15 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
     const groups = useMemo<LegendGroup[]>(() => {
         const byName = new Map<string, LegendGroup>();
 
-        for (const place of data.places) {
+        const player = data.player;
+        const places = player
+            ? [...data.places].sort(
+                  (a, b) =>
+                      Math.hypot(a.x - player.x, a.y - player.y) - Math.hypot(b.x - player.x, b.y - player.y)
+              )
+            : data.places;
+
+        for (const place of places) {
             const group = byName.get(place.name) ?? {
                 name: place.name,
                 sprite: place.sprite,
@@ -116,18 +131,20 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
         }
 
         return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name, 'fr'));
-    }, [data.places]);
+    }, [data.places, data.player]);
 
     const select = (result: SearchResult) => {
         setQuery('');
         minimapController.focus?.({ x: result.x, y: result.y });
     };
 
-    const focusNext = (group: LegendGroup) => {
-        const index = cycle.current.get(group.name) ?? 0;
+    const focusStep = (group: LegendGroup, direction: number) => {
+        const count = group.points.length;
+        const current = cycle[group.name] ?? (direction > 0 ? -1 : 0);
+        const next = (current + direction + count) % count;
 
-        cycle.current.set(group.name, (index + 1) % group.points.length);
-        minimapController.focus?.(group.points[index % group.points.length]);
+        setCycle((state) => ({ ...state, [group.name]: next }));
+        minimapController.focus?.(group.points[next]);
     };
 
     const toggleLayer = (layer: PauseMapLayer) => {
@@ -200,20 +217,40 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
                     Points d’intérêt
                 </div>
                 <ul className="min-h-0 flex-1 overflow-y-auto pr-[0.4vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full">
-                    {groups.map(group => (
-                        <li key={group.name}>
+                    {groups.map((group) => (
+                        <li
+                            key={group.name}
+                            className="group flex items-center rounded-[0.8vh] transition-colors hover:bg-white/15"
+                        >
                             <button
-                                onClick={() => focusNext(group)}
-                                className="flex w-full items-center gap-[1vh] rounded-[0.8vh] px-[0.8vh] py-[0.5vh] text-left transition-colors hover:bg-white/15"
+                                onClick={() => focusStep(group, 1)}
+                                className="flex min-w-0 flex-1 items-center gap-[1vh] px-[0.8vh] py-[0.5vh] text-left"
                             >
                                 <BlipIcon sprite={group.sprite} color={group.color} />
                                 <span className="truncate text-[1.45vh]">{group.name}</span>
                                 {group.points.length > 1 && (
                                     <span className="ml-auto shrink-0 text-[1.2vh] tabular-nums text-white/50">
+                                        {cycle[group.name] !== undefined && `${cycle[group.name] + 1}/`}
                                         {group.points.length}
                                     </span>
                                 )}
                             </button>
+                            {group.points.length > 1 && (
+                                <div className="mr-[0.4vh] hidden shrink-0 gap-[0.2vh] group-hover:flex">
+                                    <button
+                                        onClick={() => focusStep(group, -1)}
+                                        className="flex h-[2.4vh] w-[2.4vh] items-center justify-center rounded-[0.6vh] hover:bg-white/25"
+                                    >
+                                        <ChevronLeftIcon className="h-[1.6vh] w-[1.6vh]" />
+                                    </button>
+                                    <button
+                                        onClick={() => focusStep(group, 1)}
+                                        className="flex h-[2.4vh] w-[2.4vh] items-center justify-center rounded-[0.6vh] hover:bg-white/25"
+                                    >
+                                        <ChevronRightIcon className="h-[1.6vh] w-[1.6vh]" />
+                                    </button>
+                                </div>
+                            )}
                         </li>
                     ))}
                     {groups.length === 0 && <li className="px-[0.8vh] text-[1.4vh] text-white/50">Aucun point.</li>}

@@ -128,6 +128,7 @@ export class PauseMenuProvider {
             regions: this.getRegions(),
             layers: this.getMapLayers(),
             settings: this.pauseSettingsProvider.getSettings(),
+            player: this.getPlayerPosition(),
             scriptMode,
             focus,
         });
@@ -198,11 +199,17 @@ export class PauseMenuProvider {
         TriggerServerEvent(ServerEvent.PAUSE_MENU_QUIT);
     }
 
+    private getPlayerPosition(): { x: number; y: number } {
+        const [x, y] = GetEntityCoords(PlayerPedId(), false);
+
+        return { x, y };
+    }
+
     private getPlaces(): PauseMapPlace[] {
         const places: PauseMapPlace[] = [];
 
         for (const { id, blip } of this.blipFactory.getAll().values()) {
-            if (!blip.name || blip.hidden || blip.type === BlipType.Radius || !blip.position) {
+            if (!blip.name || blip.hidden || blip.group === 'admin' || blip.type === BlipType.Radius || !blip.position) {
                 continue;
             }
 

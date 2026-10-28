@@ -29,6 +29,7 @@ export type PauseMenuData = {
     regions: PauseMapRegion[];
     layers: PauseMapLayer[];
     settings: PauseSettingsData;
+    player?: { x: number; y: number };
     scriptMode?: boolean;
     focus?: { x: number; y: number };
 };

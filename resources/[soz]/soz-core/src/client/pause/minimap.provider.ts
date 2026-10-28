@@ -62,7 +62,7 @@ export class PauseMinimapProvider {
     private scanSprite = 0;
     private scanBlips: MinimapBlip[] = [];
     private scanExcluded = new Set<number>();
-    private knownBlips = new Map<number, { id: string; actions: boolean }>();
+    private knownBlips = new Map<number, { id: string; name?: string; actions: boolean }>();
     private blipSignature = '';
     private zoneSignature = '';
     private routeSignature = '';
@@ -202,14 +202,18 @@ export class PauseMinimapProvider {
         this.scanExcluded = new Set([GetMainPlayerBlipId(), GetNorthRadarBlip()]);
         this.knownBlips = new Map();
 
-        for (const { id, gameId, actions } of this.blipFactory.getAll().values()) {
-            this.knownBlips.set(gameId, { id, actions: Boolean(actions?.length) });
+        for (const { id, gameId, actions, blip } of this.blipFactory.getAll().values()) {
+            this.knownBlips.set(gameId, {
+                id,
+                name: blip.group === 'admin' ? undefined : blip.name,
+                actions: Boolean(actions?.length),
+            });
         }
     }
 
     private publishBlips(): void {
         const signature = this.scanBlips
-            .map(blip => `${blip.id ?? ''}:${blip.sprite}:${blip.color}:${blip.x}:${blip.y}`)
+            .map(blip => `${blip.id ?? ''}:${blip.name ?? ''}:${blip.sprite}:${blip.color}:${blip.x}:${blip.y}`)
             .join('|');
 
         if (signature !== this.blipSignature) {
@@ -361,6 +365,7 @@ export class PauseMinimapProvider {
 
                 this.scanBlips.push({
                     id: known?.id,
+                    name: known?.name,
                     actions: known?.actions,
                     x,
                     y,

@@ -139,6 +139,7 @@ export class MinimapRenderer {
     private current: MinimapRect = { x: 0, y: 0, w: 0, h: 0 };
     private drag: { sx: number; sy: number; x: number; y: number; moved: boolean } | null = null;
     private hovered: MinimapBlip | null = null;
+    private tooltip: { x: number; y: number; text: string } | null = null;
     private routeIndex = 0;
     private lastAt = 0;
     private handle = 0;
@@ -556,6 +557,8 @@ export class MinimapRenderer {
         const ctx = this.ctx;
         const offsets = this.getOffsets();
 
+        this.tooltip = null;
+
         const sx = width / rect.w;
         const sy = height / rect.h;
 
@@ -611,6 +614,52 @@ export class MinimapRenderer {
                 }
             }
         }
+
+        this.drawTooltip();
+    }
+
+    private getBlipLabel(blip: MinimapBlip): string {
+        const name = blip.name ?? '';
+        const same = this.blips.filter((other) => other.name === name);
+
+        if (same.length < 2) {
+            return name;
+        }
+
+        const origin = this.displayed ?? this.frame;
+        const distance = (other: MinimapBlip) =>
+            origin ? Math.hypot(other.x - origin.x, other.y - origin.y) : 0;
+
+        same.sort((a, b) => distance(a) - distance(b));
+
+        return `${name} ${same.indexOf(blip) + 1}/${same.length}`;
+    }
+
+    private drawTooltip(): void {
+        if (!this.tooltip) {
+            return;
+        }
+
+        const ctx = this.ctx;
+        const { x, y, text } = this.tooltip;
+
+        ctx.save();
+        ctx.font = '600 13px Prompt, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        const width = ctx.measureText(text).width + 16;
+        const height = 24;
+        const left = Math.min(this.current.w - width - 4, Math.max(4, x - width / 2));
+        const top = Math.max(4, y - height - 6);
+
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.82)';
+        ctx.beginPath();
+        ctx.roundRect(left, top, width, height, 8);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(text, left + width / 2, top + height / 2 + 1);
+        ctx.restore();
     }
 
     private getMinimapRadius(): number {
@@ -789,6 +838,10 @@ export class MinimapRenderer {
 
             if (x < -size || y < -size || x > this.current.w + size || y > this.current.h + size) {
                 continue;
+            }
+
+            if (highlighted && this.mode === 'open' && blip.name) {
+                this.tooltip = { x, y: y - size, text: this.getBlipLabel(blip) };
             }
 
             if (highlighted) {

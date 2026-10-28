@@ -4,6 +4,13 @@ export type BlipAction = {
     blipId: string;
 };
 
+export type BlipInfo = {
+    name: string;
+    index: number;
+    total: number;
+};
+
 export interface NuiBlipMethodMap {
     SetActions: BlipAction[];
+    SetInfo: BlipInfo | null;
 }
