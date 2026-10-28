@@ -815,14 +815,6 @@ export class MinimapRenderer {
         const ctx = this.ctx;
         const [x, y] = this.toScreen(this.highlight.x, this.highlight.y, ox, oy);
 
-        const phase = (performance.now() % 1400) / 1400;
-
-        ctx.beginPath();
-        ctx.arc(x, y, 16 + 28 * phase, 0, Math.PI * 2);
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = `${ROUTE_COLOR}${Math.round(190 * (1 - phase)).toString(16).padStart(2, '0')}`;
-        ctx.stroke();
-
         ctx.beginPath();
         ctx.arc(x, y, 20, 0, Math.PI * 2);
         ctx.lineWidth = 7;
