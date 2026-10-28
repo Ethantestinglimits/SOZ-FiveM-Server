@@ -46,6 +46,7 @@ const WATCH_FLAGS: Partial<Record<HudElementId, keyof HudSettings>> = {
 const HANDLE_SIZE = 14;
 const OUTLINE_WIDTH = 2;
 const MIN_RESIZE_DISTANCE = 24;
+const LABEL_SPACE = 3;
 
 const CORNERS = [
     { id: 'top-left', left: '0%', top: '0%' },
@@ -411,6 +412,7 @@ export const HudEditor: FunctionComponent = () => {
                 const scale = position.scale ?? 1;
                 const moved = Boolean(draft[element.id]);
                 const active = selected === element.id || hovered === element.id;
+                const labelBelow = boxFor(element.anchor, measuredSize(element), position).top < LABEL_SPACE;
 
                 return (
                     <div
@@ -426,7 +428,11 @@ export const HudEditor: FunctionComponent = () => {
                         className="absolute cursor-move"
                         style={blockStyle(element.anchor, position)}
                     >
-                        <div className="pointer-events-none">
+                        <div
+                            className={classNames('pointer-events-none transition-opacity', {
+                                'opacity-40': !active,
+                            })}
+                        >
                             {element.id === 'minimap' ? (
                                 <div
                                     style={{
@@ -440,27 +446,40 @@ export const HudEditor: FunctionComponent = () => {
                             )}
                         </div>
 
+                        <div
+                            className={classNames('pointer-events-none absolute inset-0', {
+                                'border-dashed bg-white/10': active,
+                                'border-solid bg-white/[0.04]': !active,
+                                'border-emerald-400': moved,
+                                'border-white': !moved && active,
+                                'border-white/60': !moved && !active,
+                            })}
+                            style={{
+                                borderWidth: `${(active ? OUTLINE_WIDTH + 1 : OUTLINE_WIDTH) / scale}px`,
+                                borderRadius: element.id === 'minimap' ? `${ghostRadius}px` : '0.6vh',
+                            }}
+                        />
+                        <div
+                            className={classNames(
+                                'pointer-events-none absolute left-0 whitespace-nowrap rounded bg-black/85 px-[0.8vh] py-[0.3vh] text-[1.4vh] font-semibold',
+                                {
+                                    'bottom-full mb-[0.4vh]': !labelBelow,
+                                    'top-full mt-[0.4vh]': labelBelow,
+                                    'text-white/70': !active,
+                                }
+                            )}
+                            style={{
+                                transform: `scale(${1 / scale})`,
+                                transformOrigin: labelBelow ? 'top left' : 'bottom left',
+                            }}
+                        >
+                            {element.label}
+                            {active && ` · ${Math.round(scale * 100)} %`}
+                            {WATCH_FLAGS[element.id] && !watchSettings[WATCH_FLAGS[element.id]] && ` · désactivé`}
+                        </div>
+
                         {active && (
                             <>
-                                <div
-                                    className={classNames('pointer-events-none absolute inset-0 border-dashed', {
-                                        'border-emerald-400': moved,
-                                        'border-white/80': !moved,
-                                    })}
-                                    style={{
-                                        borderWidth: `${OUTLINE_WIDTH / scale}px`,
-                                        borderRadius: element.id === 'minimap' ? `${ghostRadius}px` : undefined,
-                                    }}
-                                />
-                                <div
-                                    className="pointer-events-none absolute left-0 top-0 whitespace-nowrap rounded-br bg-black/80 px-[0.8vh] py-[0.3vh] text-[1.4vh] font-semibold"
-                                    style={{ transform: `scale(${1 / scale})`, transformOrigin: 'top left' }}
-                                >
-                                    {element.label} · {Math.round(scale * 100)} %
-                                    {WATCH_FLAGS[element.id] &&
-                                        !watchSettings[WATCH_FLAGS[element.id]] &&
-                                        ` · désactivé`}
-                                </div>
                                 {CORNERS.map((corner) => (
                                     <div
                                         key={corner.id}
