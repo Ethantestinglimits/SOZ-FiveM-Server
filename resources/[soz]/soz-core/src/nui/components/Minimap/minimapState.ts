@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { PauseMapLayer } from '../../../shared/nui/pause_menu';
+import type { MinimapRenderer } from './minimapRenderer';
 
 export type MinimapMode = 'minimap' | 'opening' | 'open' | 'closing';
 
@@ -12,7 +13,8 @@ export const minimapController: {
     requestClose: (() => boolean) | null;
     focus: ((point: { x: number; y: number }, label?: string) => void) | null;
     setLayers: ((layers: PauseMapLayer[]) => void) | null;
-} = { requestClose: null, focus: null, setLayers: null };
+    renderer: MinimapRenderer | null;
+} = { requestClose: null, focus: null, setLayers: null, renderer: null };
 
 let blipAnchor: { x: number; y: number } | null = null;
 

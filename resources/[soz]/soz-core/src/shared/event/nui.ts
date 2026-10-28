@@ -847,4 +847,5 @@ export enum NuiEvent {
     MinimapSetWaypoint = 'soz-core:nui:minimap:set-waypoint',
     MinimapRemoveWaypoint = 'soz-core:nui:minimap:remove-waypoint',
     MinimapBlipClick = 'soz-core:nui:minimap:blip-click',
+    MinimapStyleSet = 'soz-core:nui:minimap:style-set',
 }

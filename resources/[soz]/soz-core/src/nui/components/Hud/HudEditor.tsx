@@ -13,7 +13,6 @@ import { NuiEvent } from '../../../shared/event';
 import { HudSettings, Minimap } from '../../../shared/hud';
 import {
     DEFAULT_HUD_POSITIONS,
-    DEFAULT_MINIMAP_STYLE,
     HUD_ELEMENTS,
     HUD_SCALE_MAX,
     HUD_SCALE_MIN,
@@ -23,7 +22,6 @@ import {
     HudElementId,
     HudLayout,
     HudPosition,
-    MinimapStyle,
 } from '../../../shared/nui/hud_layout';
 import { fetchNui } from '../../fetch';
 import { useKeyPress } from '../../hook/control';
@@ -32,9 +30,9 @@ import { useNuiEvent, useNuiFocus } from '../../hook/nui';
 import { RootState } from '../../store';
 import { MINIMAP_RADIUS } from '../Minimap/minimapRenderer';
 import { setMinimapEditing } from '../Minimap/minimapState';
+import { useMinimapStyle } from '../Minimap/minimapStyleState';
 import { HudPreview } from './HudPreview';
 import { applyMinimapLayout, setHudLayout } from './hudLayoutState';
-import { MinimapStylePanel } from './MinimapStylePanel';
 
 const SNAP = 1;
 const FOLLOWERS: HudElementId[] = ['stats', 'injuries', ...MINIMAP_WELDED];
@@ -221,8 +219,8 @@ export const HudEditor: FunctionComponent = () => {
     const [draft, setDraft] = useState<HudLayout>({});
     const [selected, setSelected] = useState<HudElementId | null>(null);
     const [hovered, setHovered] = useState<HudElementId | null>(null);
-    const minimapStyle = draft.minimapStyle ?? DEFAULT_MINIMAP_STYLE;
-    const minimap = applyMinimapLayout(rawMinimap, draft.minimap, draft.minimapStyle);
+    const minimapStyle = useMinimapStyle();
+    const minimap = applyMinimapLayout(rawMinimap, draft.minimap, minimapStyle);
     const savedLayout = useRef<HudLayout>({});
 
     const blocks = useRef<Partial<Record<HudElementId, HTMLDivElement | null>>>({});
@@ -275,7 +273,7 @@ export const HudEditor: FunctionComponent = () => {
         }
     });
 
-    const shapedMinimap = applyMinimapLayout(rawMinimap, undefined, draft.minimapStyle);
+    const shapedMinimap = applyMinimapLayout(rawMinimap, undefined, minimapStyle);
 
     const fixedSize = (element: HudElementDefinition): Size =>
         element.id === 'minimap'
@@ -560,21 +558,6 @@ export const HudEditor: FunctionComponent = () => {
                     </div>
                 );
             })}
-
-            {selected === 'minimap' && (
-                <MinimapStylePanel
-                    style={minimapStyle}
-                    defaultRadius={Math.round((MINIMAP_RADIUS / Math.max(1, minSidePx)) * 100)}
-                    onChange={(next: MinimapStyle) => setDraft((current) => ({ ...current, minimapStyle: next }))}
-                    onReset={() =>
-                        setDraft((current) => {
-                            const { minimapStyle: _removed, ...rest } = current;
-
-                            return rest;
-                        })
-                    }
-                />
-            )}
 
             <div
                 ref={toolbarNode}

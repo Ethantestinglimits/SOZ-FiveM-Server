@@ -4,11 +4,11 @@ import { FunctionComponent, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { VoiceMode } from '../../../shared/hud';
-import { DEFAULT_MINIMAP_STYLE } from '../../../shared/nui/hud_layout';
 import { useHudHasStreetNames, useHudMinimap } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
 import { useMinimapMode } from '../Minimap/minimapState';
+import { useMinimapStyle } from '../Minimap/minimapStyleState';
 import { GlassMorphismBox } from '../Styleguide/GlassMorphismBox';
 import { Compass } from './components/Compass';
 import { DateTime } from './components/DateTime';
@@ -27,7 +27,7 @@ export const WatchInterface: FunctionComponent = () => {
     const minimap = useHudMinimap();
     const layout = useHudLayout();
     const statsLayout = layout.stats;
-    const minimapStyle = layout.minimapStyle ?? DEFAULT_MINIMAP_STYLE;
+    const minimapStyle = useMinimapStyle();
     const frameVisible =
         minimapStyle.frame === 'visible' || (minimapStyle.frame === 'auto' && minimapStyle.shape === 'rectangle');
 

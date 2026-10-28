@@ -1,6 +1,6 @@
 import { Postals } from '../../../config/postals';
 import { MinimapBlip, MinimapFrame, MinimapOrientation, MinimapPoint, MinimapZone } from '../../../shared/nui/minimap';
-import { DEFAULT_MINIMAP_STYLE, MinimapStyle } from '../../../shared/nui/hud_layout';
+import { DEFAULT_MINIMAP_STYLE, MinimapStyle } from '../../../shared/nui/minimap';
 import { PauseMapLayer, PauseMapRegion } from '../../../shared/nui/pause_menu';
 import { getBlipColor, UNTINTED_BLIP_COLORS } from './blipColors';
 import { isMapTabActive, isMinimapEditing, MinimapMode, setMinimapMode } from './minimapState';
@@ -59,6 +59,9 @@ type Label = { x: number; y: number; text: string; priority: number };
 
 type MapImage = { x0: number; y0: number; x1: number; y1: number; levels: CanvasImageSource[]; widths: number[] };
 
+const sharedImages: MapImage[] = [];
+let mapRequested = false;
+
 export type MinimapCallbacks = {
     onModeChange: (mode: MinimapMode) => void;
     onClick: (point: MinimapPoint, blip?: MinimapBlip, screen?: { x: number; y: number }) => void;
@@ -116,7 +119,7 @@ const downscale = (image: HTMLImageElement, ratio: number): HTMLCanvasElement =>
 
 export class MinimapRenderer {
     private readonly ctx: CanvasRenderingContext2D;
-    private readonly images: MapImage[] = [];
+    private readonly images: MapImage[] = sharedImages;
     private readonly icons = new Map<number, HTMLImageElement | null>();
     private readonly tinted = new Map<string, HTMLCanvasElement>();
 
@@ -145,6 +148,8 @@ export class MinimapRenderer {
     public fpsLimit = 60;
     public orientation: MinimapOrientation = 'camera';
     public style: MinimapStyle = DEFAULT_MINIMAP_STYLE;
+    public forceVisible = false;
+    public zIndex: string | null = null;
     private lastRenderedAt = 0;
     private instant = false;
     public blips: MinimapBlip[] = [];
@@ -183,6 +188,10 @@ export class MinimapRenderer {
         this.canvas.removeEventListener('pointermove', this.onPointerMove);
         this.canvas.removeEventListener('pointerup', this.onPointerUp);
         this.canvas.removeEventListener('contextmenu', this.onContextMenu);
+    }
+
+    public getFrame(): MinimapFrame | null {
+        return this.frame;
     }
 
     public setFrame(frame: MinimapFrame): void {
@@ -289,6 +298,12 @@ export class MinimapRenderer {
     }
 
     private loadMap(): void {
+        if (mapRequested) {
+            return;
+        }
+
+        mapRequested = true;
+
         const sources = [
             ...[0, 1, 2].flatMap((row) =>
                 [0, 1].map((col) => ({
@@ -403,7 +418,7 @@ export class MinimapRenderer {
         };
 
         const frame = this.displayed;
-        const live = this.frame.visible;
+        const live = this.frame.visible || this.forceVisible;
         const hiddenByTab = !isMapTabActive() && (this.mode === 'open' || (this.mode === 'opening' && this.instant));
         const wanted = this.mode === 'minimap' ? live : !hiddenByTab;
 
@@ -536,7 +551,7 @@ export class MinimapRenderer {
         style.top = `${rect.y}px`;
         style.width = `${rect.w}px`;
         style.height = `${rect.h}px`;
-        style.zIndex = isMinimapEditing() ? '210' : this.mode === 'minimap' ? '5' : '70';
+        style.zIndex = this.zIndex ?? (isMinimapEditing() ? '210' : this.mode === 'minimap' ? '5' : '70');
         style.pointerEvents = this.mode === 'open' ? 'auto' : 'none';
         style.borderRadius = `${lerp(this.getMinimapRadius(), PANEL_RADIUS, this.openness)}px`;
 

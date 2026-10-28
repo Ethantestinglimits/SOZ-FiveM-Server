@@ -36,6 +36,7 @@ export type SettingItem = ServerToggleSetting | ServerSelectSetting | ServerActi
 export type SettingCategory = {
     id: string;
     label: string;
+    parent?: string;
     native: boolean;
     staged?: boolean;
     note?: string;
@@ -119,6 +120,14 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
                 default: 60,
                 options: FPS_OPTIONS,
             },
+        ],
+    },
+    {
+        id: 'minimap',
+        label: 'Minimap',
+        parent: 'map',
+        native: false,
+        items: [
             {
                 id: 'minimapOrientation',
                 kind: 'select',

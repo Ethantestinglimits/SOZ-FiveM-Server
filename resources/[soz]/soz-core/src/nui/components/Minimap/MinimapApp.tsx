@@ -2,12 +2,11 @@ import { FunctionComponent, useEffect, useRef } from 'react';
 
 import { NuiEvent } from '../../../shared/event';
 import { fetchNui } from '../../fetch';
-import { DEFAULT_MINIMAP_STYLE } from '../../../shared/nui/hud_layout';
 import { useHudMinimap } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
-import { useHudLayout } from '../Hud/hudLayoutState';
 import { MinimapRenderer } from './minimapRenderer';
 import { isMapTabActive, minimapController, setBlipAnchor } from './minimapState';
+import { setMinimapStyle, useMinimapStyle } from './minimapStyleState';
 
 const DEFAULT_RATIO = 4 / 5.674;
 const SCREEN_WIDTH_REFERENCE = 1920;
@@ -26,7 +25,7 @@ export const MinimapApp: FunctionComponent = () => {
     const ratioRef = useRef(DEFAULT_RATIO);
     const scriptModeRef = useRef(false);
     const minimap = useHudMinimap();
-    const style = useHudLayout().minimapStyle ?? DEFAULT_MINIMAP_STYLE;
+    const style = useMinimapStyle();
 
     useEffect(() => {
         const renderer = new MinimapRenderer(canvasRef.current, {
@@ -47,6 +46,7 @@ export const MinimapApp: FunctionComponent = () => {
         });
 
         rendererRef.current = renderer;
+        minimapController.renderer = renderer;
         minimapController.requestClose = () => renderer.requestClose();
         minimapController.focus = (point, label) => renderer.focus(point, label);
         minimapController.setLayers = (layers) => {
@@ -57,6 +57,7 @@ export const MinimapApp: FunctionComponent = () => {
             minimapController.requestClose = null;
             minimapController.focus = null;
             minimapController.setLayers = null;
+            minimapController.renderer = null;
             renderer.destroy();
         };
     }, []);
@@ -112,6 +113,7 @@ export const MinimapApp: FunctionComponent = () => {
     }, [minimap, style]);
 
     useNuiEvent('minimap', 'Frame', (frame) => rendererRef.current?.setFrame(frame));
+    useNuiEvent('minimap', 'Style', setMinimapStyle);
     useNuiEvent('minimap', 'Blips', (blips) => rendererRef.current?.setBlips(blips));
     useNuiEvent('minimap', 'Zones', (zones) => rendererRef.current?.setZones(zones));
     useNuiEvent('minimap', 'Route', (route) => {

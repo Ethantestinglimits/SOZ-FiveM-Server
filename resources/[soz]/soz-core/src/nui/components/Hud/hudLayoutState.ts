@@ -1,6 +1,7 @@
 import { CSSProperties, useEffect, useMemo, useState } from 'react';
 
-import { DEFAULT_HUD_POSITIONS, HudLayout, HudPosition, MinimapStyle } from '../../../shared/nui/hud_layout';
+import { DEFAULT_HUD_POSITIONS, HudLayout, HudPosition } from '../../../shared/nui/hud_layout';
+import { MinimapStyle } from '../../../shared/nui/minimap';
 
 let layout: HudLayout = {};
 const listeners = new Set<(layout: HudLayout) => void>();

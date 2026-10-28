@@ -7,6 +7,7 @@ import { isNativeSetting, NATIVE_SETTINGS } from '../../../../shared/nui/native_
 import { PauseSettingsData } from '../../../../shared/nui/pause_settings';
 import { fetchNui } from '../../../fetch';
 import { CrosshairPanel } from './CrosshairPanel';
+import { MinimapPanel } from './MinimapPanel';
 import { setNativeHover } from './nativeInputState';
 import { SETTING_CATEGORIES, SettingCategory, SettingItem } from './definitions';
 
@@ -25,13 +26,16 @@ export const SettingsSidebar: FunctionComponent<SettingsSidebarProps> = ({ categ
                     <button
                         onClick={() => onCategoryChange(item.id)}
                         className={classNames(
-                            'w-full rounded-[0.8vh] px-[1.2vh] py-[0.8vh] text-left text-[1.5vh] font-semibold transition-colors',
+                            'w-full rounded-[0.8vh] py-[0.8vh] pr-[1.2vh] text-left font-semibold transition-colors',
                             {
+                                'pl-[1.2vh] text-[1.5vh]': !item.parent,
+                                'pl-[3vh] text-[1.4vh]': item.parent,
                                 'bg-white text-black': category === item.id,
                                 'text-white/80 hover:bg-white/15 hover:text-white': category !== item.id,
                             },
                         )}
                     >
+                        {item.parent && <span className="mr-[0.8vh] opacity-50">└</span>}
                         {item.label}
                     </button>
                 </li>
@@ -282,6 +286,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
     const showNativeButton = !query.trim() && current.native;
     const showStagedActions = sections.some((section) => section.category.staged);
     const crosshairPage = current.id === 'crosshair' && !query.trim();
+    const minimapPage = current.id === 'minimap' && !query.trim();
 
     return (
         <div className="flex h-full min-h-0 flex-col gap-[1.4vh] p-[2.4vh]">
@@ -297,6 +302,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
             </label>
 
             {crosshairPage && <CrosshairPanel initial={settings.crosshair} />}
+            {minimapPage && <MinimapPanel />}
 
             <div
                 className={classNames(

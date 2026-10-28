@@ -13,6 +13,7 @@ import { NuiDispatch } from '../nui/nui.dispatch';
 import { StreamProvider } from '../stream/stream.provider';
 import { VoiceProvider } from '../voip/voice/voice.provider';
 import { PauseMinimapProvider } from './minimap.provider';
+import { PauseMinimapStyleProvider } from './minimap.style.provider';
 
 const MENU_SIZE_KVP = 'soz_menu_size';
 const MENU_TEXT_KVP = 'soz_menu_text';
@@ -49,6 +50,9 @@ export class PauseSettingsProvider {
 
     @Inject(PauseMinimapProvider)
     private pauseMinimapProvider: PauseMinimapProvider;
+
+    @Inject(PauseMinimapStyleProvider)
+    private pauseMinimapStyleProvider: PauseMinimapStyleProvider;
 
     @Inject(HudStateProvider)
     private hudStateProvider: HudStateProvider;
@@ -141,6 +145,7 @@ export class PauseSettingsProvider {
         }
 
         this.hudCrosshairProvider.reset();
+        this.pauseMinimapStyleProvider.reset();
 
         this.nuiDispatch.dispatch('pause_menu', 'Settings', this.getSettings());
     }
