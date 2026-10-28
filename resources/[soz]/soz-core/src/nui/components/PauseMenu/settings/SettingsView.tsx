@@ -259,21 +259,25 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
 
     const current = SETTING_CATEGORIES.find((item) => item.id === category) ?? SETTING_CATEGORIES[0];
 
+    const hasWatch = Boolean(settings.server.hasWatch);
+
     const sections = useMemo<{ category: SettingCategory; items: SettingItem[] }[]>(() => {
         const search = normalize(query.trim());
+        const available = (setting: SettingItem) => !setting.requiresWatch || hasWatch;
 
         if (!search) {
-            return [{ category: current, items: current.items }];
+            return [{ category: current, items: current.items.filter(available) }];
         }
 
         return SETTING_CATEGORIES.map((item) => ({
             category: item,
             items: item.items.filter(
                 (setting) =>
-                    normalize(setting.label).includes(search) || normalize(setting.description).includes(search),
+                    available(setting) &&
+                    (normalize(setting.label).includes(search) || normalize(setting.description).includes(search)),
             ),
         })).filter((section) => section.items.length > 0);
-    }, [query, current]);
+    }, [query, current, hasWatch]);
 
     const showNativeButton = !query.trim() && current.native;
     const showStagedActions = sections.some((section) => section.category.staged);

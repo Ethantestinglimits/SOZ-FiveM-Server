@@ -8,6 +8,7 @@ import { HudCrosshairProvider } from '../hud/hud.crosshair.provider';
 import { HudGlassmorphismProvider } from '../hud/hud.glassmorphism.provider';
 import { HudMinimapProvider } from '../hud/hud.minimap.provider';
 import { HudStateProvider } from '../hud/hud.state.provider';
+import { HudWatchProvider } from '../hud/hud.watch.provider';
 import { NuiDispatch } from '../nui/nui.dispatch';
 import { StreamProvider } from '../stream/stream.provider';
 import { VoiceProvider } from '../voip/voice/voice.provider';
@@ -31,6 +32,14 @@ const DEFAULTS: Record<string, boolean | number | string> = {
     glassmorphismFps: 30,
     voipIntent: 'speech',
     videoVolume: 50,
+    watchDateTime: true,
+    watchWeather: true,
+    watchStreetName: true,
+    watchCompass: true,
+    watchStress: true,
+    watchStamina: true,
+    watchAnimalStats: true,
+    watchInjuryTracker: false,
 };
 
 @Provider()
@@ -53,6 +62,9 @@ export class PauseSettingsProvider {
     @Inject(HudCrosshairProvider)
     private hudCrosshairProvider: HudCrosshairProvider;
 
+    @Inject(HudWatchProvider)
+    private hudWatchProvider: HudWatchProvider;
+
     @Inject(VoiceProvider)
     private voiceProvider: VoiceProvider;
 
@@ -67,6 +79,7 @@ export class PauseSettingsProvider {
         }
 
         const hud = this.hudStateProvider.getState();
+        const watch = this.hudWatchProvider.getSettings();
 
         return {
             server: {
@@ -84,6 +97,15 @@ export class PauseSettingsProvider {
                 glassmorphismFps: this.hudGlassmorphismProvider.glassmorphismFpsLimit,
                 voipIntent: this.voiceProvider.intent,
                 videoVolume: Math.round(this.streamProvider.videoVolume * 100),
+                hasWatch: this.hudWatchProvider.haveWatch,
+                watchDateTime: watch.showDateTime,
+                watchWeather: watch.showWeather,
+                watchStreetName: watch.showStreetName,
+                watchCompass: watch.showCompass,
+                watchStress: watch.showStress,
+                watchStamina: watch.showStamina,
+                watchAnimalStats: watch.showAnimalStats,
+                watchInjuryTracker: watch.showInjuryTracker,
             },
             native,
             crosshair: this.hudCrosshairProvider.getConfig(),
@@ -154,6 +176,30 @@ export class PauseSettingsProvider {
                 break;
             case 'minimapOrientation':
                 this.pauseMinimapProvider.setOrientation(String(value) as MinimapOrientation);
+                break;
+            case 'watchDateTime':
+                this.hudWatchProvider.dateTime = Boolean(value);
+                break;
+            case 'watchWeather':
+                this.hudWatchProvider.weather = Boolean(value);
+                break;
+            case 'watchStreetName':
+                this.hudWatchProvider.streetName = Boolean(value);
+                break;
+            case 'watchCompass':
+                this.hudWatchProvider.compass = Boolean(value);
+                break;
+            case 'watchStress':
+                this.hudWatchProvider.stress = Boolean(value);
+                break;
+            case 'watchStamina':
+                this.hudWatchProvider.stamina = Boolean(value);
+                break;
+            case 'watchAnimalStats':
+                this.hudWatchProvider.animalStats = Boolean(value);
+                break;
+            case 'watchInjuryTracker':
+                this.hudWatchProvider.showInjuryTracker = Boolean(value);
                 break;
             case 'hudVisible':
                 this.hudStateProvider.setHudVisible(Boolean(value));
