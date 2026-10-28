@@ -2,6 +2,13 @@ import { KeyboardEvent as ReactKeyboardEvent, useEffect } from 'react';
 
 export const NAV_ZONE_ATTRIBUTE = 'data-nav-zone';
 export const NAV_SKIP_ATTRIBUTE = 'data-nav-skip';
+const NAV_GROUP_ATTRIBUTE = 'data-nav-group';
+const NAV_SELECTED_ATTRIBUTE = 'data-nav-selected';
+const NAV_TOGGLE_ATTRIBUTE = 'data-nav-toggle';
+
+export const navGroup = (mode: 'select' | 'focus') => ({ [NAV_GROUP_ATTRIBUTE]: mode });
+export const navSelected = (selected: boolean) => (selected ? { [NAV_SELECTED_ATTRIBUTE]: true } : {});
+export const navToggle = { [NAV_TOGGLE_ATTRIBUTE]: true };
 
 export const FOCUS_RING_CLASSES =
     '[&_*:focus-visible]:outline-none [&_*:focus-visible]:ring-2 [&_*:focus-visible]:ring-inset [&_*:focus-visible]:ring-white';
@@ -22,10 +29,35 @@ const zoneElement = (zone: string): HTMLElement | null =>
 const zoneOf = (element: Element | null): string | null =>
     element?.closest(`[${NAV_ZONE_ATTRIBUTE}]`)?.getAttribute(NAV_ZONE_ATTRIBUTE) ?? null;
 
-const itemsOf = (zone: string): HTMLElement[] =>
-    Array.from(zoneElement(zone)?.querySelectorAll<HTMLElement>(NAV_SELECTOR) ?? []).filter(
-        (element) => element.offsetParent !== null && !element.closest(`[${NAV_SKIP_ATTRIBUTE}]`),
+const groupOf = (element: Element | null): HTMLElement | null =>
+    element?.closest<HTMLElement>(`[${NAV_GROUP_ATTRIBUTE}]`) ?? null;
+
+const groupItems = (group: HTMLElement): HTMLElement[] =>
+    Array.from(group.querySelectorAll<HTMLElement>(NAV_SELECTOR)).filter(
+        (element) => !element.hasAttribute('disabled'),
     );
+
+const representative = (group: HTMLElement): HTMLElement | undefined => {
+    const items = groupItems(group);
+    const active = document.activeElement as HTMLElement | null;
+
+    return (
+        items.find((element) => element === active) ??
+        items.find((element) => element.hasAttribute(NAV_SELECTED_ATTRIBUTE)) ??
+        items[0]
+    );
+};
+
+const itemsOf = (zone: string): HTMLElement[] =>
+    Array.from(zoneElement(zone)?.querySelectorAll<HTMLElement>(NAV_SELECTOR) ?? []).filter((element) => {
+        if (element.offsetParent === null || element.closest(`[${NAV_SKIP_ATTRIBUTE}]`)) {
+            return false;
+        }
+
+        const group = groupOf(element);
+
+        return !group || representative(group) === element;
+    });
 
 const focusItem = (element: HTMLElement | undefined): void => {
     if (!element) {
@@ -71,6 +103,39 @@ const switchZone = (direction: number): void => {
     focusItem(remembered && items.includes(remembered) ? remembered : items[0]);
 };
 
+const horizontal = (event: KeyboardEvent): void => {
+    const active = document.activeElement as HTMLElement | null;
+    const group = groupOf(active);
+    const direction = event.key === 'ArrowRight' ? 1 : -1;
+
+    if (group && active) {
+        const items = groupItems(group);
+        const index = items.indexOf(active);
+
+        if (index === -1) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const next = items[Math.min(items.length - 1, Math.max(0, index + direction))];
+
+        next.focus();
+        next.scrollIntoView({ block: 'nearest' });
+
+        if (group.getAttribute(NAV_GROUP_ATTRIBUTE) === 'select' && next !== active) {
+            next.click();
+        }
+
+        return;
+    }
+
+    if (active?.hasAttribute(NAV_TOGGLE_ATTRIBUTE)) {
+        event.preventDefault();
+        active.click();
+    }
+};
+
 export const inputNavKeyDown = (event: ReactKeyboardEvent): void => {
     if (event.key === 'ArrowDown') {
         event.preventDefault();
@@ -103,6 +168,10 @@ export const useKeyboardNav = (enabled: boolean): void => {
                 case 'ArrowUp':
                     event.preventDefault();
                     move(-1);
+                    break;
+                case 'ArrowLeft':
+                case 'ArrowRight':
+                    horizontal(event);
                     break;
                 case 'Tab':
                     event.preventDefault();

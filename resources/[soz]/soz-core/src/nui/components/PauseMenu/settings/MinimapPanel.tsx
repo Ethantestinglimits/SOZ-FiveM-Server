@@ -12,6 +12,7 @@ import {
     MinimapStyle,
 } from '../../../../shared/nui/minimap';
 import { fetchNui } from '../../../fetch';
+import { navGroup, navSelected } from '../keyboardNav';
 import { useMinimap } from '../../../hook/data';
 import { screenWidthToPx } from '../../../utils/screenFrame';
 import { MinimapPreview } from '../../Minimap/MinimapPreview';
@@ -47,10 +48,11 @@ const Segmented: FunctionComponent<{
     value: string;
     onChange: (id: string) => void;
 }> = ({ options, value, onChange }) => (
-    <div className="flex gap-[0.4vh]">
+    <div className="flex gap-[0.4vh]" {...navGroup('select')}>
         {options.map((option) => (
             <button
                 key={option.id}
+                {...navSelected(value === option.id)}
                 onClick={() => onChange(option.id)}
                 className={classNames('rounded-[0.6vh] px-[1vh] py-[0.4vh] text-[1.3vh] font-semibold', {
                     'bg-white text-black': value === option.id,
@@ -173,10 +175,11 @@ export const MinimapPanel: FunctionComponent = () => {
 
                 {style.borderWidth > 0 && (
                     <Row label="Couleur de la bordure">
-                        <div className="flex items-center gap-[0.6vh]">
+                        <div className="flex items-center gap-[0.6vh]" {...navGroup('select')}>
                             {COLORS.map((color) => (
                                 <button
                                     key={color}
+                                    {...navSelected(style.borderColor === color)}
                                     onClick={() => change({ borderColor: color })}
                                     className={classNames('h-[2.2vh] w-[2.2vh] rounded-[0.5vh] border', {
                                         'border-white': style.borderColor === color,

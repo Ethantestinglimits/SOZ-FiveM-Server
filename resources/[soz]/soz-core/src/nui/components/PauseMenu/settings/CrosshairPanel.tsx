@@ -12,6 +12,7 @@ import {
 } from '../../../../shared/nui/crosshair';
 import { fetchNui } from '../../../fetch';
 import { CrosshairView } from '../../Crosshair/CrosshairView';
+import { navGroup, navSelected, navToggle } from '../keyboardNav';
 
 const COMMIT_DELAY = 150;
 
@@ -38,6 +39,7 @@ const Row: FunctionComponent<{ label: string; children: ReactNode }> = ({ label,
 
 const Toggle: FunctionComponent<{ value: boolean; onChange: (value: boolean) => void }> = ({ value, onChange }) => (
     <button
+        {...navToggle}
         onClick={() => onChange(!value)}
         className={classNames('rounded-[0.8vh] px-[1.4vh] py-[0.4vh] text-[1.4vh] font-semibold transition-colors', {
             'bg-emerald-500/80 text-white': value,
@@ -166,10 +168,11 @@ export const CrosshairPanel: FunctionComponent<CrosshairPanelProps> = ({ initial
                         <CrosshairView config={config} size="9.26vh" />
                     </div>
                 </div>
-                <div className="mt-[0.8vh] flex gap-[0.6vh]">
+                <div className="mt-[0.8vh] flex gap-[0.6vh]" {...navGroup('select')}>
                     {BACKGROUNDS.map(item => (
                         <button
                             key={item.id}
+                            {...navSelected(background === item.id)}
                             onClick={() => setBackground(item.id)}
                             className={classNames('flex-1 rounded-[0.8vh] py-[0.6vh] text-[1.3vh] font-semibold', {
                                 'bg-white text-black': background === item.id,
@@ -183,7 +186,7 @@ export const CrosshairPanel: FunctionComponent<CrosshairPanelProps> = ({ initial
             </div>
 
             <Section title="Préréglages">
-                <div className="grid grid-cols-6 gap-[0.8vh]">
+                <div className="grid grid-cols-6 gap-[0.8vh]" {...navGroup('focus')}>
                     {CROSSHAIR_PRESETS.map(preset => (
                         <button
                             key={preset.id}
@@ -201,10 +204,11 @@ export const CrosshairPanel: FunctionComponent<CrosshairPanelProps> = ({ initial
 
             <Section title="Général">
                 <Row label="Couleur">
-                    <div className="flex items-center gap-[0.6vh]">
+                    <div className="flex items-center gap-[0.6vh]" {...navGroup('select')}>
                         {CROSSHAIR_COLORS.map(color => (
                             <button
                                 key={color}
+                                {...navSelected(config.color === color)}
                                 onClick={() => apply({ ...config, color })}
                                 className={classNames('h-[2.4vh] w-[2.4vh] rounded-[0.5vh] border', {
                                     'border-white': config.color === color,
