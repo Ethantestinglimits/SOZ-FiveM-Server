@@ -820,7 +820,7 @@ export class MinimapRenderer {
         ctx.beginPath();
         ctx.arc(x, y, 16 + 28 * phase, 0, Math.PI * 2);
         ctx.lineWidth = 3;
-        ctx.strokeStyle = `rgba(251, 191, 36, ${0.75 * (1 - phase)})`;
+        ctx.strokeStyle = `${ROUTE_COLOR}${Math.round(190 * (1 - phase)).toString(16).padStart(2, '0')}`;
         ctx.stroke();
 
         ctx.beginPath();
@@ -829,7 +829,7 @@ export class MinimapRenderer {
         ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
         ctx.stroke();
         ctx.lineWidth = 3.5;
-        ctx.strokeStyle = '#fbbf24';
+        ctx.strokeStyle = ROUTE_COLOR;
         ctx.stroke();
 
         ctx.beginPath();
@@ -837,7 +837,7 @@ export class MinimapRenderer {
         ctx.lineTo(x - 9, y - 40);
         ctx.lineTo(x + 9, y - 40);
         ctx.closePath();
-        ctx.fillStyle = '#fbbf24';
+        ctx.fillStyle = ROUTE_COLOR;
         ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
         ctx.lineWidth = 2;
         ctx.fill();
