@@ -48,6 +48,8 @@ const OUTLINE_WIDTH = 2;
 const MIN_RESIZE_DISTANCE = 24;
 const LABEL_SPACE = 3;
 
+let toolbarPosition: { x: number; y: number } | null = null;
+
 const CORNERS = [
     { id: 'top-left', left: '0%', top: '0%' },
     { id: 'top-right', left: '100%', top: '0%' },
@@ -225,6 +227,10 @@ export const HudEditor: FunctionComponent = () => {
 
     const blocks = useRef<Partial<Record<HudElementId, HTMLDivElement | null>>>({});
     const drag = useRef<DragState | null>(null);
+    const [dragging, setDragging] = useState(false);
+    const [toolbar, setToolbar] = useState(toolbarPosition);
+    const toolbarNode = useRef<HTMLDivElement>(null);
+    const toolbarDrag = useRef<{ startX: number; startY: number; x: number; y: number } | null>(null);
 
     useNuiFocus(open, open, false);
 
@@ -316,6 +322,7 @@ export const HudEditor: FunctionComponent = () => {
     const onMoveStart = (element: HudElementDefinition) => (event: ReactPointerEvent) => {
         event.currentTarget.setPointerCapture(event.pointerId);
         setSelected(element.id);
+        setDragging(true);
         drag.current = {
             kind: 'move',
             id: element.id,
@@ -336,6 +343,7 @@ export const HudEditor: FunctionComponent = () => {
         event.stopPropagation();
         event.currentTarget.setPointerCapture(event.pointerId);
         setSelected(element.id);
+        setDragging(true);
 
         const [anchorX, anchorY] = anchorPoint(element.anchor, node.getBoundingClientRect());
 
@@ -390,6 +398,35 @@ export const HudEditor: FunctionComponent = () => {
 
     const onPointerUp = () => {
         drag.current = null;
+        setDragging(false);
+    };
+
+    const onToolbarDragStart = (event: ReactPointerEvent) => {
+        const box = toolbarNode.current?.getBoundingClientRect();
+
+        if (!box) {
+            return;
+        }
+
+        event.currentTarget.setPointerCapture(event.pointerId);
+        toolbarDrag.current = { startX: event.clientX, startY: event.clientY, x: box.left, y: box.top };
+    };
+
+    const onToolbarDragMove = (event: ReactPointerEvent) => {
+        const state = toolbarDrag.current;
+        const box = toolbarNode.current?.getBoundingClientRect();
+
+        if (!state || !box) {
+            return;
+        }
+
+        const next = {
+            x: Math.min(window.innerWidth - box.width, Math.max(0, state.x + event.clientX - state.startX)),
+            y: Math.min(window.innerHeight - box.height, Math.max(0, state.y + event.clientY - state.startY)),
+        };
+
+        toolbarPosition = next;
+        setToolbar(next);
     };
 
     if (!open) {
@@ -519,10 +556,31 @@ export const HudEditor: FunctionComponent = () => {
                 />
             )}
 
-            <div className="absolute bottom-[10vh] left-1/2 flex -translate-x-1/2 items-center gap-[1.4vh] rounded-[1.2vh] bg-black/80 px-[2vh] py-[1.2vh]">
-                <span className="text-[1.5vh] text-white/70">
-                    Glisse les blocs pour les placer, et leurs coins pour les redimensionner
-                </span>
+            <div
+                ref={toolbarNode}
+                onPointerDown={(event) => event.stopPropagation()}
+                className={classNames(
+                    'absolute flex items-center gap-[1.4vh] rounded-[1.2vh] bg-black/80 py-[1.2vh] pl-[1vh] pr-[2vh] transition-opacity',
+                    {
+                        'bottom-[10vh] left-1/2 -translate-x-1/2': !toolbar,
+                        'pointer-events-none opacity-0': dragging,
+                    }
+                )}
+                style={toolbar ? { left: `${toolbar.x}px`, top: `${toolbar.y}px` } : undefined}
+            >
+                <div
+                    onPointerDown={onToolbarDragStart}
+                    onPointerMove={onToolbarDragMove}
+                    onPointerUp={() => {
+                        toolbarDrag.current = null;
+                    }}
+                    className="flex cursor-move items-center gap-[1vh] self-stretch rounded-[0.8vh] px-[1vh] hover:bg-white/10"
+                >
+                    <span className="text-[1.8vh] leading-none text-white/50">⠿</span>
+                    <span className="text-[1.5vh] text-white/70">
+                        Glisse les blocs pour les placer, et leurs coins pour les redimensionner
+                    </span>
+                </div>
                 <button
                     onClick={reset}
                     className="rounded-[0.8vh] bg-white/15 px-[1.6vh] py-[0.6vh] text-[1.4vh] font-semibold hover:bg-white/30"
