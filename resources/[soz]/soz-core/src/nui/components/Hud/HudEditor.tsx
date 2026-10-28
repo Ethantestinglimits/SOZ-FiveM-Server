@@ -12,6 +12,7 @@ import { useSelector } from 'react-redux';
 import { NuiEvent } from '../../../shared/event';
 import { HudSettings, Minimap } from '../../../shared/hud';
 import {
+    DEFAULT_HUD_POSITIONS,
     DEFAULT_MINIMAP_STYLE,
     HUD_ELEMENTS,
     HUD_SCALE_MAX,
@@ -25,7 +26,7 @@ import {
 } from '../../../shared/nui/hud_layout';
 import { fetchNui } from '../../fetch';
 import { useKeyPress } from '../../hook/control';
-import { useHudHasStreetNames, useMinimap } from '../../hook/data';
+import { useMinimap } from '../../hook/data';
 import { useNuiEvent, useNuiFocus } from '../../hook/nui';
 import { RootState } from '../../store';
 import { MINIMAP_RADIUS } from '../Minimap/minimapRenderer';
@@ -73,24 +74,12 @@ const snap = (value: number) => Math.round(value / SNAP) * SNAP;
 
 const clampScale = (value: number) => Math.round(Math.min(HUD_SCALE_MAX, Math.max(HUD_SCALE_MIN, value)) * 100) / 100;
 
-const defaultPosition = (id: HudElementId, minimap: Minimap, hasStreetNames: boolean): HudPosition => {
+const defaultPosition = (id: HudElementId, minimap: Minimap): HudPosition => {
     switch (id) {
         case 'minimap':
             return { x: minimap.left * 100, y: minimap.bottom * 100 };
-        case 'police':
-            return { x: 99.2, y: 0.8 };
-        case 'notifications':
-            return { x: (minimap.left + 0.004) * 100, y: minimap.top * 100 };
-        case 'instructions':
-            return { x: 50, y: 100 - minimap.bottom * 100 };
-        case 'ammo':
-            return { x: 100 - (minimap.left + 0.005) * 100, y: minimap.bottom * 100 - 5 };
         case 'stats':
             return { x: (minimap.left + minimap.width + 0.012) * 100, y: (minimap.bottom + 0.005) * 100 };
-        case 'vehicle':
-            return { x: 50, y: minimap.bottom * 100 + (hasStreetNames ? 5.5 : 0) };
-        case 'progress':
-            return { x: 50, y: (minimap.bottom + 0.005) * 100 - (hasStreetNames ? 0 : 6) };
         case 'datetime':
             return { x: (minimap.left + 0.005) * 100, y: (minimap.top + 0.005) * 100 };
         case 'weather':
@@ -103,6 +92,8 @@ const defaultPosition = (id: HudElementId, minimap: Minimap, hasStreetNames: boo
             return { x: (minimap.right + 0.005) * 100, y: minimap.bottom * 100 };
         case 'injuries':
             return { x: 100 - minimap.left * 100, y: 0 };
+        default:
+            return DEFAULT_HUD_POSITIONS[id] ?? { x: 50, y: 50 };
     }
 };
 
@@ -214,7 +205,6 @@ type DragState =
 
 export const HudEditor: FunctionComponent = () => {
     const rawMinimap = visibleMinimap(useMinimap());
-    const hasStreetNames = useHudHasStreetNames();
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
     const watchSettings = useSelector((state: RootState) => state.hud.settings);
     const [open, setOpen] = useState(false);
@@ -315,7 +305,7 @@ export const HudEditor: FunctionComponent = () => {
         return clampPosition(
             element.anchor,
             measuredSize(element),
-            defaultPosition(element.id, FOLLOWERS.includes(element.id) ? minimap : rawMinimap, hasStreetNames),
+            defaultPosition(element.id, FOLLOWERS.includes(element.id) ? minimap : rawMinimap),
         );
     };
 

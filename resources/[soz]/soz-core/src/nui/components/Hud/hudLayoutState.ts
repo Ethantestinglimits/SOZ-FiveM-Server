@@ -1,6 +1,6 @@
-import { CSSProperties, useEffect, useState } from 'react';
+import { CSSProperties, useEffect, useMemo, useState } from 'react';
 
-import { HudLayout, HudPosition, MinimapStyle } from '../../../shared/nui/hud_layout';
+import { DEFAULT_HUD_POSITIONS, HudLayout, HudPosition, MinimapStyle } from '../../../shared/nui/hud_layout';
 
 let layout: HudLayout = {};
 const listeners = new Set<(layout: HudLayout) => void>();
@@ -88,5 +88,5 @@ export const useHudLayout = (): HudLayout => {
         };
     }, []);
 
-    return current;
+    return useMemo(() => ({ ...DEFAULT_HUD_POSITIONS, ...current }), [current]);
 };

@@ -88,6 +88,15 @@ export const HUD_ELEMENTS: HudElementDefinition[] = [
     { id: 'injuries', label: 'État corporel', width: 8, height: 30, anchor: 'top-right', watch: true },
 ];
 
+export const DEFAULT_HUD_POSITIONS: Partial<Record<HudElementId, HudPosition>> = {
+    notifications: { x: 1.5, y: 76 },
+    police: { x: 99, y: 1.5 },
+    instructions: { x: 50, y: 2 },
+    ammo: { x: 98.5, y: 90 },
+    vehicle: { x: 50, y: 97 },
+    progress: { x: 50, y: 76 },
+};
+
 export interface NuiHudLayoutMethodMap {
     SetLayout: HudLayout;
     OpenEditor: HudLayout;
