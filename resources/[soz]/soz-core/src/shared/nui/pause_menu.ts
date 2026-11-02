@@ -34,9 +34,21 @@ export type PauseMenuData = {
     focus?: { x: number; y: number };
 };
 
+export type PauseGraphicsRow = {
+    slot: number;
+    id: number;
+    type: number;
+    value: number;
+    selectable: boolean;
+    label: string;
+    options: string[];
+    max: number;
+};
+
 export interface NuiPauseMenuMethodMap {
     Open: PauseMenuData;
     Close: never;
     Settings: PauseSettingsData;
     NativeValue: { key: string; value: number };
+    GraphicsRows: PauseGraphicsRow[];
 }

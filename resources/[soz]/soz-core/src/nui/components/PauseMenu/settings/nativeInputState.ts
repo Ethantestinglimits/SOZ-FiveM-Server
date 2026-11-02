@@ -26,3 +26,30 @@ export const useNativeHover = (): boolean => {
 
     return current;
 };
+
+let backdrop = false;
+const backdropListeners = new Set<(value: boolean) => void>();
+
+export const setNativeBackdrop = (next: boolean): void => {
+    if (backdrop === next) {
+        return;
+    }
+
+    backdrop = next;
+    backdropListeners.forEach((listener) => listener(next));
+};
+
+export const useNativeBackdrop = (): boolean => {
+    const [current, setCurrent] = useState(backdrop);
+
+    useEffect(() => {
+        backdropListeners.add(setCurrent);
+        setCurrent(backdrop);
+
+        return () => {
+            backdropListeners.delete(setCurrent);
+        };
+    }, []);
+
+    return current;
+};

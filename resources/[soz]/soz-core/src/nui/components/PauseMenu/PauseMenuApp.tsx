@@ -12,7 +12,7 @@ import { minimapController, setMapTabActive, useMinimapMode } from '../Minimap/m
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
 import { FOCUS_RING_CLASSES, NAV_ZONE_ATTRIBUTE, useKeyboardNav } from './keyboardNav';
 import { MapSidebar } from './MapSidebar';
-import { setNativeHover, useNativeHover } from './settings/nativeInputState';
+import { setNativeHover, useNativeBackdrop, useNativeHover } from './settings/nativeInputState';
 import { SettingsMain, SettingsSidebar } from './settings/SettingsView';
 
 type PauseMenuTab = 'map' | 'settings';
@@ -151,6 +151,7 @@ export const PauseMenuApp: FunctionComponent = () => {
     const showContent = mode === 'open';
 
     const nativeHover = useNativeHover();
+    const backdrop = useNativeBackdrop();
 
     useNuiFocus(data !== null, data !== null, data !== null && nativeHover, [], data !== null && nativeHover);
 
@@ -227,8 +228,8 @@ export const PauseMenuApp: FunctionComponent = () => {
         <div className="absolute inset-0 z-[60] select-none font-prompt text-white">
             <div
                 className={classNames('absolute inset-0 transition-opacity duration-300', {
-                    'bg-gradient-to-b from-black/50 via-black/25 to-black/50': !data.settings.server.potato,
-                    'bg-black': data.settings.server.potato,
+                    'bg-gradient-to-b from-black/50 via-black/25 to-black/50': !data.settings.server.potato && !backdrop,
+                    'bg-black': data.settings.server.potato || backdrop,
                     'opacity-0': mode === 'minimap' || mode === 'closing',
                 })}
             />

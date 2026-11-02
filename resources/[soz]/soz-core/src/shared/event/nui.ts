@@ -844,4 +844,9 @@ export enum NuiEvent {
     MinimapRemoveWaypoint = 'soz-core:nui:minimap:remove-waypoint',
     MinimapBlipClick = 'soz-core:nui:minimap:blip-click',
     MinimapStyleSet = 'soz-core:nui:minimap:style-set',
+    PauseMenuGraphicsOpen = 'soz-core:nui:pause-menu:graphics-open',
+    PauseMenuGraphicsStep = 'soz-core:nui:pause-menu:graphics-step',
+    PauseMenuGraphicsSet = 'soz-core:nui:pause-menu:graphics-set',
+    PauseMenuGraphicsApply = 'soz-core:nui:pause-menu:graphics-apply',
+    PauseMenuGraphicsClose = 'soz-core:nui:pause-menu:graphics-close',
 }

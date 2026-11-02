@@ -305,8 +305,7 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
     {
         id: 'graphics',
         label: 'Graphismes',
-        native: true,
-        note: 'Les réglages graphiques classiques (MSAA, textures, ombres…) se règlent encore dans le menu natif de GTA.',
+        native: false,
         items: [],
     },
     {
