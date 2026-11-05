@@ -51,4 +51,5 @@ export interface NuiPauseMenuMethodMap {
     Settings: PauseSettingsData;
     NativeValue: { key: string; value: number };
     GraphicsRows: PauseGraphicsRow[];
+    GraphicsNative: boolean;
 }

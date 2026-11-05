@@ -228,9 +228,14 @@ export const PauseMenuApp: FunctionComponent = () => {
         <div className="absolute inset-0 z-[60] select-none font-prompt text-white">
             <div
                 className={classNames('absolute inset-0 transition-opacity duration-300', {
-                    'bg-gradient-to-b from-black/50 via-black/25 to-black/50': !data.settings.server.potato && !backdrop,
-                    'bg-black': data.settings.server.potato || backdrop,
+                    'bg-gradient-to-b from-black/50 via-black/25 to-black/50': !data.settings.server.potato,
+                    'bg-black': data.settings.server.potato,
                     'opacity-0': mode === 'minimap' || mode === 'closing',
+                })}
+            />
+            <div
+                className={classNames('absolute inset-0 bg-black transition-opacity duration-[250ms]', {
+                    'opacity-0': !backdrop,
                 })}
             />
             {showContent &&

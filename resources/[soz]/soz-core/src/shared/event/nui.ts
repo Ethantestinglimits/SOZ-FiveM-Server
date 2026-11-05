@@ -846,7 +846,6 @@ export enum NuiEvent {
     MinimapStyleSet = 'soz-core:nui:minimap:style-set',
     PauseMenuGraphicsOpen = 'soz-core:nui:pause-menu:graphics-open',
     PauseMenuGraphicsStep = 'soz-core:nui:pause-menu:graphics-step',
-    PauseMenuGraphicsSet = 'soz-core:nui:pause-menu:graphics-set',
     PauseMenuGraphicsApply = 'soz-core:nui:pause-menu:graphics-apply',
     PauseMenuGraphicsClose = 'soz-core:nui:pause-menu:graphics-close',
 }

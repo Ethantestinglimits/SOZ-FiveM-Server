@@ -10,7 +10,7 @@ import { inputNavKeyDown, NAV_SKIP_ATTRIBUTE } from '../keyboardNav';
 import { CrosshairPanel } from './CrosshairPanel';
 import { GraphicsPanel } from './GraphicsPanel';
 import { MinimapPanel } from './MinimapPanel';
-import { setNativeBackdrop, setNativeHover } from './nativeInputState';
+import { setNativeHover } from './nativeInputState';
 import { SETTING_CATEGORIES, SettingCategory, SettingItem } from './definitions';
 
 const normalize = (value: string) => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -352,12 +352,6 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
     const crosshairPage = current.id === 'crosshair' && !query.trim();
     const minimapPage = current.id === 'minimap' && !query.trim();
     const graphicsPage = current.id === 'graphics' && !query.trim();
-
-    useEffect(() => {
-        setNativeBackdrop(graphicsPage);
-
-        return () => setNativeBackdrop(false);
-    }, [graphicsPage]);
 
     return (
         <div className="flex h-full min-h-0 flex-col gap-[1.4vh] p-[2.4vh]">

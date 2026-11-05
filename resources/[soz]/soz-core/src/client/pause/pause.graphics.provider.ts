@@ -13,11 +13,11 @@ const SETTINGS_TAB = 6;
 const GRAPHICS_CATEGORY = 6;
 const GRAPHICS_PAGE = 51;
 const CONTROL_DOWN = 187;
+const CONTROL_LEFT = 189;
+const CONTROL_RIGHT = 190;
 const CONTROL_APPLY = 203;
 const ENTER_CONTROLS = [18, 176, 191, 201, 215, 255];
 const COLUMN = 1;
-const INPUT_LEFT = 10;
-const INPUT_RIGHT = 11;
 const CONTROL_ACCEPT = 201;
 const PRESS_GAP_FRAMES = 3;
 const SELECT_LIMIT = 80;
@@ -26,7 +26,10 @@ const ROW_CHUNK = 30;
 const ROW_READ_LIMIT = 200;
 const ROW_READ_TIMEOUT = 1000;
 const ROW_TYPE_SLIDER = 2;
-const CYCLE_ROWS = [60, 81];
+const ROWS_KVP = 'soz_graphics_rows';
+const BACKDROP_DELAY = 250;
+const ENTER_LIMIT = 4;
+const ENTER_GAP_FRAMES = 15;
 
 const parseRows = (text: string): PauseGraphicsRow[] =>
     text
@@ -51,6 +54,7 @@ const parseRows = (text: string): PauseGraphicsRow[] =>
 type Task =
     | { kind: 'select'; index: number; value: number; control: number; presses: number }
     | { kind: 'press'; control: number }
+    | { kind: 'enter'; presses: number }
     | { kind: 'pressAll'; controls: number[] }
     | { kind: 'scaleform'; method: string; args: number[] }
     | { kind: 'wait'; frames: number }
@@ -68,8 +72,8 @@ export class PauseGraphicsProvider {
     private cooldown = 0;
     private active = false;
     private applying = false;
-    private closeRequested = false;
-    private opening: Promise<void> | null = null;
+    private held = false;
+    private session: Promise<boolean> | null = null;
     private cachedRows: PauseGraphicsRow[] | null = null;
 
     private run(tasks: Task[]): Promise<void> {
@@ -122,6 +126,16 @@ export class PauseGraphicsProvider {
 
                 this.cooldown = PRESS_GAP_FRAMES;
                 this.tasks.shift();
+                break;
+            case 'enter':
+                if (GetPauseMenuSelectionData()[0] === GRAPHICS_PAGE || task.presses >= ENTER_LIMIT) {
+                    this.tasks.shift();
+                    break;
+                }
+
+                SetControlNormal(2, CONTROL_ACCEPT, 1.0);
+                task.presses++;
+                this.cooldown = ENTER_GAP_FRAMES;
                 break;
             case 'press':
                 SetControlNormal(2, task.control, 1.0);
@@ -190,15 +204,42 @@ export class PauseGraphicsProvider {
         return text;
     }
 
-    private async sendRows(): Promise<void> {
+    private async readRows(): Promise<PauseGraphicsRow[] | null> {
         const text = await this.readText();
 
-        if (!this.active) {
-            return;
+        return text === null || !this.active ? null : parseRows(text);
+    }
+
+    private dispatchRows(rows: PauseGraphicsRow[]): void {
+        this.nuiDispatch.dispatch('pause_menu', 'GraphicsRows', rows);
+    }
+
+    private loadCache(): PauseGraphicsRow[] | null {
+        try {
+            const rows = JSON.parse(GetResourceKvpString(ROWS_KVP) ?? 'null');
+
+            return Array.isArray(rows) && rows.length > 0 ? rows : null;
+        } catch {
+            return null;
+        }
+    }
+
+    private storeCache(rows: PauseGraphicsRow[] | null): void {
+        this.cachedRows = rows;
+
+        if (rows?.length) {
+            SetResourceKvp(ROWS_KVP, JSON.stringify(rows));
+        } else {
+            DeleteResourceKvp(ROWS_KVP);
+        }
+    }
+
+    private ensureSession(): Promise<boolean> {
+        if (!this.session) {
+            this.session = this.open();
         }
 
-        this.cachedRows = parseRows(text ?? '');
-        this.nuiDispatch.dispatch('pause_menu', 'GraphicsRows', this.cachedRows);
+        return this.session;
     }
 
     @OnNuiEvent(NuiEvent.PauseMenuGraphicsOpen)
@@ -207,22 +248,34 @@ export class PauseGraphicsProvider {
             return;
         }
 
-        if (this.cachedRows) {
-            this.nuiDispatch.dispatch('pause_menu', 'GraphicsRows', this.cachedRows);
-        }
+        this.cachedRows = this.cachedRows ?? this.loadCache();
 
-        if (this.active) {
-            this.closeRequested = false;
+        if (this.cachedRows) {
+            this.dispatchRows(this.cachedRows);
 
             return;
         }
 
-        this.opening = this.open();
-        await this.opening;
-        this.opening = null;
+        if (!(await this.ensureSession())) {
+            this.dispatchRows([]);
+
+            return;
+        }
+
+        const rows = await this.readRows();
+
+        if (rows?.length) {
+            this.storeCache(rows);
+        }
+
+        this.dispatchRows(rows ?? []);
+
+        if (!this.held && !this.applying) {
+            this.close();
+        }
     }
 
-    private async open(): Promise<void> {
+    private async open(): Promise<boolean> {
         const start = GetGameTimer();
 
         this.active = true;
@@ -232,17 +285,24 @@ export class PauseGraphicsProvider {
         }
 
         if (IsPauseMenuActive() || !this.active || !this.pauseMenuProvider.isOpen()) {
-            this.active = false;
+            this.close();
 
-            return;
+            return false;
+        }
+
+        this.nuiDispatch.dispatch('pause_menu', 'GraphicsNative', true);
+        await wait(BACKDROP_DELAY);
+
+        if (!this.active) {
+            return false;
         }
 
         ActivateFrontendMenu(PAUSE_MENU, false, SETTINGS_TAB);
 
         if (!(await this.waitReady())) {
-            this.active = false;
+            this.close();
 
-            return;
+            return false;
         }
 
         await this.run([
@@ -253,93 +313,87 @@ export class PauseGraphicsProvider {
         ]);
         await this.run([
             { kind: 'press', control: CONTROL_ACCEPT },
-            { kind: 'wait', frames: 5 },
+            { kind: 'wait', frames: 20 },
+            { kind: 'enter', presses: 0 },
         ]);
 
-        await this.sendRows();
+        return this.active;
     }
 
     @OnNuiEvent(NuiEvent.PauseMenuGraphicsStep)
-    public async onStep({ index, id, direction }: { index: number; id: number; direction: number }): Promise<void> {
-        await this.opening;
+    public async onStep({ id, direction }: { id: number; direction: number }): Promise<void> {
+        if (this.applying) {
+            return;
+        }
 
-        if (!this.active) {
+        this.held = true;
+
+        if (!(await this.ensureSession())) {
             return;
         }
 
         await this.run([
-            { kind: 'scaleform', method: 'SET_COLUMN_HIGHLIGHT', args: [COLUMN, index] },
-            {
-                kind: 'scaleform',
-                method: 'SET_COLUMN_INPUT_EVENT',
-                args: [COLUMN, direction > 0 ? INPUT_RIGHT : INPUT_LEFT],
-            },
+            { kind: 'enter', presses: 0 },
+            { kind: 'select', index: 2, value: id, control: CONTROL_DOWN, presses: 0 },
+            { kind: 'wait', frames: 5 },
+            { kind: 'press', control: direction > 0 ? CONTROL_RIGHT : CONTROL_LEFT },
+            { kind: 'wait', frames: 10 },
         ]);
 
-        if (CYCLE_ROWS.includes(id)) {
-            await this.sendRows();
+        const rows = await this.readRows();
+
+        if (rows?.length) {
+            this.dispatchRows(rows);
         }
-    }
-
-    @OnNuiEvent(NuiEvent.PauseMenuGraphicsSet)
-    public async onSet({ id, value }: { id: number; value: number }): Promise<void> {
-        await this.opening;
-
-        if (!this.active) {
-            return;
-        }
-
-        await this.run([{ kind: 'scaleform', method: 'GET_COLUMN_SELECTION', args: [COLUMN, 2, id, value] }]);
     }
 
     @OnNuiEvent(NuiEvent.PauseMenuGraphicsApply)
-    public async onApply(): Promise<void> {
-        await this.opening;
-
-        if (!this.active || this.applying) {
+    public async onApply({ values }: { values: Record<number, number> }): Promise<void> {
+        if (this.applying) {
             return;
         }
 
         this.applying = true;
 
-        const inColumn = GetPauseMenuSelectionData()[0] === GRAPHICS_PAGE;
+        if (await this.ensureSession()) {
+            this.storeCache(null);
 
-        await this.run([
-            ...(inColumn
-                ? []
-                : ([
-                      { kind: 'press', control: CONTROL_ACCEPT },
-                      { kind: 'wait', frames: 10 },
-                  ] as Task[])),
-            { kind: 'pressAll', controls: [CONTROL_APPLY] },
-            { kind: 'wait', frames: 10 },
-        ]);
+            await this.run([
+                ...Object.entries(values).map(
+                    ([id, value]): Task => ({
+                        kind: 'scaleform',
+                        method: 'GET_COLUMN_SELECTION',
+                        args: [COLUMN, 2, Number(id), value],
+                    }),
+                ),
+                { kind: 'enter', presses: 0 },
+                { kind: 'pressAll', controls: [CONTROL_APPLY] },
+                { kind: 'wait', frames: 10 },
+            ]);
+            await this.run([
+                { kind: 'pressAll', controls: ENTER_CONTROLS },
+                { kind: 'wait', frames: 30 },
+            ]);
+            await this.run([
+                { kind: 'pressAll', controls: ENTER_CONTROLS },
+                { kind: 'wait', frames: 10 },
+            ]);
 
-        await this.run([
-            { kind: 'pressAll', controls: ENTER_CONTROLS },
-            { kind: 'wait', frames: 30 },
-        ]);
-        await this.run([
-            { kind: 'pressAll', controls: ENTER_CONTROLS },
-            { kind: 'wait', frames: 10 },
-        ]);
-        await this.sendRows();
-        this.applying = false;
+            const rows = await this.readRows();
 
-        if (this.closeRequested) {
-            this.close();
+            if (rows?.length) {
+                this.storeCache(rows);
+            }
         }
+
+        this.applying = false;
+        this.close();
+        this.dispatchRows(this.cachedRows ?? []);
     }
 
     @OnNuiEvent(NuiEvent.PauseMenuGraphicsClose)
     public async onClose(): Promise<void> {
-        if (!this.active) {
-            return;
-        }
-
-        if (this.applying) {
-            this.closeRequested = true;
-
+        if (!this.active || this.applying) {
             return;
         }
 
@@ -347,14 +401,24 @@ export class PauseGraphicsProvider {
     }
 
     private close(): void {
-        this.closeRequested = false;
-
         const pending = this.tasks;
+        const wasActive = this.active;
 
         this.tasks = [];
         this.cooldown = 0;
         this.active = false;
-        SetFrontendActive(false);
+        this.held = false;
+        this.session = null;
+
+        if (wasActive) {
+            SetFrontendActive(false);
+            setTimeout(() => {
+                if (!this.active) {
+                    this.nuiDispatch.dispatch('pause_menu', 'GraphicsNative', false);
+                }
+            }, BACKDROP_DELAY);
+        }
+
         pending.forEach((task) => task.kind === 'done' && task.resolve());
     }
 }
