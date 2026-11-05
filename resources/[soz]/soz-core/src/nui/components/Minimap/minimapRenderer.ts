@@ -1,5 +1,12 @@
 import { Postals } from '../../../config/postals';
-import { MinimapBlip, MinimapFrame, MinimapOrientation, MinimapPoint, MinimapZone } from '../../../shared/nui/minimap';
+import {
+    MinimapBlip,
+    MinimapFrame,
+    MinimapOrientation,
+    MinimapPlayerBlip,
+    MinimapPoint,
+    MinimapZone,
+} from '../../../shared/nui/minimap';
 import { DEFAULT_MINIMAP_STYLE, MinimapStyle } from '../../../shared/nui/minimap';
 import { PauseMapLayer, PauseMapRegion } from '../../../shared/nui/pause_menu';
 import { getBlipColor, UNTINTED_BLIP_COLORS } from './blipColors';
@@ -7,7 +14,7 @@ import { isMapTabActive, isMinimapEditing, MinimapMode, setMinimapMode } from '.
 
 const MAP_URL = 'https://cfx-nui-soz-map-tiles/map';
 const BLIP_URL = 'https://cfx-nui-soz-map-tiles/blips';
-const ASSETS_VERSION = 5;
+const ASSETS_VERSION = 7;
 const ORIGIN_X = -4140;
 const ORIGIN_Y = 8400;
 const IMAGE_UNITS = 4500;
@@ -16,6 +23,11 @@ export const getBlipIconUrl = (sprite: number): string => `${BLIP_URL}/${sprite}
 
 const REGION_SCALE = [0.08, 1.6];
 const POSTAL_MIN_SCALE = 0.8;
+const PLAYER_LABEL_SCALE = 1.2;
+const HIGHLIGHT_MS = 1600;
+const HIGHLIGHT_FADE_FROM = 500;
+const HIGHLIGHT_GROWTH = 0.9;
+const HIGHLIGHT_PEAK = 0.2;
 const FOCUS_SCALE = 1;
 const SCRIPT_FOCUS_SCALE = 1.2;
 const FOCUS_RATE = 8;
@@ -37,12 +49,16 @@ const ROUTE_COLOR = '#b25ce8';
 const ROUTE_SEARCH_POINTS = 300;
 const WAYPOINT_SPRITE = 8;
 const WAYPOINT_SIZE = 22;
+const WAYPOINT_SNAP = 2;
 const PANEL_DEFAULT_SCALE = 0.6;
 const PANEL_MIN_SCALE = 0.06;
 const PANEL_MAX_SCALE = 8;
 const ZOOM_FACTOR = 1.3;
 const DRAG_THRESHOLD = 4;
 const HOVER_RADIUS = 14;
+const BLIP_ZOOM_FROM = 1;
+const BLIP_ZOOM_GROWTH = 0.4;
+const BLIP_ZOOM_MAX = 2.2;
 const WRAP_MARGIN_X = 14000;
 const WRAP_MARGIN_Y = 20000;
 const WORLD_MIN_X = ORIGIN_X - WRAP_MARGIN_X / 2;
@@ -65,7 +81,8 @@ let mapRequested = false;
 export type MinimapCallbacks = {
     onModeChange: (mode: MinimapMode) => void;
     onClick: (point: MinimapPoint, blip?: MinimapBlip, screen?: { x: number; y: number }) => void;
-    onRightClick: () => void;
+    onRightClick: (point: MinimapPoint, screen: { x: number; y: number }) => void;
+    onDoubleClick: (point: MinimapPoint, hasWaypoint: boolean) => void;
 };
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -156,9 +173,11 @@ export class MinimapRenderer {
     public zones: MinimapZone[] = [];
     public route: MinimapPoint[] = [];
     public waypoint: MinimapPoint | null = null;
-    public layers: PauseMapLayer[] = ['blips', 'regions'];
+    public layers: PauseMapLayer[] = ['blips', 'regions', 'players'];
     public highlight: MinimapPoint | null = null;
     private highlightLabel: string | null = null;
+    private highlightAt = 0;
+    private highlightBlip: MinimapBlip | null = null;
     private target: { x: number; y: number; scale: number } | null = null;
     private regionLabels: Label[] = [];
     private readonly postalLabels: Label[] = Postals.map(([text, x, y]) => ({ text, x, y, priority: 0 }));
@@ -174,6 +193,7 @@ export class MinimapRenderer {
         canvas.addEventListener('pointermove', this.onPointerMove);
         canvas.addEventListener('pointerup', this.onPointerUp);
         canvas.addEventListener('contextmenu', this.onContextMenu);
+        canvas.addEventListener('dblclick', this.onDoubleClick);
 
         this.loadMap();
         this.loadIcon(WAYPOINT_SPRITE);
@@ -188,6 +208,7 @@ export class MinimapRenderer {
         this.canvas.removeEventListener('pointermove', this.onPointerMove);
         this.canvas.removeEventListener('pointerup', this.onPointerUp);
         this.canvas.removeEventListener('contextmenu', this.onContextMenu);
+        this.canvas.removeEventListener('dblclick', this.onDoubleClick);
     }
 
     public getFrame(): MinimapFrame | null {
@@ -206,13 +227,38 @@ export class MinimapRenderer {
         this.blips = blips;
 
         if (this.hovered) {
-            const { x, y, sprite } = this.hovered;
+            const { id, x, y, sprite } = this.hovered;
 
-            this.hovered = blips.find((blip) => blip.x === x && blip.y === y && blip.sprite === sprite) ?? null;
+            if (this.highlightBlip) {
+                const focused = this.highlightBlip;
+
+                this.highlightBlip =
+                    blips.find((blip) =>
+                        focused.id ? blip.id === focused.id : blip.x === focused.x && blip.y === focused.y,
+                    ) ?? null;
+            }
+
+            this.hovered =
+                blips.find((blip) => (id ? blip.id === id : blip.x === x && blip.y === y && blip.sprite === sprite)) ??
+                null;
         }
 
         for (const blip of blips) {
             this.loadIcon(blip.sprite);
+        }
+    }
+
+    public setPlayerBlips(moved: MinimapPlayerBlip[]): void {
+        const byId = new Map(moved.map((entry) => [entry.id, entry]));
+
+        for (const blip of this.blips) {
+            const entry = blip.player && byId.get(blip.id);
+
+            if (entry) {
+                blip.x = entry.x;
+                blip.y = entry.y;
+                blip.rotation = entry.rotation;
+            }
         }
     }
 
@@ -232,6 +278,10 @@ export class MinimapRenderer {
     public focus(point: MinimapPoint, label?: string): void {
         this.highlight = { ...point };
         this.highlightLabel = label ?? null;
+        this.highlightAt = performance.now();
+        this.highlightBlip =
+            this.blips.find((blip) => this.isBlipVisible(blip) && Math.hypot(blip.x - point.x, blip.y - point.y) < 1) ??
+            null;
         this.target = {
             x: nearestCopy(point.x, this.panel.x, WORLD_WIDTH),
             y: nearestCopy(point.y, this.panel.y, WORLD_HEIGHT),
@@ -586,6 +636,7 @@ export class MinimapRenderer {
         ctx.globalAlpha = 1;
 
         const showBlips = this.mode === 'minimap' || this.layers.includes('blips');
+        const showPlayers = this.mode === 'minimap' || this.layers.includes('players');
 
         for (const ox of offsets) {
             for (const oy of offsets) {
@@ -599,9 +650,7 @@ export class MinimapRenderer {
 
         for (const ox of offsets) {
             for (const oy of offsets) {
-                if (showBlips) {
-                    this.drawBlips(ox, oy);
-                }
+                this.drawBlips(ox, oy, showBlips, showPlayers);
 
                 this.drawWaypoint(ox, oy);
                 this.drawHighlight(ox, oy);
@@ -620,6 +669,10 @@ export class MinimapRenderer {
                         this.drawLabels(this.regionLabels, size, 'region', ox, oy);
                     }
 
+                    if (showPlayers && zoom >= PLAYER_LABEL_SCALE) {
+                        this.drawPlayerLabels(ox, oy);
+                    }
+
                     if (this.layers.includes('postals') && zoom >= POSTAL_MIN_SCALE) {
                         const size = Math.min(14, 11 + Math.log2(zoom / POSTAL_MIN_SCALE) * 1.5);
 
@@ -632,8 +685,20 @@ export class MinimapRenderer {
         this.drawTooltip();
     }
 
+    private isBlipVisible(blip: MinimapBlip): boolean {
+        if (this.mode === 'minimap') {
+            return true;
+        }
+
+        return this.layers.includes(blip.player ? 'players' : 'blips');
+    }
+
     private getBlipLabel(blip: MinimapBlip): string {
         const name = blip.name ?? '';
+
+        if (blip.player) {
+            return name;
+        }
         const same = this.blips.filter((other) => other.name === name);
 
         if (same.length < 2) {
@@ -827,9 +892,25 @@ export class MinimapRenderer {
             return;
         }
 
+        const age = performance.now() - this.highlightAt;
+
+        if (age > HIGHLIGHT_MS) {
+            this.highlight = null;
+            this.highlightLabel = null;
+            this.highlightBlip = null;
+
+            return;
+        }
+
+        if (this.highlightBlip) {
+            return;
+        }
+
         const ctx = this.ctx;
         const [x, y] = this.toScreen(this.highlight.x, this.highlight.y, ox, oy);
 
+        ctx.save();
+        ctx.globalAlpha = 1 - Math.max(0, (age - HIGHLIGHT_FADE_FROM) / (HIGHLIGHT_MS - HIGHLIGHT_FADE_FROM));
         ctx.beginPath();
         ctx.arc(x, y, 20, 0, Math.PI * 2);
         ctx.lineWidth = 7;
@@ -838,26 +919,52 @@ export class MinimapRenderer {
         ctx.lineWidth = 3.5;
         ctx.strokeStyle = ROUTE_COLOR;
         ctx.stroke();
+        ctx.restore();
 
         if (this.highlightLabel && !this.tooltip) {
             this.tooltip = { x, y: y - 24, text: this.highlightLabel };
         }
     }
 
-    private drawBlips(ox: number, oy: number): void {
+    private getBlipZoom(): number {
+        if (this.mode === 'minimap' || this.camera.scale <= BLIP_ZOOM_FROM) {
+            return 1;
+        }
+
+        return Math.min(BLIP_ZOOM_MAX, 1 + Math.log2(this.camera.scale / BLIP_ZOOM_FROM) * BLIP_ZOOM_GROWTH);
+    }
+
+    private getFocusGrowth(): number {
+        const progress = Math.min(1, (performance.now() - this.highlightAt) / HIGHLIGHT_MS);
+        const bump =
+            progress < HIGHLIGHT_PEAK
+                ? progress / HIGHLIGHT_PEAK
+                : 1 - (progress - HIGHLIGHT_PEAK) / (1 - HIGHLIGHT_PEAK);
+
+        return 1 + HIGHLIGHT_GROWTH * Math.sin((bump * Math.PI) / 2);
+    }
+
+    private drawBlips(ox: number, oy: number, showBlips: boolean, showPlayers: boolean): void {
         const ctx = this.ctx;
-        const baseSize = this.mode === 'minimap' ? BLIP_SIZE : PANEL_BLIP_SIZE;
+        const baseSize = this.mode === 'minimap' ? BLIP_SIZE : PANEL_BLIP_SIZE * this.getBlipZoom();
 
         for (const blip of this.blips) {
-            const highlighted = blip === this.hovered;
-            const size = highlighted ? baseSize * 1.5 : baseSize;
+            if (!(blip.player ? showPlayers : showBlips)) {
+                continue;
+            }
+
+            const focused = blip === this.highlightBlip && this.highlight !== null && this.mode === 'open';
+            const highlighted = blip === this.hovered || focused;
+            const size = focused ? baseSize * this.getFocusGrowth() : blip === this.hovered ? baseSize * 1.5 : baseSize;
             const [x, y] = this.toScreen(blip.x, blip.y, ox, oy);
 
             if (x < -size || y < -size || x > this.current.w + size || y > this.current.h + size) {
                 continue;
             }
 
-            if (highlighted && this.mode === 'open' && blip.name) {
+            if (focused && this.highlightLabel) {
+                this.tooltip = { x, y: y - size, text: this.highlightLabel };
+            } else if (highlighted && this.mode === 'open' && blip.name) {
                 this.tooltip = { x, y: y - size, text: this.getBlipLabel(blip) };
             }
 
@@ -870,7 +977,11 @@ export class MinimapRenderer {
 
             const icon = this.getIcon(blip.sprite, blip.color);
 
-            if (icon && blip.rotation && this.orientation !== 'upright') {
+            ctx.globalAlpha = highlighted ? 1 : (blip.alpha ?? 255) / 255;
+
+            if (blip.player) {
+                this.drawPlayerBlip(blip, icon, x, y, size);
+            } else if (icon && blip.rotation && this.orientation !== 'upright') {
                 ctx.save();
                 ctx.translate(x, y);
                 ctx.rotate(this.camera.rotation - toRadians(blip.rotation));
@@ -884,6 +995,80 @@ export class MinimapRenderer {
                 ctx.arc(x, y, 4, 0, Math.PI * 2);
                 ctx.fill();
             }
+
+            ctx.globalAlpha = 1;
+        }
+    }
+
+    private drawPlayerBlip(
+        blip: MinimapBlip,
+        icon: CanvasImageSource | null,
+        x: number,
+        y: number,
+        size: number,
+    ): void {
+        const ctx = this.ctx;
+        const iconSize = size * 0.8;
+
+        if (icon) {
+            ctx.drawImage(icon, x - iconSize / 2, y - iconSize / 2, iconSize, iconSize);
+        } else {
+            ctx.fillStyle = getBlipColor(blip.color);
+            ctx.beginPath();
+            ctx.arc(x, y, iconSize / 3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(this.camera.rotation - toRadians(blip.rotation));
+        ctx.beginPath();
+        ctx.moveTo(0, -iconSize * 0.75);
+        ctx.lineTo(iconSize * 0.22, -iconSize * 0.45);
+        ctx.lineTo(-iconSize * 0.22, -iconSize * 0.45);
+        ctx.closePath();
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.fill();
+        ctx.restore();
+    }
+
+    private drawPlayerLabels(ox: number, oy: number): void {
+        const ctx = this.ctx;
+        const boxes: [number, number, number, number][] = [];
+
+        ctx.font = '600 11px Prompt, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 3;
+
+        for (const blip of this.blips) {
+            if (!blip.player || !blip.name || blip === this.hovered) {
+                continue;
+            }
+
+            const [x, y] = this.toScreen(blip.x, blip.y, ox, oy);
+            const top = y + PANEL_BLIP_SIZE * this.getBlipZoom() * 0.5;
+
+            if (x < -100 || top < -20 || x > this.current.w + 100 || top > this.current.h + 20) {
+                continue;
+            }
+
+            const width = ctx.measureText(blip.name).width + 4;
+            const box: [number, number, number, number] = [x - width / 2, top, x + width / 2, top + 14];
+
+            if (boxes.some(([bx0, by0, bx1, by1]) => box[0] < bx1 && box[2] > bx0 && box[1] < by1 && box[3] > by0)) {
+                continue;
+            }
+
+            boxes.push(box);
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.75)';
+            ctx.strokeText(blip.name, x, top);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(blip.name, x, top);
         }
     }
 
@@ -899,8 +1084,13 @@ export class MinimapRenderer {
         }
 
         const [x, y] = this.toScreen(this.waypoint.x, this.waypoint.y, ox, oy);
+        const hovered =
+            this.hovered &&
+            Math.hypot(this.hovered.x - this.waypoint.x, this.hovered.y - this.waypoint.y) < WAYPOINT_SNAP;
+        const base = this.mode === 'minimap' ? WAYPOINT_SIZE : WAYPOINT_SIZE * this.getBlipZoom();
+        const size = hovered ? base * 1.5 : base;
 
-        this.ctx.drawImage(icon, x - WAYPOINT_SIZE / 2, y - WAYPOINT_SIZE / 2, WAYPOINT_SIZE, WAYPOINT_SIZE);
+        this.ctx.drawImage(icon, x - size / 2, y - size / 2, size, size);
     }
 
     private drawPlayer(frame: MinimapFrame, ox: number, oy: number): void {
@@ -930,9 +1120,13 @@ export class MinimapRenderer {
 
     private findBlipAt(sx: number, sy: number): MinimapBlip | null {
         let best: MinimapBlip | null = null;
-        let bestDistance = HOVER_RADIUS;
+        let bestDistance = HOVER_RADIUS * this.getBlipZoom();
 
         for (const blip of this.blips) {
+            if (!this.isBlipVisible(blip)) {
+                continue;
+            }
+
             for (const ox of WRAP_OFFSETS) {
                 for (const oy of WRAP_OFFSETS) {
                     const [x, y] = this.toScreen(blip.x, blip.y, ox, oy);
@@ -986,7 +1180,6 @@ export class MinimapRenderer {
                 const bounds = this.canvas.getBoundingClientRect();
 
                 this.hovered = this.findBlipAt(event.clientX - bounds.left, event.clientY - bounds.top);
-                this.canvas.style.cursor = this.hovered ? 'pointer' : 'grab';
             }
 
             return;
@@ -1035,11 +1228,39 @@ export class MinimapRenderer {
         });
     };
 
+    private onDoubleClick = (event: MouseEvent): void => {
+        event.preventDefault();
+
+        if (this.mode !== 'open') {
+            return;
+        }
+
+        const bounds = this.canvas.getBoundingClientRect();
+        const sx = event.clientX - bounds.left;
+        const sy = event.clientY - bounds.top;
+        const blip = this.findBlipAt(sx, sy);
+        const point = blip ? { x: blip.x, y: blip.y } : this.toWorld(sx, sy);
+        const hasWaypoint = Boolean(this.waypoint);
+
+        this.callbacks.onDoubleClick(
+            { x: wrap(point.x, WORLD_MIN_X, WORLD_WIDTH), y: wrap(point.y, WORLD_MIN_Y, WORLD_HEIGHT) },
+            hasWaypoint,
+        );
+    };
+
     private onContextMenu = (event: MouseEvent): void => {
         event.preventDefault();
 
-        if (this.mode === 'open') {
-            this.callbacks.onRightClick();
+        if (this.mode !== 'open') {
+            return;
         }
+
+        const bounds = this.canvas.getBoundingClientRect();
+        const point = this.toWorld(event.clientX - bounds.left, event.clientY - bounds.top);
+
+        this.callbacks.onRightClick(
+            { x: wrap(point.x, WORLD_MIN_X, WORLD_WIDTH), y: wrap(point.y, WORLD_MIN_Y, WORLD_HEIGHT) },
+            { x: event.clientX, y: event.clientY },
+        );
     };
 }

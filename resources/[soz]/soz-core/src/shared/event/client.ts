@@ -1,5 +1,6 @@
 export enum ClientEvent {
     ADMIN_OPEN_MENU = 'soz-core:client:admin:openMenu',
+    PAUSE_MENU_CLOSE = 'soz-core:client:pause-menu:close',
     ADMIN_MAPPER_OPEN_MENU = 'soz-core:client:admin:mapper:openMenu',
     ADMIN_SHOW_GPS = 'soz-core:client:admin:show-gps',
     ADMIN_SPECTATE_PLAYER = 'soz-core:client:admin:spectate-player',

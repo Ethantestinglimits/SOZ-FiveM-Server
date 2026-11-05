@@ -5,18 +5,22 @@ import {
     LocationMarkerIcon,
     SearchIcon,
     TagIcon,
+    UserGroupIcon,
 } from '@heroicons/react/outline';
 import classNames from 'classnames';
-import { FunctionComponent, ReactNode, useMemo, useState } from 'react';
+import { FunctionComponent, ReactNode, useEffect, useMemo, useState } from 'react';
 
 import { Postals } from '../../../config/postals';
 import { NuiEvent } from '../../../shared/event';
+import { MinimapBlip, PlayersLayerLayout, PlayersLayerState } from '../../../shared/nui/minimap';
 import { PauseMapLayer, PauseMenuData } from '../../../shared/nui/pause_menu';
 import { fetchNui } from '../../fetch';
+import { useNuiEvent } from '../../hook/nui';
 import { getBlipColor, UNTINTED_BLIP_COLORS } from '../Minimap/blipColors';
 import { getBlipIconUrl } from '../Minimap/minimapRenderer';
 import { minimapController } from '../Minimap/minimapState';
 import { inputNavKeyDown, NAV_SKIP_ATTRIBUTE } from './keyboardNav';
+import { PlayerGroupsList } from './PlayerGroupsList';
 
 const MAX_RESULTS = 8;
 
@@ -24,6 +28,7 @@ const LAYERS: { id: PauseMapLayer; label: string; icon: ReactNode }[] = [
     { id: 'blips', label: 'Points d’intérêt', icon: <LocationMarkerIcon /> },
     { id: 'regions', label: 'Noms des régions', icon: <TagIcon /> },
     { id: 'postals', label: 'Codes postaux', icon: <HashtagIcon /> },
+    { id: 'players', label: 'Joueurs', icon: <UserGroupIcon /> },
 ];
 
 type SearchResult = {
@@ -40,6 +45,9 @@ type LegendGroup = {
     color: number;
     points: { x: number; y: number }[];
 };
+
+const playerBlipsOf = (blips: MinimapBlip[] = []) =>
+    blips.filter((blip) => blip.player && blip.name).sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '', 'fr'));
 
 const normalize = (value: string) => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
@@ -73,6 +81,17 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
     const [query, setQuery] = useState('');
     const [cycle, setCycle] = useState<Record<string, number>>({});
     const [hoveredGroup, setHoveredGroup] = useState<string | null>(null);
+    const [players, setPlayers] = useState<MinimapBlip[]>(() => playerBlipsOf(minimapController.renderer?.blips));
+
+    const [playersLayer, setPlayersLayer] = useState<PlayersLayerState | null>(null);
+
+    useNuiEvent('minimap', 'Blips', (blips) => setPlayers(playerBlipsOf(blips)));
+
+    useEffect(() => {
+        fetchNui<void, PlayersLayerState>(NuiEvent.PauseMenuPlayersLayer).then(setPlayersLayer);
+    }, []);
+
+    const showPlayers = Boolean(playersLayer?.enabled) && layers.includes('players');
 
     const items = useMemo<SearchResult[]>(
         () => [
@@ -84,6 +103,13 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
                 x: region.x,
                 y: region.y,
             })),
+            ...players.map((player) => ({
+                id: `player-${player.id}`,
+                label: player.name ?? '',
+                type: 'Joueur',
+                x: player.x,
+                y: player.y,
+            })),
             ...data.places.map((place) => ({
                 id: `place-${place.id}`,
                 label: place.name,
@@ -92,7 +118,7 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
                 y: place.y,
             })),
         ],
-        [data.regions, data.places],
+        [data.regions, data.places, players],
     );
 
     const results = useMemo(() => {
@@ -102,7 +128,13 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
             return [];
         }
 
-        return items.filter((item) => normalize(item.label).startsWith(search)).slice(0, MAX_RESULTS);
+        return items
+            .filter((item) =>
+                item.type === 'Joueur'
+                    ? normalize(item.label).includes(search)
+                    : normalize(item.label).startsWith(search),
+            )
+            .slice(0, MAX_RESULTS);
     }, [items, query]);
 
     const groups = useMemo<LegendGroup[]>(() => {
@@ -144,7 +176,29 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
         minimapController.focus?.(group.points[next], count > 1 ? `${group.name} ${next + 1}/${count}` : group.name);
     };
 
+    const changePlayersLayout = (layout: PlayersLayerLayout) => {
+        setPlayersLayer((state) => state && { ...state, layout });
+        fetchNui(NuiEvent.PauseMenuSavePlayersLayout, layout);
+    };
+
+    const isActive = (layer: PauseMapLayer) => (layer === 'players' ? showPlayers : layers.includes(layer));
+
     const toggleLayer = (layer: PauseMapLayer) => {
+        if (layer === 'players') {
+            const enabled = !showPlayers;
+
+            setPlayersLayer((state) => state && { ...state, enabled });
+            fetchNui(NuiEvent.AdminToggleDisplayPlayersOnMap, enabled);
+
+            if (!enabled) {
+                setPlayers([]);
+            }
+
+            if (enabled === layers.includes(layer)) {
+                return;
+            }
+        }
+
         const next = layers.includes(layer) ? layers.filter((id) => id !== layer) : [...layers, layer];
 
         onLayersChange(next);
@@ -168,7 +222,9 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
                                 select(results[0]);
                             }
                         }}
-                        placeholder="Code postal, région, lieu…"
+                        placeholder={
+                            players.length > 0 ? 'Code postal, région, lieu, joueur…' : 'Code postal, région, lieu…'
+                        }
                         className="w-full bg-transparent text-[1.5vh] text-white outline-none placeholder:text-white/40"
                     />
                 </label>
@@ -192,7 +248,7 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
             </div>
 
             <div className="flex gap-[0.6vh]">
-                {LAYERS.map((layer) => (
+                {LAYERS.filter((layer) => layer.id !== 'players' || playersLayer?.allowed).map((layer) => (
                     <button
                         key={layer.id}
                         onClick={() => toggleLayer(layer.id)}
@@ -200,10 +256,8 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
                         className={classNames(
                             'flex flex-1 items-center justify-center rounded-[0.9vh] py-[0.8vh] transition-colors duration-150',
                             {
-                                'bg-white text-black': layers.includes(layer.id),
-                                'bg-white/10 text-white/70 hover:bg-white/25 hover:text-white': !layers.includes(
-                                    layer.id,
-                                ),
+                                'bg-white text-black': isActive(layer.id),
+                                'bg-white/10 text-white/70 hover:bg-white/25 hover:text-white': !isActive(layer.id),
                             },
                         )}
                     >
@@ -211,6 +265,10 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
                     </button>
                 ))}
             </div>
+
+            {players.length > 0 && showPlayers && playersLayer && (
+                <PlayerGroupsList players={players} layout={playersLayer.layout} onLayoutChange={changePlayersLayout} />
+            )}
 
             <div className="flex min-h-0 flex-1 flex-col gap-[0.8vh]">
                 <div className="text-[1.2vh] font-semibold uppercase tracking-[0.2em] text-white/50">
@@ -229,7 +287,10 @@ export const MapSidebar: FunctionComponent<MapSidebarProps> = ({ data, layers, o
                                 }
                             }}
                             onKeyDown={(event) => {
-                                if (group.points.length > 1 && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+                                if (
+                                    group.points.length > 1 &&
+                                    (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
+                                ) {
                                     event.preventDefault();
                                     focusStep(group, event.key === 'ArrowRight' ? 1 : -1);
                                 }

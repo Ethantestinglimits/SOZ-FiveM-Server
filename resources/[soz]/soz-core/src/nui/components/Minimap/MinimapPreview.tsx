@@ -27,6 +27,7 @@ export const MinimapPreview: FunctionComponent = () => {
             onModeChange: () => undefined,
             onClick: () => undefined,
             onRightClick: () => undefined,
+            onDoubleClick: () => undefined,
         });
         const main = minimapController.renderer;
 
@@ -84,6 +85,7 @@ export const MinimapPreview: FunctionComponent = () => {
 
     useNuiEvent('minimap', 'Frame', (frame) => rendererRef.current?.setFrame(frame));
     useNuiEvent('minimap', 'Blips', (blips) => rendererRef.current?.setBlips(blips));
+    useNuiEvent('minimap', 'PlayerBlips', (moved) => rendererRef.current?.setPlayerBlips(moved));
     useNuiEvent('minimap', 'Zones', (zones) => rendererRef.current?.setZones(zones));
     useNuiEvent('minimap', 'Route', (route) => {
         if (rendererRef.current) rendererRef.current.route = route;

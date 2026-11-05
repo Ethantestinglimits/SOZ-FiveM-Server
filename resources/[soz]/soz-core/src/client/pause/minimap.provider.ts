@@ -8,14 +8,21 @@ import {
     MINIMAP_ORIENTATIONS,
     MinimapBlip,
     MinimapOrientation,
+    MinimapPlayerBlip,
+    MinimapPlayerGroup,
     MinimapPoint,
     MinimapZone,
 } from '../../shared/nui/minimap';
+import { AdminMenuGameMasterProvider } from '../admin/admin.menu.game-master.provider';
+import { AdminMenuInteractiveProvider, PLAYER_BLIP_PREFIX } from '../admin/admin.menu.interactive.provider';
 import { BlipFactory } from '../blip';
 import { HudMinimapProvider } from '../hud/hud.minimap.provider';
 import { NuiDispatch } from '../nui/nui.dispatch';
 
 const MAX_BLIP_SPRITE = 1000;
+const MAX_PLAYER_BLIPS = 200;
+const MAP_CONTEXT_ID = 'map:context';
+const KNOWN_BLIP_COLORS = 42;
 const BLIP_SPRITES_PER_TICK = 100;
 const WAYPOINT_BLIP_SPRITE = 8;
 const RADIUS_BLIP_SPRITES = [9, 10];
@@ -56,13 +63,25 @@ export class PauseMinimapProvider {
     @Inject(BlipFactory)
     private blipFactory: BlipFactory;
 
+    @Inject(AdminMenuInteractiveProvider)
+    private adminMenuInteractiveProvider: AdminMenuInteractiveProvider;
+
+    @Inject(AdminMenuGameMasterProvider)
+    private adminMenuGameMasterProvider: AdminMenuGameMasterProvider;
+
     public frameInterval = FRAME_INTERVAL;
 
     private lastFrameAt = 0;
     private scanSprite = 0;
     private scanBlips: MinimapBlip[] = [];
     private scanExcluded = new Set<number>();
-    private knownBlips = new Map<number, { id: string; name?: string; actions: boolean }>();
+    private knownBlips = new Map<
+        number,
+        { id: string; name?: string; actions: boolean; player: boolean; group?: MinimapPlayerGroup }
+    >();
+    private scanPlayers: { handle: number; blip: MinimapBlip }[] = [];
+    private trackedPlayers: { handle: number; blip: MinimapBlip }[] = [];
+    private lastPlayersAt = 0;
     private blipSignature = '';
     private zoneSignature = '';
     private routeSignature = '';
@@ -125,15 +144,31 @@ export class PauseMinimapProvider {
     @OnNuiEvent(NuiEvent.MinimapSetWaypoint)
     public async onSetWaypoint({ x, y }: MinimapPoint): Promise<void> {
         SetNewWaypoint(x, y);
-        this.waypointSignature = '';
-        this.dispatchWaypoint();
+        this.dispatchWaypoint(true);
     }
 
     @OnNuiEvent(NuiEvent.MinimapRemoveWaypoint)
     public async onRemoveWaypoint(): Promise<void> {
-        SetWaypointOff();
-        this.waypointSignature = '';
-        this.dispatchWaypoint();
+        this.removeWaypoint();
+    }
+
+    @OnNuiEvent(NuiEvent.MinimapContextMenu)
+    public async onContextMenu({ x, y }: MinimapPoint): Promise<void> {
+        if (!(await this.adminMenuInteractiveProvider.isMapAdmin())) {
+            this.removeWaypoint();
+
+            return;
+        }
+
+        this.blipFactory.showVirtualActions(MAP_CONTEXT_ID, [
+            { label: 'Se téléporter ici', action: () => this.adminMenuGameMasterProvider.teleportToCoords(x, y) },
+            ...(IsWaypointActive() ? [{ label: 'Supprimer le point', action: () => this.removeWaypoint() }] : []),
+        ]);
+    }
+
+    private removeWaypoint(): void {
+        DeleteWaypoint();
+        this.dispatchWaypoint(true);
     }
 
     @Tick(TickInterval.EVERY_FRAME)
@@ -201,24 +236,67 @@ export class PauseMinimapProvider {
         this.scanBlips = [];
         this.scanExcluded = new Set([GetMainPlayerBlipId(), GetNorthRadarBlip()]);
         this.knownBlips = new Map();
+        this.scanPlayers = [];
 
         for (const { id, gameId, actions, blip } of this.blipFactory.getAll().values()) {
+            const player = id.startsWith(PLAYER_BLIP_PREFIX);
+
             this.knownBlips.set(gameId, {
                 id,
-                name: blip.group === 'admin' ? undefined : blip.name,
+                name: blip.group === 'admin' && !player ? undefined : blip.name,
                 actions: Boolean(actions?.length),
+                player,
+                group: player ? this.adminMenuInteractiveProvider.getPlayerGroup(id) : undefined,
             });
         }
     }
 
     private publishBlips(): void {
+        this.trackedPlayers = this.scanPlayers;
+
         const signature = this.scanBlips
-            .map(blip => `${blip.id ?? ''}:${blip.name ?? ''}:${blip.sprite}:${blip.color}:${blip.x}:${blip.y}`)
+            .map(
+                blip =>
+                    `${blip.id ?? ''}:${blip.name ?? ''}:${blip.group?.id ?? ''}:${blip.sprite}:${blip.color}:${blip.x}:${blip.y}`
+            )
             .join('|');
 
         if (signature !== this.blipSignature) {
             this.blipSignature = signature;
             this.nuiDispatch.dispatch('minimap', 'Blips', this.scanBlips);
+        }
+    }
+
+    @Tick(TickInterval.EVERY_FRAME)
+    public onPlayerBlips(): void {
+        const now = GetGameTimer();
+
+        if (this.trackedPlayers.length === 0 || now - this.lastPlayersAt < this.frameInterval) {
+            return;
+        }
+
+        this.lastPlayersAt = now;
+
+        const moved: MinimapPlayerBlip[] = [];
+
+        for (const { handle, blip } of this.trackedPlayers) {
+            if (!DoesBlipExist(handle)) {
+                continue;
+            }
+
+            const [x, y] = GetBlipCoords(handle);
+            const rotation = GetBlipRotation(handle);
+
+            if (x !== blip.x || y !== blip.y || rotation !== blip.rotation) {
+                blip.x = x;
+                blip.y = y;
+                blip.rotation = rotation;
+                moved.push({ id: blip.id, x, y, rotation });
+            }
+        }
+
+        if (moved.length > 0) {
+            this.nuiDispatch.dispatch('minimap', 'PlayerBlips', moved);
         }
     }
 
@@ -255,7 +333,7 @@ export class PauseMinimapProvider {
         }
     }
 
-    private dispatchWaypoint(): void {
+    private dispatchWaypoint(force = false): void {
         let waypoint: MinimapPoint | null = null;
 
         if (IsWaypointActive()) {
@@ -266,7 +344,7 @@ export class PauseMinimapProvider {
 
         const signature = waypoint ? `${waypoint.x}:${waypoint.y}` : '';
 
-        if (signature !== this.waypointSignature) {
+        if (force || signature !== this.waypointSignature) {
             this.waypointSignature = signature;
             this.nuiDispatch.dispatch('minimap', 'Waypoint', waypoint);
         }
@@ -345,6 +423,18 @@ export class PauseMinimapProvider {
         }
     }
 
+    private getColor(handle: number): number {
+        const color = GetBlipColour(handle);
+
+        if (color < KNOWN_BLIP_COLORS || color > 255) {
+            return color;
+        }
+
+        const [r, g, b] = GetHudColour(GetBlipHudColour(handle));
+
+        return ((r << 24) | (g << 16) | (b << 8) | 255) >>> 0;
+    }
+
     private scanBlipRange(from: number, to: number): void {
         for (let sprite = from; sprite <= to; sprite++) {
             if (sprite === WAYPOINT_BLIP_SPRITE || RADIUS_BLIP_SPRITES.includes(sprite)) {
@@ -360,19 +450,32 @@ export class PauseMinimapProvider {
                     continue;
                 }
 
-                const [x, y] = GetBlipCoords(handle);
                 const known = this.knownBlips.get(handle);
 
-                this.scanBlips.push({
+                if (known?.player && this.scanPlayers.length >= MAX_PLAYER_BLIPS) {
+                    continue;
+                }
+
+                const [x, y] = GetBlipCoords(handle);
+                const blip: MinimapBlip = {
                     id: known?.id,
                     name: known?.name,
                     actions: known?.actions,
+                    player: known?.player,
+                    group: known?.group,
                     x,
                     y,
                     sprite: GetBlipSprite(handle),
-                    color: GetBlipColour(handle),
+                    color: this.getColor(handle),
+                    alpha: GetBlipAlpha(handle),
                     rotation: GetBlipRotation(handle),
-                });
+                };
+
+                this.scanBlips.push(blip);
+
+                if (known?.player) {
+                    this.scanPlayers.push({ handle, blip });
+                }
             }
         }
     }

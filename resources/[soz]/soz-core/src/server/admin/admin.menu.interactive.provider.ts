@@ -104,6 +104,7 @@ export class AdminMenuInteractiveProvider {
                 rpFullName: name,
                 coords: GetEntityCoords(ped),
                 heading: GetEntityHeading(ped),
+                job: playerData.job?.id,
             });
         }
         return players;

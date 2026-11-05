@@ -39,11 +39,14 @@ export const MinimapApp: FunctionComponent = () => {
                 if (blip?.id && blip.actions) {
                     setBlipAnchor(screen ?? null);
                     fetchNui(NuiEvent.MinimapBlipClick, { id: blip.id });
-                } else {
-                    fetchNui(NuiEvent.MinimapSetWaypoint, point);
                 }
             },
-            onRightClick: () => fetchNui(NuiEvent.MinimapRemoveWaypoint),
+            onDoubleClick: (point, hasWaypoint) =>
+                fetchNui(hasWaypoint ? NuiEvent.MinimapRemoveWaypoint : NuiEvent.MinimapSetWaypoint, point),
+            onRightClick: (point, screen) => {
+                setBlipAnchor(screen);
+                fetchNui(NuiEvent.MinimapContextMenu, point);
+            },
         });
 
         rendererRef.current = renderer;
@@ -116,6 +119,7 @@ export const MinimapApp: FunctionComponent = () => {
     useNuiEvent('minimap', 'Frame', (frame) => rendererRef.current?.setFrame(frame));
     useNuiEvent('minimap', 'Style', setMinimapStyle);
     useNuiEvent('minimap', 'Blips', (blips) => rendererRef.current?.setBlips(blips));
+    useNuiEvent('minimap', 'PlayerBlips', (moved) => rendererRef.current?.setPlayerBlips(moved));
     useNuiEvent('minimap', 'Zones', (zones) => rendererRef.current?.setZones(zones));
     useNuiEvent('minimap', 'Route', (route) => {
         if (rendererRef.current) rendererRef.current.route = route;

@@ -48,8 +48,33 @@ export type MinimapBlip = MinimapPoint & {
     id?: string;
     name?: string;
     actions?: boolean;
+    player?: boolean;
+    group?: MinimapPlayerGroup;
+    alpha: number;
     sprite: number;
     color: number;
+    rotation: number;
+};
+
+export type MinimapPlayerGroup = {
+    id: string;
+    label: string;
+    order: number;
+};
+
+export type PlayersLayerLayout = {
+    collapsed: boolean;
+    expanded: string[];
+};
+
+export type PlayersLayerState = {
+    allowed: boolean;
+    enabled: boolean;
+    layout: PlayersLayerLayout;
+};
+
+export type MinimapPlayerBlip = MinimapPoint & {
+    id: string;
     rotation: number;
 };
 
@@ -62,6 +87,7 @@ export type MinimapZone = MinimapPoint & {
 export interface NuiMinimapMethodMap {
     Frame: MinimapFrame;
     Blips: MinimapBlip[];
+    PlayerBlips: MinimapPlayerBlip[];
     Zones: MinimapZone[];
     Route: MinimapPoint[];
     Waypoint: MinimapPoint | null;

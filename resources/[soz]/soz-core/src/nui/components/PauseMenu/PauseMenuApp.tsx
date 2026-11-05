@@ -153,6 +153,12 @@ export const PauseMenuApp: FunctionComponent = () => {
     const nativeHover = useNativeHover();
     const backdrop = useNativeBackdrop();
 
+    useEffect(() => {
+        document.documentElement.classList.toggle('soz-pause-cursor', data !== null);
+
+        return () => document.documentElement.classList.remove('soz-pause-cursor');
+    }, [data !== null]);
+
     useNuiFocus(data !== null, data !== null, data !== null && nativeHover, [], data !== null && nativeHover);
 
     useNuiEvent('pause_menu', 'Open', (menuData) => {

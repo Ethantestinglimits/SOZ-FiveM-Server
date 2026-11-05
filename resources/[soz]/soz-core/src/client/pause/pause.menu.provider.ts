@@ -1,9 +1,9 @@
-import { OnNuiEvent } from '../../core/decorators/event';
+import { OnEvent, OnNuiEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Tick, TickInterval } from '../../core/decorators/tick';
 import { BlipType } from '../../shared/blip';
-import { NuiEvent, ServerEvent } from '../../shared/event';
+import { ClientEvent, NuiEvent, ServerEvent } from '../../shared/event';
 import { Control } from '../../shared/input';
 import { PauseMapLayer, PauseMapPlace, PauseMapRegion } from '../../shared/nui/pause_menu';
 import { BlipFactory } from '../blip';
@@ -23,8 +23,9 @@ const FRONTEND_MENU = GetHashKey('FE_MENU_VERSION_MP_PAUSE');
 const FRONTEND_SETTINGS_MENU = GetHashKey('FE_MENU_VERSION_LANDING_MENU');
 const FRONTEND_KEYS_MENU = GetHashKey('FE_MENU_VERSION_LANDING_KEYMAPPING_MENU');
 const MAP_LAYERS_KVP = 'soz_pause_map';
-const MAP_LAYERS: PauseMapLayer[] = ['postals', 'regions', 'blips'];
-const DEFAULT_MAP_LAYERS: PauseMapLayer[] = ['blips', 'regions'];
+const MAP_LAYERS: PauseMapLayer[] = ['postals', 'regions', 'blips', 'players'];
+const DEFAULT_MAP_LAYERS: PauseMapLayer[] = ['blips', 'regions', 'players'];
+const LEGACY_MAP_LAYERS: PauseMapLayer[] = ['postals', 'regions', 'blips'];
 const REGION_STEP = 125;
 const REGION_BOUNDS = { minX: -3800, maxX: 4400, minY: -4000, maxY: 8000 };
 const REGION_EXCLUDED_ZONES = ['OCEANA'];
@@ -149,6 +150,7 @@ export class PauseMenuProvider {
         });
     }
 
+    @OnEvent(ClientEvent.PAUSE_MENU_CLOSE)
     public close(): void {
         if (!this.opened) {
             return;
@@ -190,7 +192,7 @@ export class PauseMenuProvider {
 
     @OnNuiEvent(NuiEvent.PauseMenuSaveMapLayers)
     public async onSaveMapLayers(layers: PauseMapLayer[]): Promise<void> {
-        SetResourceKvp(MAP_LAYERS_KVP, JSON.stringify({ layers }));
+        SetResourceKvp(MAP_LAYERS_KVP, JSON.stringify({ layers, known: MAP_LAYERS }));
     }
 
     @OnNuiEvent(NuiEvent.PauseMenuQuit)
@@ -209,7 +211,13 @@ export class PauseMenuProvider {
         const places: PauseMapPlace[] = [];
 
         for (const { id, blip } of this.blipFactory.getAll().values()) {
-            if (!blip.name || blip.hidden || blip.group === 'admin' || blip.type === BlipType.Radius || !blip.position) {
+            if (
+                !blip.name ||
+                blip.hidden ||
+                blip.group === 'admin' ||
+                blip.type === BlipType.Radius ||
+                !blip.position
+            ) {
                 continue;
             }
 
@@ -267,9 +275,17 @@ export class PauseMenuProvider {
         }
 
         try {
-            const { layers } = JSON.parse(saved) as { layers?: PauseMapLayer[] };
+            const { layers, known } = JSON.parse(saved) as { layers?: PauseMapLayer[]; known?: PauseMapLayer[] };
 
-            return Array.isArray(layers) ? layers.filter(layer => MAP_LAYERS.includes(layer)) : DEFAULT_MAP_LAYERS;
+            if (!Array.isArray(layers)) {
+                return DEFAULT_MAP_LAYERS;
+            }
+
+            const added = DEFAULT_MAP_LAYERS.filter(
+                layer => !(known ?? LEGACY_MAP_LAYERS).includes(layer) && !layers.includes(layer)
+            );
+
+            return [...layers, ...added].filter(layer => MAP_LAYERS.includes(layer));
         } catch {
             return DEFAULT_MAP_LAYERS;
         }

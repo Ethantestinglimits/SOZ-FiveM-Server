@@ -2,12 +2,36 @@ import { OnNuiEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { emitRpc } from '../../core/rpc';
+import { slugify } from '../../nui/utils/slugify';
 import { AdminPlayer, LightAdminPlayer } from '../../shared/admin/admin';
-import { NuiEvent } from '../../shared/event';
+import { ClientEvent, NuiEvent, ServerEvent } from '../../shared/event';
+import { FDO, JobType } from '../../shared/job';
+import { MinimapPlayerGroup, PlayersLayerLayout, PlayersLayerState } from '../../shared/nui/minimap';
 import { Vector3 } from '../../shared/polyzone/vector';
 import { RpcServerEvent } from '../../shared/rpc';
 import { BlipFactory } from '../blip';
 import { DrawService } from '../draw.service';
+import { AdminSpectateProvider } from './admin.spectate.provider';
+
+export const PLAYER_BLIP_PREFIX = 'admin:player-blip:';
+const PLAYERS_LAYOUT_KVP = 'soz_pause_map_players';
+const PLAYERS_LAYER_ROLES = ['staff', 'admin', 'gamemaster'];
+
+export type PlayerBlipGroup = MinimapPlayerGroup & { color: number };
+
+export type PlayerBlipGroupResolver = (player: LightAdminPlayer) => PlayerBlipGroup | undefined;
+
+const FDO_GROUP: PlayerBlipGroup = { id: 'fdo', label: 'FDO', order: 10, color: 3 };
+const RESCUE_GROUP: PlayerBlipGroup = { id: 'rescue', label: 'Secours', order: 20, color: 1 };
+const CIVIL_GROUP: PlayerBlipGroup = { id: 'civil', label: 'Civil', order: 30, color: 0 };
+
+const getBaseGroup = (player: LightAdminPlayer): PlayerBlipGroup => {
+    if (FDO.includes(player.job)) {
+        return FDO_GROUP;
+    }
+
+    return player.job === JobType.LSMC ? RESCUE_GROUP : CIVIL_GROUP;
+};
 
 @Provider()
 export class AdminMenuInteractiveProvider {
@@ -16,6 +40,21 @@ export class AdminMenuInteractiveProvider {
 
     @Inject(BlipFactory)
     private blipFactory: BlipFactory;
+
+    @Inject(AdminSpectateProvider)
+    private adminSpectateProvider: AdminSpectateProvider;
+
+    private playerBlipGroup: PlayerBlipGroupResolver = () => undefined;
+
+    private playerGroups = new Map<string, MinimapPlayerGroup>();
+
+    public setPlayerBlipGroupResolver(resolver: PlayerBlipGroupResolver): void {
+        this.playerBlipGroup = resolver;
+    }
+
+    public getPlayerGroup(blipId: string): MinimapPlayerGroup | undefined {
+        return this.playerGroups.get(blipId);
+    }
 
     public intervalHandlers = {
         displayOwners: null,
@@ -156,13 +195,19 @@ export class AdminMenuInteractiveProvider {
 
     @OnNuiEvent(NuiEvent.AdminToggleDisplayPlayersOnMap)
     public async toggleDisplayPlayersOnMap(value: boolean): Promise<void> {
+        if (value === (this.intervalHandlers.displayPlayersOnMap !== null)) {
+            return;
+        }
+
         if (!value) {
             this.playerBlips.forEach((BlipValue, BlipKey) => {
-                this.blipFactory.remove('admin:player-blip:' + BlipKey);
+                this.blipFactory.remove(PLAYER_BLIP_PREFIX + BlipKey);
                 this.playerBlips.delete(BlipKey);
+                this.playerGroups.delete(PLAYER_BLIP_PREFIX + BlipKey);
             });
 
             clearInterval(this.intervalHandlers.displayPlayersOnMap);
+            this.intervalHandlers.displayPlayersOnMap = null;
             return;
         }
 
@@ -171,35 +216,96 @@ export class AdminMenuInteractiveProvider {
 
             this.playerBlips.forEach((BlipValue, BlipKey) => {
                 if (!players.some(player => player.citizenId === BlipKey)) {
-                    this.blipFactory.remove('admin:player-blip:' + BlipKey);
+                    this.blipFactory.remove(PLAYER_BLIP_PREFIX + BlipKey);
                     this.playerBlips.delete(BlipKey);
+                    this.playerGroups.delete(PLAYER_BLIP_PREFIX + BlipKey);
                 }
             });
 
             for (const player of players) {
                 const coords = player.coords;
-                const blipId = 'admin:player-blip:' + player.citizenId;
+                const blipId = PLAYER_BLIP_PREFIX + player.citizenId;
+                const { color, ...group } = this.playerBlipGroup(player) ?? getBaseGroup(player);
+
+                this.playerGroups.set(blipId, group);
+
                 if (this.blipFactory.exist(blipId)) {
-                    this.blipFactory.update('admin:player-blip:' + player.citizenId, {
+                    this.blipFactory.update(PLAYER_BLIP_PREFIX + player.citizenId, {
                         position: coords as Vector3,
                         heading: player.heading,
+                        color,
                     });
                 } else {
-                    const createdBlip = this.blipFactory.create('admin:player-blip:' + player.citizenId, {
-                        position: coords as Vector3,
-                        heading: player.heading,
-                        name: player.rpFullName,
-                        playerId: player.id,
-                        showHeading: true,
-                        sprite: 1,
-                        category: 7,
-                        group: 'admin',
-                    });
+                    const createdBlip = this.blipFactory.create(
+                        PLAYER_BLIP_PREFIX + player.citizenId,
+                        {
+                            position: coords as Vector3,
+                            heading: player.heading,
+                            name: player.rpFullName,
+                            playerId: player.id,
+                            showHeading: true,
+                            sprite: 1,
+                            color,
+                            category: 7,
+                            group: 'admin',
+                        },
+                        [
+                            {
+                                label: 'Aller vers le joueur',
+                                action: () =>
+                                    TriggerServerEvent(ServerEvent.ADMIN_TELEPORT_TO_PLAYER, { id: player.id }),
+                            },
+                            {
+                                label: 'Suivre le joueur',
+                                action: () => this.adminSpectateProvider.spectate({ id: player.id } as AdminPlayer),
+                            },
+                            {
+                                label: 'Ouvrir sa fiche',
+                                action: () => {
+                                    TriggerEvent(ClientEvent.PAUSE_MENU_CLOSE);
+                                    TriggerEvent(ClientEvent.ADMIN_OPEN_MENU, slugify('player_' + player.citizenId));
+                                },
+                            },
+                        ]
+                    );
 
                     this.playerBlips.set(player.citizenId, createdBlip);
                 }
             }
         }, 2500);
+    }
+
+    public async isMapAdmin(): Promise<boolean> {
+        const [isAllowed, permission] = await emitRpc<[boolean, string]>(RpcServerEvent.ADMIN_IS_ALLOWED);
+
+        return isAllowed && PLAYERS_LAYER_ROLES.includes(permission);
+    }
+
+    @OnNuiEvent(NuiEvent.PauseMenuPlayersLayer)
+    public async getPlayersLayer(): Promise<PlayersLayerState> {
+        return {
+            allowed: await this.isMapAdmin(),
+            enabled: this.intervalHandlers.displayPlayersOnMap !== null,
+            layout: this.getPlayersLayout(),
+        };
+    }
+
+    @OnNuiEvent(NuiEvent.PauseMenuSavePlayersLayout)
+    public async savePlayersLayout(layout: PlayersLayerLayout): Promise<void> {
+        SetResourceKvp(PLAYERS_LAYOUT_KVP, JSON.stringify(layout));
+    }
+
+    private getPlayersLayout(): PlayersLayerLayout {
+        try {
+            const saved = JSON.parse(GetResourceKvpString(PLAYERS_LAYOUT_KVP) ?? 'null');
+
+            return {
+                collapsed: Boolean(saved?.collapsed),
+                expanded: Array.isArray(saved?.expanded) ? saved.expanded : [],
+            };
+        } catch {
+            return { collapsed: false, expanded: [] };
+        }
     }
 
     private async displayPlayerNames(withDetails: boolean): Promise<void> {

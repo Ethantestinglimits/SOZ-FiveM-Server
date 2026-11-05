@@ -42,6 +42,8 @@ export class BlipFactory {
 
     private blips = new Map<string, GameBlip>();
 
+    private virtualActions = new Map<string, BlipAction<undefined>[]>();
+
     public getAll(): Map<string, GameBlip> {
         return this.blips;
     }
@@ -110,11 +112,29 @@ export class BlipFactory {
         );
     }
 
+    public showVirtualActions(id: string, actions: Omit<BlipAction, 'id'>[]): void {
+        const list = actions.map(action => ({ ...action, id: uuidv4() }));
+
+        this.virtualActions.set(id, list);
+        this.nuiDispatch.dispatch('blip', 'SetInfo', null);
+        this.nuiDispatch.dispatch(
+            'blip',
+            'SetActions',
+            list.map(action => ({ id: action.id, blipId: id, label: action.label }))
+        );
+    }
+
     @OnNuiEvent(NuiEvent.BlipAction)
     public async onBlipAction({ blipId, id }: { blipId: string; id: string }) {
         const blip = this.blips.get(blipId);
 
         if (!blip) {
+            const virtual = this.virtualActions.get(blipId)?.find(action => action.id === id);
+
+            if (virtual) {
+                await virtual.action(null, undefined);
+            }
+
             return;
         }
 

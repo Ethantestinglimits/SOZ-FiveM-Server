@@ -11,7 +11,7 @@ export const navSelected = (selected: boolean) => (selected ? { [NAV_SELECTED_AT
 export const navToggle = { [NAV_TOGGLE_ATTRIBUTE]: true };
 
 export const FOCUS_RING_CLASSES =
-    '[&_*:focus-visible]:outline-none [&_*:focus-visible]:shadow-[inset_0_0_0_2px_#000,inset_0_0_0_4px_#fff]';
+    '[&_*:focus-visible]:outline-none [&_*:focus-visible]:shadow-[inset_0_0_0_2px_#000,inset_0_0_0_4px_#fff] [&_input:not([type]):focus-visible]:shadow-none [&_input[type=text]:focus-visible]:shadow-none';
 
 const ZONES = ['side', 'main'];
 

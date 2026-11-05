@@ -1,6 +1,6 @@
 import { PauseSettingsData } from './pause_settings';
 
-export type PauseMapLayer = 'postals' | 'regions' | 'blips';
+export type PauseMapLayer = 'postals' | 'regions' | 'blips' | 'players';
 
 export type PauseMapPlace = {
     id: string;

@@ -1,5 +1,6 @@
 import { SozRole } from '@core/permissions';
 import { VampireGameCollection, VampireGameObjectiveTypePart2, VampireGameRole } from '@public/shared/halloween';
+import { JobType } from '@public/shared/job';
 import { PlayerCharInfo } from '@public/shared/player';
 import { EventInfo } from '@public/shared/scene';
 import { SenateParty, SenatePartyMember } from '@public/shared/senate';
@@ -155,4 +156,5 @@ export type LightAdminPlayer = {
     rpFullName: string;
     coords: number[];
     heading: number;
+    job?: JobType;
 };

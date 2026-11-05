@@ -36,6 +36,7 @@ export const BlipApp: FunctionComponent = () => {
 
     const refOutside = useOutside({
         click: () => setActions([]),
+        contextMenu: () => setActions([]),
     });
 
     if (actions.length === 0) {
@@ -46,11 +47,11 @@ export const BlipApp: FunctionComponent = () => {
 
     return (
         <main
-            className="absolute z-[100] flex flex-col items-center inset-0 h-full w-full overflow-hidden"
+            className="pointer-events-none absolute z-[100] flex flex-col items-center inset-0 h-full w-full overflow-hidden"
             style={{ cursor: 'none' }}
         >
             <div
-                className={anchor ? 'absolute' : 'mt-[52vh]'}
+                className={anchor ? 'pointer-events-auto absolute' : 'pointer-events-auto mt-[52vh]'}
                 style={anchor ? { left: anchor.x, top: anchor.y + 16, transform: 'translateX(-50%)' } : undefined}
             >
                 <GlassMorphismContainer>
@@ -69,8 +70,10 @@ export const BlipApp: FunctionComponent = () => {
                             return (
                                 <div key={i}>
                                     <div
-                                        className="flex text-white cursor-pointer items-center justify-between w-full p-2"
+                                        className="flex text-white cursor-pointer items-center justify-between w-full p-2 rounded-md transition-colors hover:bg-white/20"
                                         onClick={() => {
+                                            setActions([]);
+                                            setIsOver(false);
                                             fetchNui(NuiEvent.BlipAction, {
                                                 blipId: action.blipId,
                                                 id: action.id,

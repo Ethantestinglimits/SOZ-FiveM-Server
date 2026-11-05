@@ -46,6 +46,22 @@ export class AdminMenuGameMasterProvider {
         this.notifier.notify(`Vous vous êtes donné ${amount}$ en argent sale.`, 'success');
     }
 
+    public async teleportToCoords(x: number, y: number): Promise<void> {
+        SetPedCoordsKeepVehicle(PlayerPedId(), x, y, 0);
+
+        for (let height = 0; height < 1000; height += 1) {
+            const [found, z] = GetGroundZFor_3dCoord_2(x, y, height, false);
+
+            if (found) {
+                SetPedCoordsKeepVehicle(PlayerPedId(), x, y, z);
+
+                return;
+            }
+
+            await wait(1);
+        }
+    }
+
     @OnNuiEvent(NuiEvent.AdminTeleportToWaypoint)
     public async teleportToWaypoint(): Promise<void> {
         const waypoint = GetFirstBlipInfoId(8);
