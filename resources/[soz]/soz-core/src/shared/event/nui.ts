@@ -837,6 +837,8 @@ export enum NuiEvent {
     PauseMenuSaveMapLayers = 'soz-core:nui:pause-menu:save-map-layers',
     PauseMenuPlayersLayer = 'soz-core:nui:pause-menu:players-layer',
     PauseMenuSavePlayersLayout = 'soz-core:nui:pause-menu:save-players-layout',
+    CrosshairSet = 'soz-core:nui:crosshair:set',
+    CrosshairReset = 'soz-core:nui:crosshair:reset',
     PauseMenuSetSetting = 'soz-core:nui:pause-menu:set-setting',
     PauseMenuQueueNative = 'soz-core:nui:pause-menu:queue-native',
     PauseMenuBackdrop = 'soz-core:nui:pause-menu:backdrop',

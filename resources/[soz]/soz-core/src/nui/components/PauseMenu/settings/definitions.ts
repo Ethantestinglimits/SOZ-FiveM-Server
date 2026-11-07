@@ -260,6 +260,12 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
         ],
     },
     {
+        id: 'crosshair',
+        label: 'Viseur',
+        native: false,
+        items: [],
+    },
+    {
         id: 'voip',
         label: 'VoIP',
         native: false,

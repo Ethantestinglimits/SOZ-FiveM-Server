@@ -1,3 +1,4 @@
+import { CrosshairConfig } from './crosshair';
 
 export const PAUSE_NATIVE_CONVARS = [
     'profile_sfxVolume',
@@ -44,6 +45,7 @@ export type PauseServerSettingValue = boolean | number | string;
 export type PauseSettingsData = {
     server: Record<string, PauseServerSettingValue>;
     native: Record<string, number>;
+    crosshair: CrosshairConfig;
 };
 
 export type PauseSettingChange = {
