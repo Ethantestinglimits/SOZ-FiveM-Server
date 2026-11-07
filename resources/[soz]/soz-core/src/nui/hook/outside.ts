@@ -54,7 +54,7 @@ export const useOutside = (events: OutsideEvent, deps: DependencyList = []) => {
             document.removeEventListener('click', onClick);
             document.removeEventListener('mouseup', onUp);
             document.removeEventListener('mousedown', onDown);
-            document.removeEventListener('mousedown', onContextMenu);
+            document.removeEventListener('contextmenu', onContextMenu);
         };
     }, [refContainer, onClick, onUp, onDown, onContextMenu, ...deps]);
 
