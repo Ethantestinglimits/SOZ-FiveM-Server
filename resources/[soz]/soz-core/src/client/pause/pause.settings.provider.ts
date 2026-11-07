@@ -4,7 +4,6 @@ import { Provider } from '../../core/decorators/provider';
 import { NuiEvent } from '../../shared/event';
 import { MinimapOrientation } from '../../shared/nui/minimap';
 import { PAUSE_NATIVE_CONVARS, PauseSettingChange, PauseSettingsData } from '../../shared/nui/pause_settings';
-import { HudCrosshairProvider } from '../hud/hud.crosshair.provider';
 import { HudGlassmorphismProvider } from '../hud/hud.glassmorphism.provider';
 import { HudMinimapProvider } from '../hud/hud.minimap.provider';
 import { HudStateProvider } from '../hud/hud.state.provider';
@@ -63,9 +62,6 @@ export class PauseSettingsProvider {
     @Inject(HudGlassmorphismProvider)
     private hudGlassmorphismProvider: HudGlassmorphismProvider;
 
-    @Inject(HudCrosshairProvider)
-    private hudCrosshairProvider: HudCrosshairProvider;
-
     @Inject(HudWatchProvider)
     private hudWatchProvider: HudWatchProvider;
 
@@ -112,7 +108,6 @@ export class PauseSettingsProvider {
                 watchInjuryTracker: watch.showInjuryTracker,
             },
             native,
-            crosshair: this.hudCrosshairProvider.getConfig(),
         };
     }
 
@@ -144,7 +139,6 @@ export class PauseSettingsProvider {
             await this.apply(key, value);
         }
 
-        this.hudCrosshairProvider.reset();
         this.pauseMinimapStyleProvider.reset();
 
         this.nuiDispatch.dispatch('pause_menu', 'Settings', this.getSettings());

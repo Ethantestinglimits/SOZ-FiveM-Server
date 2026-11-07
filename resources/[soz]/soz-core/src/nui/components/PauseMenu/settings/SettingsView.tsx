@@ -7,7 +7,6 @@ import { isNativeSetting, NATIVE_SETTINGS } from '../../../../shared/nui/native_
 import { PauseSettingsData } from '../../../../shared/nui/pause_settings';
 import { fetchNui } from '../../../fetch';
 import { inputNavKeyDown, NAV_SKIP_ATTRIBUTE } from '../keyboardNav';
-import { CrosshairPanel } from './CrosshairPanel';
 import { GraphicsPanel } from './GraphicsPanel';
 import { KeysPanel } from './KeysPanel';
 import { MinimapPanel } from './MinimapPanel';
@@ -350,7 +349,6 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
 
     const showNativeButton = !query.trim() && current.native;
     const showStagedActions = sections.some((section) => section.category.staged);
-    const crosshairPage = current.id === 'crosshair' && !query.trim();
     const minimapPage = current.id === 'minimap' && !query.trim();
     const graphicsPage = current.id === 'graphics' && !query.trim();
     const keysPage = current.id === 'keys';
@@ -372,7 +370,6 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                 />
             </label>
 
-            {crosshairPage && <CrosshairPanel initial={settings.crosshair} />}
             {minimapPage && <MinimapPanel />}
             {graphicsPage && <GraphicsPanel />}
             {voicePage && <GraphicsPanel category={current.nativeCategory} />}
@@ -381,7 +378,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
             <div
                 className={classNames(
                     'min-h-0 flex-1 overflow-y-auto pr-[0.6vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full',
-                    { hidden: crosshairPage || graphicsPage || keysPage || voicePage },
+                    { hidden: graphicsPage || keysPage || voicePage },
                 )}
             >
                 {sections.map((section) => (
@@ -463,7 +460,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
 
             <div
                 className={classNames('min-h-[7vh] rounded-[1vh] bg-white/5 px-[1.6vh] py-[1.2vh]', {
-                    hidden: crosshairPage || graphicsPage || keysPage || voicePage,
+                    hidden: graphicsPage || keysPage || voicePage,
                 })}
             >
                 {hovered ? (

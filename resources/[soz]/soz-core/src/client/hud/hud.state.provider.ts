@@ -5,7 +5,6 @@ import { Tick } from '../../core/decorators/tick';
 import { ClientEvent } from '../../shared/event';
 import { HudComponent } from '../../shared/hud';
 import { NuiDispatch } from '../nui/nui.dispatch';
-import { HudCrosshairProvider } from './hud.crosshair.provider';
 import { HudMinimapProvider } from './hud.minimap.provider';
 
 const ALLOWED_RETICLE_WEAPONS = new Set([
@@ -24,9 +23,6 @@ export class HudStateProvider {
 
     @Inject(HudMinimapProvider)
     private readonly hudMinimapProvider: HudMinimapProvider;
-
-    @Inject(HudCrosshairProvider)
-    private readonly hudCrosshairProvider: HudCrosshairProvider;
 
     private isHudVisible = true;
 
@@ -132,22 +128,9 @@ export class HudStateProvider {
         const ped = PlayerPedId();
         const [, weapon] = GetCurrentPedWeapon(ped, true);
 
-        const reticleAllowed = this.isCrosshairVisible || ALLOWED_RETICLE_WEAPONS.has(weapon);
-        const customized = this.hudCrosshairProvider.isCustomized();
-
-        if (!reticleAllowed || customized) {
+        if (!this.isCrosshairVisible && !ALLOWED_RETICLE_WEAPONS.has(weapon)) {
             HideHudComponentThisFrame(HudComponent.Reticle);
         }
-
-        this.hudCrosshairProvider.setVisible(
-            customized &&
-                reticleAllowed &&
-                this.isHudVisible &&
-                !this.isCinematicMode &&
-                IsGameplayCamRendering() &&
-                !IsEntityDead(ped) &&
-                (IsPlayerFreeAiming(PlayerId()) || IsAimCamActive())
-        );
     }
 
     @On(ClientEvent.PHONE_CAMERA_OPEN)
