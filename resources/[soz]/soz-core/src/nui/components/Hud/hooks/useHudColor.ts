@@ -17,7 +17,11 @@ interface GlassmorphismColors {
 }
 
 export const useHudColor = (): GlassmorphismColors => {
-    const currentTheme = useHudTheme();
+    const hudTheme = useHudTheme();
+    const currentTheme =
+        hudTheme !== HudTheme.Auto && (Object.values(HudTheme) as HudTheme[]).includes(hudTheme)
+            ? hudTheme
+            : HudTheme.Dark;
 
     const isHalloween = useSelector((state: RootState) => state.features.Halloween);
     const halloweenMoon = useSelector((state: RootState) => state.hud.halloween.moon);
