@@ -8,11 +8,13 @@ import {
     CROSSHAIR_PRESETS,
     CrosshairConfig,
     CrosshairLines,
+    CrosshairProfiles,
     DEFAULT_CROSSHAIR,
 } from '../../../../shared/nui/crosshair';
 import { fetchNui } from '../../../fetch';
 import { CrosshairView } from '../../Crosshair/CrosshairView';
 import { navGroup, navSelected, navToggle } from '../keyboardNav';
+import { CrosshairProfilesSection } from './CrosshairProfilesSection';
 
 const COMMIT_DELAY = 150;
 
@@ -100,19 +102,40 @@ const LinesEditor: FunctionComponent<LinesEditorProps> = ({ lines, onChange }) =
 };
 
 type CrosshairPanelProps = {
-    initial: CrosshairConfig;
+    initial: CrosshairProfiles;
 };
 
 export const CrosshairPanel: FunctionComponent<CrosshairPanelProps> = ({ initial }) => {
-    const [config, setConfig] = useState<CrosshairConfig>(initial);
+    const [profiles, setProfiles] = useState<CrosshairProfiles>(initial);
     const [background, setBackground] = useState('dark');
     const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const pending = useRef<CrosshairConfig | null>(null);
     const initialKey = JSON.stringify(initial);
 
     useEffect(() => {
-        setConfig(initial);
+        setProfiles(initial);
     }, [initialKey]);
+
+    const config = (profiles.profiles.find(profile => profile.id === profiles.active) ?? profiles.profiles[0]).config;
+
+    const setConfig = (value: CrosshairConfig) =>
+        setProfiles(state => ({
+            ...state,
+            profiles: state.profiles.map(profile =>
+                profile.id === state.active ? { ...profile, config: value } : profile
+            ),
+        }));
+
+    const changeProfiles = (next: CrosshairProfiles) => {
+        if (timer.current) {
+            clearTimeout(timer.current);
+            timer.current = null;
+        }
+
+        pending.current = null;
+        setProfiles(next);
+        fetchNui(NuiEvent.CrosshairProfilesSet, next);
+    };
 
     useEffect(
         () => () => {
@@ -156,11 +179,131 @@ export const CrosshairPanel: FunctionComponent<CrosshairPanelProps> = ({ initial
     const current = BACKGROUNDS.find(item => item.id === background) ?? BACKGROUNDS[0];
 
     return (
-        <div className="min-h-0 flex-1 overflow-y-auto pr-[0.6vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full">
-            <div className="mb-[2vh]">
+        <div className="flex min-h-0 flex-1 gap-[1.6vh]">
+            <div className="min-h-0 flex-1 overflow-y-auto pr-[0.6vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full">
+                <Section title="Profils">
+                    <CrosshairProfilesSection profiles={profiles} onChange={changeProfiles} />
+                </Section>
+
+                <Section title="Préréglages">
+                    <div className="grid grid-cols-6 gap-[0.8vh]" {...navGroup('focus')}>
+                        {CROSSHAIR_PRESETS.map(preset => (
+                            <button
+                                key={preset.id}
+                                onClick={() => apply(preset.config)}
+                                className="flex flex-col items-center gap-[0.4vh] rounded-[1vh] bg-white/5 px-[0.6vh] py-[0.8vh] text-[1.3vh] font-semibold hover:bg-white/15"
+                            >
+                                <div className="flex h-[5vh] w-full items-center justify-center overflow-hidden rounded-[0.8vh] bg-neutral-900">
+                                    <CrosshairView config={preset.config} size="5vh" />
+                                </div>
+                                {preset.label}
+                            </button>
+                        ))}
+                    </div>
+                </Section>
+
+                <Section title="Général">
+                    <Row label="Couleur">
+                        <div className="flex items-center gap-[0.6vh]" {...navGroup('select')}>
+                            {CROSSHAIR_COLORS.map(color => (
+                                <button
+                                    key={color}
+                                    {...navSelected(config.color === color)}
+                                    onClick={() => apply({ ...config, color })}
+                                    className={classNames('h-[2.4vh] w-[2.4vh] rounded-[0.5vh] border', {
+                                        'border-white': config.color === color,
+                                        'border-transparent': config.color !== color,
+                                    })}
+                                    style={{ background: color }}
+                                />
+                            ))}
+                            <input
+                                type="color"
+                                value={config.color}
+                                onChange={event => apply({ ...config, color: event.target.value })}
+                                className="h-[2.4vh] w-[3vh] cursor-pointer rounded-[0.5vh] bg-transparent"
+                            />
+                        </div>
+                    </Row>
+                    <Row label="Point central">
+                        <Toggle value={config.dot} onChange={dot => apply({ ...config, dot })} />
+                    </Row>
+                    <Row label="Style T (sans ligne du haut)">
+                        <Toggle value={config.tStyle} onChange={tStyle => apply({ ...config, tStyle })} />
+                    </Row>
+                </Section>
+
+                <Section title="Contour">
+                    <Row label="Afficher">
+                        <Toggle
+                            value={config.outline.enabled}
+                            onChange={enabled => apply({ ...config, outline: { ...config.outline, enabled } })}
+                        />
+                    </Row>
+                    <Row label="Opacité">
+                        <Slider
+                            value={config.outline.opacity}
+                            min={0}
+                            max={100}
+                            onChange={opacity => apply({ ...config, outline: { ...config.outline, opacity } })}
+                        />
+                    </Row>
+                    <Row label="Épaisseur">
+                        <Slider
+                            value={config.outline.thickness}
+                            min={1}
+                            max={4}
+                            onChange={thickness => apply({ ...config, outline: { ...config.outline, thickness } })}
+                        />
+                    </Row>
+                </Section>
+
+                <Section title="Lignes intérieures">
+                    <LinesEditor lines={config.inner} onChange={inner => apply({ ...config, inner })} />
+                </Section>
+
+                <Section title="Lignes extérieures">
+                    <LinesEditor lines={config.outer} onChange={outer => apply({ ...config, outer })} />
+                </Section>
+
+                <Section title="Anneau">
+                    <Row label="Afficher">
+                        <Toggle
+                            value={config.ring.enabled}
+                            onChange={enabled => apply({ ...config, ring: { ...config.ring, enabled } })}
+                        />
+                    </Row>
+                    <Row label="Rayon">
+                        <Slider
+                            value={config.ring.radius}
+                            min={4}
+                            max={40}
+                            onChange={radius => apply({ ...config, ring: { ...config.ring, radius } })}
+                        />
+                    </Row>
+                    <Row label="Épaisseur">
+                        <Slider
+                            value={config.ring.thickness}
+                            min={1}
+                            max={8}
+                            onChange={thickness => apply({ ...config, ring: { ...config.ring, thickness } })}
+                        />
+                    </Row>
+                </Section>
+
+                <button
+                    onClick={reset}
+                    className="mb-[1vh] flex items-center gap-[0.8vh] rounded-[1vh] bg-red-500/20 px-[1.6vh] py-[0.9vh] text-[1.4vh] font-semibold uppercase text-red-200 transition-colors hover:bg-red-500/60 hover:text-white"
+                >
+                    <RefreshIcon className="h-[1.8vh] w-[1.8vh]" />
+                    Réinitialiser le viseur
+                </button>
+            </div>
+
+            <div className="flex w-[24vh] shrink-0 flex-col gap-[1vh]">
                 <div
                     className={classNames(
-                        'relative flex h-[22vh] items-center justify-center overflow-hidden rounded-[1.2vh]',
+                        'relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-[1.2vh]',
                         current.className
                     )}
                 >
@@ -168,136 +311,25 @@ export const CrosshairPanel: FunctionComponent<CrosshairPanelProps> = ({ initial
                         <CrosshairView config={config} size="9.26vh" />
                     </div>
                 </div>
-                <div className="mt-[0.8vh] flex gap-[0.6vh]" {...navGroup('select')}>
-                    {BACKGROUNDS.map(item => (
-                        <button
-                            key={item.id}
-                            {...navSelected(background === item.id)}
-                            onClick={() => setBackground(item.id)}
-                            className={classNames('flex-1 rounded-[0.8vh] py-[0.6vh] text-[1.3vh] font-semibold', {
-                                'bg-white text-black': background === item.id,
-                                'bg-white/10 text-white/70 hover:bg-white/25': background !== item.id,
-                            })}
-                        >
-                            {item.label}
-                        </button>
-                    ))}
+                <div className="flex flex-col gap-[0.8vh]">
+                    <div className="text-[1.2vh] font-semibold uppercase tracking-[0.2em] text-white/50">Aperçu</div>
+                    <div className="grid grid-cols-2 gap-[0.5vh]" {...navGroup('select')}>
+                        {BACKGROUNDS.map(item => (
+                            <button
+                                key={item.id}
+                                {...navSelected(background === item.id)}
+                                onClick={() => setBackground(item.id)}
+                                className={classNames('rounded-[0.7vh] py-[0.5vh] text-[1.25vh] font-semibold', {
+                                    'bg-white text-black': background === item.id,
+                                    'bg-white/10 text-white/70 hover:bg-white/25': background !== item.id,
+                                })}
+                            >
+                                {item.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </div>
-
-            <Section title="Préréglages">
-                <div className="grid grid-cols-6 gap-[0.8vh]" {...navGroup('focus')}>
-                    {CROSSHAIR_PRESETS.map(preset => (
-                        <button
-                            key={preset.id}
-                            onClick={() => apply(preset.config)}
-                            className="flex flex-col items-center gap-[0.4vh] rounded-[1vh] bg-white/5 px-[0.6vh] py-[0.8vh] text-[1.3vh] font-semibold hover:bg-white/15"
-                        >
-                            <div className="flex h-[5vh] w-full items-center justify-center overflow-hidden rounded-[0.8vh] bg-neutral-900">
-                                <CrosshairView config={preset.config} size="5vh" />
-                            </div>
-                            {preset.label}
-                        </button>
-                    ))}
-                </div>
-            </Section>
-
-            <Section title="Général">
-                <Row label="Couleur">
-                    <div className="flex items-center gap-[0.6vh]" {...navGroup('select')}>
-                        {CROSSHAIR_COLORS.map(color => (
-                            <button
-                                key={color}
-                                {...navSelected(config.color === color)}
-                                onClick={() => apply({ ...config, color })}
-                                className={classNames('h-[2.4vh] w-[2.4vh] rounded-[0.5vh] border', {
-                                    'border-white': config.color === color,
-                                    'border-transparent': config.color !== color,
-                                })}
-                                style={{ background: color }}
-                            />
-                        ))}
-                        <input
-                            type="color"
-                            value={config.color}
-                            onChange={event => apply({ ...config, color: event.target.value })}
-                            className="h-[2.4vh] w-[3vh] cursor-pointer rounded-[0.5vh] bg-transparent"
-                        />
-                    </div>
-                </Row>
-                <Row label="Point central">
-                    <Toggle value={config.dot} onChange={dot => apply({ ...config, dot })} />
-                </Row>
-                <Row label="Style T (sans ligne du haut)">
-                    <Toggle value={config.tStyle} onChange={tStyle => apply({ ...config, tStyle })} />
-                </Row>
-            </Section>
-
-            <Section title="Contour">
-                <Row label="Afficher">
-                    <Toggle
-                        value={config.outline.enabled}
-                        onChange={enabled => apply({ ...config, outline: { ...config.outline, enabled } })}
-                    />
-                </Row>
-                <Row label="Opacité">
-                    <Slider
-                        value={config.outline.opacity}
-                        min={0}
-                        max={100}
-                        onChange={opacity => apply({ ...config, outline: { ...config.outline, opacity } })}
-                    />
-                </Row>
-                <Row label="Épaisseur">
-                    <Slider
-                        value={config.outline.thickness}
-                        min={1}
-                        max={4}
-                        onChange={thickness => apply({ ...config, outline: { ...config.outline, thickness } })}
-                    />
-                </Row>
-            </Section>
-
-            <Section title="Lignes intérieures">
-                <LinesEditor lines={config.inner} onChange={inner => apply({ ...config, inner })} />
-            </Section>
-
-            <Section title="Lignes extérieures">
-                <LinesEditor lines={config.outer} onChange={outer => apply({ ...config, outer })} />
-            </Section>
-
-            <Section title="Anneau">
-                <Row label="Afficher">
-                    <Toggle
-                        value={config.ring.enabled}
-                        onChange={enabled => apply({ ...config, ring: { ...config.ring, enabled } })}
-                    />
-                </Row>
-                <Row label="Rayon">
-                    <Slider
-                        value={config.ring.radius}
-                        min={4}
-                        max={40}
-                        onChange={radius => apply({ ...config, ring: { ...config.ring, radius } })}
-                    />
-                </Row>
-                <Row label="Épaisseur">
-                    <Slider
-                        value={config.ring.thickness}
-                        min={1}
-                        max={8}
-                        onChange={thickness => apply({ ...config, ring: { ...config.ring, thickness } })}
-                    />
-                </Row>
-            </Section>
-
-            <button
-                onClick={reset}
-                className="mb-[1vh] flex items-center gap-[0.8vh] rounded-[1vh] bg-red-500/20 px-[1.6vh] py-[0.9vh] text-[1.4vh] font-semibold uppercase text-red-200 transition-colors hover:bg-red-500/60 hover:text-white"
-            >
-                <RefreshIcon className="h-[1.8vh] w-[1.8vh]" />
-                Réinitialiser le viseur
-            </button>
         </div>
     );
 };

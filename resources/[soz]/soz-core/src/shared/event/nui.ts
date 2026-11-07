@@ -839,6 +839,7 @@ export enum NuiEvent {
     PauseMenuSavePlayersLayout = 'soz-core:nui:pause-menu:save-players-layout',
     CrosshairSet = 'soz-core:nui:crosshair:set',
     CrosshairReset = 'soz-core:nui:crosshair:reset',
+    CrosshairProfilesSet = 'soz-core:nui:crosshair:profiles-set',
     PauseMenuSetSetting = 'soz-core:nui:pause-menu:set-setting',
     PauseMenuQueueNative = 'soz-core:nui:pause-menu:queue-native',
     PauseMenuBackdrop = 'soz-core:nui:pause-menu:backdrop',
