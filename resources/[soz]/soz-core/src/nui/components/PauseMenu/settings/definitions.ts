@@ -471,8 +471,7 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
     {
         id: 'keys',
         label: 'Touches',
-        native: true,
-        note: 'Les touches se règlent dans le menu natif de GTA.',
+        native: false,
         items: [],
     },
 ];
