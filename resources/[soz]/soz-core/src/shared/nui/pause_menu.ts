@@ -40,6 +40,7 @@ export type PauseKeyBinding = {
     resource?: string;
     input?: string;
     key?: string;
+    native?: { index: number; id: number };
 };
 
 export type PauseKeyCapture = 'idle' | 'waiting' | 'native';

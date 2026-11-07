@@ -123,11 +123,21 @@ const CaptureCountdown: FunctionComponent = () => {
     return <span className="text-white/50">(Échap pour annuler, sinon dans {left} s)</span>;
 };
 
+type KeyGroup = 'soz' | 'game';
+
+const KEY_GROUPS: { id: KeyGroup; label: string }[] = [
+    { id: 'soz', label: 'SoZ' },
+    { id: 'game', label: 'Jeu' },
+];
+
+const groupOf = (category: PauseKeyCategory): KeyGroup => (category.index === -1 ? 'soz' : 'game');
+
 type Row = PauseKeyBinding & { category: string; categoryIndex: number; categoryId: number };
 
 export const KeysPanel: FunctionComponent<{ query: string }> = ({ query }) => {
     const [data, setData] = useState<{ categories: PauseKeyCategory[]; loading: boolean } | null>(null);
-    const [selected, setSelected] = useState(0);
+    const [group, setGroup] = useState<KeyGroup>('soz');
+    const [selected, setSelected] = useState<Record<KeyGroup, number | null>>({ soz: null, game: null });
     const [capture, setCapture] = useState<{ state: PauseKeyCapture; slot?: number; category?: number }>({
         state: 'idle',
     });
@@ -157,9 +167,11 @@ export const KeysPanel: FunctionComponent<{ query: string }> = ({ query }) => {
             return;
         }
 
-        setCapture({ state: 'waiting', category: row.categoryId, slot: row.slot });
+        const native = row.native ?? { index: row.categoryIndex, id: row.categoryId };
+
+        setCapture({ state: 'waiting', category: native.id, slot: row.slot });
         setKeyCapture('waiting');
-        fetchNui(NuiEvent.PauseMenuKeysCapture, { index: row.categoryIndex, id: row.categoryId, slot: row.slot });
+        fetchNui(NuiEvent.PauseMenuKeysCapture, { index: native.index, id: native.id, slot: row.slot });
     };
 
     const reset = () => {
@@ -171,16 +183,16 @@ export const KeysPanel: FunctionComponent<{ query: string }> = ({ query }) => {
 
     const categories = data?.categories ?? [];
     const search = normalize(query.trim());
+    const visible = categories.filter((category) => groupOf(category) === group);
+    const current = visible.find((category) => category.id === selected[group]) ?? visible[0];
 
     const rows = useMemo<Row[]>(() => {
         if (!search) {
-            const category = categories[selected];
-
-            return (category?.rows ?? []).map((row) => ({
+            return (current?.rows ?? []).map((row) => ({
                 ...row,
-                category: category.label,
-                categoryIndex: category.index,
-                categoryId: category.id,
+                category: current.label,
+                categoryIndex: current.index,
+                categoryId: current.id,
             }));
         }
 
@@ -199,19 +211,38 @@ export const KeysPanel: FunctionComponent<{ query: string }> = ({ query }) => {
                     categoryId: category.id,
                 })),
         );
-    }, [categories, selected, search]);
+    }, [categories, current, search]);
 
     return (
         <div className="flex min-h-0 flex-1 flex-col gap-[1.2vh]">
             {!search && (
+                <div className="flex w-fit gap-[0.4vh] rounded-[1vh] bg-white/10 p-[0.4vh]">
+                    {KEY_GROUPS.map((entry) => (
+                        <button
+                            key={entry.id}
+                            onClick={() => setGroup(entry.id)}
+                            className={classNames(
+                                'rounded-[0.7vh] px-[1.8vh] py-[0.5vh] text-[1.35vh] font-semibold uppercase tracking-wider transition-colors',
+                                group === entry.id
+                                    ? 'bg-white text-black'
+                                    : 'text-white/70 hover:bg-white/20 hover:text-white',
+                            )}
+                        >
+                            {entry.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {!search && (
                 <div className="flex flex-wrap gap-[0.6vh]">
-                    {categories.map((category, index) => (
+                    {visible.map((category) => (
                         <button
                             key={category.id}
-                            onClick={() => setSelected(index)}
+                            onClick={() => setSelected((state) => ({ ...state, [group]: category.id }))}
                             className={classNames(
                                 'rounded-[0.7vh] px-[1.1vh] py-[0.5vh] text-[1.25vh] font-semibold transition-colors',
-                                index === selected
+                                category === current
                                     ? 'bg-white text-black'
                                     : 'bg-white/10 text-white/80 hover:bg-white/25 hover:text-white',
                             )}
@@ -267,7 +298,9 @@ export const KeysPanel: FunctionComponent<{ query: string }> = ({ query }) => {
                 )}
                 {rows.map((row) => {
                     const capturing =
-                        capture.state !== 'idle' && capture.category === row.categoryId && capture.slot === row.slot;
+                        capture.state !== 'idle' &&
+                        capture.category === (row.native?.id ?? row.categoryId) &&
+                        capture.slot === row.slot;
 
                     return (
                         <li

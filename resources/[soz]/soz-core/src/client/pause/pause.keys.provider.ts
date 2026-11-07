@@ -1,11 +1,14 @@
 import { ControlInputNames } from '../../config/controls';
+import { KeyBindingCategories, KeyBindingCategoryId, KeyBindingCommands } from '../../config/key_bindings';
 import { OnNuiEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { Tick, TickInterval } from '../../core/decorators/tick';
+import { emitRpc } from '../../core/rpc';
 import { wait } from '../../core/utils';
 import { NuiEvent } from '../../shared/event';
 import { PauseKeyBinding, PauseKeyCapture, PauseKeyCategory } from '../../shared/nui/pause_menu';
+import { RpcServerEvent } from '../../shared/rpc';
 import { NuiDispatch } from '../nui/nui.dispatch';
 import { PauseMenuProvider } from './pause.menu.provider';
 
@@ -59,6 +62,8 @@ export class PauseKeysProvider {
     private reading: Promise<void> | null = null;
     private categories: CachedCategory[] | null = null;
     private busy = false;
+    private admin = false;
+    private commands: Map<string, { category: KeyBindingCategoryId; label: string; order: number }> | null = null;
     private capturing = false;
 
     @Tick(TickInterval.EVERY_FRAME)
@@ -263,14 +268,66 @@ export class PauseKeysProvider {
         return button?.startsWith('t_') ? button.slice(2) : button || undefined;
     }
 
+    private getCommands(): Map<string, { category: KeyBindingCategoryId; label: string; order: number }> {
+        if (!this.commands) {
+            this.commands = new Map(
+                Object.entries(KeyBindingCommands).map(([command, entry], order) => [
+                    (GetHashKey(command) >>> 0).toString(16).toUpperCase().padStart(8, '0'),
+                    { ...entry, order },
+                ])
+            );
+        }
+
+        return this.commands;
+    }
+
     private dispatch(loading: boolean): void {
-        this.nuiDispatch.dispatch('pause_menu', 'KeyCategories', {
-            loading,
-            categories: (this.categories ?? []).map(category => ({
-                ...category,
-                rows: category.rows.map(row => ({ ...row, key: this.getKey(row.input) })),
-            })),
+        const commands = this.getCommands();
+        const grouped = new Map<KeyBindingCategoryId, PauseKeyBinding[]>(
+            KeyBindingCategories.map(category => [category.id, []])
+        );
+        const categories: PauseKeyCategory[] = [];
+
+        for (const category of this.categories ?? []) {
+            const rows = category.rows.map(row => ({
+                ...row,
+                key: this.getKey(row.input),
+                native: { index: category.index, id: category.id },
+            }));
+
+            if (!rows.some(row => row.input && FIVEM_INPUT.test(row.input))) {
+                categories.push({ ...category, rows });
+
+                continue;
+            }
+
+            for (const row of rows) {
+                const entry = row.input ? commands.get(row.input) : undefined;
+
+                grouped
+                    .get(entry?.category ?? 'other')
+                    .push(entry ? { ...row, label: entry.label, resource: undefined } : row);
+            }
+        }
+
+        KeyBindingCategories.forEach((definition, position) => {
+            const rows = grouped.get(definition.id);
+
+            if (rows.length > 0 && (!definition.admin || this.admin)) {
+                categories.push({
+                    index: -1,
+                    id: -(position + 1),
+                    label: definition.label,
+                    rows: rows.sort(
+                        (a, b) =>
+                            (commands.get(a.input)?.order ?? Infinity) - (commands.get(b.input)?.order ?? Infinity) ||
+                            a.label.localeCompare(b.label, 'fr', { numeric: true })
+                    ),
+                });
+            }
         });
+
+        this.nuiDispatch.dispatch('pause_menu', 'KeyCategories', { loading, categories });
     }
 
     private parseCategories(text: string): CachedCategory[] {
@@ -346,6 +403,9 @@ export class PauseKeysProvider {
             return;
         }
 
+        const [isAllowed] = await emitRpc<[boolean, string]>(RpcServerEvent.ADMIN_IS_ALLOWED);
+
+        this.admin = isAllowed;
         this.categories = this.categories ?? this.loadCache();
 
         if (this.categories) {
