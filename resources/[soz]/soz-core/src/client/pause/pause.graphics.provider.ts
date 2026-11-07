@@ -11,7 +11,6 @@ import { PauseMenuProvider } from './pause.menu.provider';
 const PAUSE_MENU = GetHashKey('FE_MENU_VERSION_MP_PAUSE');
 const SETTINGS_TAB = 6;
 const GRAPHICS_CATEGORY = 6;
-const GRAPHICS_PAGE = 51;
 const CONTROL_DOWN = 187;
 const CONTROL_LEFT = 189;
 const CONTROL_RIGHT = 190;
@@ -19,6 +18,8 @@ const CONTROL_APPLY = 203;
 const ENTER_CONTROLS = [18, 176, 191, 201, 215, 255];
 const COLUMN = 1;
 const CONTROL_ACCEPT = 201;
+const CLICK_LIMIT = 30;
+const CATEGORY_COLUMN = 0;
 const PRESS_GAP_FRAMES = 3;
 const SELECT_LIMIT = 80;
 const READY_TIMEOUT = 3000;
@@ -27,6 +28,10 @@ const ROW_READ_LIMIT = 200;
 const ROW_READ_TIMEOUT = 1000;
 const ROW_TYPE_SLIDER = 2;
 const ROWS_KVP = 'soz_graphics_rows';
+
+const inColumn = (selection: number[]) => selection[0] !== SETTINGS_TAB && selection[1] === -1;
+
+const cacheKey = (category: number) => (category === GRAPHICS_CATEGORY ? ROWS_KVP : `soz_native_rows_v2_${category}`);
 const BACKDROP_DELAY = 250;
 const ENTER_LIMIT = 4;
 const ENTER_GAP_FRAMES = 15;
@@ -35,7 +40,7 @@ const parseRows = (text: string): PauseGraphicsRow[] =>
     text
         .split('~')
         .filter(Boolean)
-        .map((line) => {
+        .map(line => {
             const [slot, , id, type, value, selectable, label, ...rest] = line.split('|');
             const slider = Number(type) === ROW_TYPE_SLIDER;
 
@@ -73,15 +78,17 @@ export class PauseGraphicsProvider {
     private active = false;
     private applying = false;
     private held = false;
+
     private session: Promise<boolean> | null = null;
-    private cachedRows: PauseGraphicsRow[] | null = null;
+    private category = GRAPHICS_CATEGORY;
+    private cachedRows = new Map<number, PauseGraphicsRow[]>();
 
     private run(tasks: Task[]): Promise<void> {
         if (!this.active) {
             return Promise.resolve();
         }
 
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
             this.tasks.push(...tasks, { kind: 'done', resolve });
         });
     }
@@ -120,7 +127,7 @@ export class PauseGraphicsProvider {
                 break;
             case 'scaleform':
                 if (BeginScaleformMovieMethodOnFrontend(task.method)) {
-                    task.args.forEach((value) => ScaleformMovieMethodAddParamInt(value));
+                    task.args.forEach(value => ScaleformMovieMethodAddParamInt(value));
                     EndScaleformMovieMethod();
                 }
 
@@ -128,7 +135,7 @@ export class PauseGraphicsProvider {
                 this.tasks.shift();
                 break;
             case 'enter':
-                if (GetPauseMenuSelectionData()[0] === GRAPHICS_PAGE || task.presses >= ENTER_LIMIT) {
+                if (inColumn(GetPauseMenuSelectionData()) || task.presses >= ENTER_LIMIT) {
                     this.tasks.shift();
                     break;
                 }
@@ -163,7 +170,7 @@ export class PauseGraphicsProvider {
                 return true;
             }
 
-            await new Promise((resolve) => setTimeout(resolve, 0));
+            await new Promise(resolve => setTimeout(resolve, 0));
         }
 
         return false;
@@ -216,7 +223,7 @@ export class PauseGraphicsProvider {
 
     private loadCache(): PauseGraphicsRow[] | null {
         try {
-            const rows = JSON.parse(GetResourceKvpString(ROWS_KVP) ?? 'null');
+            const rows = JSON.parse(GetResourceKvpString(cacheKey(this.category)) ?? 'null');
 
             return Array.isArray(rows) && rows.length > 0 ? rows : null;
         } catch {
@@ -225,12 +232,12 @@ export class PauseGraphicsProvider {
     }
 
     private storeCache(rows: PauseGraphicsRow[] | null): void {
-        this.cachedRows = rows;
-
         if (rows?.length) {
-            SetResourceKvp(ROWS_KVP, JSON.stringify(rows));
+            this.cachedRows.set(this.category, rows);
+            SetResourceKvp(cacheKey(this.category), JSON.stringify(rows));
         } else {
-            DeleteResourceKvp(ROWS_KVP);
+            this.cachedRows.delete(this.category);
+            DeleteResourceKvp(cacheKey(this.category));
         }
     }
 
@@ -243,15 +250,24 @@ export class PauseGraphicsProvider {
     }
 
     @OnNuiEvent(NuiEvent.PauseMenuGraphicsOpen)
-    public async onOpen(): Promise<void> {
+    public async onOpen(data?: { category?: number }): Promise<void> {
         if (!this.pauseMenuProvider.isOpen()) {
             return;
         }
 
-        this.cachedRows = this.cachedRows ?? this.loadCache();
+        const category = data?.category ?? GRAPHICS_CATEGORY;
 
-        if (this.cachedRows) {
-            this.dispatchRows(this.cachedRows);
+        if (category !== this.category && this.active) {
+            this.close();
+        }
+
+        this.category = category;
+
+        const cached = this.cachedRows.get(category) ?? this.loadCache();
+
+        if (cached) {
+            this.cachedRows.set(category, cached);
+            this.dispatchRows(cached);
 
             return;
         }
@@ -309,8 +325,16 @@ export class PauseGraphicsProvider {
             { kind: 'wait', frames: 20 },
             { kind: 'press', control: CONTROL_ACCEPT },
             { kind: 'wait', frames: 15 },
-            { kind: 'select', index: 2, value: GRAPHICS_CATEGORY, control: CONTROL_DOWN, presses: 0 },
         ]);
+
+        for (
+            let clicks = 0;
+            this.active && clicks < CLICK_LIMIT && GetPauseMenuSelectionData()[2] !== this.category;
+            clicks++
+        ) {
+            await this.run([{ kind: 'scaleform', method: 'M_PRESS_EVENT', args: [this.category, CATEGORY_COLUMN] }]);
+        }
+
         await this.run([
             { kind: 'press', control: CONTROL_ACCEPT },
             { kind: 'wait', frames: 20 },
@@ -355,6 +379,8 @@ export class PauseGraphicsProvider {
 
         this.applying = true;
 
+        const previous = this.cachedRows.get(this.category);
+
         if (await this.ensureSession()) {
             this.storeCache(null);
 
@@ -364,31 +390,43 @@ export class PauseGraphicsProvider {
                         kind: 'scaleform',
                         method: 'GET_COLUMN_SELECTION',
                         args: [COLUMN, 2, Number(id), value],
-                    }),
+                    })
                 ),
                 { kind: 'enter', presses: 0 },
-                { kind: 'pressAll', controls: [CONTROL_APPLY] },
                 { kind: 'wait', frames: 10 },
             ]);
-            await this.run([
-                { kind: 'pressAll', controls: ENTER_CONTROLS },
-                { kind: 'wait', frames: 30 },
-            ]);
-            await this.run([
-                { kind: 'pressAll', controls: ENTER_CONTROLS },
-                { kind: 'wait', frames: 10 },
-            ]);
+
+            if (this.category === GRAPHICS_CATEGORY) {
+                await this.run([
+                    { kind: 'pressAll', controls: [CONTROL_APPLY] },
+                    { kind: 'wait', frames: 10 },
+                ]);
+                await this.run([
+                    { kind: 'pressAll', controls: ENTER_CONTROLS },
+                    { kind: 'wait', frames: 30 },
+                ]);
+                await this.run([
+                    { kind: 'pressAll', controls: ENTER_CONTROLS },
+                    { kind: 'wait', frames: 10 },
+                ]);
+            }
 
             const rows = await this.readRows();
+            const applied =
+                this.category === GRAPHICS_CATEGORY
+                    ? rows
+                    : (rows ?? previous)?.map(row =>
+                          values[row.id] === undefined ? row : { ...row, value: values[row.id] }
+                      );
 
-            if (rows?.length) {
-                this.storeCache(rows);
+            if (applied?.length) {
+                this.storeCache(applied);
             }
         }
 
         this.applying = false;
         this.close();
-        this.dispatchRows(this.cachedRows ?? []);
+        this.dispatchRows(this.cachedRows.get(this.category) ?? []);
     }
 
     @OnNuiEvent(NuiEvent.PauseMenuGraphicsClose)
@@ -419,6 +457,6 @@ export class PauseGraphicsProvider {
             }, BACKDROP_DELAY);
         }
 
-        pending.forEach((task) => task.kind === 'done' && task.resolve());
+        pending.forEach(task => task.kind === 'done' && task.resolve());
     }
 }

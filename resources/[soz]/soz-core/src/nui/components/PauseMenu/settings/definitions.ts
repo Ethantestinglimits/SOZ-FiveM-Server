@@ -38,6 +38,7 @@ export type SettingCategory = {
     label: string;
     parent?: string;
     native: boolean;
+    nativeCategory?: number;
     staged?: boolean;
     note?: string;
     items: SettingItem[];
@@ -464,8 +465,8 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
     {
         id: 'voice',
         label: 'Chat vocal',
-        native: true,
-        note: 'Le chat vocal se règle dans le menu natif de GTA.',
+        native: false,
+        nativeCategory: 8,
         items: [],
     },
     {

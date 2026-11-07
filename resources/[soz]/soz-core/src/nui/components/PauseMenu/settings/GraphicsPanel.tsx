@@ -24,12 +24,44 @@ const OPTIONS: Record<number, string[]> = {
     87: ['Sans', 'Avec'],
 };
 
-const optionsOf = (row: PauseGraphicsRow) => (row.options.length > 1 ? row.options : OPTIONS[row.id] ?? row.options);
+const GRAPHICS_CATEGORY = 6;
 
-const indexOf = (row: PauseGraphicsRow) =>
-    row.options.length > 1 ? row.value : Math.max(0, optionsOf(row).indexOf(row.options[0]));
+export const GraphicsPanel: FunctionComponent<{ category?: number }> = ({ category = GRAPHICS_CATEGORY }) => {
+    const graphics = category === GRAPHICS_CATEGORY;
+    const restartRows = graphics ? RESTART_ROWS : [];
+    const optionsOf = (row: PauseGraphicsRow) =>
+        row.options.length > 1 ? row.options : (graphics && OPTIONS[row.id]) || row.options;
+    const isCycle = (row: PauseGraphicsRow) =>
+        graphics ? CYCLE_ROWS.includes(row.id) : row.type === ROW_TYPE_LIST && row.options.length <= 1;
+    const indexOf = (row: PauseGraphicsRow) =>
+        row.options.length > 1 ? row.value : Math.max(0, optionsOf(row).indexOf(row.options[0]));
 
-export const GraphicsPanel: FunctionComponent = () => {
+    return (
+        <GraphicsRowsPanel
+            category={category}
+            restartRows={restartRows}
+            optionsOf={optionsOf}
+            isCycle={isCycle}
+            indexOf={indexOf}
+        />
+    );
+};
+
+type GraphicsRowsPanelProps = {
+    category: number;
+    restartRows: number[];
+    optionsOf: (row: PauseGraphicsRow) => string[];
+    isCycle: (row: PauseGraphicsRow) => boolean;
+    indexOf: (row: PauseGraphicsRow) => number;
+};
+
+const GraphicsRowsPanel: FunctionComponent<GraphicsRowsPanelProps> = ({
+    category,
+    restartRows,
+    optionsOf,
+    isCycle,
+    indexOf,
+}) => {
     const [rows, setRows] = useState<PauseGraphicsRow[] | null>(null);
     const [values, setValues] = useState<Record<number, number>>({});
     const [stepped, setStepped] = useState<Record<number, number>>({});
@@ -38,7 +70,7 @@ export const GraphicsPanel: FunctionComponent = () => {
     const [confirmRestart, setConfirmRestart] = useState(false);
 
     useEffect(() => {
-        fetchNui(NuiEvent.PauseMenuGraphicsOpen);
+        fetchNui(NuiEvent.PauseMenuGraphicsOpen, { category });
 
         return () => {
             setNativeBackdrop(false);
@@ -65,7 +97,7 @@ export const GraphicsPanel: FunctionComponent = () => {
     );
 
     const changes = Object.keys(values).length + Object.keys(stepped).length;
-    const restartChanges = visible.filter((row) => RESTART_ROWS.includes(row.id) && values[row.id] !== undefined);
+    const restartChanges = visible.filter((row) => restartRows.includes(row.id) && values[row.id] !== undefined);
 
     const setValue = (row: PauseGraphicsRow, next: number) => {
         const base = row.type === ROW_TYPE_SLIDER ? row.value : indexOf(row);
@@ -88,7 +120,7 @@ export const GraphicsPanel: FunctionComponent = () => {
     };
 
     const step = (row: PauseGraphicsRow, direction: number) => {
-        const cycle = CYCLE_ROWS.includes(row.id);
+        const cycle = isCycle(row);
         const count = optionsOf(row).length;
         const current = values[row.id] ?? (row.type === ROW_TYPE_SLIDER ? row.value : indexOf(row));
         const next =
@@ -161,7 +193,7 @@ export const GraphicsPanel: FunctionComponent = () => {
                             >
                                 <span className="text-[1.5vh] font-semibold">
                                     {row.label}
-                                    {RESTART_ROWS.includes(row.id) && (
+                                    {restartRows.includes(row.id) && (
                                         <span
                                             className={`ml-[1vh] text-[1.2vh] font-normal ${
                                                 changed ? 'text-amber-300' : 'text-white/50'

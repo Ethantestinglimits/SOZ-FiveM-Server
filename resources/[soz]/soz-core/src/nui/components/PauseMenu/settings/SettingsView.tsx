@@ -354,6 +354,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
     const minimapPage = current.id === 'minimap' && !query.trim();
     const graphicsPage = current.id === 'graphics' && !query.trim();
     const keysPage = current.id === 'keys';
+    const voicePage = current.id === 'voice' && !query.trim();
 
     return (
         <div className="flex h-full min-h-0 flex-col gap-[1.4vh] p-[2.4vh]">
@@ -374,12 +375,13 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
             {crosshairPage && <CrosshairPanel initial={settings.crosshair} />}
             {minimapPage && <MinimapPanel />}
             {graphicsPage && <GraphicsPanel />}
+            {voicePage && <GraphicsPanel category={current.nativeCategory} />}
             {keysPage && <KeysPanel query={query} />}
 
             <div
                 className={classNames(
                     'min-h-0 flex-1 overflow-y-auto pr-[0.6vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full',
-                    { hidden: crosshairPage || graphicsPage || keysPage },
+                    { hidden: crosshairPage || graphicsPage || keysPage || voicePage },
                 )}
             >
                 {sections.map((section) => (
@@ -461,7 +463,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
 
             <div
                 className={classNames('min-h-[7vh] rounded-[1vh] bg-white/5 px-[1.6vh] py-[1.2vh]', {
-                    hidden: crosshairPage || graphicsPage || keysPage,
+                    hidden: crosshairPage || graphicsPage || keysPage || voicePage,
                 })}
             >
                 {hovered ? (
