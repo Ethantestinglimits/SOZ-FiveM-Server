@@ -3,11 +3,11 @@ import classNames from 'classnames';
 import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 
 import { NuiEvent } from '../../../../shared/event';
-import { PauseKeyBinding, PauseKeyCategory } from '../../../../shared/nui/pause_menu';
+import { PauseKeyBinding, PauseKeyCapture, PauseKeyCategory } from '../../../../shared/nui/pause_menu';
 import { fetchNui } from '../../../fetch';
 import { useNuiEvent } from '../../../hook/nui';
 import { keyGlyph } from './KeyGlyph';
-import { setNativeBackdrop } from './nativeInputState';
+import { setKeyCapture, setNativeBackdrop } from './nativeInputState';
 
 const KEY_NAMES: Record<string, string> = {
     b_100: 'Clic G',
@@ -57,6 +57,7 @@ const KEY_NAMES: Record<string, string> = {
     b_197: '→',
     b_200: 'Inser',
     b_202: 'Suppr',
+    b_203: 'Échap',
     b_1002: 'Tab',
     b_1003: 'Entrée',
     b_1004: 'Retour',
@@ -108,23 +109,65 @@ const Keycap: FunctionComponent<{ value?: string }> = ({ value }) => {
     );
 };
 
-type Row = PauseKeyBinding & { category: string };
+const CAPTURE_SECONDS = 10;
+
+const CaptureCountdown: FunctionComponent = () => {
+    const [left, setLeft] = useState(CAPTURE_SECONDS);
+
+    useEffect(() => {
+        const timer = setInterval(() => setLeft((value) => Math.max(0, value - 1)), 1000);
+
+        return () => clearInterval(timer);
+    }, []);
+
+    return <span className="text-white/50">(Échap pour annuler, sinon dans {left} s)</span>;
+};
+
+type Row = PauseKeyBinding & { category: string; categoryIndex: number; categoryId: number };
 
 export const KeysPanel: FunctionComponent<{ query: string }> = ({ query }) => {
     const [data, setData] = useState<{ categories: PauseKeyCategory[]; loading: boolean } | null>(null);
     const [selected, setSelected] = useState(0);
+    const [capture, setCapture] = useState<{ state: PauseKeyCapture; slot?: number; category?: number }>({
+        state: 'idle',
+    });
+    const [confirmReset, setConfirmReset] = useState(false);
 
     useEffect(() => {
         fetchNui(NuiEvent.PauseMenuKeysOpen);
 
         return () => {
             setNativeBackdrop(false);
+            setKeyCapture('idle');
             fetchNui(NuiEvent.PauseMenuKeysClose);
         };
     }, []);
 
     useNuiEvent('pause_menu', 'GraphicsNative', setNativeBackdrop);
     useNuiEvent('pause_menu', 'KeyCategories', setData);
+    useNuiEvent('pause_menu', 'KeyCapture', (next) => {
+        setCapture(next);
+        setKeyCapture(next.state);
+    });
+
+    const busy = capture.state !== 'idle';
+
+    const startCapture = (row: Row) => {
+        if (busy) {
+            return;
+        }
+
+        setCapture({ state: 'waiting', category: row.categoryId, slot: row.slot });
+        setKeyCapture('waiting');
+        fetchNui(NuiEvent.PauseMenuKeysCapture, { index: row.categoryIndex, id: row.categoryId, slot: row.slot });
+    };
+
+    const reset = () => {
+        setConfirmReset(false);
+        setCapture({ state: 'waiting' });
+        setKeyCapture('waiting');
+        fetchNui(NuiEvent.PauseMenuKeysReset);
+    };
 
     const categories = data?.categories ?? [];
     const search = normalize(query.trim());
@@ -133,7 +176,12 @@ export const KeysPanel: FunctionComponent<{ query: string }> = ({ query }) => {
         if (!search) {
             const category = categories[selected];
 
-            return (category?.rows ?? []).map((row) => ({ ...row, category: category.label }));
+            return (category?.rows ?? []).map((row) => ({
+                ...row,
+                category: category.label,
+                categoryIndex: category.index,
+                categoryId: category.id,
+            }));
         }
 
         return categories.flatMap((category) =>
@@ -144,7 +192,12 @@ export const KeysPanel: FunctionComponent<{ query: string }> = ({ query }) => {
                         normalize(keyLabel(row.key)) === search ||
                         normalize(row.resource ?? '').includes(search),
                 )
-                .map((row) => ({ ...row, category: category.label })),
+                .map((row) => ({
+                    ...row,
+                    category: category.label,
+                    categoryIndex: category.index,
+                    categoryId: category.id,
+                })),
         );
     }, [categories, selected, search]);
 
@@ -169,6 +222,38 @@ export const KeysPanel: FunctionComponent<{ query: string }> = ({ query }) => {
                 </div>
             )}
 
+            {categories.length > 0 && !search && (
+                <div className="flex items-center gap-[1vh]">
+                    {confirmReset ? (
+                        <>
+                            <span className="flex-1 text-[1.35vh] text-white/80">
+                                Toutes les touches reviendront à leurs valeurs par défaut.
+                            </span>
+                            <button
+                                onClick={reset}
+                                className="rounded-[0.8vh] bg-white px-[1.4vh] py-[0.6vh] text-[1.3vh] font-semibold text-black hover:bg-white/80"
+                            >
+                                Rétablir
+                            </button>
+                            <button
+                                onClick={() => setConfirmReset(false)}
+                                className="rounded-[0.8vh] bg-white/15 px-[1.4vh] py-[0.6vh] text-[1.3vh] font-semibold hover:bg-white/30"
+                            >
+                                Annuler
+                            </button>
+                        </>
+                    ) : (
+                        <button
+                            disabled={busy}
+                            onClick={() => setConfirmReset(true)}
+                            className="w-full rounded-[0.8vh] bg-white/10 py-[0.7vh] text-[1.3vh] font-semibold transition-colors hover:bg-white/25 disabled:opacity-40"
+                        >
+                            Rétablir les touches par défaut
+                        </button>
+                    )}
+                </div>
+            )}
+
             <ul className="flex min-h-0 flex-1 flex-col gap-[0.5vh] overflow-y-auto pr-[0.6vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full">
                 {data === null && <li className="text-[1.4vh] text-white/50">Lecture des touches du jeu…</li>}
                 {data?.loading && categories.length === 0 && (
@@ -180,26 +265,45 @@ export const KeysPanel: FunctionComponent<{ query: string }> = ({ query }) => {
                 {search && data && rows.length === 0 && (
                     <li className="text-[1.4vh] text-white/50">Aucune touche ne correspond.</li>
                 )}
-                {rows.map((row) => (
-                    <li
-                        key={`${row.category}-${row.slot}`}
-                        className="flex items-center justify-between gap-[2vh] rounded-[1vh] bg-white/5 px-[1.6vh] py-[0.8vh]"
-                    >
-                        <span className="min-w-0 truncate text-[1.45vh] font-semibold">
-                            {row.label || '(sans nom)'}
-                            {search && (
-                                <span className="ml-[1vh] text-[1.15vh] font-normal text-white/40">{row.category}</span>
+                {rows.map((row) => {
+                    const capturing =
+                        capture.state !== 'idle' && capture.category === row.categoryId && capture.slot === row.slot;
+
+                    return (
+                        <li
+                            key={`${row.category}-${row.slot}`}
+                            className="flex items-center justify-between gap-[2vh] rounded-[1vh] bg-white/5 px-[1.6vh] py-[0.8vh]"
+                        >
+                            <span className="min-w-0 truncate text-[1.45vh] font-semibold">
+                                {row.label || '(sans nom)'}
+                                {search && (
+                                    <span className="ml-[1vh] text-[1.15vh] font-normal text-white/40">
+                                        {row.category}
+                                    </span>
+                                )}
+                                {row.resource && (
+                                    <span className="ml-[1vh] text-[1.15vh] font-normal text-white/40">
+                                        {row.resource}
+                                    </span>
+                                )}
+                            </span>
+                            {capturing ? (
+                                <span className="shrink-0 text-[1.3vh] text-amber-300">
+                                    Appuie sur une touche… <CaptureCountdown />
+                                </span>
+                            ) : (
+                                <button
+                                    disabled={busy}
+                                    onClick={() => startCapture(row)}
+                                    className="flex shrink-0 items-center gap-[0.8vh] rounded-[0.6vh] px-[0.4vh] py-[0.2vh] text-white/40 transition-colors hover:bg-white/15 hover:text-white disabled:opacity-40"
+                                >
+                                    <PencilIcon className="h-[1.6vh] w-[1.6vh]" />
+                                    <Keycap value={row.key} />
+                                </button>
                             )}
-                            {row.resource && (
-                                <span className="ml-[1vh] text-[1.15vh] font-normal text-white/40">{row.resource}</span>
-                            )}
-                        </span>
-                        <span className="flex shrink-0 items-center gap-[0.8vh]">
-                            <PencilIcon className="h-[1.6vh] w-[1.6vh] text-white/30" />
-                            <Keycap value={row.key} />
-                        </span>
-                    </li>
-                ))}
+                        </li>
+                    );
+                })}
             </ul>
         </div>
     );

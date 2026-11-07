@@ -12,7 +12,7 @@ import { minimapController, setMapTabActive, useMinimapMode } from '../Minimap/m
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
 import { FOCUS_RING_CLASSES, NAV_ZONE_ATTRIBUTE, useKeyboardNav } from './keyboardNav';
 import { MapSidebar } from './MapSidebar';
-import { setNativeHover, useNativeBackdrop, useNativeHover } from './settings/nativeInputState';
+import { setNativeHover, useKeyCapture, useNativeBackdrop, useNativeHover } from './settings/nativeInputState';
 import { SettingsMain, SettingsSidebar } from './settings/SettingsView';
 
 type PauseMenuTab = 'map' | 'settings';
@@ -152,6 +152,8 @@ export const PauseMenuApp: FunctionComponent = () => {
 
     const nativeHover = useNativeHover();
     const backdrop = useNativeBackdrop();
+    const keyCapture = useKeyCapture();
+    const focused = data !== null && keyCapture === 'idle';
 
     useEffect(() => {
         document.documentElement.classList.toggle('soz-pause-cursor', data !== null);
@@ -159,7 +161,7 @@ export const PauseMenuApp: FunctionComponent = () => {
         return () => document.documentElement.classList.remove('soz-pause-cursor');
     }, [data !== null]);
 
-    useNuiFocus(data !== null, data !== null, data !== null && nativeHover, [], data !== null && nativeHover);
+    useNuiFocus(focused, focused, focused && nativeHover, [], focused && nativeHover);
 
     useNuiEvent('pause_menu', 'Open', (menuData) => {
         setConfirmQuit(false);
@@ -231,7 +233,11 @@ export const PauseMenuApp: FunctionComponent = () => {
     }
 
     return (
-        <div className="absolute inset-0 z-[60] select-none font-prompt text-white">
+        <div
+            className={classNames('absolute inset-0 z-[60] select-none font-prompt text-white', {
+                'opacity-0': keyCapture === 'native',
+            })}
+        >
             <div
                 className={classNames('absolute inset-0 transition-opacity duration-300', {
                     'bg-gradient-to-b from-black/50 via-black/25 to-black/50': !data.settings.server.potato,

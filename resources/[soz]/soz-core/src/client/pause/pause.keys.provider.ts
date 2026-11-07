@@ -5,7 +5,7 @@ import { Provider } from '../../core/decorators/provider';
 import { Tick, TickInterval } from '../../core/decorators/tick';
 import { wait } from '../../core/utils';
 import { NuiEvent } from '../../shared/event';
-import { PauseKeyBinding, PauseKeyCategory } from '../../shared/nui/pause_menu';
+import { PauseKeyBinding, PauseKeyCapture, PauseKeyCategory } from '../../shared/nui/pause_menu';
 import { NuiDispatch } from '../nui/nui.dispatch';
 import { PauseMenuProvider } from './pause.menu.provider';
 
@@ -14,7 +14,11 @@ const SETTINGS_TAB = 6;
 const KEYS_MENU = 148;
 const KEYS_CATEGORY_MENU = 149;
 const RESET_CATEGORY = -3000;
+const CONTROL_ACCEPT = 201;
 const CONTROL_CANCEL = 202;
+const KEYS_ROW_MENU = 150;
+const CAPTURE_TIMEOUT = 10000;
+const KEY_ESCAPE = 27;
 const PRESS_GAP_FRAMES = 3;
 const PRESS_LIMIT = 30;
 const READY_TIMEOUT = 3000;
@@ -54,9 +58,18 @@ export class PauseKeysProvider {
     private active = false;
     private reading: Promise<void> | null = null;
     private categories: CachedCategory[] | null = null;
+    private busy = false;
+    private capturing = false;
 
     @Tick(TickInterval.EVERY_FRAME)
     public process(): void {
+        if (this.capturing && (IsRawKeyPressed(KEY_ESCAPE) || IsRawKeyDown(KEY_ESCAPE))) {
+            this.capturing = false;
+            this.close();
+
+            return;
+        }
+
         if (this.cooldown > 0) {
             this.cooldown--;
 
@@ -349,6 +362,117 @@ export class PauseKeysProvider {
 
         await this.reading;
         this.dispatch(false);
+    }
+
+    private dispatchCapture(state: PauseKeyCapture, category?: number, slot?: number): void {
+        this.nuiDispatch.dispatch('pause_menu', 'KeyCapture', { state, category, slot });
+    }
+
+    private async selectCategory(index: number, id: number): Promise<boolean> {
+        return this.pressUntil(index, 0, selection => selection[1] === KEYS_CATEGORY_MENU && selection[2] === id);
+    }
+
+    private async waitNative(category?: number, slot?: number): Promise<void> {
+        const input = this.categories?.find(entry => entry.id === category)?.rows.find(row => row.slot === slot)?.input;
+        const before = this.getKey(input);
+        const start = GetGameTimer();
+
+        this.capturing = true;
+        let last: PauseKeyCapture | null = null;
+
+        while (this.active) {
+            const alert = IsWarningMessageActive();
+            const state: PauseKeyCapture = alert ? 'native' : 'waiting';
+
+            if (state !== last) {
+                last = state;
+                this.dispatchCapture(state, category, slot);
+            }
+
+            if (!alert && (GetPauseMenuSelectionData()[1] !== -1 || this.getKey(input) !== before)) {
+                return;
+            }
+
+            if (!alert && GetGameTimer() - start > CAPTURE_TIMEOUT) {
+                return;
+            }
+
+            await wait(0);
+        }
+    }
+
+    private async finish(): Promise<void> {
+        this.capturing = false;
+        this.close();
+        this.dispatch(false);
+        this.dispatchCapture('idle');
+        this.busy = false;
+    }
+
+    @OnNuiEvent(NuiEvent.PauseMenuKeysCapture)
+    public async onCapture({ index, id, slot }: { index: number; id: number; slot: number }): Promise<void> {
+        if (this.busy || !this.categories) {
+            return;
+        }
+
+        this.busy = true;
+
+        const ready =
+            (this.active || (await this.open())) &&
+            (await this.selectCategory(index, id)) &&
+            (await this.pressUntil(slot, 1, selection => selection[0] === KEYS_ROW_MENU && selection[2] === slot));
+
+        if (ready) {
+            await this.run([
+                {
+                    kind: 'until',
+                    control: CONTROL_ACCEPT,
+                    reached: selection => selection[0] === KEYS_ROW_MENU && selection[1] === -1,
+                    presses: 0,
+                },
+            ]);
+        }
+
+        if (ready && GetPauseMenuSelectionData()[1] === -1) {
+            await this.waitNative(id, slot);
+        }
+
+        await this.finish();
+    }
+
+    @OnNuiEvent(NuiEvent.PauseMenuKeysReset)
+    public async onReset(): Promise<void> {
+        if (this.busy || !this.categories) {
+            return;
+        }
+
+        this.busy = true;
+
+        if (this.active || (await this.open())) {
+            const resetIndex = this.categories.length;
+
+            for (let tries = 0; this.active && tries < PRESS_LIMIT && !IsWarningMessageActive(); tries++) {
+                if (GetPauseMenuSelectionData()[2] !== RESET_CATEGORY) {
+                    this.press(resetIndex, 0);
+                } else {
+                    SetControlNormal(2, CONTROL_ACCEPT, 1.0);
+                }
+
+                await this.run([{ kind: 'wait', frames: PRESS_GAP_FRAMES * 5 }]);
+            }
+
+            if (IsWarningMessageActive()) {
+                this.dispatchCapture('native');
+
+                while (this.active && IsWarningMessageActive()) {
+                    await wait(0);
+                }
+
+                await this.run([{ kind: 'wait', frames: 10 }]);
+            }
+        }
+
+        await this.finish();
     }
 
     @OnNuiEvent(NuiEvent.PauseMenuKeysClose)

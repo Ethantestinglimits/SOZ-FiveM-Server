@@ -42,6 +42,8 @@ export type PauseKeyBinding = {
     key?: string;
 };
 
+export type PauseKeyCapture = 'idle' | 'waiting' | 'native';
+
 export type PauseKeyCategory = {
     index: number;
     id: number;
@@ -68,4 +70,5 @@ export interface NuiPauseMenuMethodMap {
     GraphicsRows: PauseGraphicsRow[];
     GraphicsNative: boolean;
     KeyCategories: { categories: PauseKeyCategory[]; loading: boolean };
+    KeyCapture: { state: PauseKeyCapture; slot?: number; category?: number };
 }

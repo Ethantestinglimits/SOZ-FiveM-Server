@@ -853,4 +853,6 @@ export enum NuiEvent {
     PauseMenuGraphicsClose = 'soz-core:nui:pause-menu:graphics-close',
     PauseMenuKeysOpen = 'soz-core:nui:pause-menu:keys-open',
     PauseMenuKeysClose = 'soz-core:nui:pause-menu:keys-close',
+    PauseMenuKeysCapture = 'soz-core:nui:pause-menu:keys-capture',
+    PauseMenuKeysReset = 'soz-core:nui:pause-menu:keys-reset',
 }
