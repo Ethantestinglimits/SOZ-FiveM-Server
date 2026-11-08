@@ -18,6 +18,7 @@ import { PlayerStats } from './components/PlayerStats';
 import { VoiceIcon } from './components/VoiceIcon';
 import { Weather } from './components/Weather';
 import { useHudColor } from './hooks/useHudColor';
+import { useZoom } from './hooks/useZoom';
 import { useHudBlock } from './hudPlacement';
 
 export const WatchInterface: FunctionComponent = () => {
@@ -60,13 +61,19 @@ export const WatchInterface: FunctionComponent = () => {
         }
     }, [voiceActive, voiceMode]);
 
+    const streetOnTop = Boolean(settings.streetOnTop);
+    const compassLeft = Boolean(settings.compassLeft) && !settings.switchPlayerStatsPosition;
+    const { width: compassWidth } = useZoom();
+    const aboveMinimap = `${(minimap.top + 0.005) * 100}vh`;
+    const belowMinimap = `${(minimap.bottom + 0.005) * 100}vh`;
+
     const headerStyles = useSpring({
         from: {
-            bottom: '-100vh',
+            top: '200vh',
         },
         to: {
             width: `${minimap.width * 100}vw`,
-            bottom: `${100 - (minimap.top + 0.005) * 100}vh`,
+            top: streetOnTop ? belowMinimap : aboveMinimap,
             left: `${(minimap.left + 0.005) * 100}vw`,
         },
     });
@@ -76,7 +83,7 @@ export const WatchInterface: FunctionComponent = () => {
             bottom: '150vh',
         },
         to: {
-            top: `${(minimap.bottom + 0.005) * 100}vh`,
+            top: streetOnTop ? aboveMinimap : belowMinimap,
             left: !settings.switchPlayerStatsPosition ? `${(minimap.left + 0.005) * 100}vw` : '0vw',
             right: settings.switchPlayerStatsPosition ? `${(minimap.left + 0.005) * 100}vw` : '0vw',
         },
@@ -107,6 +114,8 @@ export const WatchInterface: FunctionComponent = () => {
             <animated.div
                 className={cn('absolute flex justify-between items-end text-white', {
                     'px-5': minimap.isHidden,
+                    '-translate-y-full': !streetOnTop,
+                    'mt-[1vh]': streetOnTop,
                 })}
                 ref={headerBlock.ref}
                 style={{ ...headerStyles, ...headerBlock.style }}
@@ -139,14 +148,24 @@ export const WatchInterface: FunctionComponent = () => {
 
             <animated.div
                 className={cn('absolute flex gap-3 text-white h-fit', {
-                    '-mt-14': !hasStreetNamesEnabled,
+                    '-mt-14': !hasStreetNamesEnabled && !streetOnTop,
+                    'mt-14': !hasStreetNamesEnabled && streetOnTop,
+                    '-translate-y-full': streetOnTop,
+                    '-mt-[1vh]': streetOnTop && hasStreetNamesEnabled,
                     'flex-row-reverse': settings.switchPlayerStatsPosition,
                 })}
                 ref={footerBlock.ref}
-                style={{ ...footerStyles, ...footerBlock.style }}
+                style={{
+                    ...footerStyles,
+                    ...(compassLeft && hasWatch && settings.showCompass
+                        ? { marginLeft: `calc(-1 * (${compassWidth} + 0.75rem))` }
+                        : {}),
+                    ...footerBlock.style,
+                }}
             >
+                {compassLeft && <Compass />}
                 <Location />
-                <Compass />
+                {!compassLeft && <Compass />}
                 {!statsBlock.placed && (
                     <div
                         ref={statsBlock.ref}

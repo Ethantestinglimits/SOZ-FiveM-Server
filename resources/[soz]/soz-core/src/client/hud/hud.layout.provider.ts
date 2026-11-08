@@ -12,8 +12,11 @@ import {
     HudPlacement,
 } from '../../shared/nui/hud_layout';
 import { NuiDispatch } from '../nui/nui.dispatch';
+import { PauseSettingsRegistry } from '../pause/pause.settings.registry';
 
 const LAYOUT_KVP = 'soz_hud_layout_v2';
+const COMPASS_LEFT_KVP = 'soz_hud_compass_left';
+const STREET_ON_TOP_KVP = 'soz_hud_street_on_top';
 const OFFSET_LIMIT = 200;
 
 const clampOffset = (value: unknown): number | null => {
@@ -91,11 +94,46 @@ export class HudLayoutProvider {
     @Inject(NuiDispatch)
     private nuiDispatch: NuiDispatch;
 
+    @Inject(PauseSettingsRegistry)
+    private pauseSettingsRegistry: PauseSettingsRegistry;
+
     private layout: HudLayout = this.load();
+
+    private compassLeft = GetResourceKvpInt(COMPASS_LEFT_KVP) === 1;
+
+    private streetOnTop = GetResourceKvpInt(STREET_ON_TOP_KVP) === 1;
+
+    @Once(OnceStep.Start)
+    public registerSettings(): void {
+        this.pauseSettingsRegistry.register('hudCompassLeft', {
+            get: () => this.compassLeft,
+            apply: value => {
+                this.compassLeft = Boolean(value);
+                SetResourceKvpInt(COMPASS_LEFT_KVP, this.compassLeft ? 1 : 0);
+                this.sendWatchLayout();
+            },
+        });
+        this.pauseSettingsRegistry.register('hudStreetOnTop', {
+            get: () => this.streetOnTop,
+            apply: value => {
+                this.streetOnTop = Boolean(value);
+                SetResourceKvpInt(STREET_ON_TOP_KVP, this.streetOnTop ? 1 : 0);
+                this.sendWatchLayout();
+            },
+        });
+    }
 
     @Once(OnceStep.NuiLoaded)
     public sendLayout(): void {
         this.nuiDispatch.dispatch('hud_layout', 'SetLayout', this.layout);
+        this.sendWatchLayout();
+    }
+
+    private sendWatchLayout(): void {
+        this.nuiDispatch.dispatch('hud', 'SetWatchLayout', {
+            compassLeft: this.compassLeft,
+            streetOnTop: this.streetOnTop,
+        });
     }
 
     @OnNuiEvent(NuiEvent.HudLayoutRequest)

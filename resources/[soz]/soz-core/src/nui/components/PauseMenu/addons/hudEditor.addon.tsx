@@ -13,6 +13,24 @@ registerPauseTab({
 });
 
 registerSettingItem('hud', {
+    id: 'hudCompassLeft',
+    kind: 'toggle',
+    label: 'Boussole à gauche',
+    description: 'Place la boussole à gauche du nom de rue au lieu de la droite.',
+    default: false,
+    requiresWatch: true,
+});
+
+registerSettingItem('hud', {
+    id: 'hudStreetOnTop',
+    kind: 'toggle',
+    label: 'Nom de rue en haut',
+    description: 'Inverse le nom de rue avec la date et la météo : la rue passe au-dessus de la Minimap.',
+    default: false,
+    requiresWatch: true,
+});
+
+registerSettingItem('hud', {
     id: 'hudEditor',
     kind: 'action',
     label: 'Modifier l’ATH',

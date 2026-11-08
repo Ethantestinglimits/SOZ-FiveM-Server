@@ -67,7 +67,7 @@ const Cycle: FunctionComponent<{
 }> = ({ options, value, onChange }) => {
     const index = Math.max(
         0,
-        options.findIndex((option) => option.id === value),
+        options.findIndex(option => option.id === value)
     );
 
     return (
@@ -75,7 +75,7 @@ const Cycle: FunctionComponent<{
             label={options[index].label}
             index={index}
             count={options.length}
-            onChange={(direction) => onChange(options[(index + direction + options.length) % options.length].id)}
+            onChange={direction => onChange(options[(index + direction + options.length) % options.length].id)}
         />
     );
 };
@@ -99,7 +99,7 @@ const Slider: FunctionComponent<{
                 max={max}
                 step={1}
                 value={value}
-                onChange={(event) => onChange(Number(event.target.value))}
+                onChange={event => onChange(Number(event.target.value))}
                 className="soz-volume-slider w-[16vh]"
                 style={{
                     background: `linear-gradient(to right, #fff ${percent}%, rgba(255, 255, 255, 0.2) ${percent}%)`,
@@ -114,7 +114,7 @@ const Slider: FunctionComponent<{
     );
 };
 
-export const MinimapPanel: FunctionComponent = () => {
+export const MinimapPanel: FunctionComponent<{ compact?: boolean }> = ({ compact }) => {
     const style = useMinimapStyle();
     const minimap = useMinimap();
     const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -130,7 +130,7 @@ export const MinimapPanel: FunctionComponent = () => {
                 }
             }
         },
-        [],
+        []
     );
 
     const apply = (next: MinimapStyle) => {
@@ -162,7 +162,7 @@ export const MinimapPanel: FunctionComponent = () => {
                     <Cycle
                         options={SHAPES}
                         value={style.shape}
-                        onChange={(shape) => change({ shape: shape as MinimapShape })}
+                        onChange={shape => change({ shape: shape as MinimapShape })}
                     />
                 </Row>
 
@@ -173,7 +173,7 @@ export const MinimapPanel: FunctionComponent = () => {
                             min={0}
                             max={MINIMAP_RADIUS_MAX}
                             suffix=" %"
-                            onChange={(value) => change({ radius: value })}
+                            onChange={value => change({ radius: value })}
                         />
                     </Row>
                 )}
@@ -182,7 +182,7 @@ export const MinimapPanel: FunctionComponent = () => {
                     <Cycle
                         options={TILT_MODES}
                         value={style.tiltMode ?? 'vehicle'}
-                        onChange={(tiltMode) => change({ tiltMode: tiltMode as MinimapTiltMode })}
+                        onChange={tiltMode => change({ tiltMode: tiltMode as MinimapTiltMode })}
                     />
                 </Row>
 
@@ -201,7 +201,7 @@ export const MinimapPanel: FunctionComponent = () => {
                             min={0}
                             max={MINIMAP_TILT_MAX}
                             suffix="°"
-                            onChange={(tilt) => change({ tilt })}
+                            onChange={tilt => change({ tilt })}
                         />
                     </Row>
                 )}
@@ -221,7 +221,7 @@ export const MinimapPanel: FunctionComponent = () => {
                         min={MINIMAP_ARROW_MIN}
                         max={MINIMAP_ARROW_MAX}
                         suffix=" px"
-                        onChange={(arrowSize) => change({ arrowSize })}
+                        onChange={arrowSize => change({ arrowSize })}
                     />
                 </Row>
 
@@ -231,7 +231,7 @@ export const MinimapPanel: FunctionComponent = () => {
                         min={MINIMAP_ZOOM_MIN}
                         max={MINIMAP_ZOOM_MAX}
                         suffix=" %"
-                        onChange={(zoom) => change({ zoom })}
+                        onChange={zoom => change({ zoom })}
                     />
                 </Row>
 
@@ -241,7 +241,7 @@ export const MinimapPanel: FunctionComponent = () => {
                         min={MINIMAP_OPACITY_MIN}
                         max={100}
                         suffix=" %"
-                        onChange={(opacity) => change({ opacity })}
+                        onChange={opacity => change({ opacity })}
                     />
                 </Row>
 
@@ -251,14 +251,14 @@ export const MinimapPanel: FunctionComponent = () => {
                         min={0}
                         max={MINIMAP_BORDER_MAX}
                         suffix=" px"
-                        onChange={(borderWidth) => change({ borderWidth })}
+                        onChange={borderWidth => change({ borderWidth })}
                     />
                 </Row>
 
                 {style.borderWidth > 0 && (
                     <Row label="Couleur de la bordure">
                         <div className="flex items-center gap-[0.6vh]" {...navGroup('select')}>
-                            {COLORS.map((color) => (
+                            {COLORS.map(color => (
                                 <button
                                     key={color}
                                     {...navSelected(style.borderColor === color)}
@@ -273,7 +273,7 @@ export const MinimapPanel: FunctionComponent = () => {
                             <input
                                 type="color"
                                 value={style.borderColor}
-                                onChange={(event) => change({ borderColor: event.target.value })}
+                                onChange={event => change({ borderColor: event.target.value })}
                                 className="h-[2vh] w-[2.6vh] cursor-pointer rounded-[0.5vh] bg-transparent"
                             />
                         </div>
@@ -284,7 +284,7 @@ export const MinimapPanel: FunctionComponent = () => {
                     <Cycle
                         options={FRAMES}
                         value={style.frame}
-                        onChange={(frame) => change({ frame: frame as MinimapFrameMode })}
+                        onChange={frame => change({ frame: frame as MinimapFrameMode })}
                     />
                 </Row>
 
@@ -297,14 +297,16 @@ export const MinimapPanel: FunctionComponent = () => {
                 </button>
             </div>
 
-            <div className="flex shrink-0 flex-col items-center gap-[1vh] rounded-[1vh] bg-white/5 p-[1.6vh]">
-                <span className="self-start text-[1.2vh] font-semibold uppercase tracking-[0.2em] text-white/50">
-                    Aperçu
-                </span>
-                <div className="flex flex-1 items-center justify-center">
-                    <MinimapPreview />
+            {!compact && (
+                <div className="flex shrink-0 flex-col items-center gap-[1vh] rounded-[1vh] bg-white/5 p-[1.6vh]">
+                    <span className="self-start text-[1.2vh] font-semibold uppercase tracking-[0.2em] text-white/50">
+                        Aperçu
+                    </span>
+                    <div className="flex flex-1 items-center justify-center">
+                        <MinimapPreview />
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };

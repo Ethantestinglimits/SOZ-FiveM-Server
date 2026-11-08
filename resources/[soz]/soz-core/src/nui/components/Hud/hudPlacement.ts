@@ -11,6 +11,7 @@ type Entry = {
     rect: HudRect | null;
     lastRect: HudRect | null;
     active: boolean;
+    fit: boolean;
     correction: [number, number];
 };
 
@@ -49,7 +50,15 @@ const entryOf = (id: HudElementId): Entry => {
     let entry = entries.get(id);
 
     if (!entry) {
-        entry = { element: null, content: null, rect: null, lastRect: null, active: false, correction: [0, 0] };
+        entry = {
+            element: null,
+            content: null,
+            rect: null,
+            lastRect: null,
+            active: false,
+            fit: false,
+            correction: [0, 0],
+        };
         entries.set(id, entry);
     }
 
@@ -111,8 +120,36 @@ const collapse = (rect: HudRect, targetCorner: HudCorner, corner: HudCorner): Hu
     };
 };
 
+const unionOfChildren = (element: HTMLElement): HudRect | null => {
+    let left = Infinity;
+    let top = Infinity;
+    let right = -Infinity;
+    let bottom = -Infinity;
+
+    for (const child of Array.from(element.children)) {
+        const bounds = child.getBoundingClientRect();
+
+        if (bounds.width > 0 || bounds.height > 0) {
+            left = Math.min(left, bounds.left);
+            top = Math.min(top, bounds.top);
+            right = Math.max(right, bounds.right);
+            bottom = Math.max(bottom, bounds.bottom);
+        }
+    }
+
+    return left === Infinity ? null : { x: left, y: top, w: right - left, h: bottom - top };
+};
+
 const measure = (entry: Entry): HudRect | null => {
     const element = entry.content ?? entry.element;
+
+    if (element && entry.fit) {
+        const union = unionOfChildren(element);
+
+        if (union) {
+            return union;
+        }
+    }
 
     if (element) {
         const bounds = element.getBoundingClientRect();
@@ -134,6 +171,15 @@ const placementSize = (id: HudElementId, placement: HudPlacement): [number, numb
     const scale = placement.scale ?? 1;
 
     const element = entry?.element;
+
+    if (element && entry.fit && element.style.width !== 'max-content') {
+        const union = measure(entry);
+        const current = parseFloat(element.style.scale) || 1;
+
+        if (union) {
+            return [(union.w / current) * scale, (union.h / current) * scale];
+        }
+    }
 
     if (element) {
         return [element.offsetWidth * scale, element.offsetHeight * scale];
@@ -231,7 +277,7 @@ const placementStyle = (
         top: `${rect.y}px`,
         right: 'auto',
         bottom: 'auto',
-        transform: placement.scale && placement.scale !== 1 ? `scale(${placement.scale})` : 'none',
+        transform: 'none',
         transformOrigin: 'top left',
         margin: 0,
         ...(fitContent ? { width: 'max-content' } : {}),
@@ -302,6 +348,8 @@ export const useHudBlock = (
         [entry]
     );
 
+    entry.fit = Boolean(options.fitContent);
+
     useEffect(() => {
         if (entry.active !== active) {
             entry.active = active;
@@ -315,6 +363,12 @@ export const useHudBlock = (
 
         if (!element) {
             return;
+        }
+
+        const scale = placement?.scale && placement.scale !== 1 && active ? String(placement.scale) : '';
+
+        if (element.style.scale !== scale) {
+            element.style.scale = scale;
         }
 
         const [dx, dy] = keepOnScreen(entry);
@@ -422,3 +476,15 @@ export const placeMinimap = <T extends MinimapBox>(minimap: T): T => {
         Y: top + boxHeight + (minimap.Y - minimap.bottom) * ratioY,
     };
 };
+
+export const getHudBlockRect = (id: HudElementId): HudRect | null => {
+    const entry = entries.get(id);
+
+    if (!entry?.active) {
+        return null;
+    }
+
+    return measure(entry);
+};
+
+export const getHudCornerPoint = (rect: HudRect, corner: HudCorner): [number, number] => cornerPoint(rect, corner);

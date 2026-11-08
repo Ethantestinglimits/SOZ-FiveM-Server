@@ -39,7 +39,7 @@ export const GlassMorphismContainer: FunctionComponent<GlassMorphismContainerPro
     const { glassmorphismColors } = useHudColor();
     const childrenRef = useRef<HTMLDivElement>(null);
 
-    const { height } = childrenRef.current?.getBoundingClientRect() || { height: undefined };
+    const height = childrenRef.current?.offsetHeight;
 
     const currentBorderColor = useMemo(() => {
         if (borderColor) {

@@ -85,6 +85,10 @@ export const StateApp: FunctionComponent = () => {
         dispatch.hud.updateSettings({ switchPlayerStatsPosition });
     });
 
+    useNuiEvent('hud', 'SetWatchLayout', watchLayout => {
+        dispatch.hud.updateSettings(watchLayout);
+    });
+
     useNuiEvent('hud', 'SetShowInjuryTracker', showInjuryTracker => {
         dispatch.hud.updateSettings({ showInjuryTracker });
     });

@@ -48,6 +48,7 @@ export interface NuiHudMethodMap {
     SetShowStamina: boolean;
     SetShowInstructionalOverlay: boolean;
     SetSwitchPlayerStatsPosition: boolean;
+    SetWatchLayout: { compassLeft: boolean; streetOnTop: boolean };
     SetShowInjuryTracker: boolean;
     SetZoomInjuryTracker: number;
     SetSwitchInjuryTrackerPosition: boolean;
