@@ -29,7 +29,7 @@ import { KeysPanel } from './KeysPanel';
 import { MinimapPanel } from './MinimapPanel';
 import { setNativeHover } from './nativeInputState';
 import { PendingApply, usePendingApply, usePublishPendingApply } from './pendingApply';
-import { Arrow, Bar, ROW_CLASS, ROW_LABEL_CLASS, ToggleButton, ValueStepper } from './rowControls';
+import { Arrow, Bar, ROW_CLASS, ROW_LABEL_CLASS, ToasterIcon, ToggleButton, ValueStepper } from './rowControls';
 
 const normalize = (value: string) => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
@@ -397,7 +397,10 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
             onKeyDown={onKeyDown}
             className={ROW_CLASS}
         >
-            <span className={ROW_LABEL_CLASS}>{item.label}</span>
+            <span className={classNames(ROW_LABEL_CLASS, 'flex items-center gap-[0.8vh]')}>
+                {item.badge === 'toaster' && <ToasterIcon className="h-[1.9vh] w-[1.9vh] shrink-0 text-amber-300" />}
+                <span className="truncate">{item.label}</span>
+            </span>
             <div {...{ [NAV_SKIP_ATTRIBUTE]: true }}>{control}</div>
         </li>
     );

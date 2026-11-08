@@ -103,3 +103,21 @@ export const Bar: FunctionComponent<{ percent: number }> = ({ percent }) => (
         <div className="h-full rounded-full bg-white" style={{ width: `${percent}%` }} />
     </div>
 );
+
+export const ToasterIcon: FunctionComponent<{ className?: string }> = ({ className }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+    >
+        <path d="M7.5 8V5.5a1.5 1.5 0 0 1 3 0V8M13.5 8V5.5a1.5 1.5 0 0 1 3 0V8" />
+        <rect x="3" y="8" width="18" height="10" rx="3" />
+        <path d="M6.5 18v2M17.5 18v2M21 12h1.5M7 13h6" />
+        <circle cx="17" cy="13" r="1" />
+    </svg>
+);

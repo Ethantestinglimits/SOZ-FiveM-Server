@@ -69,6 +69,8 @@ const WORLD_MIN_Y = -6600 - WRAP_MARGIN_Y / 2;
 const WORLD_WIDTH = 10340 + WRAP_MARGIN_X;
 const WORLD_HEIGHT = 15000 + WRAP_MARGIN_Y;
 const WRAP_OFFSETS = [-1, 0, 1];
+const WRAP_MARGIN_PX = 120;
+const IDLE_REFRESH_MS = 500;
 
 export type MinimapRect = { x: number; y: number; w: number; h: number };
 
@@ -171,6 +173,12 @@ export class MinimapRenderer {
     public forceVisible = false;
     public zIndex: string | null = null;
     private lastRenderedAt = 0;
+    private lastDrawnAt = 0;
+    private version = 0;
+    private renderKey = '';
+    private renderRefs: unknown[] = [];
+    private zoomCache = { scale: NaN, mode: '', value: 1 };
+    public potato = false;
     private instant = false;
     public blips: MinimapBlip[] = [];
     public zones: MinimapZone[] = [];
@@ -276,6 +284,8 @@ export class MinimapRenderer {
                 blip.rotation = entry.rotation;
             }
         }
+
+        this.version++;
     }
 
     public setZones(zones: MinimapZone[]): void {
@@ -283,6 +293,7 @@ export class MinimapRenderer {
     }
 
     public setRegions(regions: PauseMapRegion[]): void {
+        this.version++;
         this.regionLabels = regions.map((region) => ({
             x: region.x,
             y: region.y,
@@ -399,6 +410,7 @@ export class MinimapRenderer {
                     }
 
                     this.images.push({ ...source, levels, widths });
+                    this.version++;
                 })
                 .catch((error) => console.error('[minimap]', error));
         }
@@ -411,7 +423,10 @@ export class MinimapRenderer {
 
         this.icons.set(sprite, null);
         loadImage(`${BLIP_URL}/${sprite}.webp?v=${ASSETS_VERSION}`)
-            .then((image) => this.icons.set(sprite, image))
+            .then((image) => {
+                this.icons.set(sprite, image);
+                this.version++;
+            })
             .catch(() => undefined);
     }
 
@@ -466,9 +481,59 @@ export class MinimapRenderer {
 
         this.lastAt = now;
         this.update(now, dt);
-        this.render();
+
+        if (this.needsRender(now)) {
+            this.lastDrawnAt = now;
+            this.render();
+        }
+
         this.handle = requestAnimationFrame(this.loop);
     };
+
+    private needsRender(now: number): boolean {
+        const camera = this.camera;
+        const rect = this.current;
+        const frame = this.displayed;
+        const key = [
+            this.mode,
+            this.version,
+            this.orientation,
+            this.zIndex,
+            isMinimapEditing(),
+            rect.x.toFixed(1),
+            rect.y.toFixed(1),
+            rect.w.toFixed(1),
+            rect.h.toFixed(1),
+            camera.x.toFixed(2),
+            camera.y.toFixed(2),
+            camera.scale.toFixed(6),
+            camera.rotation.toFixed(4),
+            this.presence.toFixed(3),
+            this.openness.toFixed(3),
+            frame ? `${frame.x.toFixed(2)}:${frame.y.toFixed(2)}:${frame.heading.toFixed(1)}` : '',
+        ].join('|');
+        const refs = [
+            this.blips,
+            this.zones,
+            this.route,
+            this.waypoint,
+            this.layers,
+            this.style,
+            this.contextPoint,
+            this.hovered,
+            this.highlight,
+            this.panelRect,
+            this.minimapRect,
+        ];
+        const animating = this.highlight !== null && now - this.highlightAt < HIGHLIGHT_MS + 50;
+        const changed =
+            key !== this.renderKey || refs.some((ref, index) => ref !== this.renderRefs[index]) || animating;
+
+        this.renderKey = key;
+        this.renderRefs = refs;
+
+        return changed || now - this.lastDrawnAt > IDLE_REFRESH_MS;
+    }
 
     private update(now: number, dt: number): void {
         if (!this.frame || !this.displayed) {
@@ -576,8 +641,25 @@ export class MinimapRenderer {
         return best;
     }
 
-    private getOffsets(): number[] {
-        return this.mode === 'open' ? WRAP_OFFSETS : [0];
+    private getOffsets(axis: 'x' | 'y'): number[] {
+        if (this.mode !== 'open') {
+            return [0];
+        }
+
+        const scale = this.camera.scale;
+
+        return WRAP_OFFSETS.filter((offset) => {
+            if (axis === 'x') {
+                const from = (WORLD_MIN_X + offset * WORLD_WIDTH - this.camera.x) * scale + this.current.w / 2;
+
+                return from < this.current.w + WRAP_MARGIN_PX && from + WORLD_WIDTH * scale > -WRAP_MARGIN_PX;
+            }
+
+            const top =
+                (this.camera.y - WORLD_MIN_Y - offset * WORLD_HEIGHT - WORLD_HEIGHT) * scale + this.current.h / 2;
+
+            return top < this.current.h + WRAP_MARGIN_PX && top + WORLD_HEIGHT * scale > -WRAP_MARGIN_PX;
+        });
     }
 
     private toScreen(x: number, y: number, ox = 0, oy = 0): [number, number] {
@@ -608,7 +690,7 @@ export class MinimapRenderer {
             return;
         }
 
-        const dpr = window.devicePixelRatio || 1;
+        const dpr = this.potato ? 1 : window.devicePixelRatio || 1;
         const backing = this.mode === 'minimap' ? rect : this.panelRect;
         const width = Math.round(backing.w * dpr);
         const height = Math.round(backing.h * dpr);
@@ -637,7 +719,8 @@ export class MinimapRenderer {
         }
 
         const ctx = this.ctx;
-        const offsets = this.getOffsets();
+        const offsetsX = this.getOffsets('x');
+        const offsetsY = this.getOffsets('y');
 
         this.tooltip = null;
 
@@ -650,14 +733,14 @@ export class MinimapRenderer {
         ctx.fillStyle = SEA_COLOR;
         ctx.fillRect(0, 0, rect.w, rect.h);
 
-        this.drawMap(sx, offsets);
+        this.drawMap(sx, offsetsX, offsetsY);
         ctx.globalAlpha = 1;
 
         const showBlips = this.mode === 'minimap' || this.layers.includes('blips');
         const showPlayers = this.mode === 'minimap' || this.layers.includes('players');
 
-        for (const ox of offsets) {
-            for (const oy of offsets) {
+        for (const ox of offsetsX) {
+            for (const oy of offsetsY) {
                 if (showBlips) {
                     this.drawZones(ox, oy);
                 }
@@ -666,8 +749,8 @@ export class MinimapRenderer {
             }
         }
 
-        for (const ox of offsets) {
-            for (const oy of offsets) {
+        for (const ox of offsetsX) {
+            for (const oy of offsetsY) {
                 this.drawBlips(ox, oy, showBlips, showPlayers);
 
                 this.drawWaypoint(ox, oy);
@@ -680,8 +763,8 @@ export class MinimapRenderer {
         if (this.mode === 'open') {
             const zoom = this.camera.scale;
 
-            for (const ox of offsets) {
-                for (const oy of offsets) {
+            for (const ox of offsetsX) {
+                for (const oy of offsetsY) {
                     if (this.layers.includes('regions') && zoom >= REGION_SCALE[0] && zoom < REGION_SCALE[1]) {
                         const size = Math.min(20, Math.max(10, 10 + Math.log2(zoom / 0.1) * 3));
 
@@ -769,7 +852,7 @@ export class MinimapRenderer {
         return this.style.radius === undefined ? MINIMAP_RADIUS : (side * this.style.radius) / 100;
     }
 
-    private drawMap(dpr: number, offsets: number[]): void {
+    private drawMap(dpr: number, offsetsX: number[], offsetsY: number[]): void {
         const ctx = this.ctx;
         const { scale, rotation } = this.camera;
         const radius = Math.hypot(this.current.w, this.current.h) / 2;
@@ -778,10 +861,11 @@ export class MinimapRenderer {
         ctx.translate(this.current.w / 2, this.current.h / 2);
         ctx.rotate(rotation);
         ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = this.mode === 'minimap' || this.mode === 'open' ? 'high' : 'medium';
+        ctx.imageSmoothingQuality =
+            !this.potato && (this.mode === 'minimap' || this.mode === 'open') ? 'high' : this.potato ? 'low' : 'medium';
 
-        for (const ox of offsets) {
-            for (const oy of offsets) {
+        for (const ox of offsetsX) {
+            for (const oy of offsetsY) {
                 for (const image of this.images) {
                     const x = (image.x0 + ox * WORLD_WIDTH - this.camera.x) * scale;
                     const y = (this.camera.y - image.y0 - oy * WORLD_HEIGHT) * scale;
@@ -946,11 +1030,20 @@ export class MinimapRenderer {
     }
 
     private getBlipZoom(): number {
-        if (this.mode === 'minimap' || this.camera.scale <= BLIP_ZOOM_FROM) {
-            return 1;
+        const cache = this.zoomCache;
+
+        if (cache.scale === this.camera.scale && cache.mode === this.mode) {
+            return cache.value;
         }
 
-        return Math.min(BLIP_ZOOM_MAX, 1 + Math.log2(this.camera.scale / BLIP_ZOOM_FROM) * BLIP_ZOOM_GROWTH);
+        cache.scale = this.camera.scale;
+        cache.mode = this.mode;
+        cache.value =
+            this.mode === 'minimap' || this.camera.scale <= BLIP_ZOOM_FROM
+                ? 1
+                : Math.min(BLIP_ZOOM_MAX, 1 + Math.log2(this.camera.scale / BLIP_ZOOM_FROM) * BLIP_ZOOM_GROWTH);
+
+        return cache.value;
     }
 
     private getFocusGrowth(): number {

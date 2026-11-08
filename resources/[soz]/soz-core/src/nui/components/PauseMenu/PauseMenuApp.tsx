@@ -18,11 +18,12 @@ import { fetchNui } from '../../fetch';
 import { useKeyPress } from '../../hook/control';
 import { useNuiEvent, useNuiFocus } from '../../hook/nui';
 import { setVolumes } from '../../utils/volumes';
+import { useHudColor } from '../Hud/hooks/useHudColor';
 import { minimapController, setMapTabActive, useMinimapMode } from '../Minimap/minimapState';
-import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
 import { FOCUS_RING_CLASSES, NAV_ZONE_ATTRIBUTE, useKeyboardNav } from './keyboardNav';
 import { MapSidebar } from './MapSidebar';
 import { setNativeHover, useKeyCapture, useNativeBackdrop, useNativeHover } from './settings/nativeInputState';
+import { ToasterIcon } from './settings/rowControls';
 import { SettingsMain, SettingsSidebar } from './settings/SettingsView';
 
 type PauseMenuTab = 'map' | 'settings';
@@ -36,17 +37,29 @@ const Glass: FunctionComponent<PropsWithChildren<{ className?: string; backgroun
     className,
     backgroundColor,
     children,
-}) => (
-    <GlassMorphismContainer
-        cantBeHidden
-        rounded={16}
-        borderClassName="rounded-2xl"
-        backgroundColor={backgroundColor}
-        className={className}
-    >
-        {children}
-    </GlassMorphismContainer>
-);
+}) => {
+    const { glassmorphismColors } = useHudColor();
+    const border = glassmorphismColors.border;
+
+    return (
+        <div className="relative h-full w-full overflow-hidden rounded-2xl">
+            <div
+                className="absolute inset-0"
+                style={{ background: backgroundColor ?? glassmorphismColors.background }}
+            />
+            <div
+                className="pointer-events-none absolute inset-0 z-10 rounded-2xl border-2 border-transparent"
+                style={{
+                    background: `linear-gradient(-40deg, ${border}FC 0%, ${border}1A 25%, ${border}1A 75%, ${border}FC 100%) border-box`,
+                    WebkitMask: `linear-gradient(${border} 0 0) padding-box, linear-gradient(${border} 0 0) border-box`,
+                    WebkitMaskComposite: 'xor',
+                    maskComposite: 'exclude',
+                }}
+            />
+            <div className={classNames('relative z-10', className)}>{children}</div>
+        </div>
+    );
+};
 
 const BarButton: FunctionComponent<{ label: string; icon: ReactNode; danger?: boolean; onClick: () => void }> = ({
     label,
@@ -61,7 +74,7 @@ const BarButton: FunctionComponent<{ label: string; icon: ReactNode; danger?: bo
             {
                 'bg-white/10 text-white hover:bg-white/25': !danger,
                 'bg-red-500/20 text-red-200 hover:bg-red-500/60 hover:text-white': danger,
-            },
+            }
         )}
     >
         <span className="h-[1.9vh] w-[1.9vh] shrink-0">{icon}</span>
@@ -89,14 +102,14 @@ const VolumeSlider: FunctionComponent<{ value: number }> = ({ value }) => {
                 max={100}
                 step={1}
                 value={current}
-                onChange={(event) => {
+                onChange={event => {
                     const volume = Number(event.currentTarget.value);
 
                     setCurrent(volume);
                     setVolumes({ master: volume / 100 });
                 }}
-                onPointerUp={(event) => commit(Number(event.currentTarget.value))}
-                onKeyUp={(event) => commit(Number(event.currentTarget.value))}
+                onPointerUp={event => commit(Number(event.currentTarget.value))}
+                onKeyUp={event => commit(Number(event.currentTarget.value))}
                 className="soz-volume-slider w-[14vh]"
                 style={{
                     background: `linear-gradient(to right, #fff ${current}%, rgba(255, 255, 255, 0.2) ${current}%)`,
@@ -120,7 +133,7 @@ const TabButton: FunctionComponent<{ label: string; icon: ReactNode; active: boo
             {
                 'bg-white text-black': active,
                 'bg-white/10 text-white/80 hover:bg-white/25 hover:text-white': !active,
-            },
+            }
         )}
     >
         <span className="h-[2vh] w-[2vh] shrink-0">{icon}</span>
@@ -226,7 +239,7 @@ export const PauseMenuApp: FunctionComponent = () => {
 
     useNuiFocus(focused, focused, focused && nativeHover, [], focused && nativeHover);
 
-    useNuiEvent('pause_menu', 'Open', (menuData) => {
+    useNuiEvent('pause_menu', 'Open', menuData => {
         setConfirmQuit(false);
 
         if (menuData.scriptMode) {
@@ -243,14 +256,14 @@ export const PauseMenuApp: FunctionComponent = () => {
     });
     useNuiEvent('pause_menu', 'NativeValue', ({ key, value }) =>
         setData(
-            (current) =>
+            current =>
                 current && {
                     ...current,
                     settings: { ...current.settings, native: { ...current.settings.native, [key]: value } },
-                },
-        ),
+                }
+        )
     );
-    useNuiEvent('pause_menu', 'Settings', (settings) => setData((current) => current && { ...current, settings }));
+    useNuiEvent('pause_menu', 'Settings', settings => setData(current => current && { ...current, settings }));
 
     useEffect(() => {
         setMapTabActive(tab === 'map');
@@ -267,7 +280,7 @@ export const PauseMenuApp: FunctionComponent = () => {
             return;
         }
 
-        const index = TABS.findIndex((item) => item.id === tab);
+        const index = TABS.findIndex(item => item.id === tab);
 
         setTab(TABS[(index + direction + TABS.length) % TABS.length].id);
     };
@@ -326,14 +339,19 @@ export const PauseMenuApp: FunctionComponent = () => {
                         <XIcon className="h-[1.8vh] w-[1.8vh]" />
                         Fermer
                     </button>,
-                    document.body,
+                    document.body
                 )}
             {showContent && !data.scriptMode && (
                 <div className="pointer-events-none absolute inset-0 z-[75] mx-auto flex max-w-[177.78vh] flex-col gap-[1.8vh] px-[4vh] py-[3vh]">
                     <header className="pointer-events-auto flex h-[5.4vh] shrink-0 items-center gap-[1vh]">
                         <img src="assets/pause/soz_logo.webp" alt="SoZ" className="mr-[2vh] h-[3.6vh] w-auto" />
+                        {data.settings.server.potato && (
+                            <span title="Mode économe (petit PC) actif" className="-ml-[1.2vh] mr-[1vh] text-amber-300">
+                                <ToasterIcon className="h-[2.6vh] w-[2.6vh]" />
+                            </span>
+                        )}
                         <KeyHint label="Q" />
-                        {TABS.map((item) => (
+                        {TABS.map(item => (
                             <TabButton
                                 key={item.id}
                                 label={item.label}

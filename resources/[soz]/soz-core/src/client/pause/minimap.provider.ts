@@ -37,6 +37,11 @@ const DEFAULT_ORIENTATION: MinimapOrientation = 'camera';
 const GPS_SLOTS = [0, 1];
 const ROUTE_BUDGET_MS = 3;
 const ROUTE_INTERVAL = 250;
+const ROUTE_IDLE_INTERVAL = 2000;
+const ROUTE_MOVE_THRESHOLD = 0.75;
+const HIDDEN_FRAME_INTERVAL = 500;
+const FRAME_KEEPALIVE = 1000;
+const HIDDEN_SCAN_EVERY = 3;
 const ROUTE_NEAR_STEP = 5;
 const ROUTE_NEAR_DISTANCE = 1500;
 const ROUTE_FAR_STEP = 20;
@@ -88,6 +93,14 @@ export class PauseMinimapProvider {
     private waypointSignature = '';
     private routeJob: RouteJob | null = null;
     private lastRouteStart = 0;
+    private lastRouteFull = 0;
+    private routeKey = '';
+    private frameKey = '';
+    private lastFrameSent = 0;
+    private visible = true;
+    private scanTick = 0;
+    public panelOpen = false;
+    private routeOrigin = { x: 0, y: 0 };
 
     @Once(OnceStep.NuiLoaded)
     public sendSettings(): void {
@@ -176,8 +189,9 @@ export class PauseMinimapProvider {
     @Tick(TickInterval.EVERY_FRAME)
     public onFrame(): void {
         const now = GetGameTimer();
+        const interval = this.visible || this.panelOpen ? this.frameInterval : HIDDEN_FRAME_INTERVAL;
 
-        if (now - this.lastFrameAt < this.frameInterval) {
+        if (now - this.lastFrameAt < interval) {
             return;
         }
 
@@ -188,8 +202,7 @@ export class PauseMinimapProvider {
         const entity = vehicle || ped;
         const [x, y] = GetEntityCoords(ped, false);
         const [, , camHeading] = GetGameplayCamRot(2);
-
-        this.nuiDispatch.dispatch('minimap', 'Frame', {
+        const frame = {
             x,
             y,
             heading: GetEntityHeading(ped),
@@ -197,11 +210,34 @@ export class PauseMinimapProvider {
             speed: GetEntitySpeed(entity),
             altitude: GetEntityHeightAboveGround(entity),
             visible: this.hudMinimapProvider.radarWanted && IsGameplayCamRendering() && !IsPauseMenuActive(),
-        });
+        };
+        const key = [
+            frame.x.toFixed(2),
+            frame.y.toFixed(2),
+            frame.heading.toFixed(1),
+            frame.camHeading.toFixed(1),
+            frame.speed.toFixed(1),
+            frame.altitude.toFixed(1),
+            frame.visible,
+        ].join('|');
+
+        this.visible = frame.visible;
+
+        if (key === this.frameKey && now - this.lastFrameSent < FRAME_KEEPALIVE) {
+            return;
+        }
+
+        this.frameKey = key;
+        this.lastFrameSent = now;
+        this.nuiDispatch.dispatch('minimap', 'Frame', frame);
     }
 
     @Tick(100)
     public onBlips(): void {
+        if (!this.visible && !this.panelOpen && this.scanTick++ % HIDDEN_SCAN_EVERY !== 0) {
+            return;
+        }
+
         if (this.scanSprite === 0) {
             this.startScan();
         }
@@ -313,6 +349,20 @@ export class PauseMinimapProvider {
 
             this.lastRouteStart = now;
             this.dispatchWaypoint();
+
+            const [px, py] = GetEntityCoords(PlayerPedId(), false);
+            const routeKey = `${this.waypointSignature}:${GetGpsBlipRouteFound()}:${Math.round(
+                GetGpsBlipRouteLength() / ROUTE_MOVE_THRESHOLD
+            )}`;
+            const moved = Math.hypot(px - this.routeOrigin.x, py - this.routeOrigin.y) >= ROUTE_MOVE_THRESHOLD;
+
+            if (routeKey === this.routeKey && !moved && now - this.lastRouteFull < ROUTE_IDLE_INTERVAL) {
+                return;
+            }
+
+            this.routeKey = routeKey;
+            this.routeOrigin = { x: px, y: py };
+            this.lastRouteFull = now;
             this.routeJob = this.startRouteJob(GPS_SLOTS[0]);
         }
 

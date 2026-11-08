@@ -110,6 +110,7 @@ export class PauseMenuProvider {
         }
 
         this.opened = true;
+        this.pauseMinimapProvider.panelOpen = true;
 
         if (!this.pauseMinimapProvider.isPotato()) {
             this.blurService.add(BLUR_REASON, BLUR_DELAY);
@@ -165,6 +166,7 @@ export class PauseMenuProvider {
         waiters.forEach(resolve => resolve());
 
         this.opened = false;
+        this.pauseMinimapProvider.panelOpen = false;
         this.lastNuiFocusAt = GetGameTimer();
         this.blurService.remove(BLUR_REASON, BLUR_DELAY);
         this.nuiDispatch.dispatch('pause_menu', 'Close');

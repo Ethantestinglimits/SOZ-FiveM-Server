@@ -7,6 +7,7 @@ type SettingBase = {
     label: string;
     description: string;
     requiresWatch?: boolean;
+    badge?: 'toaster';
 };
 
 export type ServerToggleSetting = SettingBase & {
@@ -130,8 +131,9 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
                 id: 'potato',
                 kind: 'toggle',
                 label: 'Mode économe (petit PC)',
+                badge: 'toaster',
                 description:
-                    "Désactive le glassmorphisme et l'animation de la carte, et limite la Minimap à 30 FPS. Réduit les calculs de rendu sans changer le style de l'interface.",
+                    "Désactive le glassmorphisme, le flou et l'animation de la carte, limite la Minimap à 30 FPS et dessine la carte en définition standard. Réduit les calculs de rendu sans changer le style de l'interface.",
                 default: false,
             },
             {
