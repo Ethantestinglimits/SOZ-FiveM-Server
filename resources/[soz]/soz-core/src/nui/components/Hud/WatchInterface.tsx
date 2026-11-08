@@ -18,17 +18,21 @@ import { PlayerStats } from './components/PlayerStats';
 import { VoiceIcon } from './components/VoiceIcon';
 import { Weather } from './components/Weather';
 import { useHudColor } from './hooks/useHudColor';
+import { layoutTransform, useHudLayout } from './hudLayoutState';
+import { LayoutBlock } from './LayoutBlock';
 
 export const WatchInterface: FunctionComponent = () => {
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
     const settings = useSelector((state: RootState) => state.hud.settings);
     const minimap = useHudMinimap();
+    const layout = useHudLayout();
+    const statsLayout = layout.stats;
     const minimapStyle = useMinimapStyle();
-    const minimapMode = useMinimapMode();
     const frameVisible =
         minimapStyle.frame === 'visible' || (minimapStyle.frame === 'auto' && minimapStyle.shape === 'rectangle');
 
     const hasStreetNamesEnabled = useHudHasStreetNames();
+    const minimapMode = useMinimapMode();
 
     const [voiceMode, setVoiceMode] = useState(VoiceMode.Normal);
     const [voiceActive, setVoiceActive] = useState(true);
@@ -81,18 +85,13 @@ export const WatchInterface: FunctionComponent = () => {
         },
     });
 
-    const voiceStyles = useSpring({
+    const statsStyles = useSpring({
         from: {
-            bottom: '-50vh',
+            top: '150vh',
         },
         to: {
-            bottom: `${100 - minimap.bottom * 100}vh`,
-            left: settings.switchPlayerStatsPosition
-                ? `${100 - (minimap.right + 0.04) * 100}vw`
-                : (!hasWatch && minimap.isHidden) ||
-                    (!hasStreetNamesEnabled && !settings.showWeather && !settings.showDateTime && minimap.isHidden)
-                  ? `${(minimap.left + 0.005) * 100}vw`
-                  : `${(minimap.right + 0.005) * 100}vw`,
+            top: `${statsLayout?.y ?? 0}vh`,
+            left: `${statsLayout?.x ?? 0}vw`,
         },
     });
 
@@ -120,14 +119,11 @@ export const WatchInterface: FunctionComponent = () => {
                 />
             )}
 
-            <animated.div
-                className={cn('absolute size-12 drop-shadow-bg ml-3', {
-                    'mb-14': !hasStreetNamesEnabled,
-                })}
-                style={voiceStyles}
-            >
-                <VoiceIcon icon={voiceIcon} disableAutoHide={disableAutoHide} />
-            </animated.div>
+            {layout.voice && (
+                <LayoutBlock position={layout.voice} anchor="bottom-left" className="size-12 drop-shadow-bg">
+                    <VoiceIcon icon={voiceIcon} disableAutoHide={disableAutoHide} />
+                </LayoutBlock>
+            )}
 
             <animated.div
                 className={cn('absolute flex gap-3 text-white h-fit', {
@@ -138,9 +134,23 @@ export const WatchInterface: FunctionComponent = () => {
             >
                 <Location />
                 <Compass />
-                <PlayerStats />
-                <PetStats />
+                {!statsLayout && (
+                    <>
+                        <PlayerStats />
+                        <PetStats />
+                    </>
+                )}
             </animated.div>
+
+            {statsLayout && (
+                <animated.div
+                    className="absolute flex gap-3 text-white h-fit"
+                    style={{ ...statsStyles, ...layoutTransform(statsLayout, 'top left') }}
+                >
+                    <PlayerStats />
+                    <PetStats />
+                </animated.div>
+            )}
         </>
     );
 };

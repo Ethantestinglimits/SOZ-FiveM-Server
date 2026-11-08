@@ -11,10 +11,34 @@ import { LockIndicator } from './components/LockIndicator';
 import { NosGauge } from './components/NosGauge';
 import { SeatbeltIndicator } from './components/SeatbeltIndicator';
 import { SpeedGauge } from './components/SpeedGauge';
+import { layoutTransform, useHudLayout } from './hudLayoutState';
+
+export const VehicleContent: FunctionComponent<{ isPilot: boolean }> = ({ isPilot }) =>
+    isPilot ? (
+        <>
+            <div className="flex flex-col justify-end items-end gap-2 w-32">
+                <SeatbeltIndicator />
+                <LockIndicator />
+            </div>
+            <div className="flex justify-center">
+                <NosGauge />
+                <SpeedGauge />
+            </div>
+            <div className="flex flex-col justify-end items-start gap-2 w-32">
+                <LightIndicator />
+                <FuelGauge />
+            </div>
+        </>
+    ) : (
+        <div className="flex justify-end items-end pb-[1.25rem]">
+            <SeatbeltIndicator />
+        </div>
+    );
 
 export const VehicleInterface: FunctionComponent = () => {
     const minimap = useMinimap();
     const hasStreetNamesEnabled = useHudHasStreetNames();
+    const layout = useHudLayout().vehicle;
 
     const seat = useSelector((state: RootState) => state.vehicle.seat);
 
@@ -44,37 +68,25 @@ export const VehicleInterface: FunctionComponent = () => {
         },
         to: {
             opacity: 1,
-            bottom: hudShouldBeDisplayed ? `${100 - minimap.bottom * 100}vh` : '-50vh',
+            bottom: hudShouldBeDisplayed ? (layout ? `${100 - layout.y}vh` : `${100 - minimap.bottom * 100}vh`) : '-50vh',
+            left: layout ? `${layout.x}vw` : '0vw',
         },
     });
 
     return (
-        <animated.div className="absolute inset-x-0 w-full" style={styles}>
+        <animated.div
+            className={cn('absolute', layout ? 'w-fit' : 'inset-x-0 w-full')}
+            style={{
+                ...styles,
+                ...(layout ? layoutTransform(layout, 'bottom center', 'translateX(-50%)') : {}),
+            }}
+        >
             <div
                 className={cn('relative flex justify-center gap-3', {
-                    'top-12': hasStreetNamesEnabled,
+                    'top-12': hasStreetNamesEnabled && !layout,
                 })}
             >
-                {isPilot ? (
-                    <>
-                        <div className="flex flex-col justify-end items-end gap-2 w-32">
-                            <SeatbeltIndicator />
-                            <LockIndicator />
-                        </div>
-                        <div className="flex justify-center">
-                            <NosGauge />
-                            <SpeedGauge />
-                        </div>
-                        <div className="flex flex-col justify-end items-start gap-2 w-32">
-                            <LightIndicator />
-                            <FuelGauge />
-                        </div>
-                    </>
-                ) : (
-                    <div className="flex justify-end items-end pb-[1.25rem]">
-                        <SeatbeltIndicator />
-                    </div>
-                )}
+                <VehicleContent isPilot={isPilot} />
             </div>
         </animated.div>
     );

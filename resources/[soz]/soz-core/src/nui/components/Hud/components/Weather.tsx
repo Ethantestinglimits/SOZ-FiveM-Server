@@ -9,16 +9,31 @@ import { useNuiEvent } from '../../../hook/nui';
 import { RootState } from '../../../store';
 import { useZoom } from '../hooks/useZoom';
 
+let lastForecast: ForecastWithTemperature | undefined;
+
 export const Weather: FunctionComponent = () => {
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
-    const settings = useSelector((state: RootState) => state.hud.settings);
     const showWeather = useSelector((state: RootState) => state.hud.settings.showWeather);
+
+    const [forecast, setForecast] = useState<ForecastWithTemperature | undefined>(lastForecast);
+
+    useNuiEvent('weather', 'forecast', (value) => {
+        lastForecast = value;
+        setForecast(value);
+    });
+
+    if (!hasWatch || !forecast || !showWeather) {
+        return null;
+    }
+
+    return <WeatherView forecast={forecast} />;
+};
+
+export const WeatherView: FunctionComponent<{ forecast: ForecastWithTemperature }> = ({ forecast }) => {
+    const settings = useSelector((state: RootState) => state.hud.settings);
     const { isDay } = useDateTime();
     const { getPath } = useAssetPath();
     const { largeIconSize } = useZoom();
-
-    const [forecast, setForecast] = useState<ForecastWithTemperature>();
-    useNuiEvent('weather', 'forecast', setForecast);
 
     const weather = useMemo(() => {
         const variant = isDay ? 'day' : 'night';
@@ -50,10 +65,6 @@ export const Weather: FunctionComponent = () => {
                 return `${variant}/cloudy`;
         }
     }, [forecast, isDay]);
-
-    if (!hasWatch || !forecast || !showWeather) {
-        return null;
-    }
 
     return (
         <div className="flex pb-1.5 drop-shadow-bg">

@@ -39,6 +39,7 @@ import { NuiInputMethodMap } from './input';
 import { NuiLaserGameMethodMap } from './laser_games';
 import { NuiMedicalDiagMethodMap } from './medical_diag';
 import { NuiMenuMethodMap } from './menu';
+import { NuiHudLayoutMethodMap } from './hud_layout';
 import { NuiMeteorMap } from './meteor';
 import { NuiMinimapMethodMap } from './minimap';
 import { NuiPanelMethodMap } from './panel';
@@ -131,6 +132,7 @@ export interface NuiMethodMap {
     texture: NuiImageLoaderMethodMap;
     pause_menu: NuiPauseMenuMethodMap;
     minimap: NuiMinimapMethodMap;
+    hud_layout: NuiHudLayoutMethodMap;
 }
 
 export const eventNameFactory = <App extends keyof NuiMethodMap, Method extends keyof NuiMethodMap[App]>(
