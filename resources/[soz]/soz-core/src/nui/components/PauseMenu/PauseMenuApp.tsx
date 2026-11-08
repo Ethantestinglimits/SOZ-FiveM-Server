@@ -1,3 +1,5 @@
+import './addons';
+
 import {
     AdjustmentsIcon,
     CogIcon,
@@ -22,11 +24,12 @@ import { useHudColor } from '../Hud/hooks/useHudColor';
 import { minimapController, setMapTabActive, useMinimapMode } from '../Minimap/minimapState';
 import { FOCUS_RING_CLASSES, NAV_ZONE_ATTRIBUTE, useKeyboardNav } from './keyboardNav';
 import { MapSidebar } from './MapSidebar';
+import { getPauseTabs } from './pauseTabs';
 import { setNativeHover, useKeyCapture, useNativeBackdrop, useNativeHover } from './settings/nativeInputState';
 import { ToasterIcon } from './settings/rowControls';
 import { SettingsMain, SettingsSidebar } from './settings/SettingsView';
 
-type PauseMenuTab = 'map' | 'settings';
+type PauseMenuTab = string;
 
 const TABS: { id: PauseMenuTab; label: string; icon: ReactNode }[] = [
     { id: 'map', label: 'Carte', icon: <MapIcon /> },
@@ -220,6 +223,7 @@ const FadeIn: FunctionComponent<PropsWithChildren<{ as: 'aside' | 'main'; classN
 export const PauseMenuApp: FunctionComponent = () => {
     const [data, setData] = useState<PauseMenuData | null>(null);
     const [tab, setTab] = useState<PauseMenuTab>('map');
+    const customTab = getPauseTabs().find(item => item.id === tab);
     const [confirmQuit, setConfirmQuit] = useState(false);
     const [layers, setLayers] = useState<PauseMapLayer[]>([]);
     const [settingsCategory, setSettingsCategory] = useState('map');
@@ -280,9 +284,10 @@ export const PauseMenuApp: FunctionComponent = () => {
             return;
         }
 
-        const index = TABS.findIndex(item => item.id === tab);
+        const allTabs = [...TABS, ...getPauseTabs()];
+        const index = allTabs.findIndex(item => item.id === tab);
 
-        setTab(TABS[(index + direction + TABS.length) % TABS.length].id);
+        setTab(allTabs[(index + direction + allTabs.length) % allTabs.length].id);
     };
 
     useKeyPress('Escape', () => {
@@ -351,7 +356,7 @@ export const PauseMenuApp: FunctionComponent = () => {
                             </span>
                         )}
                         <KeyHint label="Q" />
-                        {TABS.map(item => (
+                        {[...TABS, ...getPauseTabs()].map(item => (
                             <TabButton
                                 key={item.id}
                                 label={item.label}
@@ -395,6 +400,14 @@ export const PauseMenuApp: FunctionComponent = () => {
                                     <MapSidebar data={data} layers={layers} onLayersChange={setLayers} />
                                 </Glass>
                             </FadeIn>
+                        ) : customTab ? (
+                            <FadeIn
+                                as="main"
+                                className="pointer-events-auto relative flex min-h-0 min-w-0 flex-1 flex-col"
+                                instant={!data.settings.server.mapAnimation}
+                            >
+                                <customTab.component data={data} />
+                            </FadeIn>
                         ) : (
                             <>
                                 <FadeIn
@@ -427,7 +440,7 @@ export const PauseMenuApp: FunctionComponent = () => {
                         />
                         <VolumeSlider value={Number(data.settings.server.interfaceVolume ?? 100)} />
                         <span className="flex-1" />
-                        {(tab === 'map' ? MAP_HINTS : SETTINGS_HINTS).map(([key, label]) => (
+                        {(tab === 'map' ? MAP_HINTS : customTab?.hints ?? SETTINGS_HINTS).map(([key, label]) => (
                             <span key={label} className="flex items-center gap-[0.6vh] text-[1.3vh] text-white/60">
                                 <KeyHint label={key} />
                                 {label}

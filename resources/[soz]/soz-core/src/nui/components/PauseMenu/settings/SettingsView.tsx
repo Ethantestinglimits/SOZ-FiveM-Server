@@ -1,3 +1,5 @@
+import './builtinPanels';
+
 import {
     AdjustmentsIcon,
     CameraIcon,
@@ -24,11 +26,9 @@ import { fetchNui } from '../../../fetch';
 import { setVolumes } from '../../../utils/volumes';
 import { inputNavKeyDown, NAV_SKIP_ATTRIBUTE } from '../keyboardNav';
 import { ServerSliderSetting, SETTING_CATEGORIES, SettingCategory, SettingItem, SOZ_CATEGORY_IDS } from './definitions';
-import { GraphicsPanel } from './GraphicsPanel';
-import { KeysPanel } from './KeysPanel';
-import { MinimapPanel } from './MinimapPanel';
 import { setNativeHover } from './nativeInputState';
 import { PendingApply, usePendingApply, usePublishPendingApply } from './pendingApply';
+import { getCategoryIcon, getSettingsPanel } from './registry';
 import { Arrow, Bar, ROW_CLASS, ROW_LABEL_CLASS, ToasterIcon, ToggleButton, ValueStepper } from './rowControls';
 
 const normalize = (value: string) => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -92,7 +92,9 @@ export const SettingsSidebar: FunctionComponent<SettingsSidebarProps> = ({ categ
                                 }
                             )}
                         >
-                            <span className="h-[1.9vh] w-[1.9vh] shrink-0">{CATEGORY_ICONS[item.id]}</span>
+                            <span className="h-[1.9vh] w-[1.9vh] shrink-0">
+                                {CATEGORY_ICONS[item.id] ?? getCategoryIcon(item.id)}
+                            </span>
                             {item.label}
                         </button>
                     </li>
@@ -473,7 +475,9 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
     }, [query, current]);
 
     const showNativeButton = !query.trim() && current.native;
-    const minimapPage = current.id === 'minimap' && !query.trim();
+    const panel = getSettingsPanel(current.id);
+    const activePanel = panel && (panel.searchable || !query.trim()) ? panel : undefined;
+    const PanelComponent = activePanel?.component;
 
     usePublishPendingApply(
         'staged',
@@ -487,9 +491,6 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
               }
             : null
     );
-    const graphicsPage = current.id === 'graphics' && !query.trim();
-    const keysPage = current.id === 'keys';
-    const voicePage = current.id === 'voice' && !query.trim();
 
     return (
         <div className="flex h-full min-h-0 gap-[2.4vh] p-[2.4vh]">
@@ -503,20 +504,17 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                             event.stopPropagation();
                             inputNavKeyDown(event);
                         }}
-                        placeholder={keysPage ? 'Rechercher une touche…' : 'Rechercher un réglage…'}
+                        placeholder={activePanel?.searchPlaceholder ?? 'Rechercher un réglage…'}
                         className="w-full bg-transparent text-[1.5vh] text-white outline-none placeholder:text-white/40"
                     />
                 </label>
 
-                {minimapPage && <MinimapPanel />}
-                {graphicsPage && <GraphicsPanel />}
-                {voicePage && <GraphicsPanel category={current.nativeCategory} />}
-                {keysPage && <KeysPanel query={query} />}
+                {PanelComponent && <PanelComponent category={current} query={query} />}
 
                 <div
                     className={classNames(
                         'min-h-0 flex-1 overflow-y-auto pr-[0.6vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full',
-                        { hidden: graphicsPage || keysPage || voicePage }
+                        { hidden: activePanel?.replacesList }
                     )}
                 >
                     {sections.map(section => (
@@ -570,7 +568,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                 )}
             </div>
 
-            {!(graphicsPage || keysPage || voicePage || minimapPage) && (
+            {!activePanel?.hidesDescription && (
                 <DescriptionPanel item={hovered ?? sections[0]?.items[0] ?? null} category={current} />
             )}
         </div>
@@ -583,7 +581,9 @@ const DescriptionPanel: FunctionComponent<{ item: SettingItem | null; category: 
 }) => (
     <aside className="flex min-w-0 flex-1 flex-col gap-[1.4vh] self-start rounded-[1.2vh] bg-white/5 p-[2vh]">
         <div className="flex items-center gap-[1vh] text-[1.2vh] font-semibold uppercase tracking-[0.2em] text-white/50">
-            <span className="h-[1.6vh] w-[1.6vh] shrink-0">{CATEGORY_ICONS[category.id]}</span>
+            <span className="h-[1.6vh] w-[1.6vh] shrink-0">
+                {CATEGORY_ICONS[category.id] ?? getCategoryIcon(category.id)}
+            </span>
             {category.label}
         </div>
         {item ? (

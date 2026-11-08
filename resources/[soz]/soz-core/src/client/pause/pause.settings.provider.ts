@@ -13,6 +13,7 @@ import { NuiDispatch } from '../nui/nui.dispatch';
 import { StreamProvider } from '../stream/stream.provider';
 import { VoiceProvider } from '../voip/voice/voice.provider';
 import { PauseMinimapProvider } from './minimap.provider';
+import { PauseSettingsRegistry } from './pause.settings.registry';
 
 const MENU_SIZE_KVP = 'soz_menu_size';
 const MENU_TEXT_KVP = 'soz_menu_text';
@@ -26,6 +27,9 @@ const VOLUME_KVP: Record<string, string> = {
 
 @Provider()
 export class PauseSettingsProvider {
+    @Inject(PauseSettingsRegistry)
+    private pauseSettingsRegistry: PauseSettingsRegistry;
+
     @Inject(NuiDispatch)
     private nuiDispatch: NuiDispatch;
 
@@ -89,6 +93,7 @@ export class PauseSettingsProvider {
                 watchStamina: watch.showStamina,
                 watchAnimalStats: watch.showAnimalStats,
                 watchInjuryTracker: watch.showInjuryTracker,
+                ...this.pauseSettingsRegistry.values(),
             },
             native,
         };
@@ -164,6 +169,14 @@ export class PauseSettingsProvider {
     }
 
     private async apply(key: string, value: PauseSettingChange['value']): Promise<void> {
+        const handler = this.pauseSettingsRegistry.get(key);
+
+        if (handler) {
+            await handler.apply(value);
+
+            return;
+        }
+
         switch (key) {
             case 'potato':
                 if (Boolean(value) === this.pauseMinimapProvider.isPotato()) {

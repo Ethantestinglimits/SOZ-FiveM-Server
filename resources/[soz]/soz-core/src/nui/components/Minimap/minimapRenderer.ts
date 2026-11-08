@@ -5,9 +5,11 @@ import {
     MINIMAP_ZOOM_DEFAULT,
     MinimapBlip,
     MinimapFrame,
+    MinimapMarker,
     MinimapOrientation,
     MinimapPlayerBlip,
     MinimapPoint,
+    MinimapRoute,
     MinimapZone,
 } from '../../../shared/nui/minimap';
 import { DEFAULT_MINIMAP_STYLE, MinimapStyle } from '../../../shared/nui/minimap';
@@ -50,6 +52,7 @@ const SMOOTHING_RATE = 18;
 const HEADING_SMOOTHING_RATE = 40;
 const TRANSITION_MS = 250;
 const ROUTE_COLOR = '#b25ce8';
+const MARKER_RADIUS = 7;
 const ROUTE_SEARCH_POINTS = 300;
 const WAYPOINT_SPRITE = 8;
 const WAYPOINT_SIZE = 22;
@@ -200,6 +203,8 @@ export class MinimapRenderer {
     public blips: MinimapBlip[] = [];
     public zones: MinimapZone[] = [];
     public route: MinimapPoint[] = [];
+    public markers: MinimapMarker[] = [];
+    public extraRoutes: MinimapRoute[] = [];
     public waypoint: MinimapPoint | null = null;
     public layers: PauseMapLayer[] = ['blips', 'regions', 'players'];
     public highlight: MinimapPoint | null = null;
@@ -536,6 +541,8 @@ export class MinimapRenderer {
             this.blips,
             this.zones,
             this.route,
+            this.markers,
+            this.extraRoutes,
             this.waypoint,
             this.layers,
             this.style,
@@ -753,7 +760,6 @@ export class MinimapRenderer {
         shift: number,
         offsetsX: number[],
         offsetsY: number[],
-        showBlips: boolean,
     ): void {
         const { w, h } = this.current;
         const p = this.perspective;
@@ -946,7 +952,7 @@ export class MinimapRenderer {
                 anchorOffset -
                 (anchorOffset * tiltCos * this.perspective) / (this.perspective - anchorOffset * tiltSin);
 
-            this.drawTiltedGround(frame, sx, tilt, shift, offsetsX, offsetsY, showBlips);
+            this.drawTiltedGround(frame, sx, tilt, shift, offsetsX, offsetsY);
             ctx.globalAlpha = 1;
             this.projection = { sin: tiltSin, cos: tiltCos, shift };
             this.drawGround(frame, offsetsX, offsetsY, showBlips);
@@ -956,6 +962,7 @@ export class MinimapRenderer {
             for (const oy of offsetsY) {
                 this.drawBlips(ox, oy, showBlips, showPlayers);
 
+                this.drawMarkers(ox, oy);
                 this.drawWaypoint(ox, oy);
                 this.drawContextPoint(ox, oy);
                 this.drawHighlight(ox, oy);
@@ -1120,7 +1127,48 @@ export class MinimapRenderer {
     }
 
     private drawRoute(frame: MinimapFrame, ox: number, oy: number): void {
-        if (this.route.length < 2) {
+        for (const route of this.extraRoutes) {
+            this.drawPath(route.points, 0, route.color, ox, oy);
+        }
+
+        this.drawPath(this.route, this.routeIndex, ROUTE_COLOR, ox, oy);
+    }
+
+    private drawMarkers(ox: number, oy: number): void {
+        const ctx = this.ctx;
+
+        for (const marker of this.markers) {
+            const [x, y] = this.toScreen(marker.x, marker.y, ox, oy);
+
+            if (!Number.isFinite(x) || x < -20 || y < -20 || x > this.current.w + 20 || y > this.current.h + 20) {
+                continue;
+            }
+
+            ctx.beginPath();
+            ctx.arc(x, y, MARKER_RADIUS, 0, Math.PI * 2);
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.stroke();
+            ctx.fillStyle = marker.color;
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ffffff';
+            ctx.stroke();
+
+            if (marker.label && this.mode === 'open') {
+                ctx.font = '600 12px Prompt, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.strokeText(marker.label, x, y - MARKER_RADIUS - 6);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(marker.label, x, y - MARKER_RADIUS - 6);
+            }
+        }
+    }
+
+    private drawPath(points: MinimapPoint[], from: number, color: string, ox: number, oy: number): void {
+        if (points.length - from < 2) {
             return;
         }
 
@@ -1131,8 +1179,8 @@ export class MinimapRenderer {
 
         ctx.beginPath();
 
-        for (let index = this.routeIndex; index < this.route.length; index++) {
-            const [x, y] = this.toScreen(this.route[index].x, this.route[index].y, ox, oy);
+        for (let index = from; index < points.length; index++) {
+            const [x, y] = this.toScreen(points[index].x, points[index].y, ox, oy);
 
             if (!Number.isFinite(x) || !Number.isFinite(y)) {
                 if (started) {
@@ -1163,7 +1211,7 @@ export class MinimapRenderer {
         ctx.strokeStyle = 'rgba(0, 0, 0, 0.35)';
         ctx.lineWidth = 7;
         ctx.stroke();
-        ctx.strokeStyle = ROUTE_COLOR;
+        ctx.strokeStyle = color;
         ctx.lineWidth = 4;
         ctx.stroke();
     }

@@ -7,10 +7,12 @@ import { NuiEvent } from '../../shared/event';
 import {
     MINIMAP_ORIENTATIONS,
     MinimapBlip,
+    MinimapMarker,
     MinimapOrientation,
     MinimapPlayerBlip,
     MinimapPlayerGroup,
     MinimapPoint,
+    MinimapRoute,
     MinimapZone,
 } from '../../shared/nui/minimap';
 import { AdminMenuGameMasterProvider } from '../admin/admin.menu.game-master.provider';
@@ -450,6 +452,30 @@ export class PauseMinimapProvider {
                 this.finishRoute([]);
             }
         }
+    }
+
+    private markerSources = new Map<string, MinimapMarker[]>();
+
+    private routeSources = new Map<string, MinimapRoute[]>();
+
+    public setMarkers(source: string, markers: MinimapMarker[]): void {
+        if (markers.length === 0) {
+            this.markerSources.delete(source);
+        } else {
+            this.markerSources.set(source, markers);
+        }
+
+        this.nuiDispatch.dispatch('minimap', 'Markers', [...this.markerSources.values()].flat());
+    }
+
+    public setRoutes(source: string, routes: MinimapRoute[]): void {
+        if (routes.length === 0) {
+            this.routeSources.delete(source);
+        } else {
+            this.routeSources.set(source, routes);
+        }
+
+        this.nuiDispatch.dispatch('minimap', 'Routes', [...this.routeSources.values()].flat());
     }
 
     private dispatchWaypoint(force = false): void {

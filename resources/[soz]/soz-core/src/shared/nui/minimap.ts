@@ -53,6 +53,18 @@ export const DEFAULT_MINIMAP_STYLE: MinimapStyle = {
     zoom: MINIMAP_ZOOM_DEFAULT,
 };
 
+export type MinimapMarker = MinimapPoint & {
+    id: string;
+    color: string;
+    label?: string;
+};
+
+export type MinimapRoute = {
+    id: string;
+    color: string;
+    points: MinimapPoint[];
+};
+
 export type MinimapPoint = {
     x: number;
     y: number;
@@ -114,6 +126,8 @@ export interface NuiMinimapMethodMap {
     PlayerBlips: MinimapPlayerBlip[];
     Zones: MinimapZone[];
     Route: MinimapPoint[];
+    Markers: MinimapMarker[];
+    Routes: MinimapRoute[];
     Waypoint: MinimapPoint | null;
     Style: MinimapStyle;
     Settings: { animation: boolean; fps: number; potato: boolean; orientation: MinimapOrientation };

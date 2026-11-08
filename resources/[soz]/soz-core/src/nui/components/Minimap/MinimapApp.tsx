@@ -148,6 +148,12 @@ export const MinimapApp: FunctionComponent = () => {
     useNuiEvent('minimap', 'Route', (route) => {
         if (rendererRef.current) rendererRef.current.route = route;
     });
+    useNuiEvent('minimap', 'Markers', (markers) => {
+        if (rendererRef.current) rendererRef.current.markers = markers;
+    });
+    useNuiEvent('minimap', 'Routes', (routes) => {
+        if (rendererRef.current) rendererRef.current.extraRoutes = routes;
+    });
     useNuiEvent('minimap', 'Waypoint', (waypoint) => {
         if (rendererRef.current) rendererRef.current.waypoint = waypoint;
     });
