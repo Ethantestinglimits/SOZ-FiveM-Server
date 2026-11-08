@@ -1,5 +1,6 @@
 import { Module } from '../../core/decorators/module';
 import { HudCompassProvider } from './hud.compass.provider';
+import { HudCrosshairProvider } from './hud.crosshair.provider';
 import { HudGlassmorphismProvider } from './hud.glassmorphism.provider';
 import { HudMinimapProvider } from './hud.minimap.provider';
 import { HudNewsProvider } from './hud.news.provider';
@@ -14,6 +15,7 @@ import { HudWeatherIconProvider } from './hud.weathericon.provider';
 @Module({
     providers: [
         HudCompassProvider,
+        HudCrosshairProvider,
         HudMinimapProvider,
         HudNewsProvider,
         HudNotificationsProvider,
