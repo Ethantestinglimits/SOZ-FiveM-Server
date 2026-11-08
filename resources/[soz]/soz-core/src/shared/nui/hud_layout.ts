@@ -17,58 +17,72 @@ export type HudElementId =
 export const HUD_SCALE_MIN = 0.5;
 export const HUD_SCALE_MAX = 2;
 
-export type HudPosition = {
+export type HudCorner =
+    | 'top-left'
+    | 'top'
+    | 'top-right'
+    | 'left'
+    | 'center'
+    | 'right'
+    | 'bottom-left'
+    | 'bottom'
+    | 'bottom-right';
+
+export const HUD_CORNERS: HudCorner[] = [
+    'top-left',
+    'top',
+    'top-right',
+    'left',
+    'center',
+    'right',
+    'bottom-left',
+    'bottom',
+    'bottom-right',
+];
+
+export type HudAnchorTarget = 'frame' | 'screen' | HudElementId;
+
+export type HudPlacement = {
+    target: HudAnchorTarget;
+    targetCorner: HudCorner;
+    corner: HudCorner;
     x: number;
     y: number;
     scale?: number;
+    hidden?: boolean;
 };
 
-export type HudLayout = Partial<Record<HudElementId, HudPosition>>;
-
-export type HudElementAnchor =
-    | 'bottom-left'
-    | 'bottom-right'
-    | 'top-left'
-    | 'top-center'
-    | 'top-right'
-    | 'bottom-center';
+export type HudLayout = Partial<Record<HudElementId, HudPlacement>>;
 
 export type HudElementDefinition = {
     id: HudElementId;
     label: string;
-    width: number;
-    height: number;
-    anchor: HudElementAnchor;
     watch?: boolean;
+    welded?: boolean;
 };
 
 export const HUD_ELEMENTS: HudElementDefinition[] = [
-    { id: 'minimap', label: 'Minimap', width: 14, height: 18, anchor: 'bottom-left' },
-    { id: 'notifications', label: 'Notifications', width: 18, height: 26, anchor: 'bottom-left' },
-    { id: 'police', label: 'Alertes police', width: 21, height: 30, anchor: 'top-right' },
-    { id: 'instructions', label: 'Aide', width: 26, height: 4.5, anchor: 'top-center' },
-    { id: 'ammo', label: 'Munitions', width: 7, height: 6, anchor: 'top-right' },
-    { id: 'stats', label: 'Statuts du joueur', width: 14, height: 5, anchor: 'top-left' },
-    { id: 'vehicle', label: 'Compteur véhicule', width: 30, height: 12, anchor: 'bottom-center' },
-    { id: 'progress', label: 'Barre de progression', width: 28, height: 7, anchor: 'top-center' },
-    { id: 'datetime', label: 'Date et heure', width: 7, height: 5, anchor: 'bottom-left', watch: true },
-    { id: 'weather', label: 'Météo', width: 7, height: 5, anchor: 'bottom-right', watch: true },
-    { id: 'street', label: 'Nom de rue', width: 14, height: 5, anchor: 'top-left', watch: true },
-    { id: 'compass', label: 'Boussole', width: 3, height: 5, anchor: 'top-left', watch: true },
-    { id: 'voice', label: 'Icône de voix', width: 3, height: 5, anchor: 'bottom-left' },
-    { id: 'injuries', label: 'État corporel', width: 8, height: 30, anchor: 'top-right', watch: true },
+    { id: 'minimap', label: 'Minimap' },
+    { id: 'notifications', label: 'Notifications' },
+    { id: 'police', label: 'Alertes police' },
+    { id: 'instructions', label: 'Aide' },
+    { id: 'ammo', label: 'Munitions' },
+    { id: 'stats', label: 'Statuts du joueur' },
+    { id: 'vehicle', label: 'Compteur véhicule' },
+    { id: 'progress', label: 'Barre de progression' },
+    { id: 'voice', label: 'Icône de voix' },
+    { id: 'injuries', label: 'État corporel', watch: true },
+    { id: 'datetime', label: 'Date et heure', watch: true, welded: true },
+    { id: 'weather', label: 'Météo', watch: true, welded: true },
+    { id: 'street', label: 'Nom de rue', watch: true, welded: true },
+    { id: 'compass', label: 'Boussole', watch: true, welded: true },
 ];
 
-export const DEFAULT_HUD_POSITIONS: Partial<Record<HudElementId, HudPosition>> = {
-    notifications: { x: 1.5, y: 76 },
-    police: { x: 99, y: 1.5 },
-    instructions: { x: 50, y: 2 },
-    ammo: { x: 98.5, y: 90 },
-    vehicle: { x: 50, y: 97 },
-    voice: { x: 16, y: 96 },
-};
-
-export const MINIMAP_WELDED: HudElementId[] = ['datetime', 'weather', 'street', 'compass'];
+export const HUD_ANCHOR_TARGETS: HudAnchorTarget[] = [
+    'frame',
+    'screen',
+    ...HUD_ELEMENTS.filter(element => !element.welded).map(element => element.id),
+];
 
 export interface NuiHudLayoutMethodMap {
     SetLayout: HudLayout;

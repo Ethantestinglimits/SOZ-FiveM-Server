@@ -18,21 +18,18 @@ import { PlayerStats } from './components/PlayerStats';
 import { VoiceIcon } from './components/VoiceIcon';
 import { Weather } from './components/Weather';
 import { useHudColor } from './hooks/useHudColor';
-import { layoutTransform, useHudLayout } from './hudLayoutState';
-import { LayoutBlock } from './LayoutBlock';
+import { useHudBlock } from './hudPlacement';
 
 export const WatchInterface: FunctionComponent = () => {
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
     const settings = useSelector((state: RootState) => state.hud.settings);
     const minimap = useHudMinimap();
-    const layout = useHudLayout();
-    const statsLayout = layout.stats;
     const minimapStyle = useMinimapStyle();
+    const minimapMode = useMinimapMode();
     const frameVisible =
         minimapStyle.frame === 'visible' || (minimapStyle.frame === 'auto' && minimapStyle.shape === 'rectangle');
 
     const hasStreetNamesEnabled = useHudHasStreetNames();
-    const minimapMode = useMinimapMode();
 
     const [voiceMode, setVoiceMode] = useState(VoiceMode.Normal);
     const [voiceActive, setVoiceActive] = useState(true);
@@ -85,15 +82,25 @@ export const WatchInterface: FunctionComponent = () => {
         },
     });
 
-    const statsStyles = useSpring({
+    const voiceStyles = useSpring({
         from: {
-            top: '150vh',
+            bottom: '-50vh',
         },
         to: {
-            top: `${statsLayout?.y ?? 0}vh`,
-            left: `${statsLayout?.x ?? 0}vw`,
+            bottom: `${100 - minimap.bottom * 100}vh`,
+            left: settings.switchPlayerStatsPosition
+                ? `${100 - (minimap.right + 0.04) * 100}vw`
+                : (!hasWatch && minimap.isHidden) ||
+                    (!hasStreetNamesEnabled && !settings.showWeather && !settings.showDateTime && minimap.isHidden)
+                  ? `${(minimap.left + 0.005) * 100}vw`
+                  : `${(minimap.right + 0.005) * 100}vw`,
         },
     });
+
+    const voiceBlock = useHudBlock('voice', true);
+    const statsBlock = useHudBlock('stats', true);
+    const headerBlock = useHudBlock('datetime', true);
+    const footerBlock = useHudBlock('street', true);
 
     return (
         <>
@@ -101,7 +108,8 @@ export const WatchInterface: FunctionComponent = () => {
                 className={cn('absolute flex justify-between items-end text-white', {
                     'px-5': minimap.isHidden,
                 })}
-                style={headerStyles}
+                ref={headerBlock.ref}
+                style={{ ...headerStyles, ...headerBlock.style }}
             >
                 <DateTime />
                 <Weather />
@@ -119,37 +127,43 @@ export const WatchInterface: FunctionComponent = () => {
                 />
             )}
 
-            {layout.voice && (
-                <LayoutBlock position={layout.voice} anchor="bottom-left" className="size-12 drop-shadow-bg">
-                    <VoiceIcon icon={voiceIcon} disableAutoHide={disableAutoHide} />
-                </LayoutBlock>
-            )}
+            <animated.div
+                className={cn('absolute size-12 drop-shadow-bg ml-3', {
+                    'mb-14': !hasStreetNamesEnabled,
+                })}
+                ref={voiceBlock.ref}
+                style={{ ...voiceStyles, ...voiceBlock.style }}
+            >
+                <VoiceIcon icon={voiceIcon} disableAutoHide={disableAutoHide} />
+            </animated.div>
 
             <animated.div
                 className={cn('absolute flex gap-3 text-white h-fit', {
                     '-mt-14': !hasStreetNamesEnabled,
                     'flex-row-reverse': settings.switchPlayerStatsPosition,
                 })}
-                style={footerStyles}
+                ref={footerBlock.ref}
+                style={{ ...footerStyles, ...footerBlock.style }}
             >
                 <Location />
                 <Compass />
-                {!statsLayout && (
-                    <>
+                {!statsBlock.placed && (
+                    <div
+                        ref={statsBlock.ref}
+                        className={cn('flex gap-3', { 'flex-row-reverse': settings.switchPlayerStatsPosition })}
+                        style={statsBlock.style}
+                    >
                         <PlayerStats />
                         <PetStats />
-                    </>
+                    </div>
                 )}
             </animated.div>
 
-            {statsLayout && (
-                <animated.div
-                    className="absolute flex gap-3 text-white h-fit"
-                    style={{ ...statsStyles, ...layoutTransform(statsLayout, 'top left') }}
-                >
+            {statsBlock.placed && (
+                <div ref={statsBlock.ref} className="absolute flex gap-3 text-white h-fit" style={statsBlock.style}>
                     <PlayerStats />
                     <PetStats />
-                </animated.div>
+                </div>
             )}
         </>
     );

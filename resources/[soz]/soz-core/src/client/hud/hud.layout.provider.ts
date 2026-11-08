@@ -2,42 +2,84 @@ import { Once, OnceStep, OnNuiEvent } from '../../core/decorators/event';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { NuiEvent } from '../../shared/event';
-import { HUD_ELEMENTS, HUD_SCALE_MAX, HUD_SCALE_MIN, HudLayout } from '../../shared/nui/hud_layout';
+import {
+    HUD_ANCHOR_TARGETS,
+    HUD_CORNERS,
+    HUD_ELEMENTS,
+    HUD_SCALE_MAX,
+    HUD_SCALE_MIN,
+    HudLayout,
+    HudPlacement,
+} from '../../shared/nui/hud_layout';
 import { NuiDispatch } from '../nui/nui.dispatch';
-import { PauseMenuProvider } from '../pause/pause.menu.provider';
-import { HudWatchProvider } from './hud.watch.provider';
 
-const LAYOUT_KVP = 'soz_hud_layout';
+const LAYOUT_KVP = 'soz_hud_layout_v2';
+const OFFSET_LIMIT = 200;
 
-const clampPercent = (value: unknown): number | null => {
+const clampOffset = (value: unknown): number | null => {
     const number = Number(value);
 
-    return Number.isFinite(number) ? Math.min(100, Math.max(0, Math.round(number * 10) / 10)) : null;
+    return Number.isFinite(number)
+        ? Math.min(OFFSET_LIMIT, Math.max(-OFFSET_LIMIT, Math.round(number * 100) / 100))
+        : null;
 };
 
-const clampScale = (value: unknown): number | null => {
+const clampScale = (value: unknown): number | undefined => {
     const number = Number(value);
 
     if (!Number.isFinite(number) || number <= 0) {
-        return null;
+        return undefined;
     }
 
     const scale = Math.round(Math.min(HUD_SCALE_MAX, Math.max(HUD_SCALE_MIN, number)) * 100) / 100;
 
-    return Math.abs(scale - 1) < 0.005 ? null : scale;
+    return Math.abs(scale - 1) < 0.005 ? undefined : scale;
+};
+
+const sanitizePlacement = (input: Partial<HudPlacement> | undefined, id: string): HudPlacement | null => {
+    if (!input || !HUD_ANCHOR_TARGETS.includes(input.target) || input.target === id) {
+        return null;
+    }
+
+    if (!HUD_CORNERS.includes(input.targetCorner) || !HUD_CORNERS.includes(input.corner)) {
+        return null;
+    }
+
+    const x = clampOffset(input.x);
+    const y = clampOffset(input.y);
+
+    if (x === null || y === null) {
+        return null;
+    }
+
+    const placement: HudPlacement = {
+        target: input.target,
+        targetCorner: input.targetCorner,
+        corner: input.corner,
+        x,
+        y,
+    };
+    const scale = clampScale(input.scale);
+
+    if (scale !== undefined) {
+        placement.scale = scale;
+    }
+
+    if (input.hidden === true) {
+        placement.hidden = true;
+    }
+
+    return placement;
 };
 
 const sanitize = (input: HudLayout | null | undefined): HudLayout => {
     const layout: HudLayout = {};
 
-    for (const { id } of HUD_ELEMENTS) {
-        const x = clampPercent(input?.[id]?.x);
-        const y = clampPercent(input?.[id]?.y);
+    for (const { id, welded } of HUD_ELEMENTS) {
+        const placement = welded ? null : sanitizePlacement(input?.[id], id);
 
-        if (x !== null && y !== null) {
-            const scale = clampScale(input?.[id]?.scale);
-
-            layout[id] = scale === null ? { x, y } : { x, y, scale };
+        if (placement) {
+            layout[id] = placement;
         }
     }
 
@@ -48,12 +90,6 @@ const sanitize = (input: HudLayout | null | undefined): HudLayout => {
 export class HudLayoutProvider {
     @Inject(NuiDispatch)
     private nuiDispatch: NuiDispatch;
-
-    @Inject(PauseMenuProvider)
-    private pauseMenuProvider: PauseMenuProvider;
-
-    @Inject(HudWatchProvider)
-    private hudWatchProvider: HudWatchProvider;
 
     private layout: HudLayout = this.load();
 
@@ -69,11 +105,6 @@ export class HudLayoutProvider {
 
     @OnNuiEvent(NuiEvent.HudEditorOpen)
     public async onOpenEditor(): Promise<void> {
-        if (!this.hudWatchProvider.haveWatch) {
-            return;
-        }
-
-        this.pauseMenuProvider.close();
         this.nuiDispatch.dispatch('hud_layout', 'OpenEditor', this.layout);
     }
 

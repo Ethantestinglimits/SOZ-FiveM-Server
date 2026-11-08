@@ -48,7 +48,6 @@ import { FieldZoneHealthApp } from './Field/FieldZoneHealthApp';
 import { FlashApp } from './Flash/FlashApp';
 import { LaserGameApp } from './Games/LaserGameApp';
 import { HudApp } from './Hud/HudApp';
-import { HudEditor } from './Hud/HudEditor';
 import { HudLayoutApp } from './Hud/HudLayoutApp';
 import { InputApp } from './Input/InputApp';
 import { InventoryApp } from './Inventory/InventoryApp';
@@ -74,8 +73,8 @@ import { SceneSearchPropApp } from './Scene/SceneSearchPropApp';
 import { ScreenshotApp } from './Screenshot/ScreenshotApp';
 import { ClothShopMenu } from './Shop/ClothShopMenu';
 import { StateApp } from './StateApp';
-import { MenuStyleApp } from './Styleguide/MenuStyleApp';
 import { GlassMorphism } from './Styleguide/GlassMorphism';
+import { MenuStyleApp } from './Styleguide/MenuStyleApp';
 import { TargetOverlay } from './Target/TargetOverlay';
 import { TaserDazeApp } from './Taser/TaserDazeApp';
 import { TaxiHorodateurApp } from './Taxi/TaxiHorodateurApp';
@@ -197,7 +196,6 @@ export const App: FunctionComponent = () => {
                 <PauseMenuApp />
                 <MinimapApp />
                 <HudLayoutApp />
-                <HudEditor />
             </Provider>
         </GlassMorphismProvider>
     );
