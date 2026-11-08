@@ -469,7 +469,7 @@ export class MinimapRenderer {
             return;
         }
 
-        if (this.fpsLimit > 0 && now - this.lastRenderedAt < 1000 / this.fpsLimit - 2) {
+        if (this.mode === 'minimap' && this.fpsLimit > 0 && now - this.lastRenderedAt < 1000 / this.fpsLimit - 2) {
             this.handle = requestAnimationFrame(this.loop);
 
             return;
