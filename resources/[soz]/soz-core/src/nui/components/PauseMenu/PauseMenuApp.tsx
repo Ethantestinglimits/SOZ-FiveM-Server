@@ -24,7 +24,7 @@ import { useHudColor } from '../Hud/hooks/useHudColor';
 import { minimapController, setMapTabActive, useMinimapMode } from '../Minimap/minimapState';
 import { FOCUS_RING_CLASSES, NAV_ZONE_ATTRIBUTE, useKeyboardNav } from './keyboardNav';
 import { MapSidebar } from './MapSidebar';
-import { getPauseTabs } from './pauseTabs';
+import { getPauseTabs, onPauseTabRequest } from './pauseTabs';
 import { setNativeHover, useKeyCapture, useNativeBackdrop, useNativeHover } from './settings/nativeInputState';
 import { ToasterIcon } from './settings/rowControls';
 import { SettingsMain, SettingsSidebar } from './settings/SettingsView';
@@ -224,6 +224,13 @@ export const PauseMenuApp: FunctionComponent = () => {
     const [data, setData] = useState<PauseMenuData | null>(null);
     const [tab, setTab] = useState<PauseMenuTab>('map');
     const customTab = getPauseTabs().find(item => item.id === tab);
+    const fullscreen = Boolean(customTab?.fullscreen);
+
+    useEffect(() => onPauseTabRequest(setTab), []);
+
+    useEffect(() => {
+        fetchNui(NuiEvent.PauseMenuBackdrop, { visible: !fullscreen });
+    }, [fullscreen]);
     const [confirmQuit, setConfirmQuit] = useState(false);
     const [layers, setLayers] = useState<PauseMapLayer[]>([]);
     const [settingsCategory, setSettingsCategory] = useState('map');
@@ -280,6 +287,10 @@ export const PauseMenuApp: FunctionComponent = () => {
     };
 
     const changeTab = (direction: number) => {
+        if (fullscreen) {
+            return;
+        }
+
         if (!data || confirmQuit) {
             return;
         }
@@ -291,7 +302,7 @@ export const PauseMenuApp: FunctionComponent = () => {
     };
 
     useKeyPress('Escape', () => {
-        if (!data) {
+        if (!data || fullscreen) {
             return;
         }
 
@@ -309,7 +320,7 @@ export const PauseMenuApp: FunctionComponent = () => {
     useKeyPress('Q', () => changeTab(-1));
     useKeyPress('e', () => changeTab(1));
     useKeyPress('E', () => changeTab(1));
-    useKeyboardNav(data !== null && !confirmQuit);
+    useKeyboardNav(data !== null && !confirmQuit && !fullscreen);
 
     if (!data) {
         return null;
@@ -325,7 +336,7 @@ export const PauseMenuApp: FunctionComponent = () => {
                 className={classNames('absolute inset-0 z-[60] transition-opacity duration-300', {
                     'bg-gradient-to-b from-black/50 via-black/25 to-black/50': !data.settings.server.potato,
                     'bg-black': data.settings.server.potato,
-                    'opacity-0': mode === 'minimap' || mode === 'closing',
+                    'opacity-0': mode === 'minimap' || mode === 'closing' || fullscreen,
                 })}
             />
             <div
@@ -346,7 +357,12 @@ export const PauseMenuApp: FunctionComponent = () => {
                     </button>,
                     document.body
                 )}
-            {showContent && !data.scriptMode && (
+            {showContent && !data.scriptMode && fullscreen && (
+                <div className="pointer-events-none absolute inset-0 z-[75]">
+                    <customTab.component data={data} />
+                </div>
+            )}
+            {showContent && !data.scriptMode && !fullscreen && (
                 <div className="pointer-events-none absolute inset-0 z-[75] mx-auto flex max-w-[177.78vh] flex-col gap-[1.8vh] px-[4vh] py-[3vh]">
                     <header className="pointer-events-auto flex h-[5.4vh] shrink-0 items-center gap-[1vh]">
                         <img src="assets/pause/soz_logo.webp" alt="SoZ" className="mr-[2vh] h-[3.6vh] w-auto" />

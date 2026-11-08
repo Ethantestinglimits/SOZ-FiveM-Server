@@ -173,6 +173,11 @@ export class PauseMenuProvider {
         this.nuiDispatch.dispatch('pause_menu', 'Close');
     }
 
+    @OnNuiEvent(NuiEvent.PauseMenuBackdrop)
+    public async onBackdrop({ visible }: { visible: boolean }): Promise<void> {
+        this.syncBlur(visible && !this.pauseMinimapProvider.isPotato());
+    }
+
     @OnNuiEvent(NuiEvent.PauseMenuClose)
     public async onClose(): Promise<void> {
         this.close();

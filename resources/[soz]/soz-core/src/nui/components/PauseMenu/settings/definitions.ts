@@ -34,6 +34,7 @@ export type ServerActionSetting = SettingBase & {
     kind: 'action';
     button: string;
     event?: NuiEvent;
+    onPress?: () => void;
 };
 
 export type NativeSetting = SettingBase & {

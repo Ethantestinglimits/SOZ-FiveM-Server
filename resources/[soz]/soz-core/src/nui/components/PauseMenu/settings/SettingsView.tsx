@@ -201,7 +201,11 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
 
     if (item.kind === 'action') {
         const run = () =>
-            item.event ? fetchNui(item.event) : fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.id, value: true });
+            item.onPress
+                ? item.onPress()
+                : item.event
+                  ? fetchNui(item.event)
+                  : fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.id, value: true });
 
         activate = run;
         control = (

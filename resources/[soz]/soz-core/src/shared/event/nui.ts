@@ -839,6 +839,7 @@ export enum NuiEvent {
     PauseMenuSavePlayersLayout = 'soz-core:nui:pause-menu:save-players-layout',
     PauseMenuSetSetting = 'soz-core:nui:pause-menu:set-setting',
     PauseMenuQueueNative = 'soz-core:nui:pause-menu:queue-native',
+    PauseMenuBackdrop = 'soz-core:nui:pause-menu:backdrop',
     MinimapSetWaypoint = 'soz-core:nui:minimap:set-waypoint',
     MinimapRemoveWaypoint = 'soz-core:nui:minimap:remove-waypoint',
     MinimapContextMenu = 'soz-core:nui:minimap:context-menu',

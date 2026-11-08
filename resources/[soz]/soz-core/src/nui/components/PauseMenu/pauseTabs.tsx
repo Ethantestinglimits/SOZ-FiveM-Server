@@ -8,6 +8,7 @@ export type PauseTab = {
     icon: ReactNode;
     component: FunctionComponent<{ data: PauseMenuData }>;
     hints?: [string, string][];
+    fullscreen?: boolean;
 };
 
 const tabs: PauseTab[] = [];
@@ -19,3 +20,17 @@ export const registerPauseTab = (tab: PauseTab): void => {
 };
 
 export const getPauseTabs = (): PauseTab[] => tabs;
+
+const requests = new Set<(id: string) => void>();
+
+export const openPauseTab = (id: string): void => {
+    requests.forEach(listener => listener(id));
+};
+
+export const onPauseTabRequest = (listener: (id: string) => void): (() => void) => {
+    requests.add(listener);
+
+    return () => {
+        requests.delete(listener);
+    };
+};
