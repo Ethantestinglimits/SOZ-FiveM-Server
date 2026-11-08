@@ -23,12 +23,13 @@ import { PauseSettingsData } from '../../../../shared/nui/pause_settings';
 import { fetchNui } from '../../../fetch';
 import { setVolumes } from '../../../utils/volumes';
 import { inputNavKeyDown, NAV_SKIP_ATTRIBUTE } from '../keyboardNav';
-import { ServerSliderSetting, SETTING_CATEGORIES, SettingCategory, SettingItem } from './definitions';
+import { ServerSliderSetting, SETTING_CATEGORIES, SettingCategory, SettingItem, SOZ_CATEGORY_IDS } from './definitions';
 import { GraphicsPanel } from './GraphicsPanel';
 import { KeysPanel } from './KeysPanel';
 import { MinimapPanel } from './MinimapPanel';
 import { setNativeHover } from './nativeInputState';
 import { PendingApply, usePendingApply, usePublishPendingApply } from './pendingApply';
+import { Arrow, Bar, ROW_CLASS, ROW_LABEL_CLASS, ToggleButton, ValueStepper } from './rowControls';
 
 const normalize = (value: string) => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
@@ -61,14 +62,26 @@ const CATEGORY_ICONS: Record<string, ReactNode> = {
     keys: <KeyboardIcon />,
 };
 
+const isSoz = (category: SettingCategory) => SOZ_CATEGORY_IDS.includes(category.id);
+
 export const SettingsSidebar: FunctionComponent<SettingsSidebarProps> = ({ category, onCategoryChange }) => {
     const pending = usePendingApply();
 
     return (
         <div className="flex min-h-0 flex-1 flex-col gap-[1vh] py-[2.4vh]">
             <ul className="flex min-h-0 flex-1 flex-col gap-[0.5vh] overflow-y-auto pr-[0.4vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full">
-                {SETTING_CATEGORIES.map(item => (
+                {SETTING_CATEGORIES.map((item, index) => (
                     <li key={item.id}>
+                        {(index === 0 || isSoz(item) !== isSoz(SETTING_CATEGORIES[index - 1])) && (
+                            <div
+                                className={classNames(
+                                    'px-[0.4vh] pb-[0.6vh] text-[1.1vh] font-semibold uppercase tracking-[0.2em] text-white/45',
+                                    { 'pt-[1.4vh]': index > 0 }
+                                )}
+                            >
+                                {isSoz(item) ? 'SoZ' : 'Jeu'}
+                            </div>
+                        )}
                         <button
                             onClick={() => onCategoryChange(item.id)}
                             className={classNames(
@@ -137,7 +150,8 @@ const SliderControl: FunctionComponent<{
     item: ServerSliderSetting;
     value: number;
     onCommit: (value: number) => void;
-}> = ({ item, value, onCommit }) => {
+    onStep: (direction: number) => void;
+}> = ({ item, value, onCommit, onStep }) => {
     const [current, setCurrent] = useState(value);
 
     useEffect(() => setCurrent(value), [value]);
@@ -145,7 +159,8 @@ const SliderControl: FunctionComponent<{
     const percent = ((current - item.min) / (item.max - item.min)) * 100;
 
     return (
-        <div className="flex items-center gap-[1.2vh]">
+        <div className="flex items-center gap-[1vh]">
+            <Arrow direction={-1} onPress={() => onStep(-1)} />
             <input
                 type="range"
                 tabIndex={-1}
@@ -163,12 +178,13 @@ const SliderControl: FunctionComponent<{
                     }
                 }}
                 onPointerUp={event => onCommit(Number(event.currentTarget.value))}
-                className="soz-volume-slider w-[17vh]"
+                className="soz-volume-slider w-[16vh]"
                 style={{
                     background: `linear-gradient(to right, #fff ${percent}%, rgba(255, 255, 255, 0.2) ${percent}%)`,
                 }}
             />
-            <span className="min-w-[4.6vh] text-right text-[1.4vh] font-semibold tabular-nums">{current}%</span>
+            <span className="min-w-[4.6vh] text-right text-[1.45vh] font-semibold tabular-nums">{current}%</span>
+            <Arrow direction={1} onPress={() => onStep(1)} />
         </div>
     );
 };
@@ -211,21 +227,12 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
         adjust = change;
 
         control = (
-            <div className="flex items-center gap-[0.8vh]">
-                <button
-                    onClick={() => change(-1)}
-                    className="h-[2.6vh] w-[2.6vh] rounded-[0.6vh] bg-white/15 text-[1.4vh] font-bold hover:bg-white/30"
-                >
-                    ‹
-                </button>
-                <span className="min-w-[9vh] text-center text-[1.4vh] font-semibold">{item.options[index].label}</span>
-                <button
-                    onClick={() => change(1)}
-                    className="h-[2.6vh] w-[2.6vh] rounded-[0.6vh] bg-white/15 text-[1.4vh] font-bold hover:bg-white/30"
-                >
-                    ›
-                </button>
-            </div>
+            <ValueStepper
+                label={item.options[index].label}
+                index={index}
+                count={item.options.length}
+                onChange={change}
+            />
         );
     } else if (item.kind === 'slider') {
         const current = Number(settings.server[item.id] ?? item.default);
@@ -240,27 +247,14 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
 
             commit(next);
         };
-        control = <SliderControl item={item} value={current} onCommit={commit} />;
+        control = <SliderControl item={item} value={current} onCommit={commit} onStep={adjust} />;
     } else if (item.kind === 'toggle') {
         const value = Boolean(settings.server[item.id] ?? item.default);
         const flip = () => fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.id, value: !value });
 
         adjust = flip;
         activate = flip;
-        control = (
-            <button
-                onClick={() => fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.id, value: !value })}
-                className={classNames(
-                    'rounded-[0.8vh] px-[1.4vh] py-[0.4vh] text-[1.4vh] font-semibold transition-colors',
-                    {
-                        'bg-emerald-500/80 text-white': value,
-                        'bg-white/15 text-white/70': !value,
-                    }
-                )}
-            >
-                {value ? 'Oui' : 'Non'}
-            </button>
-        );
+        control = <ToggleButton value={value} onPress={flip} />;
     } else {
         const raw = settings.native[item.convar];
         const native = NATIVE_SETTINGS[item.convar];
@@ -296,20 +290,13 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
             if (native.kind === 'toggle') {
                 adjust = () => queueByKey(value > 0 ? 0 : 1);
                 control = (
-                    <button
-                        {...hover}
-                        onMouseDown={() => queue(value > 0 ? 0 : 1)}
-                        className={classNames(
-                            'rounded-[0.8vh] px-[1.4vh] py-[0.4vh] text-[1.4vh] font-semibold transition-colors',
-                            {
-                                'bg-emerald-500/80 text-white': value > 0,
-                                'bg-white/15 text-white/70': value <= 0,
-                                'ring-2 ring-amber-300': changed,
-                            }
-                        )}
-                    >
-                        {value > 0 ? 'Oui' : 'Non'}
-                    </button>
+                    <ToggleButton
+                        value={value > 0}
+                        changed={changed}
+                        mouseDown
+                        hover={hover}
+                        onPress={() => queue(value > 0 ? 0 : 1)}
+                    />
                 );
             } else {
                 const label =
@@ -334,29 +321,39 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
 
                 adjust = direction => step(direction, queueByKey);
 
-                control = (
-                    <div className="flex items-center gap-[0.8vh]" {...hover}>
-                        <button
-                            onMouseDown={() => change(-1)}
-                            className="h-[2.6vh] w-[2.6vh] rounded-[0.6vh] bg-white/15 text-[1.4vh] font-bold hover:bg-white/30"
-                        >
-                            ‹
-                        </button>
-                        <span
-                            className={classNames('min-w-[9vh] text-center text-[1.4vh] font-semibold', {
-                                'text-amber-300': changed,
-                            })}
-                        >
-                            {label}
-                        </span>
-                        <button
-                            onMouseDown={() => change(1)}
-                            className="h-[2.6vh] w-[2.6vh] rounded-[0.6vh] bg-white/15 text-[1.4vh] font-bold hover:bg-white/30"
-                        >
-                            ›
-                        </button>
-                    </div>
-                );
+                if (native.kind === 'slider') {
+                    const percent = ((value - native.min) / Math.max(1, native.max - native.min)) * 100;
+
+                    control = (
+                        <div className="flex items-center gap-[1vh]" {...hover}>
+                            <Arrow direction={-1} onPress={() => change(-1)} mouseDown />
+                            <Bar percent={percent} />
+                            <span
+                                className={classNames(
+                                    'min-w-[4.6vh] text-right text-[1.45vh] font-semibold tabular-nums',
+                                    { 'text-amber-300': changed }
+                                )}
+                            >
+                                {label}
+                            </span>
+                            <Arrow direction={1} onPress={() => change(1)} mouseDown />
+                        </div>
+                    );
+                } else {
+                    const index = native.options.findIndex(option => option.value === value);
+
+                    control = (
+                        <ValueStepper
+                            label={label}
+                            index={index}
+                            count={native.options.length}
+                            changed={changed}
+                            mouseDown
+                            hover={hover}
+                            onChange={change}
+                        />
+                    );
+                }
             }
         } else {
             control = (
@@ -388,7 +385,6 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
         <li
             tabIndex={0}
             onMouseEnter={() => onHover(item)}
-            onMouseLeave={() => onHover(null)}
             onFocus={() => {
                 onHover(item);
 
@@ -397,16 +393,14 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
                 }
             }}
             onBlur={() => {
-                onHover(null);
-
                 if (keepsInput) {
                     setNativeHover(false);
                 }
             }}
             onKeyDown={onKeyDown}
-            className="flex items-center justify-between gap-[2vh] rounded-[1vh] bg-white/5 px-[1.6vh] py-[1.1vh] hover:bg-white/10"
+            className={ROW_CLASS}
         >
-            <span className="text-[1.5vh] font-semibold">{item.label}</span>
+            <span className={ROW_LABEL_CLASS}>{item.label}</span>
             <div {...{ [NAV_SKIP_ATTRIBUTE]: true }}>{control}</div>
         </li>
     );
@@ -423,6 +417,8 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
     const [draft, setDraft] = useState<Record<string, number>>({});
 
     useEffect(() => () => setNativeHover(false), [category, query]);
+
+    useEffect(() => setHovered(null), [category]);
 
     useEffect(() => {
         setDraft(current => {
@@ -491,91 +487,106 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
     const voicePage = current.id === 'voice' && !query.trim();
 
     return (
-        <div className="flex h-full min-h-0 flex-col gap-[1.4vh] p-[2.4vh]">
-            <label className="flex items-center gap-[1vh] rounded-[1vh] bg-white/10 px-[1.2vh] py-[0.9vh]">
-                <SearchIcon className="h-[1.9vh] w-[1.9vh] shrink-0 text-white/60" />
-                <input
-                    value={query}
-                    onChange={event => setQuery(event.target.value)}
-                    onKeyDown={event => {
-                        event.stopPropagation();
-                        inputNavKeyDown(event);
-                    }}
-                    placeholder={keysPage ? 'Rechercher une touche…' : 'Rechercher un réglage…'}
-                    className="w-full bg-transparent text-[1.5vh] text-white outline-none placeholder:text-white/40"
-                />
-            </label>
+        <div className="flex h-full min-h-0 gap-[2.4vh] p-[2.4vh]">
+            <div className="flex min-h-0 min-w-0 flex-[1.45] flex-col gap-[1.4vh]">
+                <label className="flex items-center gap-[1vh] rounded-[1vh] bg-white/10 px-[1.2vh] py-[0.9vh]">
+                    <SearchIcon className="h-[1.9vh] w-[1.9vh] shrink-0 text-white/60" />
+                    <input
+                        value={query}
+                        onChange={event => setQuery(event.target.value)}
+                        onKeyDown={event => {
+                            event.stopPropagation();
+                            inputNavKeyDown(event);
+                        }}
+                        placeholder={keysPage ? 'Rechercher une touche…' : 'Rechercher un réglage…'}
+                        className="w-full bg-transparent text-[1.5vh] text-white outline-none placeholder:text-white/40"
+                    />
+                </label>
 
-            {minimapPage && <MinimapPanel />}
-            {graphicsPage && <GraphicsPanel />}
-            {voicePage && <GraphicsPanel category={current.nativeCategory} />}
-            {keysPage && <KeysPanel query={query} />}
+                {minimapPage && <MinimapPanel />}
+                {graphicsPage && <GraphicsPanel />}
+                {voicePage && <GraphicsPanel category={current.nativeCategory} />}
+                {keysPage && <KeysPanel query={query} />}
 
-            <div
-                className={classNames(
-                    'min-h-0 flex-1 overflow-y-auto pr-[0.6vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full',
-                    { hidden: graphicsPage || keysPage || voicePage }
-                )}
-            >
-                {sections.map(section => (
-                    <div key={section.category.id} className="mb-[2vh]">
-                        <div className="mb-[0.8vh] flex items-center justify-between">
-                            <span className="text-[1.2vh] font-semibold uppercase tracking-[0.2em] text-white/50">
-                                {section.category.label}
-                                {section.category.native &&
-                                    section.category.items.some(
-                                        setting => setting.kind === 'native' && !isNativeSetting(setting.convar)
-                                    ) &&
-                                    ' · lecture seule'}
-                            </span>
-                        </div>
-                        <ul className="flex flex-col gap-[0.6vh]">
-                            {section.items.map(item => (
-                                <SettingRow
-                                    key={item.id}
-                                    item={item}
-                                    settings={settings}
-                                    onHover={setHovered}
-                                    draft={item.kind === 'native' ? draft[item.convar] : undefined}
-                                    onDraft={section.category.staged ? changeDraft : undefined}
-                                />
-                            ))}
-                        </ul>
-                        {section.category.note && !query.trim() && (
-                            <p className="mt-[0.8vh] text-[1.4vh] text-white/50">{section.category.note}</p>
-                        )}
-                    </div>
-                ))}
-                {sections.length === 0 && (
-                    <p className="px-[0.8vh] text-[1.4vh] text-white/50">Aucun réglage ne correspond à la recherche.</p>
-                )}
-            </div>
-
-            {showNativeButton && (
-                <button
-                    onClick={() =>
-                        fetchNui(NuiEvent.PauseMenuOpenNative, { page: current.id === 'keys' ? 'keys' : 'settings' })
-                    }
-                    className="self-start rounded-[1vh] bg-white/10 px-[1.8vh] py-[0.9vh] text-[1.4vh] font-semibold uppercase transition-colors hover:bg-white/25"
+                <div
+                    className={classNames(
+                        'min-h-0 flex-1 overflow-y-auto pr-[0.6vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full',
+                        { hidden: graphicsPage || keysPage || voicePage }
+                    )}
                 >
-                    Modifier dans GTA
-                </button>
-            )}
+                    {sections.map(section => (
+                        <div key={section.category.id} className="mb-[2vh]">
+                            <div className="mb-[0.8vh] flex items-center justify-between">
+                                <span className="text-[1.2vh] font-semibold uppercase tracking-[0.2em] text-white/50">
+                                    {section.category.label}
+                                    {section.category.native &&
+                                        section.category.items.some(
+                                            setting => setting.kind === 'native' && !isNativeSetting(setting.convar)
+                                        ) &&
+                                        ' · lecture seule'}
+                                </span>
+                            </div>
+                            <ul className="flex flex-col gap-[0.4vh]">
+                                {section.items.map(item => (
+                                    <SettingRow
+                                        key={item.id}
+                                        item={item}
+                                        settings={settings}
+                                        onHover={setHovered}
+                                        draft={item.kind === 'native' ? draft[item.convar] : undefined}
+                                        onDraft={section.category.staged ? changeDraft : undefined}
+                                    />
+                                ))}
+                            </ul>
+                            {section.category.note && !query.trim() && (
+                                <p className="mt-[0.8vh] text-[1.4vh] text-white/50">{section.category.note}</p>
+                            )}
+                        </div>
+                    ))}
+                    {sections.length === 0 && (
+                        <p className="px-[0.8vh] text-[1.4vh] text-white/50">
+                            Aucun réglage ne correspond à la recherche.
+                        </p>
+                    )}
+                </div>
 
-            <div
-                className={classNames('min-h-[7vh] rounded-[1vh] bg-white/5 px-[1.6vh] py-[1.2vh]', {
-                    hidden: graphicsPage || keysPage || voicePage,
-                })}
-            >
-                {hovered ? (
-                    <>
-                        <div className="text-[1.4vh] font-semibold">{hovered.label}</div>
-                        <div className="mt-[0.4vh] text-[1.3vh] text-white/70">{hovered.description}</div>
-                    </>
-                ) : (
-                    <div className="text-[1.3vh] text-white/50">Survole un réglage pour voir sa description.</div>
+                {showNativeButton && (
+                    <button
+                        onClick={() =>
+                            fetchNui(NuiEvent.PauseMenuOpenNative, {
+                                page: current.id === 'keys' ? 'keys' : 'settings',
+                            })
+                        }
+                        className="self-start rounded-[1vh] bg-white/10 px-[1.8vh] py-[0.9vh] text-[1.4vh] font-semibold uppercase transition-colors hover:bg-white/25"
+                    >
+                        Modifier dans GTA
+                    </button>
                 )}
             </div>
+
+            {!(graphicsPage || keysPage || voicePage) && (
+                <DescriptionPanel item={hovered ?? sections[0]?.items[0] ?? null} category={current} />
+            )}
         </div>
     );
 };
+
+const DescriptionPanel: FunctionComponent<{ item: SettingItem | null; category: SettingCategory }> = ({
+    item,
+    category,
+}) => (
+    <aside className="flex min-w-0 flex-1 flex-col gap-[1.4vh] self-start rounded-[1.2vh] bg-white/5 p-[2vh]">
+        <div className="flex items-center gap-[1vh] text-[1.2vh] font-semibold uppercase tracking-[0.2em] text-white/50">
+            <span className="h-[1.6vh] w-[1.6vh] shrink-0">{CATEGORY_ICONS[category.id]}</span>
+            {category.label}
+        </div>
+        {item ? (
+            <>
+                <div className="text-[1.9vh] font-bold leading-tight">{item.label}</div>
+                <p className="text-[1.45vh] leading-relaxed text-white/75">{item.description}</p>
+            </>
+        ) : (
+            <p className="text-[1.45vh] text-white/50">Survole un réglage pour voir sa description.</p>
+        )}
+    </aside>
+);

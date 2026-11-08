@@ -48,6 +48,8 @@ export type SettingItem =
     | ServerActionSetting
     | NativeSetting;
 
+export const SOZ_CATEGORY_IDS = ['map', 'minimap', 'hud', 'menus', 'voip', 'sounds', 'keys'];
+
 export type SettingCategory = {
     id: string;
     label: string;
@@ -303,6 +305,12 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
         ],
     },
     {
+        id: 'keys',
+        label: 'Touches',
+        native: false,
+        items: [],
+    },
+    {
         id: 'volume',
         label: 'Volume',
         native: true,
@@ -504,12 +512,6 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
         label: 'Chat vocal',
         native: false,
         nativeCategory: 8,
-        items: [],
-    },
-    {
-        id: 'keys',
-        label: 'Touches',
-        native: false,
         items: [],
     },
 ];

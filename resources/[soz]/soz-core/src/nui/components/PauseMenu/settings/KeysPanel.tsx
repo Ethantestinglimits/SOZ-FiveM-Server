@@ -8,6 +8,7 @@ import { fetchNui } from '../../../fetch';
 import { useNuiEvent } from '../../../hook/nui';
 import { keyGlyph } from './KeyGlyph';
 import { setKeyCapture, setNativeBackdrop } from './nativeInputState';
+import { ROW_CLASS, ROW_LABEL_CLASS } from './rowControls';
 
 const KEY_NAMES: Record<string, string> = {
     b_100: 'Clic G',
@@ -101,7 +102,7 @@ const Keycap: FunctionComponent<{ value?: string }> = ({ value }) => {
         <span
             className={classNames(
                 'flex h-[2.6vh] min-w-[2.6vh] items-center justify-center rounded-[0.5vh] px-[0.6vh] text-[1.2vh] font-bold uppercase',
-                value ? 'bg-white text-black shadow-[inset_0_-0.25vh_0_rgba(0,0,0,0.25)]' : 'text-white/40',
+                value ? 'bg-white text-black shadow-[inset_0_-0.25vh_0_rgba(0,0,0,0.25)]' : 'text-white/40'
             )}
         >
             {keyLabel(value)}
@@ -115,7 +116,7 @@ const CaptureCountdown: FunctionComponent = () => {
     const [left, setLeft] = useState(CAPTURE_SECONDS);
 
     useEffect(() => {
-        const timer = setInterval(() => setLeft((value) => Math.max(0, value - 1)), 1000);
+        const timer = setInterval(() => setLeft(value => Math.max(0, value - 1)), 1000);
 
         return () => clearInterval(timer);
     }, []);
@@ -155,7 +156,7 @@ export const KeysPanel: FunctionComponent<{ query: string }> = ({ query }) => {
 
     useNuiEvent('pause_menu', 'GraphicsNative', setNativeBackdrop);
     useNuiEvent('pause_menu', 'KeyCategories', setData);
-    useNuiEvent('pause_menu', 'KeyCapture', (next) => {
+    useNuiEvent('pause_menu', 'KeyCapture', next => {
         setCapture(next);
         setKeyCapture(next.state);
     });
@@ -183,12 +184,12 @@ export const KeysPanel: FunctionComponent<{ query: string }> = ({ query }) => {
 
     const categories = data?.categories ?? [];
     const search = normalize(query.trim());
-    const visible = categories.filter((category) => groupOf(category) === group);
-    const current = visible.find((category) => category.id === selected[group]) ?? visible[0];
+    const visible = categories.filter(category => groupOf(category) === group);
+    const current = visible.find(category => category.id === selected[group]) ?? visible[0];
 
     const rows = useMemo<Row[]>(() => {
         if (!search) {
-            return (current?.rows ?? []).map((row) => ({
+            return (current?.rows ?? []).map(row => ({
                 ...row,
                 category: current.label,
                 categoryIndex: current.index,
@@ -196,20 +197,20 @@ export const KeysPanel: FunctionComponent<{ query: string }> = ({ query }) => {
             }));
         }
 
-        return categories.flatMap((category) =>
+        return categories.flatMap(category =>
             category.rows
                 .filter(
-                    (row) =>
+                    row =>
                         normalize(row.label).includes(search) ||
                         normalize(keyLabel(row.key)) === search ||
-                        normalize(row.resource ?? '').includes(search),
+                        normalize(row.resource ?? '').includes(search)
                 )
-                .map((row) => ({
+                .map(row => ({
                     ...row,
                     category: category.label,
                     categoryIndex: category.index,
                     categoryId: category.id,
-                })),
+                }))
         );
     }, [categories, current, search]);
 
@@ -217,7 +218,7 @@ export const KeysPanel: FunctionComponent<{ query: string }> = ({ query }) => {
         <div className="flex min-h-0 flex-1 flex-col gap-[1.2vh]">
             {!search && (
                 <div className="flex w-fit gap-[0.4vh] rounded-[1vh] bg-white/10 p-[0.4vh]">
-                    {KEY_GROUPS.map((entry) => (
+                    {KEY_GROUPS.map(entry => (
                         <button
                             key={entry.id}
                             onClick={() => setGroup(entry.id)}
@@ -225,7 +226,7 @@ export const KeysPanel: FunctionComponent<{ query: string }> = ({ query }) => {
                                 'rounded-[0.7vh] px-[1.8vh] py-[0.5vh] text-[1.35vh] font-semibold uppercase tracking-wider transition-colors',
                                 group === entry.id
                                     ? 'bg-white text-black'
-                                    : 'text-white/70 hover:bg-white/20 hover:text-white',
+                                    : 'text-white/70 hover:bg-white/20 hover:text-white'
                             )}
                         >
                             {entry.label}
@@ -236,15 +237,15 @@ export const KeysPanel: FunctionComponent<{ query: string }> = ({ query }) => {
 
             {!search && (
                 <div className="flex flex-wrap gap-[0.6vh]">
-                    {visible.map((category) => (
+                    {visible.map(category => (
                         <button
                             key={category.id}
-                            onClick={() => setSelected((state) => ({ ...state, [group]: category.id }))}
+                            onClick={() => setSelected(state => ({ ...state, [group]: category.id }))}
                             className={classNames(
                                 'rounded-[0.7vh] px-[1.1vh] py-[0.5vh] text-[1.25vh] font-semibold transition-colors',
                                 category === current
                                     ? 'bg-white text-black'
-                                    : 'bg-white/10 text-white/80 hover:bg-white/25 hover:text-white',
+                                    : 'bg-white/10 text-white/80 hover:bg-white/25 hover:text-white'
                             )}
                         >
                             {category.label}
@@ -296,18 +297,15 @@ export const KeysPanel: FunctionComponent<{ query: string }> = ({ query }) => {
                 {search && data && rows.length === 0 && (
                     <li className="text-[1.4vh] text-white/50">Aucune touche ne correspond.</li>
                 )}
-                {rows.map((row) => {
+                {rows.map(row => {
                     const capturing =
                         capture.state !== 'idle' &&
                         capture.category === (row.native?.id ?? row.categoryId) &&
                         capture.slot === row.slot;
 
                     return (
-                        <li
-                            key={`${row.category}-${row.slot}`}
-                            className="flex items-center justify-between gap-[2vh] rounded-[1vh] bg-white/5 px-[1.6vh] py-[0.8vh]"
-                        >
-                            <span className="min-w-0 truncate text-[1.45vh] font-semibold">
+                        <li key={`${row.category}-${row.slot}`} className={ROW_CLASS}>
+                            <span className={ROW_LABEL_CLASS}>
                                 {row.label || '(sans nom)'}
                                 {search && (
                                     <span className="ml-[1vh] text-[1.15vh] font-normal text-white/40">

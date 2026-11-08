@@ -6,6 +6,7 @@ import { fetchNui } from '../../../fetch';
 import { useNuiEvent } from '../../../hook/nui';
 import { setNativeBackdrop } from './nativeInputState';
 import { usePublishPendingApply } from './pendingApply';
+import { Arrow, ROW_CLASS, ROW_LABEL_CLASS, ValueStepper } from './rowControls';
 
 const ROW_TYPE_LIST = 1;
 const ROW_TYPE_SLIDER = 2;
@@ -169,6 +170,8 @@ const GraphicsRowsPanel: FunctionComponent<GraphicsRowsPanelProps> = ({
             : null
     );
 
+    const percentOf = (row: PauseGraphicsRow) => ((values[row.id] ?? row.value) / Math.max(1, row.max)) * 100;
+
     const textOf = (row: PauseGraphicsRow) => {
         if (row.type === ROW_TYPE_SLIDER) {
             return String(values[row.id] ?? row.value);
@@ -194,21 +197,18 @@ const GraphicsRowsPanel: FunctionComponent<GraphicsRowsPanelProps> = ({
                         </button>
                     </div>
                 )}
-                <ul className="flex flex-col gap-[0.6vh]">
+                <ul className="flex flex-col gap-[0.4vh]">
                     {visible.map(row => {
                         const locked = !row.selectable;
                         const changed = values[row.id] !== undefined || stepped[row.id] !== undefined;
 
                         return (
-                            <li
-                                key={row.id}
-                                className="flex items-center justify-between gap-[2vh] rounded-[1vh] bg-white/5 px-[1.6vh] py-[0.9vh]"
-                            >
-                                <span className="text-[1.5vh] font-semibold">
+                            <li key={row.id} className={ROW_CLASS}>
+                                <span className={ROW_LABEL_CLASS}>
                                     {row.label}
                                     {restartRows.includes(row.id) && (
                                         <span
-                                            className={`ml-[1vh] text-[1.2vh] font-normal ${
+                                            className={`ml-[1vh] text-[1.15vh] font-normal ${
                                                 changed ? 'text-amber-300' : 'text-white/50'
                                             }`}
                                         >
@@ -216,43 +216,50 @@ const GraphicsRowsPanel: FunctionComponent<GraphicsRowsPanelProps> = ({
                                         </span>
                                     )}
                                 </span>
-                                <div className="flex items-center gap-[0.8vh]">
-                                    {!locked && (
-                                        <button
-                                            onClick={() => step(row, -1)}
-                                            className="h-[2.6vh] w-[2.6vh] rounded-[0.6vh] bg-white/15 text-[1.4vh] font-bold hover:bg-white/30"
-                                        >
-                                            ‹
-                                        </button>
-                                    )}
-                                    {row.type === ROW_TYPE_SLIDER && (
+                                {row.type === ROW_TYPE_SLIDER ? (
+                                    <div className="flex items-center gap-[1vh]">
+                                        {locked ? (
+                                            <span className="w-[2.6vh]" />
+                                        ) : (
+                                            <Arrow direction={-1} onPress={() => step(row, -1)} />
+                                        )}
                                         <input
                                             type="range"
+                                            tabIndex={-1}
                                             min={0}
                                             max={row.max}
                                             step={1}
                                             disabled={locked}
                                             value={values[row.id] ?? row.value}
                                             onChange={event => setValue(row, Number(event.target.value))}
-                                            className="h-[0.6vh] w-[16vh] cursor-pointer accent-white"
+                                            className="soz-volume-slider w-[16vh]"
+                                            style={{
+                                                background: `linear-gradient(to right, #fff ${percentOf(row)}%, rgba(255, 255, 255, 0.2) ${percentOf(row)}%)`,
+                                            }}
                                         />
-                                    )}
-                                    <span
-                                        className={`text-center text-[1.4vh] font-semibold tabular-nums ${
-                                            row.type === ROW_TYPE_SLIDER ? 'min-w-[3vh]' : 'min-w-[12vh]'
-                                        } ${changed ? 'text-amber-300' : locked ? 'text-white/50' : ''}`}
-                                    >
-                                        {textOf(row)}
-                                    </span>
-                                    {!locked && (
-                                        <button
-                                            onClick={() => step(row, 1)}
-                                            className="h-[2.6vh] w-[2.6vh] rounded-[0.6vh] bg-white/15 text-[1.4vh] font-bold hover:bg-white/30"
+                                        <span
+                                            className={`min-w-[4.6vh] text-right text-[1.25vh] font-semibold tabular-nums ${
+                                                changed ? 'text-amber-300' : locked ? 'text-white/50' : ''
+                                            }`}
                                         >
-                                            ›
-                                        </button>
-                                    )}
-                                </div>
+                                            {textOf(row)}
+                                        </span>
+                                        {locked ? (
+                                            <span className="w-[2.6vh]" />
+                                        ) : (
+                                            <Arrow direction={1} onPress={() => step(row, 1)} />
+                                        )}
+                                    </div>
+                                ) : (
+                                    <ValueStepper
+                                        label={textOf(row)}
+                                        index={values[row.id] ?? indexOf(row)}
+                                        count={isCycle(row) ? 0 : optionsOf(row).length}
+                                        changed={changed}
+                                        disabled={locked}
+                                        onChange={direction => step(row, direction)}
+                                    />
+                                )}
                             </li>
                         );
                     })}
