@@ -49,6 +49,7 @@ import { FlashApp } from './Flash/FlashApp';
 import { LaserGameApp } from './Games/LaserGameApp';
 import { HudApp } from './Hud/HudApp';
 import { HudLayoutApp } from './Hud/HudLayoutApp';
+import { useHudEditing } from './Hud/hudPreview';
 import { InputApp } from './Input/InputApp';
 import { InventoryApp } from './Inventory/InventoryApp';
 import { KeychainApp } from './Inventory/KeychainApp';
@@ -93,7 +94,8 @@ export const App: FunctionComponent = () => {
     useNuiEvent('pause_menu', 'Open', () => setCustomPauseMenuActive(true));
     useNuiEvent('pause_menu', 'Close', () => setCustomPauseMenuActive(false));
 
-    const menuHidden = pauseMenuActive || customPauseMenuActive;
+    const hudEditing = useHudEditing();
+    const menuHidden = (pauseMenuActive || customPauseMenuActive) && !hudEditing;
 
     const classes = classNames('font-prompt transition-all duration-500', {
         'opacity-0': menuHidden || hideHud,

@@ -191,6 +191,8 @@ export class MinimapRenderer {
     public orientation: MinimapOrientation = 'camera';
     public style: MinimapStyle = DEFAULT_MINIMAP_STYLE;
     public forceVisible = false;
+    public previewVisible: boolean | null = null;
+    private wasOpen = false;
     public zIndex: string | null = null;
     private lastRenderedAt = 0;
     private lastDrawnAt = 0;
@@ -230,7 +232,7 @@ export class MinimapRenderer {
 
     constructor(
         private readonly canvas: HTMLCanvasElement,
-        private readonly callbacks: MinimapCallbacks,
+        private readonly callbacks: MinimapCallbacks
     ) {
         this.ctx = canvas.getContext('2d');
 
@@ -280,13 +282,13 @@ export class MinimapRenderer {
                 const focused = this.highlightBlip;
 
                 this.highlightBlip =
-                    blips.find((blip) =>
-                        focused.id ? blip.id === focused.id : blip.x === focused.x && blip.y === focused.y,
+                    blips.find(blip =>
+                        focused.id ? blip.id === focused.id : blip.x === focused.x && blip.y === focused.y
                     ) ?? null;
             }
 
             this.hovered =
-                blips.find((blip) => (id ? blip.id === id : blip.x === x && blip.y === y && blip.sprite === sprite)) ??
+                blips.find(blip => (id ? blip.id === id : blip.x === x && blip.y === y && blip.sprite === sprite)) ??
                 null;
         }
 
@@ -296,7 +298,7 @@ export class MinimapRenderer {
     }
 
     public setPlayerBlips(moved: MinimapPlayerBlip[]): void {
-        const byId = new Map(moved.map((entry) => [entry.id, entry]));
+        const byId = new Map(moved.map(entry => [entry.id, entry]));
 
         for (const blip of this.blips) {
             const entry = blip.player && byId.get(blip.id);
@@ -317,7 +319,7 @@ export class MinimapRenderer {
 
     public setRegions(regions: PauseMapRegion[]): void {
         this.version++;
-        this.regionLabels = regions.map((region) => ({
+        this.regionLabels = regions.map(region => ({
             x: region.x,
             y: region.y,
             text: region.name.toUpperCase(),
@@ -330,7 +332,7 @@ export class MinimapRenderer {
         this.highlightLabel = label ?? null;
         this.highlightAt = performance.now();
         this.highlightBlip =
-            this.blips.find((blip) => this.isBlipVisible(blip) && Math.hypot(blip.x - point.x, blip.y - point.y) < 1) ??
+            this.blips.find(blip => this.isBlipVisible(blip) && Math.hypot(blip.x - point.x, blip.y - point.y) < 1) ??
             null;
         this.target = {
             x: nearestCopy(point.x, this.panel.x, WORLD_WIDTH),
@@ -341,6 +343,12 @@ export class MinimapRenderer {
 
     public open(instant = false, center?: MinimapPoint): void {
         if (this.mode !== 'minimap' || !this.displayed) {
+            return;
+        }
+
+        if (this.previewVisible !== null) {
+            this.wasOpen = true;
+
             return;
         }
 
@@ -381,6 +389,29 @@ export class MinimapRenderer {
         return true;
     }
 
+    public preview(visible: boolean | null): void {
+        this.previewVisible = visible;
+
+        if (visible === null) {
+            if (this.mode === 'minimap' && this.wasOpen) {
+                this.mode = 'open';
+                this.openness = 1;
+            }
+
+            this.wasOpen = false;
+
+            return;
+        }
+
+        if (this.mode !== 'minimap') {
+            this.wasOpen = true;
+            this.mode = 'minimap';
+            this.openness = 0;
+            this.hovered = null;
+            this.drag = null;
+        }
+    }
+
     public reset(): void {
         if (this.mode !== 'minimap') {
             this.hovered = null;
@@ -407,21 +438,21 @@ export class MinimapRenderer {
         mapRequested = true;
 
         const sources = [
-            ...[0, 1, 2].flatMap((row) =>
-                [0, 1].map((col) => ({
+            ...[0, 1, 2].flatMap(row =>
+                [0, 1].map(col => ({
                     url: `${MAP_URL}/${row}_${col}.webp?v=${ASSETS_VERSION}`,
                     x0: ORIGIN_X + col * IMAGE_UNITS,
                     y0: ORIGIN_Y - row * IMAGE_UNITS,
                     x1: ORIGIN_X + (col + 1) * IMAGE_UNITS,
                     y1: ORIGIN_Y - (row + 1) * IMAGE_UNITS,
-                })),
+                }))
             ),
             { url: `${MAP_URL}/cayo.webp?v=${ASSETS_VERSION}`, x0: 3726, y0: -4139, x1: 5733, y1: -6150 },
         ];
 
         for (const source of sources) {
             loadImage(source.url)
-                .then((image) => {
+                .then(image => {
                     const levels: CanvasImageSource[] = [image];
                     const widths = [image.naturalWidth];
 
@@ -435,7 +466,7 @@ export class MinimapRenderer {
                     this.images.push({ ...source, levels, widths });
                     this.version++;
                 })
-                .catch((error) => console.error('[minimap]', error));
+                .catch(error => console.error('[minimap]', error));
         }
     }
 
@@ -446,7 +477,7 @@ export class MinimapRenderer {
 
         this.icons.set(sprite, null);
         loadImage(`${BLIP_URL}/${sprite}.webp?v=${ASSETS_VERSION}`)
-            .then((image) => {
+            .then(image => {
                 this.icons.set(sprite, image);
                 this.version++;
             })
@@ -577,12 +608,12 @@ export class MinimapRenderer {
             camHeading: lerpAngle(
                 this.displayed.camHeading,
                 this.frame.camHeading,
-                1 - Math.exp(-dt * HEADING_SMOOTHING_RATE),
+                1 - Math.exp(-dt * HEADING_SMOOTHING_RATE)
             ),
         };
 
         const frame = this.displayed;
-        const live = this.frame.visible || this.forceVisible;
+        const live = this.previewVisible ?? (this.frame.visible || this.forceVisible);
         const hiddenByTab = !isMapTabActive() && (this.mode === 'open' || (this.mode === 'opening' && this.instant));
         const wanted = this.mode === 'minimap' ? live : !hiddenByTab;
 
@@ -591,14 +622,14 @@ export class MinimapRenderer {
             ((this.zoom * 100) / (this.style.zoom || MINIMAP_ZOOM_DEFAULT)) *
                 Math.min(
                     MAX_RANGE,
-                    BASE_RANGE + frame.speed * SPEED_RANGE + Math.max(0, frame.altitude) * ALTITUDE_RANGE,
+                    BASE_RANGE + frame.speed * SPEED_RANGE + Math.max(0, frame.altitude) * ALTITUDE_RANGE
                 ),
-            1 - Math.exp(-dt * RANGE_RATE),
+            1 - Math.exp(-dt * RANGE_RATE)
         );
         this.presence = lerp(
             this.presence,
             wanted ? 1 : 0,
-            1 - Math.exp(-dt * (this.transitionEnabled && !this.instant ? PRESENCE_RATE : 60)),
+            1 - Math.exp(-dt * (this.transitionEnabled && !this.instant ? PRESENCE_RATE : 60))
         );
 
         if (hiddenByTab) {
@@ -759,7 +790,7 @@ export class MinimapRenderer {
         tilt: number,
         shift: number,
         offsetsX: number[],
-        offsetsY: number[],
+        offsetsY: number[]
     ): void {
         const { w, h } = this.current;
         const p = this.perspective;
@@ -828,7 +859,7 @@ export class MinimapRenderer {
 
         const scale = this.camera.scale;
 
-        return WRAP_OFFSETS.filter((offset) => {
+        return WRAP_OFFSETS.filter(offset => {
             if (axis === 'x') {
                 const from = (WORLD_MIN_X + offset * WORLD_WIDTH - this.camera.x) * scale + this.current.w / 2;
 
@@ -1012,7 +1043,7 @@ export class MinimapRenderer {
         if (blip.player) {
             return name;
         }
-        const same = this.blips.filter((other) => other.name === name);
+        const same = this.blips.filter(other => other.name === name);
 
         if (same.length < 2) {
             return name;
@@ -1391,7 +1422,7 @@ export class MinimapRenderer {
         icon: CanvasImageSource | null,
         x: number,
         y: number,
-        size: number,
+        size: number
     ): void {
         const ctx = this.ctx;
         const iconSize = size * 0.8;
@@ -1674,7 +1705,7 @@ export class MinimapRenderer {
 
         this.callbacks.onDoubleClick(
             { x: wrap(point.x, WORLD_MIN_X, WORLD_WIDTH), y: wrap(point.y, WORLD_MIN_Y, WORLD_HEIGHT) },
-            hasWaypoint,
+            hasWaypoint
         );
     };
 
@@ -1690,7 +1721,7 @@ export class MinimapRenderer {
 
         this.callbacks.onRightClick(
             { x: wrap(point.x, WORLD_MIN_X, WORLD_WIDTH), y: wrap(point.y, WORLD_MIN_Y, WORLD_HEIGHT) },
-            { x: event.clientX, y: event.clientY },
+            { x: event.clientX, y: event.clientY }
         );
     };
 }

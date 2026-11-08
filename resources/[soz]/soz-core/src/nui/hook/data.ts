@@ -72,13 +72,25 @@ export const useMinimap = (): HudState['minimap'] => {
     return useSelector((state: RootState) => state.hud.minimap);
 };
 
+const MINIMAP_HEIGHT_RATIO = 4 / 5.674;
+
+const withVisibleHeight = (minimap: HudState['minimap']): HudState['minimap'] => {
+    if (minimap.isHidden || minimap.height > 0 || minimap.width <= 0) {
+        return minimap;
+    }
+
+    const height = (minimap.width * window.innerWidth * MINIMAP_HEIGHT_RATIO) / window.innerHeight;
+
+    return { ...minimap, height, top: minimap.bottom - height };
+};
+
 export const useHudMinimap = (): HudState['minimap'] => {
     const minimap = useMinimap();
     const style = useMinimapStyle();
 
     const version = useHudLayoutVersion();
 
-    return useMemo(() => placeMinimap(applyMinimapShape(minimap, style)), [minimap, style, version]);
+    return useMemo(() => placeMinimap(applyMinimapShape(withVisibleHeight(minimap), style)), [minimap, style, version]);
 };
 
 export const useAmmo = (): HudState['ammo'] => {

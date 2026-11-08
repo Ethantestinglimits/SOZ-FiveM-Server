@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import { NuiEvent } from '../../../shared/event/nui';
 import { Progress } from '../../../shared/nui/progress';
 import { fetchNui } from '../../fetch';
-import { useHudHasStreetNames, useMinimap, useVehicle } from '../../hook/data';
+import { useHudHasStreetNames, useHudMinimap, useVehicle } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
 import { useHudColor } from '../Hud/hooks/useHudColor';
@@ -17,7 +17,7 @@ import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
 const PROGRESS_BAR_SEGMENTS = 10;
 
 export const ProgressApp: FunctionComponent = () => {
-    const minimap = useMinimap();
+    const minimap = useHudMinimap();
     const vehicle = useVehicle();
     const hasStreetNamesEnabled = useHudHasStreetNames();
 

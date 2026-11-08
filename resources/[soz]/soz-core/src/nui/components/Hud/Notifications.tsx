@@ -9,6 +9,7 @@ import colors from 'tailwindcss/colors';
 import { uuidv4 } from '../../../core/utils';
 import { AdvancedNotification, BasicNotification, TPoliceNotification } from '../../../shared/notification';
 import { useAssetPath } from '../../hook/assets';
+import { useHudMinimap } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
 import { formatText } from '../../utils/gta-format';
@@ -133,6 +134,17 @@ const PoliceNotification: FunctionComponent<PoliceNotificationProps> = ({ notifi
 
     const [isClosing, setIsClosing] = useState(false);
     const [isOpening, setIsOpening] = useState(true);
+
+    useNuiEvent(
+        'hud',
+        'CancelNotification',
+        id => {
+            if (id === notification.id) {
+                setIsClosing(true);
+            }
+        },
+        [setIsClosing]
+    );
 
     useEffect(() => {
         setTimeout(() => setIsOpening(false), 300);
@@ -318,7 +330,7 @@ const PoliceNotification: FunctionComponent<PoliceNotificationProps> = ({ notifi
 
 export const Notifications: FunctionComponent = () => {
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
-    const minimap = useSelector((state: RootState) => state.hud.minimap);
+    const minimap = useHudMinimap();
     const settings = useSelector((state: RootState) => state.hud.settings);
     const showDateTime = useSelector((state: RootState) => state.hud.settings.showDateTime);
     const showWeather = useSelector((state: RootState) => state.hud.settings.showWeather);
