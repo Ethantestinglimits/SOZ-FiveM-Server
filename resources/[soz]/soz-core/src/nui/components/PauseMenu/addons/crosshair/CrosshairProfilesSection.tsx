@@ -9,9 +9,9 @@ import {
     decodeCrosshair,
     encodeCrosshair,
     MAX_CROSSHAIR_PROFILES,
-} from '../../../../shared/nui/crosshair';
-import { CrosshairView } from '../../Crosshair/CrosshairView';
-import { inputNavKeyDown, navGroup, navSelected } from '../keyboardNav';
+} from '../../../../../shared/nui/crosshair';
+import { CrosshairView } from '../../../Crosshair/CrosshairView';
+import { inputNavKeyDown, navGroup, navSelected } from '../../keyboardNav';
 
 type Mode = 'idle' | 'new' | 'rename' | 'import';
 

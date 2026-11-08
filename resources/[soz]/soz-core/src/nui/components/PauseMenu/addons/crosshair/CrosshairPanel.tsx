@@ -2,7 +2,7 @@ import { RefreshIcon } from '@heroicons/react/outline';
 import classNames from 'classnames';
 import { FunctionComponent, ReactNode, useEffect, useRef, useState } from 'react';
 
-import { NuiEvent } from '../../../../shared/event';
+import { NuiEvent } from '../../../../../shared/event';
 import {
     CROSSHAIR_COLORS,
     CROSSHAIR_PRESETS,
@@ -10,10 +10,10 @@ import {
     CrosshairLines,
     CrosshairProfiles,
     DEFAULT_CROSSHAIR,
-} from '../../../../shared/nui/crosshair';
-import { fetchNui } from '../../../fetch';
-import { CrosshairView } from '../../Crosshair/CrosshairView';
-import { navGroup, navSelected, navToggle } from '../keyboardNav';
+} from '../../../../../shared/nui/crosshair';
+import { fetchNui } from '../../../../fetch';
+import { CrosshairView } from '../../../Crosshair/CrosshairView';
+import { navGroup, navSelected, navToggle } from '../../keyboardNav';
 import { CrosshairProfilesSection } from './CrosshairProfilesSection';
 
 const COMMIT_DELAY = 150;

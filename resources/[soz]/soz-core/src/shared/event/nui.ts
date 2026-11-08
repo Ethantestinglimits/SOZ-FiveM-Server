@@ -840,6 +840,7 @@ export enum NuiEvent {
     CrosshairSet = 'soz-core:nui:crosshair:set',
     CrosshairReset = 'soz-core:nui:crosshair:reset',
     CrosshairProfilesSet = 'soz-core:nui:crosshair:profiles-set',
+    CrosshairProfilesGet = 'soz-core:nui:crosshair:profiles-get',
     PauseMenuSetSetting = 'soz-core:nui:pause-menu:set-setting',
     PauseMenuQueueNative = 'soz-core:nui:pause-menu:queue-native',
     PauseMenuBackdrop = 'soz-core:nui:pause-menu:backdrop',

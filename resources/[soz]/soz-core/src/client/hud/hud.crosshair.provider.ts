@@ -53,6 +53,11 @@ export class HudCrosshairProvider {
         this.setActiveConfig({ ...sanitizeCrosshair(config), customized: true });
     }
 
+    @OnNuiEvent(NuiEvent.CrosshairProfilesGet)
+    public async onProfilesGet(): Promise<CrosshairProfiles> {
+        return this.getProfiles();
+    }
+
     @OnNuiEvent(NuiEvent.CrosshairProfilesSet)
     public async onProfilesSet(profiles: CrosshairProfiles): Promise<CrosshairProfiles> {
         this.profiles = sanitizeCrosshairProfiles(profiles);
