@@ -3,7 +3,7 @@ import cn from 'classnames';
 import { FunctionComponent, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { useHudHasStreetNames, useMinimap, usePlayer } from '../../hook/data';
+import { useHudHasStreetNames, useHudMinimap, usePlayer } from '../../hook/data';
 import { RootState } from '../../store';
 import { FuelGauge } from './components/FuelGauge';
 import { LightIndicator } from './components/LightIndicator';
@@ -11,9 +11,10 @@ import { LockIndicator } from './components/LockIndicator';
 import { NosGauge } from './components/NosGauge';
 import { SeatbeltIndicator } from './components/SeatbeltIndicator';
 import { SpeedGauge } from './components/SpeedGauge';
+import { useHudBlock } from './hudPlacement';
 
 export const VehicleInterface: FunctionComponent = () => {
-    const minimap = useMinimap();
+    const minimap = useHudMinimap();
     const hasStreetNamesEnabled = useHudHasStreetNames();
 
     const seat = useSelector((state: RootState) => state.vehicle.seat);
@@ -48,9 +49,12 @@ export const VehicleInterface: FunctionComponent = () => {
         },
     });
 
+    const block = useHudBlock('vehicle', hudShouldBeDisplayed, { fitContent: true });
+
     return (
-        <animated.div className="absolute inset-x-0 w-full" style={styles}>
+        <animated.div className="absolute inset-x-0 w-full" ref={block.ref} style={{ ...styles, ...block.style }}>
             <div
+                ref={block.measureRef}
                 className={cn('relative flex justify-center gap-3', {
                     'top-12': hasStreetNamesEnabled,
                 })}

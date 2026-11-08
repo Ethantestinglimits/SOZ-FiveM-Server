@@ -108,6 +108,8 @@ export type HudSettings = {
     showStamina: boolean;
     showInstructionalOverlay: boolean;
     switchPlayerStatsPosition: boolean;
+    compassLeft?: boolean;
+    streetOnTop?: boolean;
     showInjuryTracker: boolean;
     zoomInjuryTracker: number;
     switchInjuryTrackerPosition: boolean;

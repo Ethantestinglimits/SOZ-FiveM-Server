@@ -30,16 +30,17 @@ import { NuiAudioMethodMap } from './audio';
 import { NuiClipboardMethodMap } from './clipboard';
 import { NuiClothShopMethodMap } from './cloth_shop';
 import { NuiCraftMethodMap } from './craft';
+import { NuiCrosshairMethodMap } from './crosshair';
 import { NuiDrugMethodMap } from './drug';
 import { NuiFieldMethodMap } from './field';
 import { NuiFishingMethodMap } from './fishing';
 import { NuiGangMethodMap } from './gang';
 import { NuiHoodMethodMap } from './hood';
+import { NuiHudLayoutMethodMap } from './hud_layout';
 import { NuiInputMethodMap } from './input';
 import { NuiLaserGameMethodMap } from './laser_games';
 import { NuiMedicalDiagMethodMap } from './medical_diag';
 import { NuiMenuMethodMap } from './menu';
-import { NuiCrosshairMethodMap } from './crosshair';
 import { NuiMeteorMap } from './meteor';
 import { NuiMinimapMethodMap } from './minimap';
 import { NuiPanelMethodMap } from './panel';
@@ -133,6 +134,7 @@ export interface NuiMethodMap {
     pause_menu: NuiPauseMenuMethodMap;
     minimap: NuiMinimapMethodMap;
     crosshair: NuiCrosshairMethodMap;
+    hud_layout: NuiHudLayoutMethodMap;
 }
 
 export const eventNameFactory = <App extends keyof NuiMethodMap, Method extends keyof NuiMethodMap[App]>(

@@ -6,21 +6,24 @@ import { useSelector } from 'react-redux';
 import { NuiEvent } from '../../../shared/event/nui';
 import { Progress } from '../../../shared/nui/progress';
 import { fetchNui } from '../../fetch';
-import { useHudHasStreetNames, useMinimap, useVehicle } from '../../hook/data';
+import { useHudHasStreetNames, useHudMinimap, useVehicle } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
 import { useHudColor } from '../Hud/hooks/useHudColor';
+import { useHudBlock } from '../Hud/hudPlacement';
 import { GameCanvasBox } from '../Styleguide/GameCanvasBox';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
 
 const PROGRESS_BAR_SEGMENTS = 10;
 
 export const ProgressApp: FunctionComponent = () => {
-    const minimap = useMinimap();
+    const minimap = useHudMinimap();
     const vehicle = useVehicle();
     const hasStreetNamesEnabled = useHudHasStreetNames();
 
     const [progress, setProgress] = useState<Progress | null>();
+    const block = useHudBlock('progress', Boolean(progress), { fitContent: true });
+
     const [currentProgress, setCurrentProgress] = useState(0);
 
     const styles = useSpring({
@@ -80,7 +83,8 @@ export const ProgressApp: FunctionComponent = () => {
 
     return (
         <animated.div
-            style={styles}
+            ref={block.ref}
+            style={{ ...styles, ...block.style }}
             className={cn(
                 `absolute w-full inset-x-0 flex flex-col justify-center items-center gap-3 text-white text-xl`,
                 {

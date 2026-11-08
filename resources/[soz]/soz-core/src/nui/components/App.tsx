@@ -49,6 +49,8 @@ import { FieldZoneHealthApp } from './Field/FieldZoneHealthApp';
 import { FlashApp } from './Flash/FlashApp';
 import { LaserGameApp } from './Games/LaserGameApp';
 import { HudApp } from './Hud/HudApp';
+import { HudLayoutApp } from './Hud/HudLayoutApp';
+import { useHudEditing } from './Hud/hudPreview';
 import { InputApp } from './Input/InputApp';
 import { InventoryApp } from './Inventory/InventoryApp';
 import { KeychainApp } from './Inventory/KeychainApp';
@@ -73,8 +75,8 @@ import { SceneSearchPropApp } from './Scene/SceneSearchPropApp';
 import { ScreenshotApp } from './Screenshot/ScreenshotApp';
 import { ClothShopMenu } from './Shop/ClothShopMenu';
 import { StateApp } from './StateApp';
-import { MenuStyleApp } from './Styleguide/MenuStyleApp';
 import { GlassMorphism } from './Styleguide/GlassMorphism';
+import { MenuStyleApp } from './Styleguide/MenuStyleApp';
 import { TargetOverlay } from './Target/TargetOverlay';
 import { TaserDazeApp } from './Taser/TaserDazeApp';
 import { TaxiHorodateurApp } from './Taxi/TaxiHorodateurApp';
@@ -93,7 +95,8 @@ export const App: FunctionComponent = () => {
     useNuiEvent('pause_menu', 'Open', () => setCustomPauseMenuActive(true));
     useNuiEvent('pause_menu', 'Close', () => setCustomPauseMenuActive(false));
 
-    const menuHidden = pauseMenuActive || customPauseMenuActive;
+    const hudEditing = useHudEditing();
+    const menuHidden = (pauseMenuActive || customPauseMenuActive) && !hudEditing;
 
     const classes = classNames('font-prompt transition-all duration-500', {
         'opacity-0': menuHidden || hideHud,
@@ -196,6 +199,7 @@ export const App: FunctionComponent = () => {
                 <PauseMenuApp />
                 <MinimapApp />
                 <CrosshairApp />
+                <HudLayoutApp />
             </Provider>
         </GlassMorphismProvider>
     );

@@ -4,18 +4,21 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { bindKeyToName, BindName } from '../../../shared/utils/bind';
-import { useHudHasStreetNames, useMinimap } from '../../hook/data';
+import { useHudHasStreetNames, useHudMinimap } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
 import { formatText } from '../../utils/gta-format';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
+import { useHudBlock } from './hudPlacement';
 
 export function InstructionalOverlay() {
-    const minimap = useMinimap();
+    const minimap = useHudMinimap();
     const showInstructionalOverlay = useSelector((state: RootState) => state.hud.settings.showInstructionalOverlay);
     const hasStreetNamesEnabled = useHudHasStreetNames();
 
     const [text, setText] = useState<string[]>([]);
+    const block = useHudBlock('instructions', text.length > 0, { fitContent: true });
+
     const [forceDisplay, setForceDisplay] = useState(false);
 
     const styles = useSpring({
@@ -48,9 +51,10 @@ export function InstructionalOverlay() {
             className={cn('absolute inset-x-0 flex justify-center', {
                 '-mt-12': hasStreetNamesEnabled,
             })}
-            style={styles}
+            ref={block.ref}
+            style={{ ...styles, ...block.style }}
         >
-            <div className="h-10 w-fit">
+            <div className="h-10 w-fit" ref={block.measureRef}>
                 <GlassMorphismContainer
                     borderClassName="rounded-full"
                     className="flex items-center gap-2 text-white px-5 py-1.5 w-full h-10"

@@ -4,11 +4,12 @@ import { FunctionComponent } from 'react';
 import { useSelector } from 'react-redux';
 
 import { useAssetPath } from '../../hook/assets';
-import { useAmmo, useHudHasStreetNames, useMinimap } from '../../hook/data';
+import { useAmmo, useHudHasStreetNames, useHudMinimap } from '../../hook/data';
 import { RootState } from '../../store';
+import { useHudBlock } from './hudPlacement';
 
 export const WeaponInterface: FunctionComponent = () => {
-    const minimap = useMinimap();
+    const minimap = useHudMinimap();
     const { getPath } = useAssetPath();
     const hasStreetNamesEnabled = useHudHasStreetNames();
     const switchPlayerStatsPosition = useSelector((state: RootState) => state.hud.settings.switchPlayerStatsPosition);
@@ -27,6 +28,8 @@ export const WeaponInterface: FunctionComponent = () => {
         [ammo, minimap]
     );
 
+    const block = useHudBlock('ammo', ammo.hasWeapon, { fitContent: true });
+
     return (
         <animated.div
             className={cn('absolute flex gap-1 items-center justify-center text-white w-fit drop-shadow-bg', {
@@ -35,7 +38,8 @@ export const WeaponInterface: FunctionComponent = () => {
                     (switchPlayerStatsPosition && hasStreetNamesEnabled),
                 '-mt-28': switchPlayerStatsPosition && !hasStreetNamesEnabled,
             })}
-            style={ammoStyles}
+            ref={block.ref}
+            style={{ ...ammoStyles, ...block.style }}
         >
             <div className="flex flex-col justify-center items-center tabular-nums h-11">
                 <span className="text-3xl leading-7">{ammo?.ammo}</span>

@@ -8,6 +8,7 @@ import { PlayerPedHash } from '../../../shared/player';
 import { useHudMinimap, usePlayer } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
+import { useHudBlock } from './hudPlacement';
 
 export function DamageOverlay() {
     const hasWatch = useSelector((state: RootState) => state.hud.hasWatch);
@@ -39,15 +40,18 @@ export function DamageOverlay() {
 
     useNuiEvent('hud', 'SetDamagedBones', setBones);
 
+    const block = useHudBlock('injuries', shouldDisplay, { fitContent: true });
+
     return (
         <animated.div
             className={clsx('absolute top-0 inset-x-0 flex', {
                 'justify-start': switchInjuryTrackerPosition,
                 'justify-end': !switchInjuryTrackerPosition,
             })}
-            style={styles}
+            ref={block.ref}
+            style={{ ...styles, ...block.style }}
         >
-            <div className="relative h-[30vh]" style={{ zoom: zoomInjuryTracker }}>
+            <div className="relative h-[30vh]" ref={block.measureRef} style={{ zoom: zoomInjuryTracker }}>
                 <img
                     alt="skel"
                     src={getPath(`images/hud/player/damages/${playerType}/skel.webp`)}
