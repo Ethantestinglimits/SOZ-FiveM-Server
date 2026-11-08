@@ -1,5 +1,6 @@
 import { NuiEvent } from '../../../../shared/event';
 import { PauseNativeConvar } from '../../../../shared/nui/pause_settings';
+import { InterfaceVolumes } from '../../../../shared/nui/volume';
 
 type SettingBase = {
     id: string;
@@ -19,6 +20,15 @@ export type ServerSelectSetting = SettingBase & {
     options: { value: number | string; label: string }[];
 };
 
+export type ServerSliderSetting = SettingBase & {
+    kind: 'slider';
+    default: number;
+    min: number;
+    max: number;
+    step: number;
+    channel?: keyof InterfaceVolumes;
+};
+
 export type ServerActionSetting = SettingBase & {
     kind: 'action';
     button: string;
@@ -31,7 +41,12 @@ export type NativeSetting = SettingBase & {
     format: (raw: number) => string;
 };
 
-export type SettingItem = ServerToggleSetting | ServerSelectSetting | ServerActionSetting | NativeSetting;
+export type SettingItem =
+    | ServerToggleSetting
+    | ServerSelectSetting
+    | ServerSliderSetting
+    | ServerActionSetting
+    | NativeSetting;
 
 export type SettingCategory = {
     id: string;
@@ -44,14 +59,27 @@ export type SettingCategory = {
     items: SettingItem[];
 };
 
-const FPS_OPTIONS = [30, 60, 90, 120, 144, 165, 240].map((value) => ({ value, label: `${value} FPS` }));
+const FPS_OPTIONS = [30, 60, 90, 120, 144, 165, 240].map(value => ({ value, label: `${value} FPS` }));
 
-const VIDEO_VOLUME_OPTIONS = [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((value) => ({
-    value,
-    label: `${value}%`,
-}));
+const volume = (
+    id: string,
+    label: string,
+    description: string,
+    channel?: keyof InterfaceVolumes,
+    initial = 100
+): ServerSliderSetting => ({
+    id,
+    kind: 'slider',
+    label,
+    description,
+    default: initial,
+    min: 0,
+    max: 100,
+    step: 5,
+    channel,
+});
 
-const MENU_SIZE_OPTIONS = [70, 80, 90, 100, 110, 120, 130].map((value) => ({ value, label: `${value}%` }));
+const MENU_SIZE_OPTIONS = [70, 80, 90, 100, 110, 120, 130].map(value => ({ value, label: `${value}%` }));
 
 const MENU_TEXT_OPTIONS = [
     { value: 1, label: 'Très petit' },
@@ -80,7 +108,7 @@ const native = (
     convar: PauseNativeConvar,
     label: string,
     description: string,
-    format: (raw: number) => string,
+    format: (raw: number) => string
 ): NativeSetting => ({
     id: convar,
     kind: 'native',
@@ -249,14 +277,29 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
                     { value: 'music', label: 'Musique' },
                 ],
             },
-            {
-                id: 'videoVolume',
-                kind: 'select',
-                label: 'Volume vidéo des écrans',
-                description: 'Permet de changer le volume des vidéos sur les écrans.',
-                default: 50,
-                options: VIDEO_VOLUME_OPTIONS,
-            },
+        ],
+    },
+    {
+        id: 'sounds',
+        label: 'Sons SoZ',
+        native: false,
+        items: [
+            volume('interfaceVolume', 'Volume général', 'Volume de tous les sons des interfaces SoZ.', 'master'),
+            volume(
+                'volumeEffects',
+                'Effets de jeu',
+                'Carburant, ceinture, véhicule, radio, alarmes, armes, météo.',
+                'effects'
+            ),
+            volume('volumeMusic', 'Musique et ambiances', 'Albums, ambiances et événements.', 'music'),
+            volume('volumePhone', 'Téléphone', 'Sonneries et notifications du téléphone.', 'phone'),
+            volume(
+                'videoVolume',
+                'Écrans vidéo',
+                "Vidéos sur les écrans du cinéma, du Benny's, du LSPD et du FDLM.",
+                undefined,
+                50
+            ),
         ],
     },
     {
@@ -270,13 +313,13 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
                 'profile_musicVolumeInMp',
                 'Volume musique en ligne',
                 'Volume de la musique en partie en ligne.',
-                plain,
+                plain
             ),
             native(
                 'profile_audioMuteOnFocusLoss',
                 'Couper le son en changeant de fenêtre',
                 'Coupe le son du jeu quand la fenêtre de GTA perd le focus.',
-                onOff,
+                onOff
             ),
         ],
     },
@@ -290,7 +333,7 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
                 'profile_safezoneSize',
                 'Zone neutre',
                 "Marge de sécurité de l'affichage sur les bords de l'écran.",
-                plain,
+                plain
             ),
             native('profile_subtitles', 'Sous-titres', 'Affiche les sous-titres des dialogues.', onOff),
             native('profile_measurementSystem', "Système d'unités", 'Unités affichées dans le jeu.', units),
@@ -313,26 +356,26 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
                 'profile_advGfxLongShadows',
                 'Ombres longues',
                 'Ombres plus longues au lever et au coucher du soleil.',
-                onOff,
+                onOff
             ),
             native('profile_advGfxUltraShadows', 'Ombres haute résolution', 'Ombres en haute résolution.', onOff),
             native(
                 'profile_advGfxHdFlight',
                 'Streaming HD en vol',
                 'Charge les textures en haute définition en vol.',
-                onOff,
+                onOff
             ),
             native(
                 'profile_advGfxMaxLod',
                 'Distance de détail étendue',
                 'Distance à laquelle les objets restent détaillés.',
-                plain,
+                plain
             ),
             native(
                 'profile_advGfxShadowsDistMult',
                 "Distance d'ombres étendue",
                 'Distance à laquelle les ombres sont dessinées.',
-                plain,
+                plain
             ),
         ],
     },
@@ -346,39 +389,39 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
                 'profile_kbmToggleAim',
                 'Visée : appuyer pour basculer',
                 'Un appui active la visée au lieu de maintenir la touche.',
-                onOff,
+                onOff
             ),
             native('profile_invertMouse', 'Inverser la souris', "Inverse l'axe vertical de la souris.", onOff),
             native(
                 'profile_invertLook',
                 'Inverser la vue (manette)',
                 "Inverse l'axe vertical de la vue à la manette.",
-                onOff,
+                onOff
             ),
             native('profile_vibration', 'Vibration', 'Vibration de la manette.', onOff),
             native(
                 'profile_alternateHandbrake',
                 'Frein à main alternatif',
                 'Utilise la commande alternative pour le frein à main.',
-                onOff,
+                onOff
             ),
             native(
                 'profile_alternateDriveby',
                 'Tir en véhicule alternatif',
                 'Utilise la commande alternative pour tirer depuis un véhicule.',
-                onOff,
+                onOff
             ),
             native(
                 'profile_mouseOnFootScale',
                 'Sensibilité souris à pied',
                 'Sensibilité de la souris quand tu es à pied.',
-                plain,
+                plain
             ),
             native(
                 'profile_mouseDrivingScale',
                 'Sensibilité souris en conduite',
                 'Sensibilité de la souris en conduite.',
-                plain,
+                plain
             ),
         ],
     },
@@ -391,68 +434,68 @@ export const SETTING_CATEGORIES: SettingCategory[] = [
                 'profile_fpsFieldOfView',
                 'Champ de vision à la première personne',
                 'Angle de vision de la caméra à la première personne.',
-                plain,
+                plain
             ),
             native(
                 'profile_cameraHeight',
                 'Hauteur de la caméra véhicule',
                 'Hauteur de la caméra pendant la conduite.',
-                plain,
+                plain
             ),
             native('profile_hoodCamera', 'Caméra capot', 'Ajoute la caméra capot aux vues du véhicule.', onOff),
             native(
                 'profile_cinematicShooting',
                 'Tir cinématique',
                 'Active le ralenti cinématique pendant les fusillades.',
-                onOff,
+                onOff
             ),
             native(
                 'profile_fpsHeadbob',
                 'Balancement de la tête',
                 'Balancement de la caméra à la première personne en marchant.',
-                onOff,
+                onOff
             ),
             native(
                 'profile_fpsRagdoll',
                 'Chute à la première personne',
                 'Garde la vue à la première personne pendant les chutes.',
-                onOff,
+                onOff
             ),
             native(
                 'profile_fpsCombatroll',
                 'Roulade à la première personne',
                 'Garde la vue à la première personne pendant les roulades.',
-                onOff,
+                onOff
             ),
             native(
                 'profile_fpsAutoLevel',
                 'Mise à niveau automatique',
                 'Remet la caméra à niveau automatiquement.',
-                onOff,
+                onOff
             ),
             native(
                 'profile_fpsPersistantView',
                 'Vue persistante',
                 'Conserve la vue à la première personne entre les situations.',
-                onOff,
+                onOff
             ),
             native(
                 'profile_fpsThirdPersonCover',
                 'Couverture à la troisième personne',
                 'Passe à la troisième personne à couvert.',
-                onOff,
+                onOff
             ),
             native(
                 'profile_fpsVehAutoCenter',
                 'Recentrage en véhicule',
                 'Recentre la caméra du véhicule automatiquement.',
-                onOff,
+                onOff
             ),
             native(
                 'profile_fpsRelativeVehicleCameraDrivebyAiming',
                 'Visée relative en véhicule',
                 'La visée depuis un véhicule suit la caméra du véhicule.',
-                onOff,
+                onOff
             ),
         ],
     },

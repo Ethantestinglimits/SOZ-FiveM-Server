@@ -1,4 +1,13 @@
-import { AdjustmentsIcon, CogIcon, LogoutIcon, MapIcon, PlayIcon, XIcon } from '@heroicons/react/outline';
+import {
+    AdjustmentsIcon,
+    CogIcon,
+    LogoutIcon,
+    MapIcon,
+    PlayIcon,
+    VolumeOffIcon,
+    VolumeUpIcon,
+    XIcon,
+} from '@heroicons/react/outline';
 import classNames from 'classnames';
 import { FunctionComponent, PropsWithChildren, ReactNode, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -8,6 +17,7 @@ import { PauseMapLayer, PauseMenuData } from '../../../shared/nui/pause_menu';
 import { fetchNui } from '../../fetch';
 import { useKeyPress } from '../../hook/control';
 import { useNuiEvent, useNuiFocus } from '../../hook/nui';
+import { setVolumes } from '../../utils/volumes';
 import { minimapController, setMapTabActive, useMinimapMode } from '../Minimap/minimapState';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
 import { FOCUS_RING_CLASSES, NAV_ZONE_ATTRIBUTE, useKeyboardNav } from './keyboardNav';
@@ -38,28 +48,64 @@ const Glass: FunctionComponent<PropsWithChildren<{ className?: string; backgroun
     </GlassMorphismContainer>
 );
 
-type SideButtonProps = {
-    label: string;
-    icon: ReactNode;
-    danger?: boolean;
-    onClick: () => void;
-};
-
-const SideButton: FunctionComponent<SideButtonProps> = ({ label, icon, danger, onClick }) => (
+const BarButton: FunctionComponent<{ label: string; icon: ReactNode; danger?: boolean; onClick: () => void }> = ({
+    label,
+    icon,
+    danger,
+    onClick,
+}) => (
     <button
         onClick={onClick}
         className={classNames(
-            'flex w-full items-center gap-[1vh] rounded-[1vh] px-[1.4vh] py-[1vh] text-left text-[1.5vh] font-semibold uppercase transition-colors duration-150',
+            'flex items-center gap-[0.8vh] rounded-[1vh] px-[1.6vh] py-[0.9vh] text-[1.45vh] font-semibold transition-colors duration-150',
             {
                 'bg-white/10 text-white hover:bg-white/25': !danger,
                 'bg-red-500/20 text-red-200 hover:bg-red-500/60 hover:text-white': danger,
             },
         )}
     >
-        <span className="h-[2vh] w-[2vh] shrink-0">{icon}</span>
+        <span className="h-[1.9vh] w-[1.9vh] shrink-0">{icon}</span>
         {label}
     </button>
 );
+
+const VolumeSlider: FunctionComponent<{ value: number }> = ({ value }) => {
+    const [current, setCurrent] = useState(value);
+
+    useEffect(() => setCurrent(value), [value]);
+
+    const commit = (volume: number) =>
+        fetchNui(NuiEvent.PauseMenuSetSetting, { key: 'interfaceVolume', value: volume });
+
+    return (
+        <label
+            title="Volume des interfaces"
+            className="flex items-center gap-[1vh] rounded-[1vh] bg-white/10 px-[1.6vh] py-[0.9vh] text-[1.45vh] font-semibold"
+        >
+            <span className="h-[1.9vh] w-[1.9vh] shrink-0">{current === 0 ? <VolumeOffIcon /> : <VolumeUpIcon />}</span>
+            <input
+                type="range"
+                min={0}
+                max={100}
+                step={1}
+                value={current}
+                onChange={(event) => {
+                    const volume = Number(event.currentTarget.value);
+
+                    setCurrent(volume);
+                    setVolumes({ master: volume / 100 });
+                }}
+                onPointerUp={(event) => commit(Number(event.currentTarget.value))}
+                onKeyUp={(event) => commit(Number(event.currentTarget.value))}
+                className="soz-volume-slider w-[14vh]"
+                style={{
+                    background: `linear-gradient(to right, #fff ${current}%, rgba(255, 255, 255, 0.2) ${current}%)`,
+                }}
+            />
+            <span className="w-[4.4vh] text-right tabular-nums">{current}%</span>
+        </label>
+    );
+};
 
 const TabButton: FunctionComponent<{ label: string; icon: ReactNode; active: boolean; onClick: () => void }> = ({
     label,
@@ -70,17 +116,34 @@ const TabButton: FunctionComponent<{ label: string; icon: ReactNode; active: boo
     <button
         onClick={onClick}
         className={classNames(
-            'flex flex-1 items-center justify-center gap-[0.8vh] rounded-[1vh] px-[1vh] py-[0.9vh] text-[1.4vh] font-semibold uppercase transition-colors duration-150',
+            'flex items-center gap-[0.8vh] rounded-[1vh] px-[2vh] py-[1vh] text-[1.7vh] font-semibold transition-colors duration-150',
             {
                 'bg-white text-black': active,
                 'bg-white/10 text-white/80 hover:bg-white/25 hover:text-white': !active,
             },
         )}
     >
-        <span className="h-[1.8vh] w-[1.8vh] shrink-0">{icon}</span>
+        <span className="h-[2vh] w-[2vh] shrink-0">{icon}</span>
         {label}
     </button>
 );
+
+const KeyHint: FunctionComponent<{ label: string }> = ({ label }) => (
+    <span className="flex h-[2.4vh] min-w-[2.4vh] items-center justify-center rounded-[0.5vh] bg-white px-[0.6vh] text-[1.15vh] font-bold uppercase text-black shadow-[inset_0_-0.25vh_0_rgba(0,0,0,0.25)]">
+        {label}
+    </span>
+);
+
+const SETTINGS_HINTS: [string, string][] = [
+    ['↑↓', 'Déplacer'],
+    ['Entrée', 'Valider'],
+    ['Échap', 'Retour'],
+];
+
+const MAP_HINTS: [string, string][] = [
+    ['2× clic', 'Poser un point'],
+    ['Échap', 'Retour'],
+];
 
 const QuitConfirm: FunctionComponent<{ onCancel: () => void }> = ({ onCancel }) => (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 font-prompt text-white">
@@ -224,6 +287,8 @@ export const PauseMenuApp: FunctionComponent = () => {
     useKeyPress('P', () => data && !confirmQuit && close());
     useKeyPress('a', () => changeTab(-1));
     useKeyPress('A', () => changeTab(-1));
+    useKeyPress('q', () => changeTab(-1));
+    useKeyPress('Q', () => changeTab(-1));
     useKeyPress('e', () => changeTab(1));
     useKeyPress('E', () => changeTab(1));
     useKeyboardNav(data !== null && !confirmQuit);
@@ -234,19 +299,19 @@ export const PauseMenuApp: FunctionComponent = () => {
 
     return (
         <div
-            className={classNames('absolute inset-0 z-[60] select-none font-prompt text-white', {
+            className={classNames('absolute inset-0 select-none font-prompt text-white', {
                 'opacity-0': keyCapture === 'native',
             })}
         >
             <div
-                className={classNames('absolute inset-0 transition-opacity duration-300', {
+                className={classNames('absolute inset-0 z-[60] transition-opacity duration-300', {
                     'bg-gradient-to-b from-black/50 via-black/25 to-black/50': !data.settings.server.potato,
                     'bg-black': data.settings.server.potato,
                     'opacity-0': mode === 'minimap' || mode === 'closing',
                 })}
             />
             <div
-                className={classNames('absolute inset-0 bg-black transition-opacity duration-[250ms]', {
+                className={classNames('absolute inset-0 z-[60] bg-black transition-opacity duration-[250ms]', {
                     'opacity-0': !backdrop,
                 })}
             />
@@ -263,86 +328,96 @@ export const PauseMenuApp: FunctionComponent = () => {
                     </button>,
                     document.body,
                 )}
-            <div className="absolute inset-0 mx-auto flex max-w-[177.78vh] gap-[2vh] p-[3vh]">
-                {showContent && !data.scriptMode && (
-                    <FadeIn
-                        as="aside"
-                        className="relative w-[30vh] shrink-0"
-                        instant={!data.settings.server.mapAnimation}
-                    >
-                        <Glass className="flex h-full flex-col gap-[2vh] p-[2.5vh]">
-                            <img src="assets/pause/soz_logo.webp" alt="SoZ" className="h-[4vh] w-auto self-start" />
-
-                            <div className="flex flex-col gap-[0.4vh]">
-                                <div className="flex items-baseline justify-between gap-[1vh]">
-                                    <span className="truncate text-[2vh] font-bold leading-tight">
-                                        {data.firstname} {data.lastname}
-                                    </span>
-                                    <span className="shrink-0 text-[1.3vh] text-white/50">#{data.serverId}</span>
-                                </div>
-                                <div className="flex items-center gap-[0.8vh] text-[1.4vh] text-white/70">
-                                    <span
-                                        className={classNames('h-[0.8vh] w-[0.8vh] shrink-0 rounded-full', {
-                                            'bg-emerald-400': data.onDuty,
-                                            'bg-white/30': !data.onDuty,
-                                        })}
-                                    />
-                                    <span className="truncate">
-                                        {data.job ?? 'Sans emploi'}
-                                        {data.grade && ` · ${data.grade}`}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="flex gap-[0.8vh]">
-                                {TABS.map((item) => (
-                                    <TabButton
-                                        key={item.id}
-                                        label={item.label}
-                                        icon={item.icon}
-                                        active={tab === item.id}
-                                        onClick={() => setTab(item.id)}
-                                    />
-                                ))}
-                            </div>
-
-                            {tab === 'map' ? (
-                                <MapSidebar data={data} layers={layers} onLayersChange={setLayers} />
-                            ) : (
-                                <SettingsSidebar category={settingsCategory} onCategoryChange={setSettingsCategory} />
-                            )}
-
-                            <div className="flex flex-col gap-[0.8vh]">
-                                <SideButton label="Reprendre" icon={<PlayIcon />} onClick={close} />
-                                <SideButton
-                                    label="Menu du jeu"
-                                    icon={<CogIcon />}
-                                    onClick={() => fetchNui(NuiEvent.PauseMenuOpenNative)}
+            {showContent && !data.scriptMode && (
+                <div className="pointer-events-none absolute inset-0 z-[75] mx-auto flex max-w-[177.78vh] flex-col gap-[1.8vh] px-[4vh] py-[3vh]">
+                    <header className="pointer-events-auto flex h-[5.4vh] shrink-0 items-center gap-[1vh]">
+                        <img src="assets/pause/soz_logo.webp" alt="SoZ" className="mr-[2vh] h-[3.6vh] w-auto" />
+                        <KeyHint label="Q" />
+                        {TABS.map((item) => (
+                            <TabButton
+                                key={item.id}
+                                label={item.label}
+                                icon={item.icon}
+                                active={tab === item.id}
+                                onClick={() => setTab(item.id)}
+                            />
+                        ))}
+                        <KeyHint label="E" />
+                        <span className="flex-1" />
+                        <div className="flex flex-col items-end leading-tight">
+                            <span className="text-[1.5vh] font-bold">
+                                {data.firstname} {data.lastname}
+                                <span className="ml-[0.6vh] font-normal text-white/50">#{data.serverId}</span>
+                            </span>
+                            <span className="flex items-center gap-[0.6vh] text-[1.25vh] text-white/60">
+                                <span
+                                    className={classNames('h-[0.7vh] w-[0.7vh] rounded-full', {
+                                        'bg-emerald-400': data.onDuty,
+                                        'bg-white/30': !data.onDuty,
+                                    })}
                                 />
-                                <SideButton
-                                    label="Quitter"
-                                    icon={<LogoutIcon />}
-                                    danger
-                                    onClick={() => setConfirmQuit(true)}
-                                />
-                            </div>
-                        </Glass>
-                    </FadeIn>
-                )}
-                {showContent && !data.scriptMode && (
-                    <FadeIn
-                        as="main"
-                        className="relative min-h-0 min-w-0 flex-1"
-                        instant={!data.settings.server.mapAnimation}
-                    >
-                        {tab === 'settings' && (
-                            <Glass className="h-full">
-                                <SettingsMain category={settingsCategory} settings={data.settings} />
-                            </Glass>
+                                {data.job ?? 'Sans emploi'}
+                                {data.grade && ` · ${data.grade}`}
+                            </span>
+                        </div>
+                        <BarButton label="Quitter" icon={<LogoutIcon />} danger onClick={() => setConfirmQuit(true)} />
+                    </header>
+
+                    <div className="relative flex min-h-0 flex-1 gap-[2.4vh]">
+                        {tab === 'map' ? (
+                            <FadeIn
+                                as="aside"
+                                className="pointer-events-auto absolute bottom-[1.6vh] left-[1.6vh] top-[1.6vh] w-[30vh]"
+                                instant={!data.settings.server.mapAnimation}
+                            >
+                                <Glass
+                                    backgroundColor="#16171ce6"
+                                    className="flex h-full flex-col gap-[1.4vh] p-[1.8vh]"
+                                >
+                                    <MapSidebar data={data} layers={layers} onLayersChange={setLayers} />
+                                </Glass>
+                            </FadeIn>
+                        ) : (
+                            <>
+                                <FadeIn
+                                    as="aside"
+                                    className="pointer-events-auto flex w-[24vh] shrink-0 flex-col"
+                                    instant={!data.settings.server.mapAnimation}
+                                >
+                                    <SettingsSidebar
+                                        category={settingsCategory}
+                                        onCategoryChange={setSettingsCategory}
+                                    />
+                                </FadeIn>
+                                <FadeIn
+                                    as="main"
+                                    className="pointer-events-auto relative flex min-h-0 min-w-0 flex-1 flex-col"
+                                    instant={!data.settings.server.mapAnimation}
+                                >
+                                    <SettingsMain category={settingsCategory} settings={data.settings} />
+                                </FadeIn>
+                            </>
                         )}
-                    </FadeIn>
-                )}
-            </div>
+                    </div>
+
+                    <footer className="pointer-events-auto flex h-[4.6vh] shrink-0 items-center gap-[1vh]">
+                        <BarButton label="Reprendre" icon={<PlayIcon />} onClick={close} />
+                        <BarButton
+                            label="Menu du jeu"
+                            icon={<CogIcon />}
+                            onClick={() => fetchNui(NuiEvent.PauseMenuOpenNative)}
+                        />
+                        <VolumeSlider value={Number(data.settings.server.interfaceVolume ?? 100)} />
+                        <span className="flex-1" />
+                        {(tab === 'map' ? MAP_HINTS : SETTINGS_HINTS).map(([key, label]) => (
+                            <span key={label} className="flex items-center gap-[0.6vh] text-[1.3vh] text-white/60">
+                                <KeyHint label={key} />
+                                {label}
+                            </span>
+                        ))}
+                    </footer>
+                </div>
+            )}
             {confirmQuit && createPortal(<QuitConfirm onCancel={() => setConfirmQuit(false)} />, document.body)}
         </div>
     );

@@ -1,17 +1,34 @@
-import { RefreshIcon, SearchIcon } from '@heroicons/react/outline';
+import {
+    AdjustmentsIcon,
+    CameraIcon,
+    ChatAlt2Icon,
+    CursorClickIcon,
+    DesktopComputerIcon,
+    LocationMarkerIcon,
+    MapIcon,
+    MenuIcon,
+    MicrophoneIcon,
+    MusicNoteIcon,
+    SearchIcon,
+    SparklesIcon,
+    ViewGridIcon,
+    VolumeUpIcon,
+} from '@heroicons/react/outline';
 import classNames from 'classnames';
-import { FunctionComponent, KeyboardEvent as ReactKeyboardEvent, useEffect, useMemo, useState } from 'react';
+import { FunctionComponent, KeyboardEvent as ReactKeyboardEvent, ReactNode, useEffect, useMemo, useState } from 'react';
 
 import { NuiEvent } from '../../../../shared/event';
 import { isNativeSetting, NATIVE_SETTINGS } from '../../../../shared/nui/native_settings';
 import { PauseSettingsData } from '../../../../shared/nui/pause_settings';
 import { fetchNui } from '../../../fetch';
+import { setVolumes } from '../../../utils/volumes';
 import { inputNavKeyDown, NAV_SKIP_ATTRIBUTE } from '../keyboardNav';
+import { ServerSliderSetting, SETTING_CATEGORIES, SettingCategory, SettingItem } from './definitions';
 import { GraphicsPanel } from './GraphicsPanel';
 import { KeysPanel } from './KeysPanel';
 import { MinimapPanel } from './MinimapPanel';
 import { setNativeHover } from './nativeInputState';
-import { SETTING_CATEGORIES, SettingCategory, SettingItem } from './definitions';
+import { PendingApply, usePendingApply, usePublishPendingApply } from './pendingApply';
 
 const normalize = (value: string) => value.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
@@ -20,40 +37,93 @@ type SettingsSidebarProps = {
     onCategoryChange: (category: string) => void;
 };
 
-export const SettingsSidebar: FunctionComponent<SettingsSidebarProps> = ({ category, onCategoryChange }) => (
-    <div className="flex min-h-0 flex-1 flex-col gap-[1vh]">
-        <ul className="min-h-0 flex-1 overflow-y-auto pr-[0.4vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full">
-            {SETTING_CATEGORIES.map((item) => (
-                <li key={item.id}>
-                    <button
-                        onClick={() => onCategoryChange(item.id)}
-                        className={classNames(
-                            'w-full rounded-[0.8vh] py-[0.8vh] pr-[1.2vh] text-left font-semibold transition-colors',
-                            {
-                                'pl-[1.2vh] text-[1.5vh]': !item.parent,
-                                'pl-[3vh] text-[1.4vh]': item.parent,
-                                'bg-white text-black': category === item.id,
-                                'text-white/80 hover:bg-white/15 hover:text-white': category !== item.id,
-                            },
-                        )}
-                    >
-                        {item.parent && <span className="mr-[0.8vh] opacity-50">└</span>}
-                        {item.label}
-                    </button>
-                </li>
-            ))}
-        </ul>
-        <button
-            onClick={() => {
-                fetchNui(NuiEvent.PauseMenuResetSettings);
-            }}
-            className="flex items-center justify-center gap-[0.8vh] rounded-[1vh] bg-red-500/20 px-[1.2vh] py-[0.9vh] text-[1.4vh] font-semibold uppercase text-red-200 transition-colors hover:bg-red-500/60 hover:text-white"
-        >
-            <RefreshIcon className="h-[1.8vh] w-[1.8vh]" />
-            Réinitialiser tout
-        </button>
-    </div>
+const KeyboardIcon: FunctionComponent = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <rect x="2" y="6" width="20" height="12" rx="2" />
+        <path strokeLinecap="round" d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10" />
+    </svg>
 );
+
+const CATEGORY_ICONS: Record<string, ReactNode> = {
+    map: <MapIcon />,
+    minimap: <LocationMarkerIcon />,
+    hud: <ViewGridIcon />,
+    menus: <MenuIcon />,
+    voip: <MicrophoneIcon />,
+    sounds: <MusicNoteIcon />,
+    volume: <VolumeUpIcon />,
+    display: <DesktopComputerIcon />,
+    graphics: <SparklesIcon />,
+    graphicsAdvanced: <AdjustmentsIcon />,
+    controls: <CursorClickIcon />,
+    camera: <CameraIcon />,
+    voice: <ChatAlt2Icon />,
+    keys: <KeyboardIcon />,
+};
+
+export const SettingsSidebar: FunctionComponent<SettingsSidebarProps> = ({ category, onCategoryChange }) => {
+    const pending = usePendingApply();
+
+    return (
+        <div className="flex min-h-0 flex-1 flex-col gap-[1vh] py-[2.4vh]">
+            <ul className="flex min-h-0 flex-1 flex-col gap-[0.5vh] overflow-y-auto pr-[0.4vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full">
+                {SETTING_CATEGORIES.map(item => (
+                    <li key={item.id}>
+                        <button
+                            onClick={() => onCategoryChange(item.id)}
+                            className={classNames(
+                                'flex w-full items-center gap-[1vh] rounded-[0.8vh] py-[0.95vh] pr-[1.4vh] text-left font-semibold transition-colors',
+                                {
+                                    'pl-[1.4vh] text-[1.45vh]': !item.parent,
+                                    'pl-[3vh] text-[1.4vh]': item.parent,
+                                    'bg-white text-black': category === item.id,
+                                    'bg-white/5 text-white/85 hover:bg-white/15 hover:text-white': category !== item.id,
+                                }
+                            )}
+                        >
+                            {item.parent && <span className="opacity-50">└</span>}
+                            <span className="h-[1.9vh] w-[1.9vh] shrink-0">{CATEGORY_ICONS[item.id]}</span>
+                            {item.label}
+                        </button>
+                    </li>
+                ))}
+            </ul>
+            {pending && <PendingActions pending={pending} />}
+        </div>
+    );
+};
+
+const PendingActions: FunctionComponent<{ pending: PendingApply }> = ({ pending }) => {
+    const native = pending.native
+        ? {
+              onMouseEnter: () => setNativeHover(true),
+              onMouseLeave: () => setNativeHover(false),
+              onFocus: () => setNativeHover(true),
+              onBlur: () => setNativeHover(false),
+              onMouseDown: pending.apply,
+          }
+        : { onClick: pending.apply };
+
+    return (
+        <div className="flex shrink-0 flex-col gap-[0.6vh]">
+            <button
+                disabled={pending.busy}
+                {...native}
+                className="rounded-[0.8vh] bg-emerald-500/80 px-[1.4vh] py-[0.95vh] text-[1.4vh] font-semibold text-white transition-colors hover:bg-emerald-500 disabled:cursor-default disabled:bg-white/10 disabled:text-white/40"
+            >
+                {pending.busy ? 'Application…' : `${pending.label} (${pending.count})`}
+            </button>
+            {pending.cancel && (
+                <button
+                    onClick={pending.cancel}
+                    className="rounded-[0.8vh] bg-white/10 px-[1.4vh] py-[0.95vh] text-[1.4vh] font-semibold transition-colors hover:bg-white/25"
+                >
+                    Annuler les changements
+                </button>
+            )}
+        </div>
+    );
+};
 
 type SettingRowProps = {
     item: SettingItem;
@@ -61,6 +131,46 @@ type SettingRowProps = {
     onHover: (item: SettingItem | null) => void;
     draft?: number;
     onDraft?: (key: string, value: number) => void;
+};
+
+const SliderControl: FunctionComponent<{
+    item: ServerSliderSetting;
+    value: number;
+    onCommit: (value: number) => void;
+}> = ({ item, value, onCommit }) => {
+    const [current, setCurrent] = useState(value);
+
+    useEffect(() => setCurrent(value), [value]);
+
+    const percent = ((current - item.min) / (item.max - item.min)) * 100;
+
+    return (
+        <div className="flex items-center gap-[1.2vh]">
+            <input
+                type="range"
+                tabIndex={-1}
+                min={item.min}
+                max={item.max}
+                step={1}
+                value={current}
+                onChange={event => {
+                    const next = Number(event.currentTarget.value);
+
+                    setCurrent(next);
+
+                    if (item.channel) {
+                        setVolumes({ [item.channel]: next / 100 });
+                    }
+                }}
+                onPointerUp={event => onCommit(Number(event.currentTarget.value))}
+                className="soz-volume-slider w-[17vh]"
+                style={{
+                    background: `linear-gradient(to right, #fff ${percent}%, rgba(255, 255, 255, 0.2) ${percent}%)`,
+                }}
+            />
+            <span className="min-w-[4.6vh] text-right text-[1.4vh] font-semibold tabular-nums">{current}%</span>
+        </div>
+    );
 };
 
 const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHover, draft, onDraft }) => {
@@ -90,7 +200,7 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
         const current = settings.server[item.id] ?? item.default;
         const index = Math.max(
             0,
-            item.options.findIndex((option) => option.value === current),
+            item.options.findIndex(option => option.value === current)
         );
         const change = (direction: number) => {
             const next = item.options[(index + direction + item.options.length) % item.options.length];
@@ -117,6 +227,20 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
                 </button>
             </div>
         );
+    } else if (item.kind === 'slider') {
+        const current = Number(settings.server[item.id] ?? item.default);
+        const commit = (value: number) => fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.id, value });
+
+        adjust = direction => {
+            const next = Math.min(item.max, Math.max(item.min, current + direction * item.step));
+
+            if (item.channel) {
+                setVolumes({ [item.channel]: next / 100 });
+            }
+
+            commit(next);
+        };
+        control = <SliderControl item={item} value={current} onCommit={commit} />;
     } else if (item.kind === 'toggle') {
         const value = Boolean(settings.server[item.id] ?? item.default);
         const flip = () => fetchNui(NuiEvent.PauseMenuSetSetting, { key: item.id, value: !value });
@@ -131,7 +255,7 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
                     {
                         'bg-emerald-500/80 text-white': value,
                         'bg-white/15 text-white/70': !value,
-                    },
+                    }
                 )}
             >
                 {value ? 'Oui' : 'Non'}
@@ -181,7 +305,7 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
                                 'bg-emerald-500/80 text-white': value > 0,
                                 'bg-white/15 text-white/70': value <= 0,
                                 'ring-2 ring-amber-300': changed,
-                            },
+                            }
                         )}
                     >
                         {value > 0 ? 'Oui' : 'Non'}
@@ -190,7 +314,7 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
             } else {
                 const label =
                     native.kind === 'select'
-                        ? native.options.find((option) => option.value === value)?.label ?? item.format(value)
+                        ? native.options.find(option => option.value === value)?.label ?? item.format(value)
                         : item.format(value);
                 const step = (direction: number, apply: (next: number) => void) => {
                     if (native.kind === 'slider') {
@@ -201,14 +325,14 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
 
                     const index = Math.max(
                         0,
-                        native.options.findIndex((option) => option.value === value),
+                        native.options.findIndex(option => option.value === value)
                     );
 
                     apply(native.options[(index + direction + native.options.length) % native.options.length].value);
                 };
                 const change = (direction: number) => step(direction, queue);
 
-                adjust = (direction) => step(direction, queueByKey);
+                adjust = direction => step(direction, queueByKey);
 
                 control = (
                     <div className="flex items-center gap-[0.8vh]" {...hover}>
@@ -301,9 +425,9 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
     useEffect(() => () => setNativeHover(false), [category, query]);
 
     useEffect(() => {
-        setDraft((current) => {
+        setDraft(current => {
             const next = Object.fromEntries(
-                Object.entries(current).filter(([key, value]) => settings.native[key] !== value),
+                Object.entries(current).filter(([key, value]) => settings.native[key] !== value)
             );
 
             return Object.keys(next).length === Object.keys(current).length ? current : next;
@@ -311,7 +435,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
     }, [settings.native]);
 
     const changeDraft = (key: string, value: number) =>
-        setDraft((current) => {
+        setDraft(current => {
             const next = { ...current };
 
             if (settings.native[key] === value) {
@@ -325,7 +449,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
 
     const pendingChanges = Object.entries(draft).map(([key, value]) => ({ key, value }));
 
-    const current = SETTING_CATEGORIES.find((item) => item.id === category) ?? SETTING_CATEGORIES[0];
+    const current = SETTING_CATEGORIES.find(item => item.id === category) ?? SETTING_CATEGORIES[0];
 
     const hasWatch = Boolean(settings.server.hasWatch);
 
@@ -337,19 +461,31 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
             return [{ category: current, items: current.items.filter(available) }];
         }
 
-        return SETTING_CATEGORIES.map((item) => ({
+        return SETTING_CATEGORIES.map(item => ({
             category: item,
             items: item.items.filter(
-                (setting) =>
+                setting =>
                     available(setting) &&
-                    (normalize(setting.label).includes(search) || normalize(setting.description).includes(search)),
+                    (normalize(setting.label).includes(search) || normalize(setting.description).includes(search))
             ),
-        })).filter((section) => section.items.length > 0);
+        })).filter(section => section.items.length > 0);
     }, [query, current, hasWatch]);
 
     const showNativeButton = !query.trim() && current.native;
-    const showStagedActions = sections.some((section) => section.category.staged);
     const minimapPage = current.id === 'minimap' && !query.trim();
+
+    usePublishPendingApply(
+        'staged',
+        pendingChanges.length > 0
+            ? {
+                  count: pendingChanges.length,
+                  label: 'Appliquer les changements',
+                  native: true,
+                  apply: () => fetchNui(NuiEvent.PauseMenuQueueNative, { changes: pendingChanges }),
+                  cancel: () => setDraft({}),
+              }
+            : null
+    );
     const graphicsPage = current.id === 'graphics' && !query.trim();
     const keysPage = current.id === 'keys';
     const voicePage = current.id === 'voice' && !query.trim();
@@ -360,8 +496,8 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                 <SearchIcon className="h-[1.9vh] w-[1.9vh] shrink-0 text-white/60" />
                 <input
                     value={query}
-                    onChange={(event) => setQuery(event.target.value)}
-                    onKeyDown={(event) => {
+                    onChange={event => setQuery(event.target.value)}
+                    onKeyDown={event => {
                         event.stopPropagation();
                         inputNavKeyDown(event);
                     }}
@@ -378,23 +514,23 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
             <div
                 className={classNames(
                     'min-h-0 flex-1 overflow-y-auto pr-[0.6vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full',
-                    { hidden: graphicsPage || keysPage || voicePage },
+                    { hidden: graphicsPage || keysPage || voicePage }
                 )}
             >
-                {sections.map((section) => (
+                {sections.map(section => (
                     <div key={section.category.id} className="mb-[2vh]">
                         <div className="mb-[0.8vh] flex items-center justify-between">
                             <span className="text-[1.2vh] font-semibold uppercase tracking-[0.2em] text-white/50">
                                 {section.category.label}
                                 {section.category.native &&
                                     section.category.items.some(
-                                        (setting) => setting.kind === 'native' && !isNativeSetting(setting.convar),
+                                        setting => setting.kind === 'native' && !isNativeSetting(setting.convar)
                                     ) &&
                                     ' · lecture seule'}
                             </span>
                         </div>
                         <ul className="flex flex-col gap-[0.6vh]">
-                            {section.items.map((item) => (
+                            {section.items.map(item => (
                                 <SettingRow
                                     key={item.id}
                                     item={item}
@@ -414,38 +550,6 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                     <p className="px-[0.8vh] text-[1.4vh] text-white/50">Aucun réglage ne correspond à la recherche.</p>
                 )}
             </div>
-
-            {showStagedActions && (
-                <div className="flex items-center gap-[1vh]">
-                    <button
-                        disabled={pendingChanges.length === 0}
-                        onMouseEnter={() => setNativeHover(true)}
-                        onMouseLeave={() => setNativeHover(false)}
-                        onFocus={() => setNativeHover(true)}
-                        onBlur={() => setNativeHover(false)}
-                        onMouseDown={() =>
-                            pendingChanges.length > 0 &&
-                            fetchNui(NuiEvent.PauseMenuQueueNative, { changes: pendingChanges })
-                        }
-                        onKeyDown={(event) =>
-                            event.key === 'Enter' &&
-                            pendingChanges.length > 0 &&
-                            fetchNui(NuiEvent.PauseMenuQueueNative, { changes: pendingChanges })
-                        }
-                        className="rounded-[1vh] bg-white px-[1.8vh] py-[0.9vh] text-[1.4vh] font-semibold uppercase text-black transition-colors hover:bg-white/80 disabled:cursor-default disabled:bg-white/10 disabled:text-white/40 disabled:hover:bg-white/10"
-                    >
-                        Appliquer les changements
-                        {pendingChanges.length > 0 && ` (${pendingChanges.length})`}
-                    </button>
-                    <button
-                        disabled={pendingChanges.length === 0}
-                        onClick={() => setDraft({})}
-                        className="rounded-[1vh] bg-white/10 px-[1.8vh] py-[0.9vh] text-[1.4vh] font-semibold uppercase transition-colors hover:bg-white/25 disabled:cursor-default disabled:text-white/40 disabled:hover:bg-white/10"
-                    >
-                        Annuler les changements
-                    </button>
-                </div>
-            )}
 
             {showNativeButton && (
                 <button

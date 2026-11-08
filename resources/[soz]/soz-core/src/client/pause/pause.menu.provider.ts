@@ -210,7 +210,7 @@ export class PauseMenuProvider {
     private getPlaces(): PauseMapPlace[] {
         const places: PauseMapPlace[] = [];
 
-        for (const { id, blip } of this.blipFactory.getAll().values()) {
+        for (const { id, gameId, blip } of this.blipFactory.getAll().values()) {
             if (
                 !blip.name ||
                 blip.hidden ||
@@ -225,7 +225,7 @@ export class PauseMenuProvider {
                 id,
                 name: blip.name,
                 sprite: blip.sprite ?? 1,
-                color: blip.color ?? 0,
+                color: DoesBlipExist(gameId) ? this.pauseMinimapProvider.getColor(gameId) : blip.color ?? 0,
                 x: blip.position[0],
                 y: blip.position[1],
             });

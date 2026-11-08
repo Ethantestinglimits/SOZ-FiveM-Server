@@ -153,17 +153,19 @@ export class PauseMinimapProvider {
     }
 
     @OnNuiEvent(NuiEvent.MinimapContextMenu)
-    public async onContextMenu({ x, y }: MinimapPoint): Promise<void> {
+    public async onContextMenu({ x, y }: MinimapPoint): Promise<boolean> {
         if (!(await this.adminMenuInteractiveProvider.isMapAdmin())) {
             this.removeWaypoint();
 
-            return;
+            return false;
         }
 
         this.blipFactory.showVirtualActions(MAP_CONTEXT_ID, [
             { label: 'Se téléporter ici', action: () => this.adminMenuGameMasterProvider.teleportToCoords(x, y) },
             ...(IsWaypointActive() ? [{ label: 'Supprimer le point', action: () => this.removeWaypoint() }] : []),
         ]);
+
+        return true;
     }
 
     private removeWaypoint(): void {
@@ -423,7 +425,7 @@ export class PauseMinimapProvider {
         }
     }
 
-    private getColor(handle: number): number {
+    public getColor(handle: number): number {
         const color = GetBlipColour(handle);
 
         if (color < KNOWN_BLIP_COLORS || color > 255) {

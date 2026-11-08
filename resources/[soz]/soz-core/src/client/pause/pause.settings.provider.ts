@@ -1,4 +1,5 @@
 import { Once, OnceStep, OnNuiEvent } from '../../core/decorators/event';
+import { Exportable } from '../../core/decorators/exports';
 import { Inject } from '../../core/decorators/injectable';
 import { Provider } from '../../core/decorators/provider';
 import { NuiEvent } from '../../shared/event';
@@ -12,34 +13,14 @@ import { NuiDispatch } from '../nui/nui.dispatch';
 import { StreamProvider } from '../stream/stream.provider';
 import { VoiceProvider } from '../voip/voice/voice.provider';
 import { PauseMinimapProvider } from './minimap.provider';
-import { PauseMinimapStyleProvider } from './minimap.style.provider';
 
 const MENU_SIZE_KVP = 'soz_menu_size';
 const MENU_TEXT_KVP = 'soz_menu_text';
-
-const DEFAULTS: Record<string, boolean | number | string> = {
-    potato: false,
-    mapAnimation: true,
-    minimapFps: 60,
-    minimapOrientation: 'camera',
-    menuSize: 100,
-    menuTextSize: 3,
-    hudVisible: true,
-    hudCinematic: false,
-    hudCinematicCamera: false,
-    scaledNui: false,
-    glassmorphism: true,
-    glassmorphismFps: 30,
-    voipIntent: 'speech',
-    videoVolume: 50,
-    watchDateTime: true,
-    watchWeather: true,
-    watchStreetName: true,
-    watchCompass: true,
-    watchStress: true,
-    watchStamina: true,
-    watchAnimalStats: true,
-    watchInjuryTracker: false,
+const VOLUME_KVP: Record<string, string> = {
+    interfaceVolume: 'soz_interface_volume',
+    volumeEffects: 'soz_volume_effects',
+    volumeMusic: 'soz_volume_music',
+    volumePhone: 'soz_volume_phone',
 };
 
 @Provider()
@@ -49,9 +30,6 @@ export class PauseSettingsProvider {
 
     @Inject(PauseMinimapProvider)
     private pauseMinimapProvider: PauseMinimapProvider;
-
-    @Inject(PauseMinimapStyleProvider)
-    private pauseMinimapStyleProvider: PauseMinimapStyleProvider;
 
     @Inject(HudStateProvider)
     private hudStateProvider: HudStateProvider;
@@ -96,6 +74,10 @@ export class PauseSettingsProvider {
                 glassmorphism: this.hudGlassmorphismProvider.glassmorphism,
                 glassmorphismFps: this.hudGlassmorphismProvider.glassmorphismFpsLimit,
                 voipIntent: this.voiceProvider.intent,
+                interfaceVolume: this.getVolume('interfaceVolume'),
+                volumeEffects: this.getVolume('volumeEffects'),
+                volumeMusic: this.getVolume('volumeMusic'),
+                volumePhone: this.getVolume('volumePhone'),
                 videoVolume: Math.round(this.streamProvider.videoVolume * 100),
                 hasWatch: this.hudWatchProvider.haveWatch,
                 watchDateTime: watch.showDateTime,
@@ -119,6 +101,32 @@ export class PauseSettingsProvider {
         });
     }
 
+    @Once(OnceStep.NuiLoaded)
+    public sendVolumes(): void {
+        const master = this.getVolume('interfaceVolume') / 100;
+
+        this.nuiDispatch.dispatch('global', 'Volumes', {
+            master,
+            effects: this.getVolume('volumeEffects') / 100,
+            music: this.getVolume('volumeMusic') / 100,
+            phone: this.getVolume('volumePhone') / 100,
+            video: this.streamProvider.videoVolume,
+        });
+        this.streamProvider.masterVolume = master;
+        TriggerEvent('InteractSound_CL:SetVolume', this.getEffectsVolume());
+    }
+
+    @Exportable('GetEffectsVolume')
+    public getEffectsVolume(): number {
+        return (this.getVolume('interfaceVolume') / 100) * (this.getVolume('volumeEffects') / 100);
+    }
+
+    private getVolume(key: string): number {
+        const stored = GetResourceKvpString(VOLUME_KVP[key]);
+
+        return stored ? Number(stored) : 100;
+    }
+
     private getMenuSize(): number {
         return GetResourceKvpInt(MENU_SIZE_KVP) || 100;
     }
@@ -130,17 +138,6 @@ export class PauseSettingsProvider {
     @OnNuiEvent(NuiEvent.PauseMenuSetSetting)
     public async onSetSetting({ key, value }: PauseSettingChange): Promise<void> {
         await this.apply(key, value);
-        this.nuiDispatch.dispatch('pause_menu', 'Settings', this.getSettings());
-    }
-
-    @OnNuiEvent(NuiEvent.PauseMenuResetSettings)
-    public async onResetSettings(): Promise<void> {
-        for (const [key, value] of Object.entries(DEFAULTS)) {
-            await this.apply(key, value);
-        }
-
-        this.pauseMinimapStyleProvider.reset();
-
         this.nuiDispatch.dispatch('pause_menu', 'Settings', this.getSettings());
     }
 
@@ -223,6 +220,13 @@ export class PauseSettingsProvider {
                 break;
             case 'voipReset':
                 await this.voiceProvider.reconnect(true, 'Demande joueur');
+                break;
+            case 'interfaceVolume':
+            case 'volumeEffects':
+            case 'volumeMusic':
+            case 'volumePhone':
+                SetResourceKvp(VOLUME_KVP[key], String(Number(value)));
+                this.sendVolumes();
                 break;
             case 'videoVolume':
                 this.streamProvider.setVideoVolume(Number(value) / 100);

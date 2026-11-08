@@ -41,8 +41,8 @@ import { NuiMedicalDiagMethodMap } from './medical_diag';
 import { NuiMenuMethodMap } from './menu';
 import { NuiMeteorMap } from './meteor';
 import { NuiMinimapMethodMap } from './minimap';
-import { NuiPauseMenuMethodMap } from './pause_menu';
 import { NuiPanelMethodMap } from './panel';
+import { NuiPauseMenuMethodMap } from './pause_menu';
 import { NuiPetManagerMethodMap } from './pet_manager';
 import { NuiPLayerMethodMap } from './player';
 import { NuiPoliceMethodMap } from './police';
@@ -58,11 +58,13 @@ import { NuiRepairMethodMap } from './repair';
 import { NuiSozedexMethodMap } from './sozedex';
 import { NuiTaserMethodMap } from './taser';
 import { NuiTaxiMethodMap } from './taxi';
+import { InterfaceVolumes } from './volume';
 import { NuiWeatherMethodMap } from './wheather';
 
 export interface NuiGlobalMethodMap {
     PauseMenuActive: boolean;
     HideHud: boolean;
+    Volumes: InterfaceVolumes;
 }
 
 export interface NuiMethodMap {

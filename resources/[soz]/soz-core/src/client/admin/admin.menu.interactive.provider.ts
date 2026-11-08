@@ -16,6 +16,7 @@ import { AdminSpectateProvider } from './admin.spectate.provider';
 export const PLAYER_BLIP_PREFIX = 'admin:player-blip:';
 const PLAYERS_LAYOUT_KVP = 'soz_pause_map_players';
 const PLAYERS_LAYER_ROLES = ['staff', 'admin', 'gamemaster'];
+const MAP_ADMIN_CACHE = 30000;
 
 export type PlayerBlipGroup = MinimapPlayerGroup & { color: number };
 
@@ -47,6 +48,8 @@ export class AdminMenuInteractiveProvider {
     private playerBlipGroup: PlayerBlipGroupResolver = () => undefined;
 
     private playerGroups = new Map<string, MinimapPlayerGroup>();
+
+    private mapAdmin: { allowed: boolean; checkedAt: number } | null = null;
 
     public setPlayerBlipGroupResolver(resolver: PlayerBlipGroupResolver): void {
         this.playerBlipGroup = resolver;
@@ -276,9 +279,15 @@ export class AdminMenuInteractiveProvider {
     }
 
     public async isMapAdmin(): Promise<boolean> {
+        if (this.mapAdmin && GetGameTimer() - this.mapAdmin.checkedAt < MAP_ADMIN_CACHE) {
+            return this.mapAdmin.allowed;
+        }
+
         const [isAllowed, permission] = await emitRpc<[boolean, string]>(RpcServerEvent.ADMIN_IS_ALLOWED);
 
-        return isAllowed && PLAYERS_LAYER_ROLES.includes(permission);
+        this.mapAdmin = { allowed: isAllowed && PLAYERS_LAYER_ROLES.includes(permission), checkedAt: GetGameTimer() };
+
+        return this.mapAdmin.allowed;
     }
 
     @OnNuiEvent(NuiEvent.PauseMenuPlayersLayer)

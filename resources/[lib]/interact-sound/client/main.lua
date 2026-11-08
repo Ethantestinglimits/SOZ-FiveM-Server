@@ -13,6 +13,10 @@ local hasPlayerLoaded = false
 Citizen.CreateThread(function()
 	Wait(5000)
 	hasPlayerLoaded = true
+	local ok, volume = pcall(function() return exports['soz-core']:GetEffectsVolume() end)
+	if ok and volume then
+		SendNUIMessage({ transactionType = 'setVolume', transactionVolume = volume })
+	end
     TriggerServerEvent('soz-core:server:sound:init')
 end)
 ------
@@ -35,6 +39,13 @@ AddEventHandler('InteractSound_CL:PlayOnOne', function(soundFile, soundVolume)
             transactionVolume = soundVolume
         })
     end
+end)
+
+AddEventHandler('InteractSound_CL:SetVolume', function(volume)
+    SendNUIMessage({
+        transactionType = 'setVolume',
+        transactionVolume = volume
+    })
 end)
 
 RegisterNetEvent('InteractSound_CL:StopOnOne')

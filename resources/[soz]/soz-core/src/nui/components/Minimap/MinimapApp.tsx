@@ -1,6 +1,7 @@
 import { FunctionComponent, useEffect, useRef } from 'react';
 
 import { NuiEvent } from '../../../shared/event';
+import { MinimapPoint } from '../../../shared/nui/minimap';
 import { fetchNui } from '../../fetch';
 import { useHudMinimap } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
@@ -17,8 +18,9 @@ const OFFSET_Y = 11 / SCREEN_HEIGHT_REFERENCE;
 const OFFSET_WIDTH = -2 / SCREEN_WIDTH_REFERENCE;
 const OFFSET_HEIGHT = -16 / SCREEN_HEIGHT_REFERENCE;
 const PANEL_MARGIN_VH = 3;
-const PANEL_COLUMN_VH = 30;
-const PANEL_GAP_VH = 2;
+const PANEL_SIDE_VH = 4;
+const PANEL_TOP_VH = 10.2;
+const PANEL_BOTTOM_VH = 9.4;
 
 export const MinimapApp: FunctionComponent = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -29,6 +31,7 @@ export const MinimapApp: FunctionComponent = () => {
     const style = useMinimapStyle();
 
     useEffect(() => {
+        let contextPending = false;
         const renderer = new MinimapRenderer(canvasRef.current, {
             onModeChange: (mode) => {
                 if (mode === 'minimap') {
@@ -44,8 +47,22 @@ export const MinimapApp: FunctionComponent = () => {
             onDoubleClick: (point, hasWaypoint) =>
                 fetchNui(hasWaypoint ? NuiEvent.MinimapRemoveWaypoint : NuiEvent.MinimapSetWaypoint, point),
             onRightClick: (point, screen) => {
+                if (contextPending) {
+                    return;
+                }
+
+                contextPending = true;
                 setBlipAnchor(screen);
-                fetchNui(NuiEvent.MinimapContextMenu, point);
+                renderer.setContextPoint(point);
+                fetchNui<MinimapPoint, boolean>(NuiEvent.MinimapContextMenu, point)
+                    .then((shown) => {
+                        if (!shown) {
+                            renderer.setContextPoint(null);
+                        }
+                    })
+                    .finally(() => {
+                        contextPending = false;
+                    });
             },
         });
 
@@ -102,12 +119,19 @@ export const MinimapApp: FunctionComponent = () => {
             renderer.minimapRect = rect;
 
             const frame = getScreenFrame();
-            const margin = (PANEL_MARGIN_VH * vh) / 100;
-            const x = scriptModeRef.current
-                ? frame.x + margin
-                : frame.x + margin + (PANEL_COLUMN_VH * vh) / 100 + (PANEL_GAP_VH * vh) / 100;
+            const toPx = (value: number) => (value * vh) / 100;
 
-            renderer.panelRect = { x, y: margin, w: frame.x + frame.w - x - margin, h: vh - margin * 2 };
+            if (scriptModeRef.current) {
+                const margin = toPx(PANEL_MARGIN_VH);
+
+                renderer.panelRect = { x: frame.x + margin, y: margin, w: frame.w - margin * 2, h: vh - margin * 2 };
+            } else {
+                const side = toPx(PANEL_SIDE_VH);
+                const top = toPx(PANEL_TOP_VH);
+                const bottom = toPx(PANEL_BOTTOM_VH);
+
+                renderer.panelRect = { x: frame.x + side, y: top, w: frame.w - side * 2, h: vh - top - bottom };
+            }
         };
 
         update();

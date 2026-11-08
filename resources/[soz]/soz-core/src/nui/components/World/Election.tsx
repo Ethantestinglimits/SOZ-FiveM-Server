@@ -1,9 +1,11 @@
-import { FunctionComponent, MutableRefObject, useRef } from 'react';
+import { FunctionComponent, MutableRefObject, useEffect, useRef } from 'react';
 
 import { useNuiEvent } from '../../hook/nui';
+import { tagContext } from '../../utils/volumes';
 
 export const Election: FunctionComponent = () => {
     const audioCtx = useRef<AudioContext>(new AudioContext());
+    useEffect(() => tagContext(audioCtx.current, 'music'), []);
     const gainSociety1 = useRef<GainNode>(null);
     const gainSociety2 = useRef<GainNode>(null);
     const gainSenat = useRef<GainNode>(null);
@@ -62,10 +64,26 @@ export const Election: FunctionComponent = () => {
 
     return (
         <>
-            <audio id="election-society1" src="https://cfx-nui-soz-sounds/election/society1.mp3"></audio>
-            <audio id="election-society2" src="https://cfx-nui-soz-sounds/election/society2.mp3"></audio>
-            <audio id="election-senat" src="https://cfx-nui-soz-sounds/election/senat.mp3"></audio>
-            <audio id="election-hymne" src="https://cfx-nui-soz-sounds/election/hymne.mp3"></audio>
+            <audio
+                data-volume-channel="music"
+                id="election-society1"
+                src="https://cfx-nui-soz-sounds/election/society1.mp3"
+            ></audio>
+            <audio
+                data-volume-channel="music"
+                id="election-society2"
+                src="https://cfx-nui-soz-sounds/election/society2.mp3"
+            ></audio>
+            <audio
+                data-volume-channel="music"
+                id="election-senat"
+                src="https://cfx-nui-soz-sounds/election/senat.mp3"
+            ></audio>
+            <audio
+                data-volume-channel="music"
+                id="election-hymne"
+                src="https://cfx-nui-soz-sounds/election/hymne.mp3"
+            ></audio>
         </>
     );
 };

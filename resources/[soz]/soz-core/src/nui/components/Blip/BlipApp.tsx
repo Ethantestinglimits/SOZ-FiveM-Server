@@ -5,7 +5,7 @@ import { BlipAction, BlipInfo } from '../../../shared/nui/blip';
 import { fetchNui } from '../../fetch';
 import { useNuiEvent, useNuiFocus } from '../../hook/nui';
 import { useOutside } from '../../hook/outside';
-import { getBlipAnchor, getMinimapMode } from '../Minimap/minimapState';
+import { getBlipAnchor, getMinimapMode, minimapController } from '../Minimap/minimapState';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
 
 export const BlipApp: FunctionComponent = () => {
@@ -25,6 +25,12 @@ export const BlipApp: FunctionComponent = () => {
     });
 
     useNuiFocus(actions.length > 0, actions.length > 0 && isOver, false);
+
+    useEffect(() => {
+        if (actions.length === 0) {
+            minimapController.renderer?.releaseContextPoint();
+        }
+    }, [actions]);
 
     useEffect(() => {
         if (actions.length > 0) {

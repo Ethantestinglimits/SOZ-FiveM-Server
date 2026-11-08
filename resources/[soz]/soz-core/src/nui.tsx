@@ -1,3 +1,5 @@
+import './nui/utils/volumes';
+
 import { createRoot } from 'react-dom/client';
 
 import { App } from './nui/components/App';

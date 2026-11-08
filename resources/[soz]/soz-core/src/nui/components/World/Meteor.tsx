@@ -1,10 +1,12 @@
 import { Music } from '@public/shared/audio';
-import { FunctionComponent, MutableRefObject, useRef, useState } from 'react';
+import { FunctionComponent, MutableRefObject, useEffect, useRef, useState } from 'react';
 
 import { useNuiEvent } from '../../hook/nui';
+import { tagContext } from '../../utils/volumes';
 
 export const Meteor: FunctionComponent = () => {
     const audioCtx = useRef<AudioContext>(new AudioContext());
+    useEffect(() => tagContext(audioCtx.current, 'music'), []);
     const gainChronos = useRef<GainNode>(null);
     const gainMusic = useRef<GainNode>(null);
     const gainSiren = useRef<GainNode>(null);
@@ -162,20 +164,49 @@ export const Meteor: FunctionComponent = () => {
     return (
         <div>
             {white && <div className="w-full h-full grid h-screen bg-white animate-display-in-long opacity-0"></div>}
-            <audio id="chronos" src="https://cfx-nui-soz-sounds/meteor/chronos.mp3"></audio>
-            <audio id="meteor" src="https://cfx-nui-soz-sounds/meteor/meteor.mp3"></audio>
-            <audio id="music-event" src="https://cfx-nui-soz-sounds/meteor/ambiance.mp3"></audio>
-            <audio id="sandstorm" src="https://cfx-nui-soz-sounds/meteor/sandstorm.mp3"></audio>
-            <audio id="siren" src="https://cfx-nui-interact-sound/client/html/sounds/system/reboot.ogg"></audio>
+            <audio data-volume-channel="music" id="chronos" src="https://cfx-nui-soz-sounds/meteor/chronos.mp3"></audio>
+            <audio data-volume-channel="music" id="meteor" src="https://cfx-nui-soz-sounds/meteor/meteor.mp3"></audio>
             <audio
+                data-volume-channel="music"
+                id="music-event"
+                src="https://cfx-nui-soz-sounds/meteor/ambiance.mp3"
+            ></audio>
+            <audio
+                data-volume-channel="music"
+                id="sandstorm"
+                src="https://cfx-nui-soz-sounds/meteor/sandstorm.mp3"
+            ></audio>
+            <audio
+                data-volume-channel="music"
+                id="siren"
+                src="https://cfx-nui-interact-sound/client/html/sounds/system/reboot.ogg"
+            ></audio>
+            <audio
+                data-volume-channel="music"
                 id="earthquake"
                 src="https://cfx-nui-interact-sound/client/html/sounds/earthquake/earthquake.ogg"
             ></audio>
-            <audio id="impact" src="https://cfx-nui-soz-sounds/firestorm/impact.mp3"></audio>
-            <audio id="cinis" src="https://cfx-nui-soz-sounds/firestorm/cinis.mp3"></audio>
-            <audio id="destruction" src="https://cfx-nui-soz-sounds/firestorm/destruction.mp3"></audio>
-            <audio id="dies_irae" src="https://cfx-nui-soz-sounds/firestorm/dies_irae.mp3"></audio>
-            <audio id="obsession" src="https://cfx-nui-soz-sounds/whatif/obsession.mp3"></audio>
+            <audio
+                data-volume-channel="music"
+                id="impact"
+                src="https://cfx-nui-soz-sounds/firestorm/impact.mp3"
+            ></audio>
+            <audio data-volume-channel="music" id="cinis" src="https://cfx-nui-soz-sounds/firestorm/cinis.mp3"></audio>
+            <audio
+                data-volume-channel="music"
+                id="destruction"
+                src="https://cfx-nui-soz-sounds/firestorm/destruction.mp3"
+            ></audio>
+            <audio
+                data-volume-channel="music"
+                id="dies_irae"
+                src="https://cfx-nui-soz-sounds/firestorm/dies_irae.mp3"
+            ></audio>
+            <audio
+                data-volume-channel="music"
+                id="obsession"
+                src="https://cfx-nui-soz-sounds/whatif/obsession.mp3"
+            ></audio>
         </div>
     );
 };

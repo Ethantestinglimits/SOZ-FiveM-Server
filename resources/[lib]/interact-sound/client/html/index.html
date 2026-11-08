@@ -38,6 +38,9 @@
                         delete audioLoopPlayer[event.data.id];
                     }
                 }
+                else if (event.data.transactionType === "setVolume") {
+                    Howler.volume(event.data.transactionVolume);
+                }
                 else if (event.data.transactionType === "stopSound") {
                     if (audioPlayers[event.data.transactionFile]) {
                         audioPlayers[event.data.transactionFile].stop();

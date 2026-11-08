@@ -56,6 +56,9 @@ const PANEL_MAX_SCALE = 8;
 const ZOOM_FACTOR = 1.3;
 const DRAG_THRESHOLD = 4;
 const HOVER_RADIUS = 14;
+const CONTEXT_POINT_RADIUS = 9;
+const CONTEXT_POINT_GRACE = 300;
+const GRABBING_CLASS = 'soz-pause-grabbing';
 const BLIP_ZOOM_FROM = 1;
 const BLIP_ZOOM_GROWTH = 0.4;
 const BLIP_ZOOM_MAX = 2.2;
@@ -175,6 +178,19 @@ export class MinimapRenderer {
     public waypoint: MinimapPoint | null = null;
     public layers: PauseMapLayer[] = ['blips', 'regions', 'players'];
     public highlight: MinimapPoint | null = null;
+    public contextPoint: MinimapPoint | null = null;
+    private contextPointAt = 0;
+
+    public setContextPoint(point: MinimapPoint | null): void {
+        this.contextPoint = point;
+        this.contextPointAt = performance.now();
+    }
+
+    public releaseContextPoint(): void {
+        if (performance.now() - this.contextPointAt > CONTEXT_POINT_GRACE) {
+            this.contextPoint = null;
+        }
+    }
     private highlightLabel: string | null = null;
     private highlightAt = 0;
     private highlightBlip: MinimapBlip | null = null;
@@ -335,6 +351,8 @@ export class MinimapRenderer {
         if (this.mode !== 'minimap') {
             this.hovered = null;
             this.drag = null;
+            this.contextPoint = null;
+            document.documentElement.classList.remove(GRABBING_CLASS);
             this.openness = 0;
             this.setMode('minimap');
         }
@@ -653,6 +671,7 @@ export class MinimapRenderer {
                 this.drawBlips(ox, oy, showBlips, showPlayers);
 
                 this.drawWaypoint(ox, oy);
+                this.drawContextPoint(ox, oy);
                 this.drawHighlight(ox, oy);
                 this.drawPlayer(frame, ox, oy);
             }
@@ -1072,6 +1091,28 @@ export class MinimapRenderer {
         }
     }
 
+    private drawContextPoint(ox: number, oy: number): void {
+        if (!this.contextPoint || this.mode !== 'open') {
+            return;
+        }
+
+        const ctx = this.ctx;
+        const [x, y] = this.toScreen(this.contextPoint.x, this.contextPoint.y, ox, oy);
+
+        ctx.beginPath();
+        ctx.arc(x, y, CONTEXT_POINT_RADIUS, 0, Math.PI * 2);
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.stroke();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#ffffff';
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+    }
+
     private drawWaypoint(ox: number, oy: number): void {
         if (!this.waypoint) {
             return;
@@ -1172,6 +1213,7 @@ export class MinimapRenderer {
 
         this.canvas.setPointerCapture(event.pointerId);
         this.drag = { sx: event.clientX, sy: event.clientY, x: this.panel.x, y: this.panel.y, moved: false };
+        document.documentElement.classList.add(GRABBING_CLASS);
     };
 
     private onPointerMove = (event: PointerEvent): void => {
@@ -1204,6 +1246,7 @@ export class MinimapRenderer {
         const drag = this.drag;
 
         this.drag = null;
+        document.documentElement.classList.remove(GRABBING_CLASS);
 
         if (!drag || drag.moved || this.mode !== 'open') {
             return;

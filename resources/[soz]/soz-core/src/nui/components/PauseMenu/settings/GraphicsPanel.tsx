@@ -5,6 +5,7 @@ import { PauseGraphicsRow } from '../../../../shared/nui/pause_menu';
 import { fetchNui } from '../../../fetch';
 import { useNuiEvent } from '../../../hook/nui';
 import { setNativeBackdrop } from './nativeInputState';
+import { usePublishPendingApply } from './pendingApply';
 
 const ROW_TYPE_LIST = 1;
 const ROW_TYPE_SLIDER = 2;
@@ -80,7 +81,7 @@ const GraphicsRowsPanel: FunctionComponent<GraphicsRowsPanelProps> = ({
 
     useNuiEvent('pause_menu', 'GraphicsNative', setNativeBackdrop);
 
-    useNuiEvent('pause_menu', 'GraphicsRows', (next) => {
+    useNuiEvent('pause_menu', 'GraphicsRows', next => {
         setRows(next);
 
         if (applied.current) {
@@ -92,12 +93,12 @@ const GraphicsRowsPanel: FunctionComponent<GraphicsRowsPanelProps> = ({
     });
 
     const visible = useMemo(
-        () => (rows ?? []).filter((row) => row.type === ROW_TYPE_LIST || row.type === ROW_TYPE_SLIDER),
-        [rows],
+        () => (rows ?? []).filter(row => row.type === ROW_TYPE_LIST || row.type === ROW_TYPE_SLIDER),
+        [rows]
     );
 
     const changes = Object.keys(values).length + Object.keys(stepped).length;
-    const restartChanges = visible.filter((row) => restartRows.includes(row.id) && values[row.id] !== undefined);
+    const restartChanges = visible.filter(row => restartRows.includes(row.id) && values[row.id] !== undefined);
 
     const setValue = (row: PauseGraphicsRow, next: number) => {
         const base = row.type === ROW_TYPE_SLIDER ? row.value : indexOf(row);
@@ -106,7 +107,7 @@ const GraphicsRowsPanel: FunctionComponent<GraphicsRowsPanelProps> = ({
             return;
         }
 
-        setValues((state) => {
+        setValues(state => {
             const updated = { ...state };
 
             if (next === base) {
@@ -130,7 +131,7 @@ const GraphicsRowsPanel: FunctionComponent<GraphicsRowsPanelProps> = ({
 
         if (cycle) {
             fetchNui(NuiEvent.PauseMenuGraphicsStep, { id: row.id, direction });
-            setStepped((state) => {
+            setStepped(state => {
                 const updated = { ...state };
                 const total = (state[row.id] ?? 0) + direction;
 
@@ -155,6 +156,18 @@ const GraphicsRowsPanel: FunctionComponent<GraphicsRowsPanelProps> = ({
         setApplying(true);
         fetchNui(NuiEvent.PauseMenuGraphicsApply, { values });
     };
+
+    usePublishPendingApply(
+        'graphics',
+        changes > 0 || applying
+            ? {
+                  count: changes,
+                  busy: applying,
+                  label: restartChanges.length > 0 ? 'Appliquer et redémarrer' : 'Appliquer les changements',
+                  apply: () => (restartChanges.length > 0 ? setConfirmRestart(true) : apply()),
+              }
+            : null
+    );
 
     const textOf = (row: PauseGraphicsRow) => {
         if (row.type === ROW_TYPE_SLIDER) {
@@ -182,7 +195,7 @@ const GraphicsRowsPanel: FunctionComponent<GraphicsRowsPanelProps> = ({
                     </div>
                 )}
                 <ul className="flex flex-col gap-[0.6vh]">
-                    {visible.map((row) => {
+                    {visible.map(row => {
                         const locked = !row.selectable;
                         const changed = values[row.id] !== undefined || stepped[row.id] !== undefined;
 
@@ -220,7 +233,7 @@ const GraphicsRowsPanel: FunctionComponent<GraphicsRowsPanelProps> = ({
                                             step={1}
                                             disabled={locked}
                                             value={values[row.id] ?? row.value}
-                                            onChange={(event) => setValue(row, Number(event.target.value))}
+                                            onChange={event => setValue(row, Number(event.target.value))}
                                             className="h-[0.6vh] w-[16vh] cursor-pointer accent-white"
                                         />
                                     )}
@@ -248,7 +261,7 @@ const GraphicsRowsPanel: FunctionComponent<GraphicsRowsPanelProps> = ({
 
             {restartChanges.length > 0 && !confirmRestart && (
                 <p className="rounded-[1vh] bg-amber-500/15 px-[1.6vh] py-[1vh] text-[1.4vh]">
-                    GTA V devra redémarrer pour appliquer : {restartChanges.map((row) => row.label).join(', ')}.
+                    GTA V devra redémarrer pour appliquer : {restartChanges.map(row => row.label).join(', ')}.
                 </p>
             )}
 
@@ -274,28 +287,6 @@ const GraphicsRowsPanel: FunctionComponent<GraphicsRowsPanelProps> = ({
                     </div>
                 </div>
             )}
-
-            <div className="flex items-center gap-[1.6vh]">
-                <button
-                    disabled={changes === 0 || applying}
-                    onClick={() => {
-                        if (restartChanges.length > 0) {
-                            setConfirmRestart(true);
-
-                            return;
-                        }
-
-                        apply();
-                    }}
-                    className="rounded-[1vh] bg-white px-[1.8vh] py-[0.9vh] text-[1.4vh] font-semibold uppercase text-black transition-colors hover:bg-white/80 disabled:cursor-default disabled:bg-white/10 disabled:text-white/40 disabled:hover:bg-white/10"
-                >
-                    {applying
-                        ? 'Application…'
-                        : `${restartChanges.length > 0 ? 'Appliquer et redémarrer' : 'Appliquer les changements'}${
-                              changes > 0 ? ` (${changes})` : ''
-                          }`}
-                </button>
-            </div>
         </div>
     );
 };

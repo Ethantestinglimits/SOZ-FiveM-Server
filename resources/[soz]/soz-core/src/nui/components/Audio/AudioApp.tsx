@@ -1,6 +1,9 @@
 import { FunctionComponent, useState } from 'react';
 
 import { useAudioNuiEvent } from '../../hook/nui';
+import { tagMedia } from '../../utils/volumes';
+
+const EFFECT_PATHS = ['/weapon/', 'lightning'];
 
 export const AudioApp: FunctionComponent = () => {
     const [, setAudio] = useState<Record<string, HTMLAudioElement>>({});
@@ -12,6 +15,7 @@ export const AudioApp: FunctionComponent = () => {
 
         try {
             const emitter = new Audio(sound.path);
+            tagMedia(emitter, EFFECT_PATHS.some(path => sound.path.includes(path)) ? 'effects' : 'music');
             emitter.volume = sound.volume;
             emitter.loop = sound.loop;
 
