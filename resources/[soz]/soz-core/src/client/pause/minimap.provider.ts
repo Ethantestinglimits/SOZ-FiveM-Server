@@ -140,9 +140,12 @@ export class PauseMinimapProvider {
         return GetResourceKvpString(POTATO_KVP) === 'on';
     }
 
+    public onPotatoChange: ((enabled: boolean) => void) | null = null;
+
     public setPotato(enabled: boolean): void {
         SetResourceKvp(POTATO_KVP, enabled ? 'on' : 'off');
         this.dispatchSettings();
+        this.onPotatoChange?.(enabled);
     }
 
     public isAnimationEnabled(): boolean {

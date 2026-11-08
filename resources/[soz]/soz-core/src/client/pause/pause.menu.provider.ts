@@ -57,6 +57,8 @@ export class PauseMenuProvider {
     private pauseMinimapProvider: PauseMinimapProvider;
 
     private opened = false;
+
+    private blurred = false;
     private lastNuiFocusAt = 0;
     private frontendRequestedAt: number | null = null;
     private frontendOpened = false;
@@ -112,9 +114,8 @@ export class PauseMenuProvider {
         this.opened = true;
         this.pauseMinimapProvider.panelOpen = true;
 
-        if (!this.pauseMinimapProvider.isPotato()) {
-            this.blurService.add(BLUR_REASON, BLUR_DELAY);
-        }
+        this.pauseMinimapProvider.onPotatoChange = potato => this.syncBlur(!potato);
+        this.syncBlur(!this.pauseMinimapProvider.isPotato());
 
         const job = this.jobService.getJob(player.job.id);
         const grade = this.jobGradeRepository.find(Number(player.job.grade));
@@ -168,7 +169,7 @@ export class PauseMenuProvider {
         this.opened = false;
         this.pauseMinimapProvider.panelOpen = false;
         this.lastNuiFocusAt = GetGameTimer();
-        this.blurService.remove(BLUR_REASON, BLUR_DELAY);
+        this.syncBlur(false);
         this.nuiDispatch.dispatch('pause_menu', 'Close');
     }
 
@@ -313,5 +314,15 @@ export class PauseMenuProvider {
         }
 
         return this.frontendOpened;
+    }
+
+    private syncBlur(wanted: boolean): void {
+        if (wanted && this.opened && !this.blurred) {
+            this.blurService.add(BLUR_REASON, BLUR_DELAY);
+            this.blurred = true;
+        } else if (!wanted && this.blurred) {
+            this.blurService.remove(BLUR_REASON, BLUR_DELAY);
+            this.blurred = false;
+        }
     }
 }

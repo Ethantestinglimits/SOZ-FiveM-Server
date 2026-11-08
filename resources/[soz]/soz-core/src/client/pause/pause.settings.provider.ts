@@ -16,6 +16,7 @@ import { PauseMinimapProvider } from './minimap.provider';
 
 const MENU_SIZE_KVP = 'soz_menu_size';
 const MENU_TEXT_KVP = 'soz_menu_text';
+const POTATO_RESTORE_KVP = 'soz_potato_restore';
 const VOLUME_KVP: Record<string, string> = {
     interfaceVolume: 'soz_interface_volume',
     volumeEffects: 'soz_volume_effects',
@@ -127,6 +128,27 @@ export class PauseSettingsProvider {
         return stored ? Number(stored) : 100;
     }
 
+    private restoreBeforePotato(): void {
+        const saved = GetResourceKvpString(POTATO_RESTORE_KVP);
+
+        if (!saved) {
+            return;
+        }
+
+        DeleteResourceKvp(POTATO_RESTORE_KVP);
+
+        try {
+            const previous = JSON.parse(saved);
+
+            this.pauseMinimapProvider.setAnimationEnabled(Boolean(previous.animation));
+            this.pauseMinimapProvider.setFpsLimit(Number(previous.fps) || 60);
+            this.hudGlassmorphismProvider.glassmorphism = Boolean(previous.glassmorphism);
+            this.hudGlassmorphismProvider.glassmorphismFpsLimit = Number(previous.glassmorphismFps) || 30;
+        } catch {
+            return;
+        }
+    }
+
     private getMenuSize(): number {
         return GetResourceKvpInt(MENU_SIZE_KVP) || 100;
     }
@@ -144,9 +166,26 @@ export class PauseSettingsProvider {
     private async apply(key: string, value: PauseSettingChange['value']): Promise<void> {
         switch (key) {
             case 'potato':
+                if (Boolean(value) === this.pauseMinimapProvider.isPotato()) {
+                    break;
+                }
+
                 this.pauseMinimapProvider.setPotato(Boolean(value));
 
+                if (!value) {
+                    this.restoreBeforePotato();
+                }
+
                 if (value) {
+                    SetResourceKvp(
+                        POTATO_RESTORE_KVP,
+                        JSON.stringify({
+                            animation: this.pauseMinimapProvider.isAnimationEnabled(),
+                            fps: this.pauseMinimapProvider.getFpsLimit(),
+                            glassmorphism: this.hudGlassmorphismProvider.glassmorphism,
+                            glassmorphismFps: this.hudGlassmorphismProvider.glassmorphismFpsLimit,
+                        })
+                    );
                     this.pauseMinimapProvider.setAnimationEnabled(false);
                     this.pauseMinimapProvider.setFpsLimit(30);
                     this.hudGlassmorphismProvider.glassmorphism = false;
