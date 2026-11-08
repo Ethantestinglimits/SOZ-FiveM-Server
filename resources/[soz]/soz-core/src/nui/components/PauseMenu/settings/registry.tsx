@@ -1,6 +1,6 @@
 import { FunctionComponent, ReactNode } from 'react';
 
-import { SETTING_CATEGORIES, SettingCategory, SOZ_CATEGORY_IDS } from './definitions';
+import { SETTING_CATEGORIES, SettingCategory, SettingItem, SOZ_CATEGORY_IDS } from './definitions';
 
 export type SettingsPanelProps = {
     category: SettingCategory;
@@ -53,4 +53,16 @@ export const registerSettingCategory = (
     if (options.panel) {
         registerSettingsPanel(category.id, options.panel);
     }
+};
+
+export const registerSettingItem = (categoryId: string, item: SettingItem, options: { after?: string } = {}): void => {
+    const category = SETTING_CATEGORIES.find(existing => existing.id === categoryId);
+
+    if (!category || category.items.some(existing => existing.id === item.id)) {
+        return;
+    }
+
+    const anchor = options.after ? category.items.findIndex(existing => existing.id === options.after) : -1;
+
+    category.items.splice(anchor >= 0 ? anchor + 1 : category.items.length, 0, item);
 };
