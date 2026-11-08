@@ -12,12 +12,13 @@ import {
     MinimapStyle,
 } from '../../../../shared/nui/minimap';
 import { fetchNui } from '../../../fetch';
-import { navGroup, navSelected } from '../keyboardNav';
 import { useMinimap } from '../../../hook/data';
 import { screenWidthToPx } from '../../../utils/screenFrame';
 import { MinimapPreview } from '../../Minimap/MinimapPreview';
 import { MINIMAP_RADIUS } from '../../Minimap/minimapRenderer';
 import { setMinimapStyle, useMinimapStyle } from '../../Minimap/minimapStyleState';
+import { navGroup, navSelected } from '../keyboardNav';
+import { Arrow, ROW_CLASS, ROW_LABEL_CLASS, ValueStepper } from './rowControls';
 
 const COMMIT_DELAY = 150;
 const MINIMAP_RATIO = 4 / 5.674;
@@ -37,33 +38,31 @@ const FRAMES: { id: MinimapFrameMode; label: string }[] = [
 const COLORS = ['#ffffff', '#3b82f6', '#22c55e', '#ef4444', '#f59e0b', '#a855f7'];
 
 const Row: FunctionComponent<{ label: string; children: ReactNode }> = ({ label, children }) => (
-    <div className="flex items-center justify-between gap-[2vh] rounded-[1vh] bg-white/5 px-[1.6vh] py-[1vh]">
-        <span className="text-[1.5vh] font-semibold">{label}</span>
+    <div className={ROW_CLASS}>
+        <span className={ROW_LABEL_CLASS}>{label}</span>
         {children}
     </div>
 );
 
-const Segmented: FunctionComponent<{
+const Cycle: FunctionComponent<{
     options: { id: string; label: string }[];
     value: string;
     onChange: (id: string) => void;
-}> = ({ options, value, onChange }) => (
-    <div className="flex gap-[0.4vh]" {...navGroup('select')}>
-        {options.map((option) => (
-            <button
-                key={option.id}
-                {...navSelected(value === option.id)}
-                onClick={() => onChange(option.id)}
-                className={classNames('rounded-[0.6vh] px-[1vh] py-[0.4vh] text-[1.3vh] font-semibold', {
-                    'bg-white text-black': value === option.id,
-                    'bg-white/15 text-white/80 hover:bg-white/30': value !== option.id,
-                })}
-            >
-                {option.label}
-            </button>
-        ))}
-    </div>
-);
+}> = ({ options, value, onChange }) => {
+    const index = Math.max(
+        0,
+        options.findIndex(option => option.id === value)
+    );
+
+    return (
+        <ValueStepper
+            label={options[index].label}
+            index={index}
+            count={options.length}
+            onChange={direction => onChange(options[(index + direction + options.length) % options.length].id)}
+        />
+    );
+};
 
 const Slider: FunctionComponent<{
     value: number;
@@ -71,23 +70,33 @@ const Slider: FunctionComponent<{
     max: number;
     suffix: string;
     onChange: (value: number) => void;
-}> = ({ value, min, max, suffix, onChange }) => (
-    <div className="flex items-center gap-[1.2vh]">
-        <input
-            type="range"
-            min={min}
-            max={max}
-            step={1}
-            value={value}
-            onChange={(event) => onChange(Number(event.target.value))}
-            className="h-[0.6vh] w-[16vh] cursor-pointer accent-white"
-        />
-        <span className="w-[4.4vh] text-right text-[1.4vh] font-semibold tabular-nums">
-            {value}
-            {suffix}
-        </span>
-    </div>
-);
+}> = ({ value, min, max, suffix, onChange }) => {
+    const percent = ((value - min) / Math.max(1, max - min)) * 100;
+
+    return (
+        <div className="flex items-center gap-[1vh]">
+            <Arrow direction={-1} onPress={() => onChange(Math.max(min, value - 1))} />
+            <input
+                type="range"
+                tabIndex={-1}
+                min={min}
+                max={max}
+                step={1}
+                value={value}
+                onChange={event => onChange(Number(event.target.value))}
+                className="soz-volume-slider w-[16vh]"
+                style={{
+                    background: `linear-gradient(to right, #fff ${percent}%, rgba(255, 255, 255, 0.2) ${percent}%)`,
+                }}
+            />
+            <span className="min-w-[4.6vh] text-right text-[1.25vh] font-semibold tabular-nums">
+                {value}
+                {suffix}
+            </span>
+            <Arrow direction={1} onPress={() => onChange(Math.min(max, value + 1))} />
+        </div>
+    );
+};
 
 export const MinimapPanel: FunctionComponent = () => {
     const style = useMinimapStyle();
@@ -105,7 +114,7 @@ export const MinimapPanel: FunctionComponent = () => {
                 }
             }
         },
-        [],
+        []
     );
 
     const apply = (next: MinimapStyle) => {
@@ -132,12 +141,12 @@ export const MinimapPanel: FunctionComponent = () => {
 
     return (
         <div className="flex gap-[2.4vh]">
-            <div className="flex min-w-0 flex-1 flex-col gap-[0.6vh]">
+            <div className="flex min-w-0 flex-1 flex-col gap-[0.4vh]">
                 <Row label="Forme">
-                    <Segmented
+                    <Cycle
                         options={SHAPES}
                         value={style.shape}
-                        onChange={(shape) => change({ shape: shape as MinimapShape })}
+                        onChange={shape => change({ shape: shape as MinimapShape })}
                     />
                 </Row>
 
@@ -148,7 +157,7 @@ export const MinimapPanel: FunctionComponent = () => {
                             min={0}
                             max={MINIMAP_RADIUS_MAX}
                             suffix=" %"
-                            onChange={(value) => change({ radius: value })}
+                            onChange={value => change({ radius: value })}
                         />
                     </Row>
                 )}
@@ -159,7 +168,7 @@ export const MinimapPanel: FunctionComponent = () => {
                         min={MINIMAP_OPACITY_MIN}
                         max={100}
                         suffix=" %"
-                        onChange={(opacity) => change({ opacity })}
+                        onChange={opacity => change({ opacity })}
                     />
                 </Row>
 
@@ -169,19 +178,19 @@ export const MinimapPanel: FunctionComponent = () => {
                         min={0}
                         max={MINIMAP_BORDER_MAX}
                         suffix=" px"
-                        onChange={(borderWidth) => change({ borderWidth })}
+                        onChange={borderWidth => change({ borderWidth })}
                     />
                 </Row>
 
                 {style.borderWidth > 0 && (
                     <Row label="Couleur de la bordure">
                         <div className="flex items-center gap-[0.6vh]" {...navGroup('select')}>
-                            {COLORS.map((color) => (
+                            {COLORS.map(color => (
                                 <button
                                     key={color}
                                     {...navSelected(style.borderColor === color)}
                                     onClick={() => change({ borderColor: color })}
-                                    className={classNames('h-[2.2vh] w-[2.2vh] rounded-[0.5vh] border', {
+                                    className={classNames('h-[2vh] w-[2vh] rounded-[0.5vh] border', {
                                         'border-white': style.borderColor === color,
                                         'border-transparent': style.borderColor !== color,
                                     })}
@@ -191,18 +200,18 @@ export const MinimapPanel: FunctionComponent = () => {
                             <input
                                 type="color"
                                 value={style.borderColor}
-                                onChange={(event) => change({ borderColor: event.target.value })}
-                                className="h-[2.2vh] w-[2.8vh] cursor-pointer rounded-[0.5vh] bg-transparent"
+                                onChange={event => change({ borderColor: event.target.value })}
+                                className="h-[2vh] w-[2.6vh] cursor-pointer rounded-[0.5vh] bg-transparent"
                             />
                         </div>
                     </Row>
                 )}
 
                 <Row label="Cadre de la montre">
-                    <Segmented
+                    <Cycle
                         options={FRAMES}
                         value={style.frame}
-                        onChange={(frame) => change({ frame: frame as MinimapFrameMode })}
+                        onChange={frame => change({ frame: frame as MinimapFrameMode })}
                     />
                 </Row>
 

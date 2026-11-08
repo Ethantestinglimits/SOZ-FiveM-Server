@@ -85,16 +85,13 @@ export const SettingsSidebar: FunctionComponent<SettingsSidebarProps> = ({ categ
                         <button
                             onClick={() => onCategoryChange(item.id)}
                             className={classNames(
-                                'flex w-full items-center gap-[1vh] rounded-[0.8vh] py-[0.95vh] pr-[1.4vh] text-left font-semibold transition-colors',
+                                'flex w-full items-center gap-[1vh] rounded-[0.8vh] py-[0.95vh] px-[1.4vh] text-left text-[1.45vh] font-semibold transition-colors',
                                 {
-                                    'pl-[1.4vh] text-[1.45vh]': !item.parent,
-                                    'pl-[3vh] text-[1.4vh]': item.parent,
                                     'bg-white text-black': category === item.id,
                                     'bg-white/5 text-white/85 hover:bg-white/15 hover:text-white': category !== item.id,
                                 }
                             )}
                         >
-                            {item.parent && <span className="opacity-50">└</span>}
                             <span className="h-[1.9vh] w-[1.9vh] shrink-0">{CATEGORY_ICONS[item.id]}</span>
                             {item.label}
                         </button>
@@ -564,7 +561,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                 )}
             </div>
 
-            {!(graphicsPage || keysPage || voicePage) && (
+            {!(graphicsPage || keysPage || voicePage || minimapPage) && (
                 <DescriptionPanel item={hovered ?? sections[0]?.items[0] ?? null} category={current} />
             )}
         </div>
