@@ -19,6 +19,7 @@ import { DrivingSchoolModule } from './client/driving-school/ds.module';
 import { FactoryModule } from './client/factory/factory.module';
 import { FeatureModule } from './client/feature/feature.module';
 import { GamesModule } from './client/games/games.module';
+import { GpsModule } from './client/gps/gps.module';
 import { HousingModule } from './client/housing/housing.module';
 import { HudModule } from './client/hud/hud.module';
 import { InventoryModule } from './client/inventory/inventory.module';
@@ -113,6 +114,7 @@ async function bootstrap() {
         StoryModule,
         AfkModule,
         PauseModule,
+        GpsModule,
         VehicleModule,
         FactoryModule,
         OilModule,

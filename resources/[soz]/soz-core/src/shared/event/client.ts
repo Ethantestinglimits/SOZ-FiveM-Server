@@ -536,4 +536,6 @@ export enum ClientEvent {
     PET_SYNC_JOB_ANIMAL = 'soz-core:client:pet:sync-job-animal',
     PET_SHOP_ABANDON_ANIMAL = 'soz-core:client:pet:shop-abandon-animal',
     PET_SHOP_NAME_ANIMAL = 'soz-core:client:pet:shop-name-animal',
+
+    GPS_VEHICLE_POINTS = 'soz-core:client:gps:vehicle-points',
 }
