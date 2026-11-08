@@ -8,23 +8,41 @@ import colors from 'tailwindcss/colors';
 
 import { uuidv4 } from '../../../core/utils';
 import { AdvancedNotification, BasicNotification, TPoliceNotification } from '../../../shared/notification';
+import { HudEnter } from '../../../shared/nui/hud_layout';
 import { useAssetPath } from '../../hook/assets';
 import { useHudMinimap } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { RootState } from '../../store';
 import { formatText } from '../../utils/gta-format';
 import { GlassMorphismContainer } from '../Styleguide/GlassMorphismContainer';
-import { useHudBlock } from './hudPlacement';
+import { useHudBlock, useHudEnter } from './hudPlacement';
 
 type NotificationProps = {
     notification: BasicNotification | AdvancedNotification;
     onDelete: () => void;
+    enter: HudEnter;
 };
 
 type PoliceNotificationProps = {
     notification: TPoliceNotification;
     onDelete: () => void;
+    enter: HudEnter;
 };
+
+const HIDDEN_CLASS: Record<HudEnter, string> = {
+    left: '-translate-x-full',
+    right: 'translate-x-full',
+    fade: 'opacity-0',
+};
+
+const enterProps = (enter: HudEnter) => ({
+    enter: 'transform ease-out duration-300 transition',
+    enterFrom: HIDDEN_CLASS[enter],
+    enterTo: 'translate-x-0 opacity-100',
+    leave: 'transform ease-in duration-300 transition',
+    leaveFrom: 'translate-x-0 opacity-100',
+    leaveTo: HIDDEN_CLASS[enter],
+});
 
 const isAdvancedNotification = (
     notification: BasicNotification | AdvancedNotification | TPoliceNotification
@@ -38,7 +56,7 @@ const isPoliceNotification = (
     return (notification as TPoliceNotification).policeStyle !== undefined;
 };
 
-const Notification: FunctionComponent<NotificationProps> = ({ notification, onDelete }) => {
+const Notification: FunctionComponent<NotificationProps> = ({ notification, onDelete, enter }) => {
     const [isClosing, setIsClosing] = useState(false);
     const [isOpening, setIsOpening] = useState(true);
 
@@ -81,16 +99,7 @@ const Notification: FunctionComponent<NotificationProps> = ({ notification, onDe
     );
 
     return (
-        <Transition
-            show={!isClosing && !isOpening}
-            enter="transform ease-out duration-300 transition"
-            enterFrom="-translate-x-full"
-            enterTo="translate-x-0"
-            leave="transform ease-in duration-300 transition"
-            leaveFrom="translate-x-0"
-            leaveTo="-translate-x-full"
-            className="relative"
-        >
+        <Transition show={!isClosing && !isOpening} {...enterProps(enter)} className="relative">
             <div className="w-full overflow-hidden transition-all rounded text-sm lg:text-lg text-white">
                 <GlassMorphismContainer
                     className="p-3"
@@ -129,7 +138,7 @@ const Notification: FunctionComponent<NotificationProps> = ({ notification, onDe
     );
 };
 
-const PoliceNotification: FunctionComponent<PoliceNotificationProps> = ({ notification, onDelete }) => {
+const PoliceNotification: FunctionComponent<PoliceNotificationProps> = ({ notification, onDelete, enter }) => {
     const { getPath } = useAssetPath();
 
     const [isClosing, setIsClosing] = useState(false);
@@ -289,15 +298,7 @@ const PoliceNotification: FunctionComponent<PoliceNotificationProps> = ({ notifi
     };
 
     return (
-        <Transition
-            show={!isClosing && !isOpening}
-            enter="transform ease-out duration-300 transition"
-            enterFrom="translate-x-full"
-            enterTo="-translate-x-0"
-            leave="transform ease-in duration-300 transition"
-            leaveFrom="-translate-x-0"
-            leaveTo="translate-x-full"
-        >
+        <Transition show={!isClosing && !isOpening} {...enterProps(enter)}>
             <div
                 className={cn(
                     'w-full relative overflow-hidden mb-2 transition-all rounded text-sm lg:text-lg text-white'
@@ -397,6 +398,8 @@ export const Notifications: FunctionComponent = () => {
 
     const notificationsBlock = useHudBlock('notifications', true);
     const policeBlock = useHudBlock('police', true);
+    const notificationsEnter = useHudEnter('notifications', 'left');
+    const policeEnter = useHudEnter('police', 'right');
 
     return (
         <>
@@ -417,6 +420,7 @@ export const Notifications: FunctionComponent = () => {
                             key={notification.id}
                             notification={notification}
                             onDelete={() => deleteNotification(notification.id)}
+                            enter={notificationsEnter}
                         />
                     ))}
             </animated.div>
@@ -438,6 +442,7 @@ export const Notifications: FunctionComponent = () => {
                                 key={notification.id}
                                 notification={notification}
                                 onDelete={() => deleteNotification(notification.id)}
+                                enter={policeEnter}
                             />
                         )
                 )}

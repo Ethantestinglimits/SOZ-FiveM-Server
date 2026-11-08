@@ -76,6 +76,7 @@ const independentRects = (id: HudElementId, layout: HudLayout, rects: BlockRects
 const keep = (previous: HudPlacement | undefined): Partial<HudPlacement> => ({
     ...(previous?.scale !== undefined ? { scale: previous.scale } : {}),
     ...(previous?.hidden ? { hidden: true } : {}),
+    ...(previous?.enter ? { enter: previous.enter } : {}),
 });
 
 const edgeAnchor = (rect: HudRect, previous: HudPlacement | undefined): HudPlacement | null => {
@@ -289,3 +290,42 @@ export const nudge = (placement: HudPlacement, dx: number, dy: number): HudPlace
 
 export const clampScale = (scale: number): number =>
     Math.round(Math.max(HUD_SCALE_MIN, Math.min(HUD_SCALE_MAX, scale)) * 100) / 100;
+
+export const anchorTargets = (id: HudElementId, layout: HudLayout, rects: BlockRects): HudAnchorTarget[] => [
+    'frame',
+    'screen',
+    ...independentRects(id, layout, rects).map(([other]) => other),
+];
+
+export const reanchor = (
+    id: HudElementId,
+    rect: HudRect,
+    layout: HudLayout,
+    target: HudAnchorTarget,
+    targetCorner: HudCorner
+): HudPlacement | null => {
+    const targetRect = resolveTargetRect(target);
+
+    if (!targetRect) {
+        return null;
+    }
+
+    let corner = targetCorner;
+
+    if (target !== 'frame' && target !== 'screen') {
+        let distance = Infinity;
+
+        for (const candidate of HUD_CORNERS) {
+            const gap = Math.hypot(...offsetBetween(rect, targetRect, targetCorner, candidate));
+
+            if (gap < distance) {
+                distance = gap;
+                corner = candidate;
+            }
+        }
+    }
+
+    const [x, y] = offsetBetween(rect, targetRect, targetCorner, corner);
+
+    return { target, targetCorner, corner, x, y, ...keep(layout[id]) };
+};

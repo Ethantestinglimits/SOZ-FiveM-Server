@@ -1,4 +1,14 @@
-import { ChevronDownIcon, ChevronUpIcon, MinusIcon, PlusIcon, XIcon } from '@heroicons/react/outline';
+import {
+    ChevronDownIcon,
+    ChevronUpIcon,
+    EyeIcon,
+    EyeOffIcon,
+    MinusIcon,
+    PlusIcon,
+    RefreshIcon,
+    ReplyIcon,
+    XIcon,
+} from '@heroicons/react/outline';
 import classNames from 'classnames';
 import {
     FunctionComponent,
@@ -12,7 +22,15 @@ import {
 } from 'react';
 
 import { NuiEvent } from '../../../../../shared/event';
-import { HUD_ELEMENTS, HudAnchorTarget, HudElementId, HudLayout } from '../../../../../shared/nui/hud_layout';
+import {
+    HUD_CORNERS,
+    HUD_ELEMENTS,
+    HudAnchorTarget,
+    HudCorner,
+    HudElementId,
+    HudEnter,
+    HudLayout,
+} from '../../../../../shared/nui/hud_layout';
 import { PauseMenuData } from '../../../../../shared/nui/pause_menu';
 import { fetchNui } from '../../../../fetch';
 import { store } from '../../../../store';
@@ -22,9 +40,11 @@ import { setHudEditing, setHudPreview } from '../../../Hud/hudPreview';
 import { minimapController } from '../../../Minimap/minimapState';
 import { openPauseTab } from '../../pauseTabs';
 import { MinimapPanel } from '../../settings/MinimapPanel';
+import { Arrow } from '../../settings/rowControls';
 import {
     absolutePlacement,
     anchorFor,
+    anchorTargets,
     BlockRects,
     clampScale,
     dropLayout,
@@ -32,6 +52,7 @@ import {
     Guides,
     nudge,
     readBlockRects,
+    reanchor,
     snapRect,
 } from './editing';
 
@@ -83,6 +104,15 @@ const WATCH_DISPLAYS: { id: string; label: string; default: boolean }[] = [
     { id: 'hudCompassLeft', label: 'Boussole à gauche', default: false },
     { id: 'hudStreetOnTop', label: 'Rue en haut', default: false },
 ];
+
+const ENTER_OPTIONS: { value: HudEnter | undefined; label: string }[] = [
+    { value: undefined, label: 'Auto (bord le plus proche)' },
+    { value: 'left', label: 'Par la gauche' },
+    { value: 'right', label: 'Par la droite' },
+    { value: 'fade', label: 'Fondu' },
+];
+
+const ENTER_BLOCKS: HudElementId[] = ['notifications', 'police'];
 
 const NO_GUIDES: Guides = { x: [], y: [] };
 
@@ -157,6 +187,7 @@ export const HudEditorTab: FunctionComponent<{ data: PauseMenuData }> = ({ data 
     const [selected, setSelected] = useState<HudElementId | null>(null);
     const [guides, setGuides] = useState<Guides>(NO_GUIDES);
     const [panel, setPanel] = useState(() => ({ x: window.innerHeight * 0.02, y: window.innerHeight * 0.02 }));
+    const [panelWidth, setPanelWidth] = useState(44);
     const frame = useMemo(() => getScreenFrame(), []);
     const rects = useBlockRects();
     const original = useRef<HudLayout>(getHudLayout());
@@ -168,6 +199,9 @@ export const HudEditorTab: FunctionComponent<{ data: PauseMenuData }> = ({ data 
     rectsRef.current = rects;
 
     const [, refresh] = useState(0);
+    const [confirmLeave, setConfirmLeave] = useState(false);
+    const past = useRef<HudLayout[]>([]);
+    const future = useRef<HudLayout[]>([]);
 
     const commit = useCallback((next: HudLayout) => {
         draft.current = next;
@@ -175,14 +209,127 @@ export const HudEditorTab: FunctionComponent<{ data: PauseMenuData }> = ({ data 
         refresh(value => value + 1);
     }, []);
 
-    const setScale = (id: HudElementId, value: number) => {
+    const record = () => {
+        past.current = [...past.current.slice(-49), draft.current];
+        future.current = [];
+    };
+
+    const change = (next: HudLayout) => {
+        record();
+        commit(next);
+    };
+
+    const undo = () => {
+        const previous = past.current.pop();
+
+        if (previous) {
+            future.current.push(draft.current);
+            commit(previous);
+        }
+    };
+
+    const redo = () => {
+        const next = future.current.pop();
+
+        if (next) {
+            past.current.push(draft.current);
+            commit(next);
+        }
+    };
+
+    const dirty = JSON.stringify(draft.current) !== JSON.stringify(original.current);
+
+    const save = () => {
+        fetchNui(NuiEvent.HudLayoutSave, draft.current);
+        original.current = draft.current;
+        refresh(value => value + 1);
+    };
+
+    const leave = () => {
+        if (dirty) {
+            setConfirmLeave(true);
+        } else {
+            openPauseTab('settings');
+        }
+    };
+
+    const placementOf = (id: HudElementId) => {
         const layout = draft.current;
         const rect = rectsRef.current[id];
-        const placement = layout[id] ?? (rect ? anchorFor(id, rect, layout, rectsRef.current) : null);
+
+        return layout[id] ?? (rect ? anchorFor(id, rect, layout, rectsRef.current) : null);
+    };
+
+    const setScale = (id: HudElementId, value: number) => {
+        const placement = placementOf(id);
 
         if (placement) {
-            commit({ ...layout, [id]: { ...placement, scale: clampScale(value) } });
+            change({ ...draft.current, [id]: { ...placement, scale: clampScale(value) } });
         }
+    };
+
+    const toggleHidden = (id: HudElementId) => {
+        const placement = placementOf(id);
+
+        if (!placement) {
+            return;
+        }
+
+        const next = { ...placement };
+
+        if (next.hidden) {
+            delete next.hidden;
+        } else {
+            next.hidden = true;
+        }
+
+        change({ ...draft.current, [id]: next });
+    };
+
+    const resetBlock = (id: HudElementId) => {
+        const next = { ...draft.current };
+
+        delete next[id];
+        change(next);
+    };
+
+    const setAnchor = (id: HudElementId, target: HudAnchorTarget, targetCorner: HudCorner) => {
+        const rect = rectsRef.current[id];
+        const placement = rect ? reanchor(id, rect, draft.current, target, targetCorner) : null;
+
+        if (placement) {
+            change({ ...draft.current, [id]: placement });
+        }
+    };
+
+    const cycleEnter = (id: HudElementId, direction: number) => {
+        const placement = placementOf(id);
+
+        if (!placement) {
+            return;
+        }
+
+        const index = ENTER_OPTIONS.findIndex(option => option.value === placement.enter);
+        const next = ENTER_OPTIONS[(index + direction + ENTER_OPTIONS.length) % ENTER_OPTIONS.length].value;
+        const updated = { ...placement };
+
+        if (next) {
+            updated.enter = next;
+        } else {
+            delete updated.enter;
+        }
+
+        change({ ...draft.current, [id]: updated });
+    };
+
+    const cycleTarget = (id: HudElementId, direction: number) => {
+        const targets = anchorTargets(id, draft.current, rectsRef.current);
+        const current = draft.current[id]?.target ?? 'frame';
+        const index = targets.indexOf(current);
+        const target = targets[(index + direction + targets.length) % targets.length];
+        const corner = draft.current[id]?.targetCorner ?? 'bottom-left';
+
+        setAnchor(id, target, corner);
     };
 
     useEffect(() => {
@@ -267,52 +414,75 @@ export const HudEditorTab: FunctionComponent<{ data: PauseMenuData }> = ({ data 
         []
     );
 
-    useEffect(() => {
-        const onKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                event.stopImmediatePropagation();
+    const keyHandler = useRef<(event: KeyboardEvent) => void>(() => undefined);
 
-                if (selected) {
-                    setSelected(null);
-                } else {
-                    openPauseTab('settings');
-                }
+    keyHandler.current = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+            event.stopImmediatePropagation();
 
-                return;
+            if (confirmLeave) {
+                setConfirmLeave(false);
+            } else if (selected) {
+                setSelected(null);
+            } else {
+                leave();
             }
 
-            const direction: Record<string, [number, number]> = {
-                ArrowLeft: [-1, 0],
-                ArrowRight: [1, 0],
-                ArrowUp: [0, -1],
-                ArrowDown: [0, 1],
-            };
-            const move = direction[event.key];
+            return;
+        }
 
-            if (!move || !selected) {
-                return;
-            }
-
+        if (event.ctrlKey && (event.key === 'z' || event.key === 'Z' || event.key === 'y' || event.key === 'Y')) {
             event.preventDefault();
             event.stopImmediatePropagation();
 
-            const layout = draft.current;
-            const rect = rectsRef.current[selected];
-            const placement = layout[selected] ?? (rect ? anchorFor(selected, rect, layout, rectsRef.current) : null);
-
-            if (!placement) {
-                return;
+            if (event.key.toLowerCase() === 'y' || event.shiftKey) {
+                redo();
+            } else {
+                undo();
             }
 
-            const step = event.shiftKey ? LARGE_STEP : FINE_STEP;
+            return;
+        }
 
-            commit({ ...layout, [selected]: nudge(placement, move[0] * step, move[1] * step) });
-        };
+        keyMove(event);
+    };
+
+    useEffect(() => {
+        const onKeyDown = (event: KeyboardEvent) => keyHandler.current(event);
 
         window.addEventListener('keydown', onKeyDown, true);
 
         return () => window.removeEventListener('keydown', onKeyDown, true);
-    }, [selected, commit]);
+    }, []);
+
+    const keyMove = (event: KeyboardEvent) => {
+        const direction: Record<string, [number, number]> = {
+            ArrowLeft: [-1, 0],
+            ArrowRight: [1, 0],
+            ArrowUp: [0, -1],
+            ArrowDown: [0, 1],
+        };
+        const move = direction[event.key];
+
+        if (!move || !selected) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        const layout = draft.current;
+        const rect = rectsRef.current[selected];
+        const placement = layout[selected] ?? (rect ? anchorFor(selected, rect, layout, rectsRef.current) : null);
+
+        if (!placement) {
+            return;
+        }
+
+        const step = event.shiftKey ? LARGE_STEP : FINE_STEP;
+
+        change({ ...layout, [selected]: nudge(placement, move[0] * step, move[1] * step) });
+    };
 
     const startDrag = (id: HudElementId, event: ReactPointerEvent<HTMLDivElement>) => {
         event.stopPropagation();
@@ -353,6 +523,10 @@ export const HudEditorTab: FunctionComponent<{ data: PauseMenuData }> = ({ data 
             return;
         }
 
+        if (!current.moved) {
+            record();
+        }
+
         current.moved = true;
 
         const layout = draft.current;
@@ -379,6 +553,24 @@ export const HudEditorTab: FunctionComponent<{ data: PauseMenuData }> = ({ data 
 
         drag.current = null;
         setGuides(NO_GUIDES);
+    };
+
+    const startResize = (event: ReactPointerEvent<HTMLDivElement>) => {
+        event.stopPropagation();
+
+        const startX = event.clientX;
+        const startWidth = panelWidth;
+        const onMove = (move: PointerEvent) =>
+            setPanelWidth(
+                Math.max(32, Math.min(80, startWidth + ((move.clientX - startX) / window.innerHeight) * 100))
+            );
+        const onUp = () => {
+            window.removeEventListener('pointermove', onMove, true);
+            window.removeEventListener('pointerup', onUp, true);
+        };
+
+        window.addEventListener('pointermove', onMove, true);
+        window.addEventListener('pointerup', onUp, true);
     };
 
     const startPanelDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -464,7 +656,10 @@ export const HudEditorTab: FunctionComponent<{ data: PauseMenuData }> = ({ data 
                         }}
                         className={classNames('group absolute cursor-move rounded-[0.4vh]', {
                             'border-2 border-sky-400 bg-sky-400/10': active,
-                            'border border-white/30 hover:border-white/70 hover:bg-white/5': !active,
+                            'border border-white/30 hover:border-white/70 hover:bg-white/5':
+                                !active && !draft.current[element.id]?.hidden,
+                            'border border-dashed border-white/25 bg-black/40':
+                                !active && draft.current[element.id]?.hidden,
                         })}
                         style={{ left: rect.x, top: rect.y, width: rect.w, height: rect.h }}
                     >
@@ -509,8 +704,8 @@ export const HudEditorTab: FunctionComponent<{ data: PauseMenuData }> = ({ data 
 
             <aside
                 onPointerDown={event => event.stopPropagation()}
-                className="absolute flex max-h-[85vh] w-[34vh] flex-col gap-[1.6vh] rounded-2xl bg-[#16171cf2] p-[1.6vh] shadow-xl"
-                style={{ left: panel.x, top: panel.y }}
+                className="absolute flex max-h-[94vh] flex-col gap-[1.6vh] rounded-2xl bg-[#16171cf2] p-[1.6vh] shadow-xl"
+                style={{ left: panel.x, top: panel.y, width: `${panelWidth}vh` }}
             >
                 <div
                     onPointerDown={startPanelDrag}
@@ -568,10 +763,76 @@ export const HudEditorTab: FunctionComponent<{ data: PauseMenuData }> = ({ data 
                                         <PlusIcon />
                                     </button>
                                 </div>
-                                <span className="px-[0.4vh] text-[1.25vh] text-white/60">
-                                    Accroché à :{' '}
-                                    {selectedPlacement ? targetLabel(selectedPlacement.target) : 'position par défaut'}
-                                </span>
+                                <div className="flex items-center gap-[0.6vh] rounded-[0.8vh] bg-white/5 px-[1.2vh] py-[0.6vh] text-[1.4vh] font-semibold">
+                                    <span className="flex-1">Accroché à</span>
+                                    {selectedRect ? (
+                                        <>
+                                            <Arrow direction={-1} onPress={() => cycleTarget(selected, -1)} />
+                                            <span className="w-[13vh] truncate text-center text-[1.3vh]">
+                                                {selectedPlacement
+                                                    ? targetLabel(selectedPlacement.target)
+                                                    : 'position par défaut'}
+                                            </span>
+                                            <Arrow direction={1} onPress={() => cycleTarget(selected, 1)} />
+                                        </>
+                                    ) : (
+                                        <span className="text-[1.3vh] font-normal text-white/50">bloc non affiché</span>
+                                    )}
+                                </div>
+                                {selectedRect && selectedPlacement && (
+                                    <div className="flex items-center gap-[1vh] rounded-[0.8vh] bg-white/5 px-[1.2vh] py-[0.6vh] text-[1.4vh] font-semibold">
+                                        <span className="flex-1">Point d’accroche</span>
+                                        <div className="grid grid-cols-3 gap-[0.3vh]">
+                                            {HUD_CORNERS.map(corner => (
+                                                <button
+                                                    key={corner}
+                                                    onClick={() =>
+                                                        setAnchor(selected, selectedPlacement.target, corner)
+                                                    }
+                                                    className={classNames('h-[1.6vh] w-[1.6vh] rounded-[0.3vh]', {
+                                                        'bg-amber-300': selectedPlacement.targetCorner === corner,
+                                                        'bg-white/15 hover:bg-white/35':
+                                                            selectedPlacement.targetCorner !== corner,
+                                                    })}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                {ENTER_BLOCKS.includes(selected) && selectedRect && (
+                                    <div className="flex items-center gap-[0.6vh] rounded-[0.8vh] bg-white/5 px-[1.2vh] py-[0.6vh] text-[1.4vh] font-semibold">
+                                        <span className="flex-1">Arrivée</span>
+                                        <Arrow direction={-1} onPress={() => cycleEnter(selected, -1)} />
+                                        <span className="w-[13vh] truncate text-center text-[1.3vh]">
+                                            {selectedPlacement
+                                                ? ENTER_OPTIONS.find(option => option.value === selectedPlacement.enter)
+                                                      ?.label
+                                                : 'Par défaut'}
+                                        </span>
+                                        <Arrow direction={1} onPress={() => cycleEnter(selected, 1)} />
+                                    </div>
+                                )}
+                                <div className="grid grid-cols-2 gap-[0.6vh]">
+                                    <button
+                                        onClick={() => toggleHidden(selected)}
+                                        className="flex items-center justify-center gap-[0.6vh] rounded-[0.8vh] bg-white/10 py-[0.7vh] text-[1.3vh] font-semibold hover:bg-white/25"
+                                    >
+                                        {selectedPlacement?.hidden ? (
+                                            <EyeIcon className="h-[1.6vh] w-[1.6vh]" />
+                                        ) : (
+                                            <EyeOffIcon className="h-[1.6vh] w-[1.6vh]" />
+                                        )}
+                                        {selectedPlacement?.hidden ? 'Afficher' : 'Masquer'}
+                                    </button>
+                                    <button
+                                        onClick={() => resetBlock(selected)}
+                                        disabled={!selectedPlacement}
+                                        className="flex items-center justify-center gap-[0.6vh] rounded-[0.8vh] bg-white/10 py-[0.7vh] text-[1.3vh] font-semibold hover:bg-white/25 disabled:text-white/35 disabled:hover:bg-white/10"
+                                    >
+                                        <RefreshIcon className="h-[1.6vh] w-[1.6vh]" />
+                                        Par défaut
+                                    </button>
+                                </div>
                             </Section>
                         )}
 
@@ -595,10 +856,14 @@ export const HudEditorTab: FunctionComponent<{ data: PauseMenuData }> = ({ data 
                                             )}
                                         >
                                             <span className="flex-1">{element.label}</span>
-                                            {(noWatch || !shown) && (
-                                                <span className="text-[1.2vh] font-normal">
-                                                    {noWatch ? 'pas de smartwatch' : 'non affiché'}
-                                                </span>
+                                            {draft.current[element.id]?.hidden ? (
+                                                <span className="text-[1.2vh] font-normal text-white/60">masqué</span>
+                                            ) : (
+                                                (noWatch || !shown) && (
+                                                    <span className="text-[1.2vh] font-normal">
+                                                        {noWatch ? 'pas de smartwatch' : 'non affiché'}
+                                                    </span>
+                                                )
                                             )}
                                         </button>
                                     );
@@ -642,30 +907,114 @@ export const HudEditorTab: FunctionComponent<{ data: PauseMenuData }> = ({ data 
                             <span>Flèches : ajuster (Maj : plus vite)</span>
                             <span>Molette sur le bloc : taille</span>
                             <span>Alt en glissant : sans guides</span>
+                            <span>Ctrl+Z / Ctrl+Y : annuler, rétablir</span>
                         </div>
+                    </div>
+                )}
 
+                {!collapsed && (
+                    <div className="flex shrink-0 flex-col gap-[0.6vh]">
+                        <div className="grid grid-cols-3 gap-[0.6vh]">
+                            <button
+                                onClick={undo}
+                                disabled={past.current.length === 0}
+                                className="flex items-center justify-center gap-[0.5vh] rounded-[0.8vh] bg-white/10 py-[0.7vh] text-[1.3vh] font-semibold hover:bg-white/25 disabled:text-white/35 disabled:hover:bg-white/10"
+                            >
+                                <ReplyIcon className="h-[1.6vh] w-[1.6vh]" />
+                                Annuler
+                            </button>
+                            <button
+                                onClick={redo}
+                                disabled={future.current.length === 0}
+                                className="flex items-center justify-center gap-[0.5vh] rounded-[0.8vh] bg-white/10 py-[0.7vh] text-[1.3vh] font-semibold hover:bg-white/25 disabled:text-white/35 disabled:hover:bg-white/10"
+                            >
+                                <ReplyIcon className="h-[1.6vh] w-[1.6vh] -scale-x-100" />
+                                Rétablir
+                            </button>
+                            <button
+                                onClick={() => change({})}
+                                disabled={Object.keys(draft.current).length === 0}
+                                className="flex items-center justify-center gap-[0.5vh] rounded-[0.8vh] bg-white/10 py-[0.7vh] text-[1.3vh] font-semibold hover:bg-white/25 disabled:text-white/35 disabled:hover:bg-white/10"
+                            >
+                                <RefreshIcon className="h-[1.6vh] w-[1.6vh]" />
+                                Tout
+                            </button>
+                        </div>
                         <button
-                            onClick={() => openPauseTab('settings')}
-                            className="flex shrink-0 items-center justify-center gap-[0.8vh] rounded-[0.8vh] bg-white/10 py-[0.9vh] text-[1.4vh] font-semibold hover:bg-white/25"
+                            onClick={save}
+                            disabled={!dirty}
+                            className="rounded-[0.8vh] bg-emerald-600 py-[0.9vh] text-[1.45vh] font-bold hover:bg-emerald-500 disabled:bg-white/10 disabled:text-white/40"
+                        >
+                            {dirty ? 'Enregistrer' : 'Enregistré'}
+                        </button>
+                        <button
+                            onClick={leave}
+                            className="flex items-center justify-center gap-[0.8vh] rounded-[0.8vh] bg-white/10 py-[0.9vh] text-[1.4vh] font-semibold hover:bg-white/25"
                         >
                             <XIcon className="h-[1.8vh] w-[1.8vh]" />
                             Quitter l’éditeur
                         </button>
                     </div>
                 )}
+
+                <div
+                    onPointerDown={startResize}
+                    className="absolute inset-y-[2vh] -right-[0.4vh] w-[0.8vh] cursor-ew-resize rounded-full hover:bg-white/30"
+                />
             </aside>
 
             {selected === 'minimap' && !collapsed && (
                 <aside
                     onPointerDown={event => event.stopPropagation()}
                     className="absolute flex max-h-[85vh] w-[48vh] flex-col gap-[1.2vh] rounded-2xl bg-[#16171cf2] p-[1.6vh] shadow-xl"
-                    style={{ left: panel.x + window.innerHeight * 0.36, top: panel.y }}
+                    style={{ left: panel.x + (window.innerHeight * (panelWidth + 2)) / 100, top: panel.y }}
                 >
                     <span className="text-[1.8vh] font-bold">Apparence de la Minimap</span>
                     <div className="min-h-0 overflow-y-auto pr-[0.4vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full">
                         <MinimapPanel compact />
                     </div>
                 </aside>
+            )}
+
+            {confirmLeave && (
+                <div
+                    className="absolute inset-0 flex items-center justify-center bg-black/50"
+                    onPointerDown={event => event.stopPropagation()}
+                >
+                    <div className="flex w-[44vh] flex-col gap-[1.6vh] rounded-2xl bg-[#16171cf5] p-[2.4vh] shadow-xl">
+                        <span className="text-[1.9vh] font-bold">Modifications non enregistrées</span>
+                        <span className="text-[1.45vh] text-white/70">
+                            Tu as modifié l’ATH sans enregistrer. Que veux-tu faire ?
+                        </span>
+                        <div className="grid grid-cols-3 gap-[0.8vh]">
+                            <button
+                                onClick={() => setConfirmLeave(false)}
+                                className="rounded-[0.8vh] bg-white/10 py-[0.9vh] text-[1.35vh] font-semibold hover:bg-white/25"
+                            >
+                                Rester
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setConfirmLeave(false);
+                                    openPauseTab('settings');
+                                }}
+                                className="rounded-[0.8vh] bg-red-600/80 py-[0.9vh] text-[1.35vh] font-semibold hover:bg-red-500"
+                            >
+                                Abandonner
+                            </button>
+                            <button
+                                onClick={() => {
+                                    save();
+                                    setConfirmLeave(false);
+                                    openPauseTab('settings');
+                                }}
+                                className="rounded-[0.8vh] bg-emerald-600 py-[0.9vh] text-[1.35vh] font-bold hover:bg-emerald-500"
+                            >
+                                Enregistrer
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

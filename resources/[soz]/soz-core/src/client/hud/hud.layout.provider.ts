@@ -6,6 +6,7 @@ import {
     HUD_ANCHOR_TARGETS,
     HUD_CORNERS,
     HUD_ELEMENTS,
+    HUD_ENTERS,
     HUD_SCALE_MAX,
     HUD_SCALE_MIN,
     HudLayout,
@@ -70,6 +71,10 @@ const sanitizePlacement = (input: Partial<HudPlacement> | undefined, id: string)
 
     if (input.hidden === true) {
         placement.hidden = true;
+    }
+
+    if (HUD_ENTERS.includes(input.enter)) {
+        placement.enter = input.enter;
     }
 
     return placement;

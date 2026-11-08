@@ -40,6 +40,10 @@ export const HUD_CORNERS: HudCorner[] = [
     'bottom-right',
 ];
 
+export type HudEnter = 'left' | 'right' | 'fade';
+
+export const HUD_ENTERS: HudEnter[] = ['left', 'right', 'fade'];
+
 export type HudAnchorTarget = 'frame' | 'screen' | HudElementId;
 
 export type HudPlacement = {
@@ -50,6 +54,7 @@ export type HudPlacement = {
     y: number;
     scale?: number;
     hidden?: boolean;
+    enter?: HudEnter;
 };
 
 export type HudLayout = Partial<Record<HudElementId, HudPlacement>>;

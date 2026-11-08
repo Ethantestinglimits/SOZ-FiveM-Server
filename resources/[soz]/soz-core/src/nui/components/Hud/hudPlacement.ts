@@ -1,6 +1,13 @@
 import { CSSProperties, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { HudAnchorTarget, HudCorner, HudElementId, HudLayout, HudPlacement } from '../../../shared/nui/hud_layout';
+import {
+    HudAnchorTarget,
+    HudCorner,
+    HudElementId,
+    HudEnter,
+    HudLayout,
+    HudPlacement,
+} from '../../../shared/nui/hud_layout';
 import { getScreenFrame } from '../../utils/screenFrame';
 
 export type HudRect = { x: number; y: number; w: number; h: number };
@@ -245,7 +252,9 @@ export const resolvePlacementRect = (id: HudElementId, placement: HudPlacement):
 const positionRect = (placement: HudPlacement, w: number, h: number): HudRect | null => {
     const entry = entries.get(placement.target as HudElementId);
     const targetHidden =
-        placement.target !== 'screen' && placement.target !== 'frame' && !(entry?.active && measure(entry));
+        placement.target !== 'screen' &&
+        placement.target !== 'frame' &&
+        (Boolean(layout[placement.target]?.hidden) || !(entry?.active && measure(entry)));
     const anchorRect = resolveTargetRect(placement.target);
 
     if (!anchorRect) {
@@ -475,6 +484,30 @@ export const placeMinimap = <T extends MinimapBox>(minimap: T): T => {
         X: left + (minimap.X - minimap.left) * ratioX,
         Y: top + boxHeight + (minimap.Y - minimap.bottom) * ratioY,
     };
+};
+
+export const useHudEnter = (id: HudElementId, fallback: HudEnter): HudEnter => {
+    useHudLayoutVersion();
+
+    const placement = layout[id];
+
+    if (!placement) {
+        return fallback;
+    }
+
+    if (placement.enter) {
+        return placement.enter;
+    }
+
+    const rect = resolvePlacementRect(id, placement);
+
+    if (!rect) {
+        return fallback;
+    }
+
+    const center = (rect.x + rect.w / 2) / window.innerWidth;
+
+    return center < 0.4 ? 'left' : center > 0.6 ? 'right' : 'fade';
 };
 
 export const getHudBlockRect = (id: HudElementId): HudRect | null => {
