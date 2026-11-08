@@ -48,6 +48,66 @@ const ROUTE_FAR_STEP = 20;
 const ROUTE_FAR_POINTS = 300;
 const ROUTE_MAX_POINTS = ROUTE_NEAR_DISTANCE / ROUTE_NEAR_STEP + ROUTE_FAR_POINTS;
 
+const ROUTE_SIMPLIFY_TOLERANCE = 1.5;
+const ROUTE_ROAD_DISTANCE = 8;
+const ROUTE_TRIM_LIMIT = 60;
+
+const trimOffRoad = (route: MinimapPoint[]): MinimapPoint[] => {
+    const [, , z] = GetEntityCoords(PlayerPedId(), false);
+    const limit = Math.min(route.length - 2, ROUTE_TRIM_LIMIT);
+
+    for (let index = 0; index < limit; index++) {
+        const { x, y } = route[index];
+        const [found, node] = GetClosestVehicleNode(x, y, z, 1, 3, 0);
+
+        if (found && Math.hypot(node[0] - x, node[1] - y) <= ROUTE_ROAD_DISTANCE) {
+            return index === 0 ? route : route.slice(index);
+        }
+    }
+
+    return route;
+};
+
+const simplifyRoute = (points: MinimapPoint[], tolerance: number): MinimapPoint[] => {
+    if (points.length < 3) {
+        return points;
+    }
+
+    const keep = new Uint8Array(points.length);
+    const stack: [number, number][] = [[0, points.length - 1]];
+
+    keep[0] = 1;
+    keep[points.length - 1] = 1;
+
+    while (stack.length > 0) {
+        const [first, last] = stack.pop();
+        const a = points[first];
+        const b = points[last];
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const length = Math.hypot(dx, dy) || 1;
+        let farthest = -1;
+        let distance = tolerance;
+
+        for (let index = first + 1; index < last; index++) {
+            const p = points[index];
+            const d = Math.abs(dy * p.x - dx * p.y + b.x * a.y - b.y * a.x) / length;
+
+            if (d > distance) {
+                distance = d;
+                farthest = index;
+            }
+        }
+
+        if (farthest !== -1) {
+            keep[farthest] = 1;
+            stack.push([first, farthest], [farthest, last]);
+        }
+    }
+
+    return points.filter((_, index) => keep[index] === 1);
+};
+
 type RouteJob = {
     slot: number;
     points: MinimapPoint[];
@@ -444,8 +504,10 @@ export class PauseMinimapProvider {
         return (job.length > 0 && job.distance >= job.length) || job.samples >= ROUTE_MAX_POINTS;
     }
 
-    private finishRoute(route: MinimapPoint[]): void {
+    private finishRoute(raw: MinimapPoint[]): void {
         this.routeJob = null;
+
+        const route = raw.length > 1 ? simplifyRoute(trimOffRoad(raw), ROUTE_SIMPLIFY_TOLERANCE) : raw;
 
         const first = route[0];
         const middle = route[Math.floor(route.length / 2)];

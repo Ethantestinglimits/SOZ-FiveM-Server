@@ -76,6 +76,7 @@ const WRAP_OFFSETS = [-1, 0, 1];
 const WRAP_MARGIN_PX = 120;
 const IDLE_REFRESH_MS = 500;
 const TILT_RATE = 6;
+const HORIZON_MARGIN = 0.05;
 const MINIMAP_PLAYER_ANCHOR = 0.8;
 const MINIMAP_ZOOM = 0.85;
 const TILT_PERSPECTIVE = 275;
@@ -729,7 +730,7 @@ export class MinimapRenderer {
     private getTilt(): number {
         const mode = this.style.tiltMode ?? 'vehicle';
 
-        if (mode === 'none' || this.current.h < 1) {
+        if (mode === 'none' || this.mode !== 'minimap' || this.current.h < 1) {
             return 0;
         }
 
@@ -789,7 +790,6 @@ export class MinimapRenderer {
         groundCtx.fillRect(0, 0, sourceWidth, sourceHeight);
         this.drawMap(density, offsetsX, offsetsY);
         groundCtx.globalAlpha = 1;
-        this.drawGround(frame, offsetsX, offsetsY, showBlips);
 
         this.ctx = main;
         this.current = current;
@@ -850,7 +850,13 @@ export class MinimapRenderer {
             return [sx + this.current.w / 2, sy + this.current.h / 2];
         }
 
-        const zoom = this.perspective / (this.perspective - sy * this.projection.sin);
+        const depth = this.perspective - sy * this.projection.sin;
+
+        if (depth < this.perspective * HORIZON_MARGIN) {
+            return [NaN, NaN];
+        }
+
+        const zoom = this.perspective / depth;
 
         return [
             this.current.w / 2 + sx * zoom,
@@ -924,7 +930,7 @@ export class MinimapRenderer {
         const tilt = this.getTilt();
 
         if (tilt === 0) {
-            if (ctx.globalAlpha < 0.999) {
+            if (this.mode === 'minimap' && ctx.globalAlpha < 0.999) {
                 this.drawMapLayer(sx, offsetsX, offsetsY);
             } else {
                 this.drawMap(sx, offsetsX, offsetsY);
@@ -943,6 +949,7 @@ export class MinimapRenderer {
             this.drawTiltedGround(frame, sx, tilt, shift, offsetsX, offsetsY, showBlips);
             ctx.globalAlpha = 1;
             this.projection = { sin: tiltSin, cos: tiltCos, shift };
+            this.drawGround(frame, offsetsX, offsetsY, showBlips);
         }
 
         for (const ox of offsetsX) {
@@ -1118,16 +1125,37 @@ export class MinimapRenderer {
         }
 
         const ctx = this.ctx;
-        const start = this.route[this.routeIndex];
-        const [startX, startY] = this.toScreen(start.x, start.y, ox, oy);
+        let started = false;
+        let previousX = 0;
+        let previousY = 0;
 
         ctx.beginPath();
-        ctx.moveTo(startX, startY);
 
-        for (let index = this.routeIndex + 1; index < this.route.length; index++) {
+        for (let index = this.routeIndex; index < this.route.length; index++) {
             const [x, y] = this.toScreen(this.route[index].x, this.route[index].y, ox, oy);
 
-            ctx.lineTo(x, y);
+            if (!Number.isFinite(x) || !Number.isFinite(y)) {
+                if (started) {
+                    ctx.lineTo(previousX, previousY);
+                }
+
+                started = false;
+                continue;
+            }
+
+            if (started) {
+                ctx.quadraticCurveTo(previousX, previousY, (previousX + x) / 2, (previousY + y) / 2);
+            } else {
+                ctx.moveTo(x, y);
+                started = true;
+            }
+
+            previousX = x;
+            previousY = y;
+        }
+
+        if (started) {
+            ctx.lineTo(previousX, previousY);
         }
 
         ctx.lineJoin = 'round';
