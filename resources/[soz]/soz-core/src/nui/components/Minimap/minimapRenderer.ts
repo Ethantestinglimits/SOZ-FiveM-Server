@@ -47,6 +47,7 @@ const PANEL_RADIUS = 16;
 const PRESENCE_RATE = 10;
 const RANGE_RATE = 2;
 const SMOOTHING_RATE = 18;
+const HEADING_SMOOTHING_RATE = 40;
 const TRANSITION_MS = 250;
 const ROUTE_COLOR = '#b25ce8';
 const ROUTE_SEARCH_POINTS = 300;
@@ -150,6 +151,7 @@ const downscale = (image: HTMLImageElement, ratio: number): HTMLCanvasElement =>
 export class MinimapRenderer {
     private ctx: CanvasRenderingContext2D;
     private ground: HTMLCanvasElement | null = null;
+    private mapLayer: HTMLCanvasElement | null = null;
     private projection: { sin: number; cos: number; shift: number } | null = null;
     private dynamicTilt = 0;
     private readonly anchor = MINIMAP_PLAYER_ANCHOR;
@@ -564,7 +566,11 @@ export class MinimapRenderer {
             x: lerp(this.displayed.x, this.frame.x, k),
             y: lerp(this.displayed.y, this.frame.y, k),
             heading: lerpAngle(this.displayed.heading, this.frame.heading, k),
-            camHeading: lerpAngle(this.displayed.camHeading, this.frame.camHeading, k),
+            camHeading: lerpAngle(
+                this.displayed.camHeading,
+                this.frame.camHeading,
+                1 - Math.exp(-dt * HEADING_SMOOTHING_RATE),
+            ),
         };
 
         const frame = this.displayed;
@@ -673,6 +679,35 @@ export class MinimapRenderer {
         }
 
         return best;
+    }
+
+    private drawMapLayer(density: number, offsetsX: number[], offsetsY: number[]): void {
+        if (!this.mapLayer) {
+            this.mapLayer = document.createElement('canvas');
+        }
+
+        const layer = this.mapLayer;
+
+        if (layer.width !== this.canvas.width || layer.height !== this.canvas.height) {
+            layer.width = this.canvas.width;
+            layer.height = this.canvas.height;
+        }
+
+        const main = this.ctx;
+        const layerCtx = layer.getContext('2d');
+
+        layerCtx.setTransform(1, 0, 0, 1, 0, 0);
+        layerCtx.clearRect(0, 0, layer.width, layer.height);
+        layerCtx.setTransform(density, 0, 0, layer.height / this.current.h, 0, 0);
+        layerCtx.globalAlpha = 1;
+        this.ctx = layerCtx;
+        this.drawMap(density, offsetsX, offsetsY);
+        this.ctx = main;
+
+        main.save();
+        main.setTransform(1, 0, 0, 1, 0, 0);
+        main.drawImage(layer, 0, 0);
+        main.restore();
     }
 
     private drawGround(frame: MinimapFrame, offsetsX: number[], offsetsY: number[], showBlips: boolean): void {
@@ -889,7 +924,12 @@ export class MinimapRenderer {
         const tilt = this.getTilt();
 
         if (tilt === 0) {
-            this.drawMap(sx, offsetsX, offsetsY);
+            if (ctx.globalAlpha < 0.999) {
+                this.drawMapLayer(sx, offsetsX, offsetsY);
+            } else {
+                this.drawMap(sx, offsetsX, offsetsY);
+            }
+
             ctx.globalAlpha = 1;
             this.drawGround(frame, offsetsX, offsetsY, showBlips);
         } else {
