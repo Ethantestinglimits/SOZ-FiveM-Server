@@ -59,22 +59,9 @@ export class NuiProvider {
         SetMouseCursorVisibleInMenus(showCursor);
     }
 
-    private pauseMenuActive: boolean | null = null;
-
-    private pauseMenuSentAt = 0;
-
     @Tick(100)
     public async checkPauseMenu() {
-        const active = IsPauseMenuActive();
-        const now = GetGameTimer();
-
-        if (active === this.pauseMenuActive && now - this.pauseMenuSentAt < 2000) {
-            return;
-        }
-
-        this.pauseMenuActive = active;
-        this.pauseMenuSentAt = now;
-        this.dispatcher.dispatch('global', 'PauseMenuActive', active);
+        this.dispatcher.dispatch('global', 'PauseMenuActive', IsPauseMenuActive());
     }
 
     @Tick(0)
