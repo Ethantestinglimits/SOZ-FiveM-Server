@@ -382,7 +382,7 @@ export class PauseMinimapProvider {
                 continue;
             }
 
-            if (job.points.length > 2) {
+            if (job.points.length > 1) {
                 this.finishRoute(job.points);
             } else if (job.slot !== GPS_SLOTS[GPS_SLOTS.length - 1]) {
                 this.routeJob = this.startRouteJob(GPS_SLOTS[GPS_SLOTS.indexOf(job.slot) + 1]);
@@ -410,12 +410,11 @@ export class PauseMinimapProvider {
     }
 
     private startRouteJob(slot: number): RouteJob {
-        const [x, y] = GetEntityCoords(PlayerPedId(), false);
         const length = slot === 0 && GetGpsBlipRouteFound() ? GetGpsBlipRouteLength() : 0;
 
         return {
             slot,
-            points: [{ x, y }],
+            points: [],
             length,
             farStep: Math.max(ROUTE_FAR_STEP, (length - ROUTE_NEAR_DISTANCE) / ROUTE_FAR_POINTS),
             distance: 0,
@@ -436,7 +435,7 @@ export class PauseMinimapProvider {
         const [x, y] = position;
         const previous = job.points[job.points.length - 1];
 
-        if (Math.hypot(x - previous.x, y - previous.y) < 0.5) {
+        if (previous && Math.hypot(x - previous.x, y - previous.y) < 0.5) {
             return true;
         }
 

@@ -1118,7 +1118,8 @@ export class MinimapRenderer {
         }
 
         const ctx = this.ctx;
-        const [startX, startY] = this.toScreen(frame.x, frame.y, ox, oy);
+        const start = this.route[this.routeIndex];
+        const [startX, startY] = this.toScreen(start.x, start.y, ox, oy);
 
         ctx.beginPath();
         ctx.moveTo(startX, startY);
@@ -1520,7 +1521,6 @@ export class MinimapRenderer {
 
         this.canvas.setPointerCapture(event.pointerId);
         this.drag = { sx: event.clientX, sy: event.clientY, x: this.panel.x, y: this.panel.y, moved: false };
-        document.documentElement.classList.add(GRABBING_CLASS);
     };
 
     private onPointerMove = (event: PointerEvent): void => {
@@ -1538,6 +1538,10 @@ export class MinimapRenderer {
         const dy = event.clientY - this.drag.sy;
 
         if (Math.hypot(dx, dy) > DRAG_THRESHOLD) {
+            if (!this.drag.moved) {
+                document.documentElement.classList.add(GRABBING_CLASS);
+            }
+
             this.drag.moved = true;
             this.hovered = null;
             this.target = null;
