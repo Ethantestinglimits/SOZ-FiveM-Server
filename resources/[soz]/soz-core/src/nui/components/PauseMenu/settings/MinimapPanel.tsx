@@ -7,9 +7,15 @@ import {
     MINIMAP_BORDER_MAX,
     MINIMAP_OPACITY_MIN,
     MINIMAP_RADIUS_MAX,
+    MINIMAP_TILT_DEFAULT,
+    MINIMAP_TILT_MAX,
+    MINIMAP_ZOOM_DEFAULT,
+    MINIMAP_ZOOM_MAX,
+    MINIMAP_ZOOM_MIN,
     MinimapFrameMode,
     MinimapShape,
     MinimapStyle,
+    MinimapTiltMode,
 } from '../../../../shared/nui/minimap';
 import { fetchNui } from '../../../fetch';
 import { useMinimap } from '../../../hook/data';
@@ -18,7 +24,7 @@ import { MinimapPreview } from '../../Minimap/MinimapPreview';
 import { MINIMAP_RADIUS } from '../../Minimap/minimapRenderer';
 import { setMinimapStyle, useMinimapStyle } from '../../Minimap/minimapStyleState';
 import { navGroup, navSelected } from '../keyboardNav';
-import { Arrow, ROW_CLASS, ROW_LABEL_CLASS, ValueStepper } from './rowControls';
+import { Arrow, ROW_CLASS, ROW_LABEL_CLASS, ToggleButton, ValueStepper } from './rowControls';
 
 const COMMIT_DELAY = 150;
 const MINIMAP_RATIO = 4 / 5.674;
@@ -33,6 +39,13 @@ const FRAMES: { id: MinimapFrameMode; label: string }[] = [
     { id: 'auto', label: 'Auto' },
     { id: 'visible', label: 'Visible' },
     { id: 'hidden', label: 'Masqué' },
+];
+
+const TILT_MODES: { id: MinimapTiltMode; label: string }[] = [
+    { id: 'none', label: 'Aucune' },
+    { id: 'vehicle', label: 'En véhicule' },
+    { id: 'fixed', label: 'Fixe' },
+    { id: 'camera', label: 'Suit la caméra' },
 ];
 
 const COLORS = ['#ffffff', '#3b82f6', '#22c55e', '#ef4444', '#f59e0b', '#a855f7'];
@@ -51,7 +64,7 @@ const Cycle: FunctionComponent<{
 }> = ({ options, value, onChange }) => {
     const index = Math.max(
         0,
-        options.findIndex(option => option.id === value)
+        options.findIndex((option) => option.id === value),
     );
 
     return (
@@ -59,7 +72,7 @@ const Cycle: FunctionComponent<{
             label={options[index].label}
             index={index}
             count={options.length}
-            onChange={direction => onChange(options[(index + direction + options.length) % options.length].id)}
+            onChange={(direction) => onChange(options[(index + direction + options.length) % options.length].id)}
         />
     );
 };
@@ -83,7 +96,7 @@ const Slider: FunctionComponent<{
                 max={max}
                 step={1}
                 value={value}
-                onChange={event => onChange(Number(event.target.value))}
+                onChange={(event) => onChange(Number(event.target.value))}
                 className="soz-volume-slider w-[16vh]"
                 style={{
                     background: `linear-gradient(to right, #fff ${percent}%, rgba(255, 255, 255, 0.2) ${percent}%)`,
@@ -114,7 +127,7 @@ export const MinimapPanel: FunctionComponent = () => {
                 }
             }
         },
-        []
+        [],
     );
 
     const apply = (next: MinimapStyle) => {
@@ -146,7 +159,7 @@ export const MinimapPanel: FunctionComponent = () => {
                     <Cycle
                         options={SHAPES}
                         value={style.shape}
-                        onChange={shape => change({ shape: shape as MinimapShape })}
+                        onChange={(shape) => change({ shape: shape as MinimapShape })}
                     />
                 </Row>
 
@@ -157,10 +170,57 @@ export const MinimapPanel: FunctionComponent = () => {
                             min={0}
                             max={MINIMAP_RADIUS_MAX}
                             suffix=" %"
-                            onChange={value => change({ radius: value })}
+                            onChange={(value) => change({ radius: value })}
                         />
                     </Row>
                 )}
+
+                <Row label="Inclinaison">
+                    <Cycle
+                        options={TILT_MODES}
+                        value={style.tiltMode ?? 'vehicle'}
+                        onChange={(tiltMode) => change({ tiltMode: tiltMode as MinimapTiltMode })}
+                    />
+                </Row>
+
+                {(style.tiltMode ?? 'vehicle') !== 'none' && (
+                    <Row
+                        label={
+                            style.tiltMode === 'camera'
+                                ? 'Inclinaison maximale'
+                                : style.tiltMode === 'fixed'
+                                  ? "Angle d'inclinaison"
+                                  : 'Inclinaison en véhicule'
+                        }
+                    >
+                        <Slider
+                            value={style.tilt ?? MINIMAP_TILT_DEFAULT}
+                            min={0}
+                            max={MINIMAP_TILT_MAX}
+                            suffix="°"
+                            onChange={(tilt) => change({ tilt })}
+                        />
+                    </Row>
+                )}
+
+                {(style.tiltMode ?? 'vehicle') !== 'none' && (
+                    <Row label="Flèche inclinée">
+                        <ToggleButton
+                            value={Boolean(style.tiltArrow)}
+                            onPress={() => change({ tiltArrow: !style.tiltArrow })}
+                        />
+                    </Row>
+                )}
+
+                <Row label="Zoom">
+                    <Slider
+                        value={style.zoom ?? MINIMAP_ZOOM_DEFAULT}
+                        min={MINIMAP_ZOOM_MIN}
+                        max={MINIMAP_ZOOM_MAX}
+                        suffix=" %"
+                        onChange={(zoom) => change({ zoom })}
+                    />
+                </Row>
 
                 <Row label="Opacité">
                     <Slider
@@ -168,7 +228,7 @@ export const MinimapPanel: FunctionComponent = () => {
                         min={MINIMAP_OPACITY_MIN}
                         max={100}
                         suffix=" %"
-                        onChange={opacity => change({ opacity })}
+                        onChange={(opacity) => change({ opacity })}
                     />
                 </Row>
 
@@ -178,14 +238,14 @@ export const MinimapPanel: FunctionComponent = () => {
                         min={0}
                         max={MINIMAP_BORDER_MAX}
                         suffix=" px"
-                        onChange={borderWidth => change({ borderWidth })}
+                        onChange={(borderWidth) => change({ borderWidth })}
                     />
                 </Row>
 
                 {style.borderWidth > 0 && (
                     <Row label="Couleur de la bordure">
                         <div className="flex items-center gap-[0.6vh]" {...navGroup('select')}>
-                            {COLORS.map(color => (
+                            {COLORS.map((color) => (
                                 <button
                                     key={color}
                                     {...navSelected(style.borderColor === color)}
@@ -200,7 +260,7 @@ export const MinimapPanel: FunctionComponent = () => {
                             <input
                                 type="color"
                                 value={style.borderColor}
-                                onChange={event => change({ borderColor: event.target.value })}
+                                onChange={(event) => change({ borderColor: event.target.value })}
                                 className="h-[2vh] w-[2.6vh] cursor-pointer rounded-[0.5vh] bg-transparent"
                             />
                         </div>
@@ -211,7 +271,7 @@ export const MinimapPanel: FunctionComponent = () => {
                     <Cycle
                         options={FRAMES}
                         value={style.frame}
-                        onChange={frame => change({ frame: frame as MinimapFrameMode })}
+                        onChange={(frame) => change({ frame: frame as MinimapFrameMode })}
                     />
                 </Row>
 

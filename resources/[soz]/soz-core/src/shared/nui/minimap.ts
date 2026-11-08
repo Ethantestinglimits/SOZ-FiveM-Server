@@ -6,6 +6,8 @@ export type MinimapShape = 'rectangle' | 'square' | 'circle';
 
 export type MinimapFrameMode = 'auto' | 'visible' | 'hidden';
 
+export type MinimapTiltMode = 'none' | 'vehicle' | 'fixed' | 'camera';
+
 export type MinimapStyle = {
     shape: MinimapShape;
     radius?: number;
@@ -13,6 +15,10 @@ export type MinimapStyle = {
     borderWidth: number;
     borderColor: string;
     frame: MinimapFrameMode;
+    tiltMode?: MinimapTiltMode;
+    tilt?: number;
+    tiltArrow?: boolean;
+    zoom?: number;
 };
 
 export const MINIMAP_SHAPES: MinimapShape[] = ['rectangle', 'square', 'circle'];
@@ -22,6 +28,12 @@ export const MINIMAP_FRAME_MODES: MinimapFrameMode[] = ['auto', 'visible', 'hidd
 export const MINIMAP_OPACITY_MIN = 20;
 export const MINIMAP_BORDER_MAX = 6;
 export const MINIMAP_RADIUS_MAX = 50;
+export const MINIMAP_TILT_MAX = 75;
+export const MINIMAP_ZOOM_MIN = 50;
+export const MINIMAP_ZOOM_MAX = 200;
+export const MINIMAP_ZOOM_DEFAULT = 85;
+export const MINIMAP_TILT_DEFAULT = 57;
+export const MINIMAP_TILT_MODES: MinimapTiltMode[] = ['none', 'vehicle', 'fixed', 'camera'];
 
 export const DEFAULT_MINIMAP_STYLE: MinimapStyle = {
     shape: 'rectangle',
@@ -29,6 +41,10 @@ export const DEFAULT_MINIMAP_STYLE: MinimapStyle = {
     borderWidth: 0,
     borderColor: '#ffffff',
     frame: 'auto',
+    tiltMode: 'vehicle',
+    tilt: MINIMAP_TILT_DEFAULT,
+    tiltArrow: false,
+    zoom: MINIMAP_ZOOM_DEFAULT,
 };
 
 export type MinimapPoint = {
@@ -39,6 +55,8 @@ export type MinimapPoint = {
 export type MinimapFrame = MinimapPoint & {
     heading: number;
     camHeading: number;
+    camPitch?: number;
+    inVehicle?: boolean;
     speed: number;
     altitude: number;
     visible: boolean;

@@ -204,12 +204,14 @@ export class PauseMinimapProvider {
         const vehicle = GetVehiclePedIsIn(ped, false);
         const entity = vehicle || ped;
         const [x, y] = GetEntityCoords(ped, false);
-        const [, , camHeading] = GetGameplayCamRot(2);
+        const [camPitch, , camHeading] = GetGameplayCamRot(2);
         const frame = {
             x,
             y,
             heading: GetEntityHeading(ped),
             camHeading,
+            camPitch,
+            inVehicle: vehicle !== 0,
             speed: GetEntitySpeed(entity),
             altitude: GetEntityHeightAboveGround(entity),
             visible: this.hudMinimapProvider.radarWanted && IsGameplayCamRendering() && !IsPauseMenuActive(),
@@ -219,6 +221,8 @@ export class PauseMinimapProvider {
             frame.y.toFixed(2),
             frame.heading.toFixed(1),
             frame.camHeading.toFixed(1),
+            frame.camPitch.toFixed(1),
+            frame.inVehicle,
             frame.speed.toFixed(1),
             frame.altitude.toFixed(1),
             frame.visible,

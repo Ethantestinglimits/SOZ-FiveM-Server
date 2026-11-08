@@ -1,5 +1,7 @@
 import { Postals } from '../../../config/postals';
 import {
+    MINIMAP_TILT_DEFAULT,
+    MINIMAP_ZOOM_DEFAULT,
     MinimapBlip,
     MinimapFrame,
     MinimapOrientation,
@@ -71,6 +73,10 @@ const WORLD_HEIGHT = 15000 + WRAP_MARGIN_Y;
 const WRAP_OFFSETS = [-1, 0, 1];
 const WRAP_MARGIN_PX = 120;
 const IDLE_REFRESH_MS = 500;
+const TILT_RATE = 6;
+const MINIMAP_PLAYER_ANCHOR = 0.8;
+const MINIMAP_ZOOM = 0.85;
+const TILT_PERSPECTIVE = 275;
 
 export type MinimapRect = { x: number; y: number; w: number; h: number };
 
@@ -140,7 +146,13 @@ const downscale = (image: HTMLImageElement, ratio: number): HTMLCanvasElement =>
 };
 
 export class MinimapRenderer {
-    private readonly ctx: CanvasRenderingContext2D;
+    private ctx: CanvasRenderingContext2D;
+    private ground: HTMLCanvasElement | null = null;
+    private projection: { sin: number; cos: number; shift: number } | null = null;
+    private dynamicTilt = 0;
+    private readonly anchor = MINIMAP_PLAYER_ANCHOR;
+    private readonly zoom = MINIMAP_ZOOM;
+    private readonly perspective = TILT_PERSPECTIVE;
     private readonly images: MapImage[] = sharedImages;
     private readonly icons = new Map<number, HTMLImageElement | null>();
     private readonly tinted = new Map<string, HTMLCanvasElement>();
@@ -509,6 +521,8 @@ export class MinimapRenderer {
             camera.scale.toFixed(6),
             camera.rotation.toFixed(4),
             this.presence.toFixed(3),
+            this.dynamicTilt.toFixed(2),
+            this.perspective,
             this.openness.toFixed(3),
             frame ? `${frame.x.toFixed(2)}:${frame.y.toFixed(2)}:${frame.heading.toFixed(1)}` : '',
         ].join('|');
@@ -557,7 +571,11 @@ export class MinimapRenderer {
 
         this.range = lerp(
             this.range,
-            Math.min(MAX_RANGE, BASE_RANGE + frame.speed * SPEED_RANGE + Math.max(0, frame.altitude) * ALTITUDE_RANGE),
+            ((this.zoom * 100) / (this.style.zoom || MINIMAP_ZOOM_DEFAULT)) *
+                Math.min(
+                    MAX_RANGE,
+                    BASE_RANGE + frame.speed * SPEED_RANGE + Math.max(0, frame.altitude) * ALTITUDE_RANGE,
+                ),
             1 - Math.exp(-dt * RANGE_RATE),
         );
         this.presence = lerp(
@@ -571,16 +589,29 @@ export class MinimapRenderer {
         }
         this.routeIndex = this.findRouteIndex(frame);
 
+        const maxTilt = this.style.tilt ?? MINIMAP_TILT_DEFAULT;
+        const targetTilt =
+            this.style.tiltMode === 'camera'
+                ? Math.min(maxTilt, Math.max(0, maxTilt + (this.frame.camPitch ?? 0)))
+                : this.style.tiltMode === 'vehicle' && this.frame.inVehicle
+                  ? maxTilt
+                  : 0;
+
+        this.dynamicTilt = lerp(this.dynamicTilt, targetTilt, 1 - Math.exp(-dt * TILT_RATE));
+
         if (live) {
             this.lockedRect = { ...this.minimapRect };
         }
 
         const base = live || !this.lockedRect ? this.minimapRect : this.lockedRect;
+        const minimapScale = base.w / this.range;
+        const minimapRotation = this.orientation === 'north' ? 0 : toRadians(frame.camHeading);
+        const anchor = ((this.anchor - 0.5) * base.h) / (minimapScale || 1);
         const minimapCamera: Camera = {
-            x: frame.x,
-            y: frame.y,
-            scale: base.w / this.range,
-            rotation: this.orientation === 'north' ? 0 : toRadians(frame.camHeading),
+            x: frame.x - anchor * Math.sin(minimapRotation),
+            y: frame.y + anchor * Math.cos(minimapRotation),
+            scale: minimapScale,
+            rotation: minimapRotation,
         };
 
         let t = this.mode === 'open' ? 1 : 0;
@@ -641,6 +672,111 @@ export class MinimapRenderer {
         return best;
     }
 
+    private drawGround(frame: MinimapFrame, offsetsX: number[], offsetsY: number[], showBlips: boolean): void {
+        for (const ox of offsetsX) {
+            for (const oy of offsetsY) {
+                if (showBlips) {
+                    this.drawZones(ox, oy);
+                }
+
+                this.drawRoute(frame, ox, oy);
+            }
+        }
+    }
+
+    private getAnchorOffset(): number {
+        return (this.anchor - 0.5) * this.current.h * (1 - this.openness);
+    }
+
+    private getTilt(): number {
+        const mode = this.style.tiltMode ?? 'vehicle';
+
+        if (mode === 'none' || this.current.h < 1) {
+            return 0;
+        }
+
+        const base = mode === 'fixed' ? this.style.tilt ?? MINIMAP_TILT_DEFAULT : this.dynamicTilt;
+        const requested = (base * (1 - this.openness) * Math.PI) / 180;
+
+        if (Math.abs(requested) < 0.01) {
+            return 0;
+        }
+
+        const limit = Math.atan((0.95 * this.perspective) / (this.current.h / 2 + Math.abs(this.getAnchorOffset())));
+
+        return Math.max(-limit, Math.min(limit, requested));
+    }
+
+    private drawTiltedGround(
+        frame: MinimapFrame,
+        density: number,
+        tilt: number,
+        shift: number,
+        offsetsX: number[],
+        offsetsY: number[],
+        showBlips: boolean,
+    ): void {
+        const { w, h } = this.current;
+        const p = this.perspective;
+        const sin = Math.sin(tilt);
+        const cos = Math.cos(tilt);
+        const reach = h / 2 + Math.abs(shift);
+        const top = (reach * p) / (p * cos - reach * sin);
+        const topScale = p / (p + Math.abs(top) * Math.abs(sin));
+        const sourceWidth = Math.ceil(w / topScale);
+        const sourceHeight = Math.ceil(Math.abs(top) * 2);
+
+        if (!this.ground) {
+            this.ground = document.createElement('canvas');
+        }
+
+        const groundWidth = Math.round(sourceWidth * density);
+        const groundHeight = Math.round(sourceHeight * density);
+
+        if (this.ground.width !== groundWidth || this.ground.height !== groundHeight) {
+            this.ground.width = groundWidth;
+            this.ground.height = groundHeight;
+        }
+
+        const main = this.ctx;
+        const current = this.current;
+        const groundCtx = this.ground.getContext('2d');
+
+        this.ctx = groundCtx;
+        this.current = { x: 0, y: 0, w: sourceWidth, h: sourceHeight };
+
+        groundCtx.setTransform(density, 0, 0, density, 0, 0);
+        groundCtx.globalAlpha = 1;
+        groundCtx.fillStyle = SEA_COLOR;
+        groundCtx.fillRect(0, 0, sourceWidth, sourceHeight);
+        this.drawMap(density, offsetsX, offsetsY);
+        groundCtx.globalAlpha = 1;
+        this.drawGround(frame, offsetsX, offsetsY, showBlips);
+
+        this.ctx = main;
+        this.current = current;
+
+        main.save();
+        main.setTransform(1, 0, 0, 1, 0, 0);
+        main.imageSmoothingEnabled = true;
+
+        const deviceWidth = this.canvas.width;
+        const deviceHeight = this.canvas.height;
+
+        for (let row = 0; row < deviceHeight; row++) {
+            const destination = (row + 0.5) / density - h / 2 - shift;
+            const y = (destination * p) / (p * cos + destination * sin);
+            const scale = p / (p - y * sin);
+            const sw = (w / scale) * density;
+            const sx = groundWidth / 2 - sw / 2;
+            const sy = Math.min(groundHeight - 1, Math.max(0, (sourceHeight / 2 + y) * density));
+
+            main.drawImage(this.ground, sx, sy, sw, 1, 0, row, deviceWidth, 1);
+        }
+
+        main.restore();
+    }
+
     private getOffsets(axis: 'x' | 'y'): number[] {
         if (this.mode !== 'open') {
             return [0];
@@ -669,7 +805,19 @@ export class MinimapRenderer {
         const cos = Math.cos(rotation);
         const sin = Math.sin(rotation);
 
-        return [dx * cos - dy * sin + this.current.w / 2, dx * sin + dy * cos + this.current.h / 2];
+        const sx = dx * cos - dy * sin;
+        const sy = dx * sin + dy * cos;
+
+        if (!this.projection) {
+            return [sx + this.current.w / 2, sy + this.current.h / 2];
+        }
+
+        const zoom = this.perspective / (this.perspective - sy * this.projection.sin);
+
+        return [
+            this.current.w / 2 + sx * zoom,
+            this.current.h / 2 + sy * this.projection.cos * zoom + this.projection.shift,
+        ];
     }
 
     private toWorld(sx: number, sy: number): MinimapPoint {
@@ -733,20 +881,25 @@ export class MinimapRenderer {
         ctx.fillStyle = SEA_COLOR;
         ctx.fillRect(0, 0, rect.w, rect.h);
 
-        this.drawMap(sx, offsetsX, offsetsY);
-        ctx.globalAlpha = 1;
-
         const showBlips = this.mode === 'minimap' || this.layers.includes('blips');
         const showPlayers = this.mode === 'minimap' || this.layers.includes('players');
+        const tilt = this.getTilt();
 
-        for (const ox of offsetsX) {
-            for (const oy of offsetsY) {
-                if (showBlips) {
-                    this.drawZones(ox, oy);
-                }
+        if (tilt === 0) {
+            this.drawMap(sx, offsetsX, offsetsY);
+            ctx.globalAlpha = 1;
+            this.drawGround(frame, offsetsX, offsetsY, showBlips);
+        } else {
+            const anchorOffset = this.getAnchorOffset();
+            const tiltSin = Math.sin(tilt);
+            const tiltCos = Math.cos(tilt);
+            const shift =
+                anchorOffset -
+                (anchorOffset * tiltCos * this.perspective) / (this.perspective - anchorOffset * tiltSin);
 
-                this.drawRoute(frame, ox, oy);
-            }
+            this.drawTiltedGround(frame, sx, tilt, shift, offsetsX, offsetsY, showBlips);
+            ctx.globalAlpha = 1;
+            this.projection = { sin: tiltSin, cos: tiltCos, shift };
         }
 
         for (const ox of offsetsX) {
@@ -785,6 +938,7 @@ export class MinimapRenderer {
         }
 
         this.drawTooltip();
+        this.projection = null;
     }
 
     private isBlipVisible(blip: MinimapBlip): boolean {
@@ -1237,6 +1391,11 @@ export class MinimapRenderer {
 
         ctx.save();
         ctx.translate(x, y);
+
+        if (this.projection && this.style.tiltArrow) {
+            ctx.scale(1, this.projection.cos);
+        }
+
         ctx.rotate(this.camera.rotation - toRadians(frame.heading));
         ctx.beginPath();
         ctx.moveTo(0, -10);

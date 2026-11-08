@@ -68,15 +68,15 @@ export const SettingsSidebar: FunctionComponent<SettingsSidebarProps> = ({ categ
     const pending = usePendingApply();
 
     return (
-        <div className="flex min-h-0 flex-1 flex-col gap-[1vh] py-[2.4vh]">
+        <div className="flex min-h-0 flex-1 flex-col gap-[1vh] pb-[2.4vh]">
             <ul className="flex min-h-0 flex-1 flex-col gap-[0.5vh] overflow-y-auto pr-[0.4vh] scrollbar scrollbar-w-[4px] scrollbar-thumb-white/40 scrollbar-thumb-rounded-full">
                 {SETTING_CATEGORIES.map((item, index) => (
                     <li key={item.id}>
                         {(index === 0 || isSoz(item) !== isSoz(SETTING_CATEGORIES[index - 1])) && (
                             <div
                                 className={classNames(
-                                    'px-[0.4vh] pb-[0.6vh] text-[1.1vh] font-semibold uppercase tracking-[0.2em] text-white/45',
-                                    { 'pt-[1.4vh]': index > 0 }
+                                    'flex items-end px-[0.4vh] pb-[0.6vh] text-[1.1vh] font-semibold uppercase leading-none tracking-[0.2em] text-white/45',
+                                    { 'h-[2.4vh]': index === 0, 'pt-[1.4vh]': index > 0 }
                                 )}
                             >
                                 {isSoz(item) ? 'SoZ' : 'Jeu'}
@@ -141,6 +141,7 @@ type SettingRowProps = {
     onHover: (item: SettingItem | null) => void;
     draft?: number;
     onDraft?: (key: string, value: number) => void;
+    locked?: string;
 };
 
 const SliderControl: FunctionComponent<{
@@ -186,7 +187,7 @@ const SliderControl: FunctionComponent<{
     );
 };
 
-const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHover, draft, onDraft }) => {
+const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHover, draft, onDraft, locked }) => {
     let control;
     let adjust: ((direction: number) => void) | undefined;
     let activate: (() => void) | undefined;
@@ -361,6 +362,11 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
         }
     }
 
+    if (locked) {
+        adjust = undefined;
+        activate = undefined;
+    }
+
     const onKeyDown = (event: ReactKeyboardEvent<HTMLLIElement>) => {
         if (event.target !== event.currentTarget) {
             return;
@@ -395,13 +401,16 @@ const SettingRow: FunctionComponent<SettingRowProps> = ({ item, settings, onHove
                 }
             }}
             onKeyDown={onKeyDown}
-            className={ROW_CLASS}
+            className={classNames(ROW_CLASS, { 'opacity-50': locked })}
         >
             <span className={classNames(ROW_LABEL_CLASS, 'flex items-center gap-[0.8vh]')}>
                 {item.badge === 'toaster' && <ToasterIcon className="h-[1.9vh] w-[1.9vh] shrink-0 text-amber-300" />}
                 <span className="truncate">{item.label}</span>
+                {locked && <span className="shrink-0 text-[1.15vh] font-normal text-white/70">{locked}</span>}
             </span>
-            <div {...{ [NAV_SKIP_ATTRIBUTE]: true }}>{control}</div>
+            <div className={classNames({ 'pointer-events-none': locked })} {...{ [NAV_SKIP_ATTRIBUTE]: true }}>
+                {control}
+            </div>
         </li>
     );
 };
@@ -451,21 +460,17 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
 
     const sections = useMemo<{ category: SettingCategory; items: SettingItem[] }[]>(() => {
         const search = normalize(query.trim());
-        const available = (setting: SettingItem) => !setting.requiresWatch || hasWatch;
-
         if (!search) {
-            return [{ category: current, items: current.items.filter(available) }];
+            return [{ category: current, items: current.items }];
         }
 
         return SETTING_CATEGORIES.map(item => ({
             category: item,
             items: item.items.filter(
-                setting =>
-                    available(setting) &&
-                    (normalize(setting.label).includes(search) || normalize(setting.description).includes(search))
+                setting => normalize(setting.label).includes(search) || normalize(setting.description).includes(search)
             ),
         })).filter(section => section.items.length > 0);
-    }, [query, current, hasWatch]);
+    }, [query, current]);
 
     const showNativeButton = !query.trim() && current.native;
     const minimapPage = current.id === 'minimap' && !query.trim();
@@ -535,6 +540,7 @@ export const SettingsMain: FunctionComponent<SettingsMainProps> = ({ category, s
                                         onHover={setHovered}
                                         draft={item.kind === 'native' ? draft[item.convar] : undefined}
                                         onDraft={section.category.staged ? changeDraft : undefined}
+                                        locked={item.requiresWatch && !hasWatch ? 'pas de smartwatch' : undefined}
                                     />
                                 ))}
                             </ul>

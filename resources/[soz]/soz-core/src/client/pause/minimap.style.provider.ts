@@ -9,6 +9,12 @@ import {
     MINIMAP_OPACITY_MIN,
     MINIMAP_RADIUS_MAX,
     MINIMAP_SHAPES,
+    MINIMAP_TILT_DEFAULT,
+    MINIMAP_TILT_MAX,
+    MINIMAP_TILT_MODES,
+    MINIMAP_ZOOM_DEFAULT,
+    MINIMAP_ZOOM_MAX,
+    MINIMAP_ZOOM_MIN,
     MinimapStyle,
 } from '../../shared/nui/minimap';
 import { NuiDispatch } from '../nui/nui.dispatch';
@@ -34,6 +40,10 @@ const sanitize = (input: Partial<MinimapStyle> | null | undefined): MinimapStyle
             ? String(input.borderColor)
             : DEFAULT_MINIMAP_STYLE.borderColor,
         frame: MINIMAP_FRAME_MODES.includes(input.frame) ? input.frame : DEFAULT_MINIMAP_STYLE.frame,
+        tiltMode: MINIMAP_TILT_MODES.includes(input.tiltMode) ? input.tiltMode : DEFAULT_MINIMAP_STYLE.tiltMode,
+        tilt: clampRange(input.tilt, 0, MINIMAP_TILT_MAX, MINIMAP_TILT_DEFAULT),
+        tiltArrow: input.tiltArrow === true,
+        zoom: clampRange(input.zoom, MINIMAP_ZOOM_MIN, MINIMAP_ZOOM_MAX, MINIMAP_ZOOM_DEFAULT),
     };
 
     if (input.radius !== undefined && input.radius !== null) {
