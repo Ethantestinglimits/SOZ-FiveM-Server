@@ -6,7 +6,7 @@ import { fetchNui } from '../../fetch';
 import { useHudMinimap } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { getScreenFrame, screenWidthToPx } from '../../utils/screenFrame';
-import { MinimapRenderer } from './minimapRenderer';
+import { MinimapRenderer, ROUTE_COLOR } from './minimapRenderer';
 import { isMapTabActive, minimapController, setBlipAnchor } from './minimapState';
 import { setMinimapStyle, useMinimapStyle } from './minimapStyleState';
 
@@ -156,6 +156,9 @@ export const MinimapApp: FunctionComponent = () => {
     });
     useNuiEvent('minimap', 'Waypoint', (waypoint) => {
         if (rendererRef.current) rendererRef.current.waypoint = waypoint;
+    });
+    useNuiEvent('minimap', 'WaypointColor', (color) => {
+        if (rendererRef.current) rendererRef.current.routeColor = color ?? ROUTE_COLOR;
     });
     useNuiEvent('minimap', 'Settings', ({ animation, fps, orientation, potato }) => {
         if (rendererRef.current) {

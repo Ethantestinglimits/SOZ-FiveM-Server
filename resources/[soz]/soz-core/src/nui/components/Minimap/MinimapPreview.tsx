@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { useMinimap } from '../../hook/data';
 import { useNuiEvent } from '../../hook/nui';
 import { screenWidthToPx } from '../../utils/screenFrame';
-import { MinimapRenderer } from './minimapRenderer';
+import { MinimapRenderer, ROUTE_COLOR } from './minimapRenderer';
 import { minimapController } from './minimapState';
 import { useMinimapStyle } from './minimapStyleState';
 
@@ -92,6 +92,9 @@ export const MinimapPreview: FunctionComponent = () => {
     });
     useNuiEvent('minimap', 'Waypoint', (waypoint) => {
         if (rendererRef.current) rendererRef.current.waypoint = waypoint;
+    });
+    useNuiEvent('minimap', 'WaypointColor', (color) => {
+        if (rendererRef.current) rendererRef.current.routeColor = color ?? ROUTE_COLOR;
     });
     useNuiEvent('minimap', 'Settings', ({ fps, orientation }) => {
         if (rendererRef.current) {

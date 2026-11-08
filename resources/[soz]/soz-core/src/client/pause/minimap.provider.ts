@@ -163,10 +163,32 @@ export class PauseMinimapProvider {
     private scanTick = 0;
     public panelOpen = false;
     private routeOrigin = { x: 0, y: 0 };
+    private waypointColor: string | null = null;
+    private secondarySlotReserved = false;
 
     @Once(OnceStep.NuiLoaded)
     public sendSettings(): void {
         this.dispatchSettings();
+        this.nuiDispatch.dispatch('minimap', 'WaypointColor', this.waypointColor);
+    }
+
+    public setWaypointColor(color: string | null): void {
+        this.waypointColor = color;
+        this.nuiDispatch.dispatch('minimap', 'WaypointColor', color);
+    }
+
+    public reserveSecondarySlot(): boolean {
+        if (this.routeJob && this.routeJob.slot !== GPS_SLOTS[0]) {
+            return false;
+        }
+
+        this.secondarySlotReserved = true;
+
+        return true;
+    }
+
+    public releaseSecondarySlot(): void {
+        this.secondarySlotReserved = false;
     }
 
     public getFpsLimit(): number {
@@ -446,6 +468,8 @@ export class PauseMinimapProvider {
 
             if (job.points.length > 1) {
                 this.finishRoute(job.points);
+            } else if (job.slot !== GPS_SLOTS[GPS_SLOTS.length - 1] && this.secondarySlotReserved) {
+                this.routeJob = null;
             } else if (job.slot !== GPS_SLOTS[GPS_SLOTS.length - 1]) {
                 this.routeJob = this.startRouteJob(GPS_SLOTS[GPS_SLOTS.indexOf(job.slot) + 1]);
             } else {

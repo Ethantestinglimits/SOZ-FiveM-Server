@@ -129,6 +129,7 @@ export interface NuiMinimapMethodMap {
     Markers: MinimapMarker[];
     Routes: MinimapRoute[];
     Waypoint: MinimapPoint | null;
+    WaypointColor: string | null;
     Style: MinimapStyle;
     Settings: { animation: boolean; fps: number; potato: boolean; orientation: MinimapOrientation };
 }

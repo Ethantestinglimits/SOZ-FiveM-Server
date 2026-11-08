@@ -51,7 +51,7 @@ const RANGE_RATE = 2;
 const SMOOTHING_RATE = 18;
 const HEADING_SMOOTHING_RATE = 40;
 const TRANSITION_MS = 250;
-const ROUTE_COLOR = '#b25ce8';
+export const ROUTE_COLOR = '#b25ce8';
 const MARKER_RADIUS = 7;
 const ROUTE_SEARCH_POINTS = 300;
 const WAYPOINT_SPRITE = 8;
@@ -206,6 +206,7 @@ export class MinimapRenderer {
     public markers: MinimapMarker[] = [];
     public extraRoutes: MinimapRoute[] = [];
     public waypoint: MinimapPoint | null = null;
+    public routeColor = ROUTE_COLOR;
     public layers: PauseMapLayer[] = ['blips', 'regions', 'players'];
     public highlight: MinimapPoint | null = null;
     public contextPoint: MinimapPoint | null = null;
@@ -464,7 +465,7 @@ export class MinimapRenderer {
             return image;
         }
 
-        const key = `${sprite}-${color}`;
+        const key = `${sprite}-${color}-${tint ?? ''}`;
         const cached = this.tinted.get(key);
 
         if (cached) {
@@ -1131,7 +1132,7 @@ export class MinimapRenderer {
             this.drawPath(route.points, 0, route.color, ox, oy);
         }
 
-        this.drawPath(this.route, this.routeIndex, ROUTE_COLOR, ox, oy);
+        this.drawPath(this.route, this.routeIndex, this.routeColor, ox, oy);
     }
 
     private drawMarkers(ox: number, oy: number): void {
@@ -1294,7 +1295,7 @@ export class MinimapRenderer {
         ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
         ctx.stroke();
         ctx.lineWidth = 3.5;
-        ctx.strokeStyle = ROUTE_COLOR;
+        ctx.strokeStyle = this.routeColor;
         ctx.stroke();
         ctx.restore();
 
@@ -1485,7 +1486,7 @@ export class MinimapRenderer {
             return;
         }
 
-        const icon = this.getIcon(WAYPOINT_SPRITE, 84, ROUTE_COLOR);
+        const icon = this.getIcon(WAYPOINT_SPRITE, 84, this.routeColor);
 
         if (!icon) {
             return;
