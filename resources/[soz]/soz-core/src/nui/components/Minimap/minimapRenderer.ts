@@ -1,5 +1,6 @@
 import { Postals } from '../../../config/postals';
 import {
+    MINIMAP_ARROW_DEFAULT,
     MINIMAP_TILT_DEFAULT,
     MINIMAP_ZOOM_DEFAULT,
     MinimapBlip,
@@ -77,6 +78,7 @@ const TILT_RATE = 6;
 const MINIMAP_PLAYER_ANCHOR = 0.8;
 const MINIMAP_ZOOM = 0.85;
 const TILT_PERSPECTIVE = 275;
+const PLAYER_SPRITE = 6;
 
 export type MinimapRect = { x: number; y: number; w: number; h: number };
 
@@ -233,6 +235,7 @@ export class MinimapRenderer {
 
         this.loadMap();
         this.loadIcon(WAYPOINT_SPRITE);
+        this.loadIcon(PLAYER_SPRITE);
         this.handle = requestAnimationFrame(this.loop);
     }
 
@@ -1397,6 +1400,18 @@ export class MinimapRenderer {
         }
 
         ctx.rotate(this.camera.rotation - toRadians(frame.heading));
+
+        const icon = this.icons.get(PLAYER_SPRITE);
+
+        if (icon) {
+            const size = this.style.arrowSize ?? MINIMAP_ARROW_DEFAULT;
+
+            ctx.drawImage(icon, -size / 2, -size / 2, size, size);
+            ctx.restore();
+
+            return;
+        }
+
         ctx.beginPath();
         ctx.moveTo(0, -10);
         ctx.lineTo(7, 8);

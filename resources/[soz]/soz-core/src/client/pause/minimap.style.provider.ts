@@ -4,6 +4,9 @@ import { Provider } from '../../core/decorators/provider';
 import { NuiEvent } from '../../shared/event';
 import {
     DEFAULT_MINIMAP_STYLE,
+    MINIMAP_ARROW_DEFAULT,
+    MINIMAP_ARROW_MAX,
+    MINIMAP_ARROW_MIN,
     MINIMAP_BORDER_MAX,
     MINIMAP_FRAME_MODES,
     MINIMAP_OPACITY_MIN,
@@ -43,6 +46,7 @@ const sanitize = (input: Partial<MinimapStyle> | null | undefined): MinimapStyle
         tiltMode: MINIMAP_TILT_MODES.includes(input.tiltMode) ? input.tiltMode : DEFAULT_MINIMAP_STYLE.tiltMode,
         tilt: clampRange(input.tilt, 0, MINIMAP_TILT_MAX, MINIMAP_TILT_DEFAULT),
         tiltArrow: input.tiltArrow === true,
+        arrowSize: clampRange(input.arrowSize, MINIMAP_ARROW_MIN, MINIMAP_ARROW_MAX, MINIMAP_ARROW_DEFAULT),
         zoom: clampRange(input.zoom, MINIMAP_ZOOM_MIN, MINIMAP_ZOOM_MAX, MINIMAP_ZOOM_DEFAULT),
     };
 

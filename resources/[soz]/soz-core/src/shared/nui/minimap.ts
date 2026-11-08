@@ -18,6 +18,7 @@ export type MinimapStyle = {
     tiltMode?: MinimapTiltMode;
     tilt?: number;
     tiltArrow?: boolean;
+    arrowSize?: number;
     zoom?: number;
 };
 
@@ -32,18 +33,23 @@ export const MINIMAP_TILT_MAX = 75;
 export const MINIMAP_ZOOM_MIN = 50;
 export const MINIMAP_ZOOM_MAX = 200;
 export const MINIMAP_ZOOM_DEFAULT = 85;
+export const MINIMAP_ARROW_MIN = 12;
+export const MINIMAP_ARROW_MAX = 32;
+export const MINIMAP_ARROW_DEFAULT = 18;
 export const MINIMAP_TILT_DEFAULT = 57;
 export const MINIMAP_TILT_MODES: MinimapTiltMode[] = ['none', 'vehicle', 'fixed', 'camera'];
 
 export const DEFAULT_MINIMAP_STYLE: MinimapStyle = {
     shape: 'rectangle',
-    opacity: 100,
+    radius: 5,
+    opacity: 50,
     borderWidth: 0,
     borderColor: '#ffffff',
     frame: 'auto',
     tiltMode: 'vehicle',
     tilt: MINIMAP_TILT_DEFAULT,
     tiltArrow: false,
+    arrowSize: MINIMAP_ARROW_DEFAULT,
     zoom: MINIMAP_ZOOM_DEFAULT,
 };
 

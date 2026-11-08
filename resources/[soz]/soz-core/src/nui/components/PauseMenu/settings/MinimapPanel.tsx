@@ -4,6 +4,9 @@ import { FunctionComponent, ReactNode, useEffect, useRef } from 'react';
 import { NuiEvent } from '../../../../shared/event';
 import {
     DEFAULT_MINIMAP_STYLE,
+    MINIMAP_ARROW_DEFAULT,
+    MINIMAP_ARROW_MAX,
+    MINIMAP_ARROW_MIN,
     MINIMAP_BORDER_MAX,
     MINIMAP_OPACITY_MIN,
     MINIMAP_RADIUS_MAX,
@@ -211,6 +214,16 @@ export const MinimapPanel: FunctionComponent = () => {
                         />
                     </Row>
                 )}
+
+                <Row label="Taille de la flèche">
+                    <Slider
+                        value={style.arrowSize ?? MINIMAP_ARROW_DEFAULT}
+                        min={MINIMAP_ARROW_MIN}
+                        max={MINIMAP_ARROW_MAX}
+                        suffix=" px"
+                        onChange={(arrowSize) => change({ arrowSize })}
+                    />
+                </Row>
 
                 <Row label="Zoom">
                     <Slider
